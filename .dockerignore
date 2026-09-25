@@ -1,4 +1,9 @@
 .git
+.github
+android
+test
 node_modules
 .env
 *.log
+*.jks
+*.keystore
