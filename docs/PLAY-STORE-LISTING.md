@@ -38,6 +38,13 @@ Mining output, uptime, profitability, token value and cost recovery are never gu
 - Privacy URL: `https://worker-registry-production.up.railway.app/privacy`
 - Support email: **publisher must enter a monitored public address before submission**
 
+## Prepared graphics
+
+- App icon: `store-assets/marsx-play-icon-512.png` (512 × 512 PNG)
+- Feature graphic: `store-assets/marsx-feature-graphic-1024x500.png` (1024 × 500 PNG)
+
+Capture the required screenshots from the exact signed build on a real Android device. The shot list and non-misleading-image rule are in `store-assets/README.md`.
+
 ## Review-team access note
 
 This build is a remote-management and sandbox-accounting beta. It performs no on-device mining. Provide Google Play review with one active one-device beta licence, the production HTTPS endpoint and these steps:
