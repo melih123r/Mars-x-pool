@@ -1,11 +1,15 @@
 {
   "name": "marsx-pool-worker-api",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node server.js",
     "check": "node --check server.js",
+    "check:cloudflare": "node --check cloudflare/worker.js",
+    "dev:cloudflare": "wrangler dev --local",
+    "db:local": "wrangler d1 migrations apply DB --local",
+    "deploy:cloudflare": "wrangler deploy",
     "test": "node --test",
     "license:generate": "node license-tool.js"
   },
@@ -14,5 +18,8 @@
   },
   "dependencies": {
     "redis": "6.2.0"
+  },
+  "devDependencies": {
+    "wrangler": "4.141.0"
   }
 }
