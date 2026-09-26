@@ -6,6 +6,12 @@ def qonversionProjectKey = providers.gradleProperty("QONVERSION_PROJECT_KEY")
 def escapedQonversionProjectKey = qonversionProjectKey
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
+def apiBaseUrl = providers.gradleProperty("MARSX_API_BASE_URL")
+        .orElse(providers.environmentVariable("MARSX_API_BASE_URL"))
+        .getOrElse("https://worker-registry-production.up.railway.app")
+def escapedApiBaseUrl = apiBaseUrl
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
 
 android {
     namespace "com.marsx.pool"
@@ -15,8 +21,9 @@ android {
         applicationId "com.marsx.pool"
         minSdk 26
         targetSdk 36
-        versionCode 6
-        versionName "0.6-beta"
+        versionCode 7
+        versionName "0.6.1-beta"
+        buildConfigField "String", "API_BASE_URL", "\"${escapedApiBaseUrl}\""
         buildConfigField "String", "QONVERSION_PROJECT_KEY", "\"${escapedQonversionProjectKey}\""
         buildConfigField "String", "QONVERSION_PRODUCT_PRO", "\"pro_monthly\""
         buildConfigField "String", "QONVERSION_PRODUCT_FARM", "\"farm_monthly\""
