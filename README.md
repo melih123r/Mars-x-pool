@@ -65,6 +65,8 @@ Without that key, the purchase controls remain disabled. The planned mappings ar
 
 GitHub Actions tests the backend, checks all four translation sets and assembles a debug APK. Public distribution should use a signed AAB with Play App Signing and Play Integrity. The Qonversion SDK checks entitlements in the app; the MARS-X backend independently resolves the Qonversion identity and entitlement before issuing a short session.
 
+The CI release gate also runs `scripts/check-release.py`, Android release lint and `bundleRelease`. It uploads a tester APK and an unsigned release AAB; the AAB must be signed with the publisher's private upload key before Play Console submission. Store copy, Data safety answers and the tester procedure are prepared in `docs/PLAY-STORE-LISTING.md`, `docs/DATA-SAFETY-DRAFT.md` and `docs/CLOSED-BETA-RUNBOOK.md`.
+
 ## Closed testing and advertising
 
 Invite 20 genuine testers so at least 12 remain opted in continuously for 14 days and provide real feedback. Do not buy testers, reviews or fake activity. See `docs/USER-ACQUISITION-PLAN.md` and `docs/MARKET-AND-MONETIZATION-PLAN.md` for the USD 10/month India→Indonesia test and the Oman/UAE direct-partnership route.
