@@ -18,7 +18,9 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - run: npm run check:cloudflare
       - run: npm test
+      - run: npx wrangler d1 migrations apply DB --local
       - run: python3 scripts/check-translations.py
       - run: python3 scripts/check-release.py
 
