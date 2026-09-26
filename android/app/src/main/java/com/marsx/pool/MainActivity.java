@@ -31,7 +31,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 public class MainActivity extends Activity {
-    private static final String DEFAULT_URL = "https://worker-registry-production.up.railway.app";
+    private static final String DEFAULT_URL = BuildConfig.API_BASE_URL;
     private static final String TERMS_VERSION = "2026-09-26-v2";
     private static final String APP_VERSION = "0.6-beta";
     private static final String TESTER_URL = "https://play.google.com/apps/testing/com.marsx.pool";
