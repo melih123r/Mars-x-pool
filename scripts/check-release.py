@@ -19,6 +19,11 @@ required_files = [
     ROOT / "docs/PLAY-STORE-LISTING.md",
     ROOT / "docs/DATA-SAFETY-DRAFT.md",
     ROOT / "docs/CLOSED-BETA-RUNBOOK.md",
+    ROOT / "docs/CLOUDFLARE-ZERO-COST-DEPLOYMENT.md",
+    ROOT / "cloudflare/src/worker.js",
+    ROOT / "cloudflare/migrations/0001_initial.sql",
+    ROOT / "cloudflare/migrations/0002_google_auth_referrals.sql",
+    ROOT / "cloudflare/wrangler.toml",
 ]
 
 missing = [str(path.relative_to(ROOT)) for path in required_files if not path.is_file()]
@@ -42,6 +47,12 @@ if 'android.permission.INTERNET' not in manifest:
     raise SystemExit("INTERNET permission is required")
 if not re.search(r"targetSdk\s+36", gradle):
     raise SystemExit("targetSdk 36 is required")
+if 'versionName "0.8-beta"' not in gradle or 'versionCode 8' not in gradle:
+    raise SystemExit("Beta 0.8 Android version is required")
+if "MARSX_API_BASE_URL" not in gradle:
+    raise SystemExit("Cloudflare API build-time endpoint is required")
+if "GOOGLE_WEB_CLIENT_ID" not in gradle:
+    raise SystemExit("Google Credential Manager client ID build field is required")
 if "USDT_TEST" not in readme or "does **not** mine cryptocurrency on the Android device" not in readme:
     raise SystemExit("README must keep the sandbox and no-device-mining disclosures")
 

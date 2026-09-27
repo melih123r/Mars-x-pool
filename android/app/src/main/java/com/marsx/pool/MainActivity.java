@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -31,9 +34,9 @@ import java.util.Locale;
 import java.util.UUID;
 
 public class MainActivity extends Activity {
-    private static final String DEFAULT_URL = "https://worker-registry-production.up.railway.app";
-    private static final String TERMS_VERSION = "2026-09-26-v2";
-    private static final String APP_VERSION = "0.6-beta";
+    private static final String DEFAULT_URL = BuildConfig.MARSX_API_BASE_URL;
+    private static final String TERMS_VERSION = "2026-09-27-v3";
+    private static final String APP_VERSION = "0.8-beta";
     private static final String TESTER_URL = "https://play.google.com/apps/testing/com.marsx.pool";
     private static final int[] TASKS = {
             R.string.task_app_opens,
@@ -52,10 +55,13 @@ public class MainActivity extends Activity {
     private TextView feedback;
     private TextView balance;
     private TextView payoutStatus;
+    private TextView accountStatus;
+    private TextView referralStatus;
     private EditText endpoint;
     private EditText licenceKey;
     private EditText payoutAmount;
     private EditText payoutDestination;
+    private EditText referralInput;
     private CheckBox acceptTerms;
     private SharedPreferences prefs;
     private SecureStore secureStore;
@@ -63,6 +69,17 @@ public class MainActivity extends Activity {
     private Button proPlanButton;
     private Button farmPlanButton;
     private Button restorePurchasesButton;
+    private Button googleSignInButton;
+    private Button deleteAccountButton;
+    private FrameLayout contentFrame;
+    private View homePage;
+    private View earningsPage;
+    private View accountPage;
+    private Button homeTab;
+    private Button earningsTab;
+    private Button accountTab;
+    private GoogleSignInManager googleSignIn;
+    private String currentReferralCode = "";
 
     @Override
     public void onCreate(Bundle state) {
@@ -73,56 +90,415 @@ public class MainActivity extends Activity {
             prefs.edit().putString("worker_id", "node-" + UUID.randomUUID().toString().replace("-", "")).apply();
         }
 
-        ScrollView scroll = new ScrollView(this);
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(28, 36, 28, 36);
-        root.setBackgroundColor(Color.rgb(246, 248, 252));
-        scroll.addView(root);
+        googleSignIn = new GoogleSignInManager(this);
+        LinearLayout screen = new LinearLayout(this);
+        screen.setOrientation(LinearLayout.VERTICAL);
+        screen.setBackgroundColor(Color.rgb(246, 248, 252));
 
-        addTitle(root, getString(R.string.app_title));
-        addText(root, getString(R.string.beta_label), 18);
-        addText(root, getString(R.string.product_disclaimer), 14);
+        LinearLayout header = new LinearLayout(this);
+        header.setOrientation(LinearLayout.VERTICAL);
+        header.setPadding(28, 28, 28, 14);
+        addTitle(header, getString(R.string.app_title));
+        TextView beta = addText(header, getString(R.string.simple_beta_label), 13);
+        beta.setTextColor(Color.rgb(103, 111, 128));
+        screen.addView(header);
 
-        addTitle(root, getString(R.string.worker_identity_title));
-        addText(root, prefs.getString("worker_id", ""), 13);
-        addText(root, getString(R.string.explicit_action_notice), 13);
+        contentFrame = new FrameLayout(this);
+        screen.addView(contentFrame, new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
+        homePage = buildHomePage();
+        earningsPage = buildEarningsPage();
+        accountPage = buildAccountPage();
+        contentFrame.addView(homePage);
+        contentFrame.addView(earningsPage);
+        contentFrame.addView(accountPage);
 
-        addTitle(root, getString(R.string.server_connection_title));
-        endpoint = new EditText(this);
-        endpoint.setSingleLine(true);
-        endpoint.setText(prefs.getString("endpoint", DEFAULT_URL));
-        endpoint.setHint("https://...");
-        root.addView(endpoint);
-        status = addText(root, getString(R.string.not_tested), 15);
-        button(root, getString(R.string.test_health_button), view -> testConnection());
+        LinearLayout tabs = new LinearLayout(this);
+        tabs.setOrientation(LinearLayout.HORIZONTAL);
+        tabs.setPadding(12, 6, 12, 10);
+        tabs.setBackgroundColor(Color.WHITE);
+        homeTab = tabButton(tabs, getString(R.string.tab_home), view -> showTab(0));
+        earningsTab = tabButton(tabs, getString(R.string.tab_earnings), view -> showTab(1));
+        accountTab = tabButton(tabs, getString(R.string.tab_account), view -> showTab(2));
+        screen.addView(tabs);
+        setContentView(screen);
+        showTab(0);
 
-        addTitle(root, getString(R.string.licence_title));
-        licenceStatus = addText(root, getString(R.string.licence_not_checked), 15);
+        initializeSubscriptions();
+        testConnection();
+        if (secureStore.get("licence_session") != null) checkSavedLicence();
+        if (secureStore.get("auth_session") != null) {
+            refreshUserProfile();
+        } else if (prefs.getBoolean("google_signed_once", false) && googleSignIn.isConfigured()) {
+            beginGoogleSignIn(true);
+        }
+    }
+
+    private View buildHomePage() {
+        LinearLayout root = pageRoot();
+        addTitle(root, getString(R.string.home_title));
+        addText(root, getString(R.string.home_subtitle), 15);
+
+        LinearLayout serviceCard = card(root);
+        addText(serviceCard, getString(R.string.service_status_title), 14);
+        status = addText(serviceCard, getString(R.string.connecting), 18);
+        button(serviceCard, getString(R.string.refresh_button), view -> testConnection());
+
+        LinearLayout deviceCard = card(root);
+        addText(deviceCard, getString(R.string.device_title), 14);
+        String worker = prefs.getString("worker_id", "");
+        String suffix = worker.length() > 8 ? worker.substring(worker.length() - 8) : worker;
+        addText(deviceCard, getString(R.string.device_summary, suffix), 18);
+        licenceStatus = addText(deviceCard, getString(R.string.licence_not_checked), 14);
+        button(deviceCard, getString(R.string.connect_device_button), view -> sendNodeEvent("/register"));
+        button(deviceCard, getString(R.string.advanced_tools_button), view -> showAdvancedTools());
+        return scroll(root);
+    }
+
+    private View buildEarningsPage() {
+        LinearLayout root = pageRoot();
+        addTitle(root, getString(R.string.earnings_title));
+        addText(root, getString(R.string.sandbox_balance_disclaimer), 13);
+
+        LinearLayout balanceCard = card(root);
+        balance = addText(balanceCard, getString(R.string.sandbox_balance_not_loaded), 21);
+        button(balanceCard, getString(R.string.refresh_balance_button), view -> refreshAccount());
+
+        LinearLayout payoutCard = card(root);
+        addText(payoutCard, getString(R.string.payout_title), 18);
+        payoutAmount = new EditText(this);
+        payoutAmount.setSingleLine(true);
+        payoutAmount.setHint(R.string.payout_amount_hint);
+        payoutAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        payoutCard.addView(payoutAmount);
+        payoutDestination = new EditText(this);
+        payoutDestination.setSingleLine(true);
+        payoutDestination.setHint(R.string.payout_destination_hint);
+        payoutDestination.setText(prefs.getString("sandbox_destination", ""));
+        payoutCard.addView(payoutDestination);
+        button(payoutCard, getString(R.string.request_sandbox_payout_button), view -> requestPayout());
+        button(payoutCard, getString(R.string.refresh_payouts_button), view -> refreshPayouts());
+        payoutStatus = addText(payoutCard, getString(R.string.no_sandbox_payouts), 14);
+
+        LinearLayout referralCard = card(root);
+        addText(referralCard, getString(R.string.referral_title), 18);
+        addText(referralCard, getString(R.string.referral_explanation), 14);
+        referralStatus = addText(referralCard, getString(R.string.sign_in_to_view_referral), 15);
+        button(referralCard, getString(R.string.share_invite_button), view -> shareReferral());
+        return scroll(root);
+    }
+
+    private View buildAccountPage() {
+        LinearLayout root = pageRoot();
+        addTitle(root, getString(R.string.account_title));
+
+        LinearLayout accountCard = card(root);
+        accountStatus = addText(accountCard, getString(R.string.google_signed_out), 16);
+        referralInput = new EditText(this);
+        referralInput.setSingleLine(true);
+        referralInput.setHint(R.string.referral_code_hint);
+        referralInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        accountCard.addView(referralInput);
+        googleSignInButton = button(accountCard, getString(R.string.continue_with_google), view -> beginGoogleSignIn(false));
+        button(accountCard, getString(R.string.refresh_account_button), view -> refreshUserProfile());
+
         acceptTerms = new CheckBox(this);
         acceptTerms.setText(R.string.accept_terms);
         acceptTerms.setChecked(prefs.getBoolean("terms_accepted_" + TERMS_VERSION, false));
         acceptTerms.setOnCheckedChangeListener((button, checked) ->
                 prefs.edit().putBoolean("terms_accepted_" + TERMS_VERSION, checked).apply());
-        root.addView(acceptTerms);
-        button(root, getString(R.string.view_terms_button), view -> showTerms());
+        accountCard.addView(acceptTerms);
+        button(accountCard, getString(R.string.view_terms_button), view -> showTerms());
 
-        addTitle(root, getString(R.string.subscription_title));
-        subscriptionStatus = addText(root, getString(R.string.subscription_checking), 15);
-        proPlanButton = button(root, getString(R.string.buy_pro_button), view -> {
+        LinearLayout planCard = card(root);
+        addText(planCard, getString(R.string.plan_title), 18);
+        subscriptionStatus = addText(planCard, getString(R.string.subscription_checking), 15);
+        proPlanButton = button(planCard, getString(R.string.buy_pro_button), view -> {
             if (canStartPurchase()) subscriptions.purchasePro();
         });
-        farmPlanButton = button(root, getString(R.string.buy_farm_button), view -> {
+        farmPlanButton = button(planCard, getString(R.string.buy_farm_button), view -> {
             if (canStartPurchase()) subscriptions.purchaseFarm();
         });
-        restorePurchasesButton = button(root, getString(R.string.restore_purchases_button), view -> {
+        restorePurchasesButton = button(planCard, getString(R.string.restore_purchases_button), view -> {
             if (canStartPurchase()) subscriptions.restore();
         });
         proPlanButton.setEnabled(false);
         farmPlanButton.setEnabled(false);
         restorePurchasesButton.setEnabled(false);
 
-        addTitle(root, getString(R.string.beta_licence_title));
+        LinearLayout privacyCard = card(root);
+        button(privacyCard, getString(R.string.open_privacy_button), view -> openPrivacy());
+        button(privacyCard, getString(R.string.advanced_tools_button), view -> showAdvancedTools());
+        deleteAccountButton = button(privacyCard, getString(R.string.delete_account_button), view -> confirmDeleteAccount());
+        feedback = addText(privacyCard, "", 13);
+        updateFeedback();
+        return scroll(root);
+    }
+
+    private LinearLayout pageRoot() {
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(24, 8, 24, 32);
+        return root;
+    }
+
+    private View scroll(LinearLayout root) {
+        ScrollView scroll = new ScrollView(this);
+        scroll.setFillViewport(true);
+        scroll.addView(root);
+        return scroll;
+    }
+
+    private LinearLayout card(LinearLayout parent) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(24, 20, 24, 20);
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(Color.WHITE);
+        background.setCornerRadius(24f);
+        card.setBackground(background);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(0, 8, 0, 14);
+        parent.addView(card, params);
+        return card;
+    }
+
+    private Button tabButton(LinearLayout root, String label, View.OnClickListener listener) {
+        Button button = new Button(this);
+        button.setText(label);
+        button.setAllCaps(false);
+        button.setOnClickListener(listener);
+        root.addView(button, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
+        return button;
+    }
+
+    private void showTab(int selected) {
+        homePage.setVisibility(selected == 0 ? View.VISIBLE : View.GONE);
+        earningsPage.setVisibility(selected == 1 ? View.VISIBLE : View.GONE);
+        accountPage.setVisibility(selected == 2 ? View.VISIBLE : View.GONE);
+        int active = Color.rgb(20, 73, 145);
+        int inactive = Color.rgb(89, 98, 115);
+        homeTab.setTextColor(selected == 0 ? active : inactive);
+        earningsTab.setTextColor(selected == 1 ? active : inactive);
+        accountTab.setTextColor(selected == 2 ? active : inactive);
+    }
+
+    private void beginGoogleSignIn(boolean silent) {
+        if (!googleSignIn.isConfigured()) {
+            accountStatus.setText(R.string.google_not_configured);
+            return;
+        }
+        String base = baseUrl();
+        if (base == null) {
+            accountStatus.setText(R.string.enter_valid_https_first);
+            return;
+        }
+        accountStatus.setText(R.string.google_signing_in);
+        new Thread(() -> {
+            try {
+                String workerId = prefs.getString("worker_id", "");
+                JSONObject request = new JSONObject();
+                request.put("install_id", workerId);
+                HttpURLConnection connection = post(base + "/auth/google/nonce", request, null);
+                int code = connection.getResponseCode();
+                JSONObject response = new JSONObject(read(connection, code));
+                connection.disconnect();
+                if (code != 200 || !response.optBoolean("ok")) {
+                    setText(accountStatus, authError(response.optString("error", "unknown"), code));
+                    return;
+                }
+                String nonce = response.getString("nonce");
+                runOnUiThread(() -> googleSignIn.signIn(nonce, silent, new GoogleSignInManager.Callback() {
+                    @Override
+                    public void onToken(String idToken) {
+                        exchangeGoogleToken(base, nonce, idToken);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        if (!silent) accountStatus.setText(R.string.google_sign_in_cancelled);
+                        else accountStatus.setText(R.string.google_signed_out);
+                    }
+                }));
+            } catch (Exception error) {
+                setText(accountStatus, getString(R.string.google_sign_in_failed));
+            }
+        }).start();
+    }
+
+    private void exchangeGoogleToken(String base, String nonce, String idToken) {
+        accountStatus.setText(R.string.google_confirming);
+        String referral = referralInput.getText().toString().trim().toUpperCase(Locale.ROOT);
+        new Thread(() -> {
+            try {
+                String workerId = prefs.getString("worker_id", "");
+                JSONObject request = new JSONObject();
+                request.put("install_id", workerId);
+                request.put("worker_id", workerId);
+                request.put("nonce", nonce);
+                request.put("id_token", idToken);
+                if (!referral.isEmpty()) request.put("referral_code", referral);
+                HttpURLConnection connection = post(base + "/auth/google/exchange", request, null);
+                int code = connection.getResponseCode();
+                JSONObject response = new JSONObject(read(connection, code));
+                connection.disconnect();
+                if (code == 200 && response.optBoolean("ok")) {
+                    secureStore.put("auth_session", response.getString("session_token"));
+                    prefs.edit().putBoolean("google_signed_once", true).apply();
+                    runOnUiThread(() -> {
+                        referralInput.setEnabled(false);
+                        googleSignInButton.setText(R.string.google_connected);
+                    });
+                    applyAccountProfile(response);
+                } else {
+                    setText(accountStatus, authError(response.optString("error", "unknown"), code));
+                }
+            } catch (Exception error) {
+                setText(accountStatus, getString(R.string.google_sign_in_failed));
+            }
+        }).start();
+    }
+
+    private void refreshUserProfile() {
+        String session = secureStore.get("auth_session");
+        String base = baseUrl();
+        String workerId = prefs.getString("worker_id", "");
+        if (session == null || base == null) {
+            accountStatus.setText(R.string.google_signed_out);
+            referralStatus.setText(R.string.sign_in_to_view_referral);
+            return;
+        }
+        accountStatus.setText(R.string.account_loading);
+        new Thread(() -> {
+            try {
+                HttpURLConnection connection = open(base + "/auth/me", "GET");
+                connection.setRequestProperty("Authorization", "Bearer " + session);
+                connection.setRequestProperty("X-Install-Id", workerId);
+                int code = connection.getResponseCode();
+                JSONObject response = new JSONObject(read(connection, code));
+                connection.disconnect();
+                if (code == 200 && response.optBoolean("ok")) {
+                    applyAccountProfile(response);
+                } else {
+                    secureStore.remove("auth_session");
+                    setText(accountStatus, authError(response.optString("error", "unknown"), code));
+                }
+            } catch (Exception error) {
+                setText(accountStatus, getString(R.string.account_refresh_failed));
+            }
+        }).start();
+    }
+
+    private void applyAccountProfile(JSONObject response) {
+        JSONObject user = response.optJSONObject("user");
+        JSONObject referral = response.optJSONObject("referral");
+        String name = user == null ? "MARS-X" : user.optString("display_name", "MARS-X");
+        String email = user == null ? "" : user.optString("email", "");
+        currentReferralCode = referral == null ? "" : referral.optString("code", "");
+        long rewards = referral == null ? 0 : referral.optLong("rewardUnits", 0);
+        int invited = referral == null ? 0 : referral.optInt("invitedCount", 0);
+        String rewardDisplay = BigDecimal.valueOf(rewards, 6).toPlainString();
+        runOnUiThread(() -> {
+            accountStatus.setText(getString(R.string.google_account_connected, name, email));
+            referralStatus.setText(getString(R.string.referral_details, currentReferralCode, invited, rewardDisplay));
+            referralInput.setEnabled(false);
+            googleSignInButton.setText(R.string.google_connected);
+        });
+    }
+
+    private String authError(String error, int code) {
+        switch (error) {
+            case "referral_code_invalid": return getString(R.string.referral_invalid);
+            case "self_referral_not_allowed": return getString(R.string.referral_self_blocked);
+            case "google_auth_not_configured": return getString(R.string.google_not_configured);
+            case "google_id_token_invalid":
+            case "google_nonce_invalid_or_used":
+            case "user_session_invalid": return getString(R.string.google_session_invalid);
+            default: return getString(R.string.error_operation_failed, code);
+        }
+    }
+
+    private void shareReferral() {
+        if (currentReferralCode.isEmpty()) {
+            showTab(2);
+            accountStatus.setText(R.string.sign_in_to_view_referral);
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.referral_share_text, currentReferralCode, TESTER_URL));
+        startActivity(Intent.createChooser(intent, getString(R.string.invite_chooser)));
+    }
+
+    private void confirmDeleteAccount() {
+        if (secureStore.get("auth_session") == null) {
+            accountStatus.setText(R.string.google_signed_out);
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.delete_account_title)
+                .setMessage(R.string.delete_account_message)
+                .setNegativeButton(R.string.cancel_button, null)
+                .setPositiveButton(R.string.delete_account_confirm, (dialog, which) -> deleteAccount())
+                .show();
+    }
+
+    private void deleteAccount() {
+        String session = secureStore.get("auth_session");
+        String base = baseUrl();
+        String workerId = prefs.getString("worker_id", "");
+        if (session == null || base == null) return;
+        accountStatus.setText(R.string.deleting_account);
+        new Thread(() -> {
+            try {
+                HttpURLConnection connection = open(base + "/auth/delete", "POST");
+                connection.setRequestProperty("X-Install-Id", workerId);
+                connection.setRequestProperty("Authorization", "Bearer " + session);
+                connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                connection.setDoOutput(true);
+                byte[] body = "{}".getBytes(StandardCharsets.UTF_8);
+                connection.setFixedLengthStreamingMode(body.length);
+                connection.getOutputStream().write(body);
+                int code = connection.getResponseCode();
+                JSONObject response = new JSONObject(read(connection, code));
+                connection.disconnect();
+                if (code == 200 && response.optBoolean("deleted")) {
+                    secureStore.remove("auth_session");
+                    prefs.edit().putBoolean("google_signed_once", false).apply();
+                    currentReferralCode = "";
+                    runOnUiThread(() -> {
+                        accountStatus.setText(R.string.account_deleted);
+                        referralStatus.setText(R.string.sign_in_to_view_referral);
+                        referralInput.setText("");
+                        referralInput.setEnabled(true);
+                        googleSignInButton.setText(R.string.continue_with_google);
+                    });
+                } else {
+                    setText(accountStatus, authError(response.optString("error", "unknown"), code));
+                }
+            } catch (Exception error) {
+                setText(accountStatus, getString(R.string.account_delete_failed));
+            }
+        }).start();
+    }
+
+    private void showAdvancedTools() {
+        ScrollView scroll = new ScrollView(this);
+        LinearLayout root = pageRoot();
+        scroll.addView(root);
+        endpoint = new EditText(this);
+        endpoint.setSingleLine(true);
+        endpoint.setText(prefs.getString("endpoint", DEFAULT_URL));
+        endpoint.setHint("https://...");
+        root.addView(endpoint);
+        button(root, getString(R.string.save_server_button), view -> {
+            String value = endpoint.getText().toString().trim().replaceAll("/$", "");
+            if (value.matches("https://[A-Za-z0-9._:-]+")) {
+                prefs.edit().putString("endpoint", value).apply();
+                testConnection();
+            } else status.setText(R.string.valid_https_required);
+        });
         licenceKey = new EditText(this);
         licenceKey.setSingleLine(true);
         licenceKey.setHint("MARSX-XXXX-XXXX-XXXX-XXXX");
@@ -137,48 +513,13 @@ public class MainActivity extends Activity {
             prefs.edit().remove("licence_source").apply();
             licenceStatus.setText(R.string.session_cleared);
         });
-        button(root, getString(R.string.open_privacy_button), view -> openPrivacy());
-
-        addTitle(root, getString(R.string.sandbox_balance_title));
-        addText(root, getString(R.string.sandbox_balance_disclaimer), 13);
-        balance = addText(root, getString(R.string.sandbox_balance_not_loaded), 17);
-        button(root, getString(R.string.refresh_balance_button), view -> refreshAccount());
-        payoutAmount = new EditText(this);
-        payoutAmount.setSingleLine(true);
-        payoutAmount.setHint(R.string.payout_amount_hint);
-        payoutAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
-        root.addView(payoutAmount);
-        payoutDestination = new EditText(this);
-        payoutDestination.setSingleLine(true);
-        payoutDestination.setHint(R.string.payout_destination_hint);
-        payoutDestination.setText(prefs.getString("sandbox_destination", ""));
-        root.addView(payoutDestination);
-        button(root, getString(R.string.request_sandbox_payout_button), view -> requestPayout());
-        button(root, getString(R.string.refresh_payouts_button), view -> refreshPayouts());
-        payoutStatus = addText(root, getString(R.string.no_sandbox_payouts), 14);
-
-        addTitle(root, getString(R.string.closed_test_checklist_title));
-        for (int i = 0; i < TASKS.length; i++) {
-            final int index = i;
-            CheckBox checkBox = new CheckBox(this);
-            checkBox.setText(TASKS[i]);
-            checkBox.setChecked(prefs.getBoolean("test_" + i, false));
-            checkBox.setOnCheckedChangeListener((button, checked) -> {
-                prefs.edit().putBoolean("test_" + index, checked).apply();
-                updateFeedback();
-            });
-            root.addView(checkBox);
-        }
-
-        feedback = addText(root, "", 15);
-        updateFeedback();
         button(root, getString(R.string.share_feedback_button), view -> shareFeedback());
         button(root, getString(R.string.invite_tester_button), view -> shareTesterInvite());
-        setContentView(scroll);
-
-        initializeSubscriptions();
-
-        if (secureStore.get("licence_session") != null) checkSavedLicence();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.advanced_tools_button)
+                .setView(scroll)
+                .setPositiveButton(R.string.close_button, null)
+                .show();
     }
 
     private void initializeSubscriptions() {
@@ -266,7 +607,10 @@ public class MainActivity extends Activity {
     }
 
     private String baseUrl() {
-        String value = endpoint.getText().toString().trim().replaceAll("/$", "");
+        String value = endpoint == null
+                ? prefs.getString("endpoint", DEFAULT_URL)
+                : endpoint.getText().toString();
+        value = value.trim().replaceAll("/$", "");
         if (!value.matches("https://[A-Za-z0-9._:-]+")) return null;
         prefs.edit().putString("endpoint", value).apply();
         return value;
@@ -497,8 +841,10 @@ public class MainActivity extends Activity {
                 JSONObject response = new JSONObject(read(connection, code));
                 if ((code == 200 || code == 201) && response.optBoolean("ok")) {
                     JSONObject payout = response.getJSONObject("payout");
-                    setText(payoutStatus, getString(R.string.sandbox_payout_created,
-                            payout.optString("amountDisplay", "?"), payout.optString("status", "?")));
+                    setText(payoutStatus, getString(R.string.sandbox_payout_created_with_fee,
+                            payout.optString("payoutNetDisplay", payout.optString("amountDisplay", "?")),
+                            payout.optString("platformFeeDisplay", "0.000000"),
+                            payout.optString("status", "?")));
                     runOnUiThread(this::refreshAccount);
                 } else {
                     setText(payoutStatus, licenceError(response.optString("error", "unknown"), code));

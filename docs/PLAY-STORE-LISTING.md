@@ -32,10 +32,10 @@ Mining output, uptime, profitability, token value and cost recovery are never gu
 
 - Category: Tools
 - Content rating: Everyone, subject to the final questionnaire
-- Ads: No for Beta 0.6
+- Ads: No for Beta 0.8
 - Target audience: 18 and over
 - Support URL: `https://github.com/melih123r/Mars-x-pool/issues`
-- Privacy URL: `https://worker-registry-production.up.railway.app/privacy`
+- Privacy URL: `https://marsx-pool-api.<cloudflare-subdomain>.workers.dev/privacy` — replace the placeholder after the production Worker is deployed
 - Support email: **publisher must enter a monitored public address before submission**
 
 ## Prepared graphics

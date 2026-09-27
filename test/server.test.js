@@ -32,8 +32,8 @@ async function activate(baseUrl, installId = "install_1234567890", key = LICENSE
       license_key: key,
       install_id: installId,
       terms_accepted: true,
-      terms_version: "2026-09-26-v2",
-      app_version: "0.6-beta",
+      terms_version: "2026-09-27-v3",
+      app_version: "0.8-beta",
     }),
   });
 }
@@ -82,7 +82,7 @@ test("health and privacy are public", async () => {
     assert.deepEqual(await health.json(), {
       ok: true,
       service: "marsx-pool-worker-api",
-      version: "0.6.0",
+      version: "0.8.0",
       storage: "memory",
       persistent: false,
       licensing: "ready",
@@ -339,8 +339,8 @@ test("Qonversion entitlement is exchanged for a short device-bound session", asy
         identity_id: "node-qonversion12345",
         install_id: "node-qonversion12345",
         terms_accepted: true,
-        terms_version: "2026-09-26-v2",
-        app_version: "0.6-beta",
+        terms_version: "2026-09-27-v3",
+        app_version: "0.8-beta",
       }),
     });
     assert.equal(exchange.status, 200);
@@ -392,7 +392,7 @@ test("Qonversion session is denied without an active configured entitlement", as
         identity_id: "node-qonversion12345",
         install_id: "node-qonversion12345",
         terms_accepted: true,
-        terms_version: "2026-09-26-v2",
+        terms_version: "2026-09-27-v3",
       }),
     });
     assert.equal(response.status, 403);
