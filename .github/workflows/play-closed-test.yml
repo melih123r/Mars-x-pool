@@ -3,11 +3,6 @@ name: Google Play closed-test release
 # Never publish on every push. Requires owner-configured Play credentials and signing.
 on:
   workflow_dispatch:
-    inputs:
-      release_notes:
-        description: "Closed-test release notes (English)"
-        required: true
-        default: "MARS-X Pool closed beta: stability and compatibility updates."
 
 permissions:
   contents: read
@@ -83,4 +78,3 @@ jobs:
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
           track: alpha
           status: completed
-          whatsNewDirectory: .github/play-whatsnew
