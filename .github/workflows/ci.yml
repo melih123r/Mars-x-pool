@@ -19,6 +19,8 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm test
+      - run: npm run cf:check
+      - run: npm run cf:db:local
       - run: python3 scripts/check-translations.py
       - run: python3 scripts/check-release.py
 

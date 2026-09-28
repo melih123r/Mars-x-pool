@@ -19,6 +19,16 @@ required_files = [
     ROOT / "docs/PLAY-STORE-LISTING.md",
     ROOT / "docs/DATA-SAFETY-DRAFT.md",
     ROOT / "docs/CLOSED-BETA-RUNBOOK.md",
+    ROOT / "docs/CLOUDFLARE-ZERO-COST-DEPLOYMENT.md",
+    ROOT / "docs/SUPABASE-ZERO-COST-DEPLOYMENT.md",
+    ROOT / "cloudflare/src/worker.js",
+    ROOT / "cloudflare/migrations/0001_initial.sql",
+    ROOT / "cloudflare/migrations/0002_google_auth_referrals.sql",
+    ROOT / "cloudflare/wrangler.toml",
+    ROOT / "supabase/functions/marsx-pool-api/index.ts",
+    ROOT / "supabase/functions/marsx-pool-api/postgres-d1.ts",
+    ROOT / "supabase/migrations/20260928154000_marsx_pool_backend.sql",
+    ROOT / "supabase/migrations/20260928155000_marsx_pool_security_indexes.sql",
 ]
 
 missing = [str(path.relative_to(ROOT)) for path in required_files if not path.is_file()]
@@ -42,10 +52,25 @@ if 'android.permission.INTERNET' not in manifest:
     raise SystemExit("INTERNET permission is required")
 if not re.search(r"targetSdk\s+36", gradle):
     raise SystemExit("targetSdk 36 is required")
+if 'versionName "0.8.2-beta"' not in gradle or 'versionCode 10' not in gradle:
+    raise SystemExit("Beta 0.8.2 Android version is required")
+if "MARSX_API_BASE_URL" not in gradle:
+    raise SystemExit("API build-time endpoint is required")
+if "GOOGLE_WEB_CLIENT_ID" not in gradle:
+    raise SystemExit("Google Credential Manager client ID build field is required")
 if "USDT_TEST" not in readme or "does **not** mine cryptocurrency on the Android device" not in readme:
     raise SystemExit("README must keep the sandbox and no-device-mining disclosures")
 
-for folder in ("values", "values-tr", "values-id", "values-ar"):
+for folder in (
+    "values",
+    "values-tr",
+    "values-id",
+    "values-ar",
+    "values-hi",
+    "values-bn",
+    "values-ur",
+    "values-vi",
+):
     text = (ROOT / f"android/app/src/main/res/{folder}/strings.xml").read_text(encoding="utf-8")
     if "USDT_TEST" not in text:
         raise SystemExit(f"{folder} must disclose USDT_TEST")

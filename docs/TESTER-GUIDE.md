@@ -1,11 +1,11 @@
-# MARS-X Pool Beta 0.6 — tester guide
+# MARS-X Pool Beta 0.8 — tester guide
 
 Thank you for testing MARS-X Pool. This is a closed-beta remote node/pool management prototype. It does not mine on your phone, promise earnings or transfer real money. `USDT_TEST` is a non-withdrawable simulation unit.
 
 ## Install and activate
 
 1. Install the APK supplied directly by the publisher, or use the Google Play closed-test link when available.
-2. Confirm that the prefilled endpoint is `https://worker-registry-production.up.railway.app`.
+2. Confirm that the prefilled endpoint matches the publisher's Cloudflare Worker URL: `https://marsx-pool-api.<cloudflare-subdomain>.workers.dev`.
 3. Open the licence/privacy summary, read it, and accept the current terms.
 4. Enter the one-device beta licence sent to you privately. Do not share the key.
 5. Tap **Activate licence**. If you change devices, ask the publisher to reset or replace the licence.
@@ -26,4 +26,4 @@ Please remain opted into the closed test for 14 continuous days if you joined th
 MARS-X Pool Beta telefonda mining yapmaz, kazanç vaat etmez ve gerçek para transfer etmez. `USDT_TEST` yalnızca çekilemeyen bir simülasyon birimidir. Yayıncının gönderdiği APK'yı veya Play kapalı test bağlantısını kullanın; lisans/gizlilik özetini okuyup kabul edin; size özel tek cihazlık anahtarı girin; bağlantı, kayıt, manuel heartbeat, sandbox hesap ve geri bildirim adımlarını tamamlayın. Lisans anahtarını paylaşmayın.
 
 Support: https://github.com/melih123r/Mars-x-pool/issues
-Privacy: https://worker-registry-production.up.railway.app/privacy
+Privacy: https://marsx-pool-api.<cloudflare-subdomain>.workers.dev/privacy (publisher replaces the placeholder after deployment)

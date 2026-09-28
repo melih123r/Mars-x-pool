@@ -23,7 +23,7 @@ Closed-beta features:
 - Explicit worker registration and manual heartbeat
 - Persistent server-side worker status
 - Sandbox balance and payout-request history
-- English, Turkish, Indonesian and Arabic interface
+- English, Turkish, Indonesian, Arabic, Hindi, Bengali, Urdu and Vietnamese interface
 - Built-in test checklist and feedback sharing
 
 Mining output, uptime, profitability, token value and cost recovery are never guaranteed. Connect only devices and accounts you own or are authorised to manage.
@@ -32,10 +32,10 @@ Mining output, uptime, profitability, token value and cost recovery are never gu
 
 - Category: Tools
 - Content rating: Everyone, subject to the final questionnaire
-- Ads: No for Beta 0.6
+- Ads: No for Beta 0.8.2
 - Target audience: 18 and over
 - Support URL: `https://github.com/melih123r/Mars-x-pool/issues`
-- Privacy URL: `https://worker-registry-production.up.railway.app/privacy`
+- Privacy URL: `https://marsx-pool-api.<cloudflare-subdomain>.workers.dev/privacy` — replace the placeholder after the production Worker is deployed
 - Support email: **publisher must enter a monitored public address before submission**
 
 ## Prepared graphics
@@ -44,6 +44,8 @@ Mining output, uptime, profitability, token value and cost recovery are never gu
 - Feature graphic: `store-assets/marsx-feature-graphic-1024x500.png` (1024 × 500 PNG)
 
 Capture the required screenshots from the exact signed build on a real Android device. The shot list and non-misleading-image rule are in `store-assets/README.md`.
+
+Localized short and full descriptions for all eight interface languages are prepared in `PLAY-STORE-LOCALISATIONS.md`. Add them separately in Play Console; Android interface resources do not localize the store listing automatically.
 
 ## Review-team access note
 

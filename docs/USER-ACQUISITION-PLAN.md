@@ -33,7 +33,7 @@ Do not spend on install ads until production access, a privacy/landing page, use
 | Objective | Qualified app installs |
 | Monthly cap | USD 10 total; owner approval required before spend |
 | Markets | India first, Indonesia second; Oman/UAE use direct B2B outreach |
-| Languages | English, Indonesian, Arabic, Turkish |
+| Languages | English, Turkish, Indonesian, Arabic, Hindi, Bengali, Urdu, Vietnamese |
 | Conversion | Install → onboarding → licensed active user |
 | Stop rule | Pause below 15% activation after 100 installs or after any policy failure |
 
