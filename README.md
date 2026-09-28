@@ -1,12 +1,14 @@
-# MARS-X Pool Beta 0.6
+# MARS-X Pool Beta 0.8
 
-MARS-X Pool is an authorised Android remote node/pool management beta. It does **not** mine cryptocurrency on the Android device, run third-party workloads, promise earnings, perform hidden background compute or transfer real money in sandbox mode. Beta 0.6 combines the Qonversion/Google Play licence path with a persistent `USDT_TEST` balance and payout simulator. English, Turkish, Indonesian and Arabic resources and right-to-left support are included.
+MARS-X Pool is an authorised Android remote node/pool management beta. It does **not** mine cryptocurrency on the Android device, run third-party workloads, promise earnings, perform hidden background compute or transfer real money in sandbox mode. Beta 0.8 adds a three-tab consumer interface, Google Credential Manager sign-in, self-service account deletion and a one-level referral ledger. Cloudflare Workers + D1 remains the production target; Railway/Redis remains a rollback target during migration.
 
 ## Live API
 
 - `GET /health` — public readiness, storage and licence configuration status.
 - `GET /privacy` — public privacy notice.
 - `POST /billing/qonversion/session` — server-side exchange of an active Qonversion entitlement for a short device-bound MARS-X session.
+- `POST /auth/google/nonce` and `POST /auth/google/exchange` — one-time nonce issuance and server-verified Google ID-token exchange.
+- `GET /auth/me` and `POST /auth/delete` — device-bound account profile/referral view and self-service account deletion.
 - `POST /license/activate` — licence-key verification, terms acceptance and persistent device binding.
 - `GET /license/status` — validates an expiring device-bound licence session.
 - `POST /register` and `POST /heartbeat` — require `Authorization: License <session>` and the bound installation ID.
@@ -14,7 +16,30 @@ MARS-X Pool is an authorised Android remote node/pool management beta. It does *
 - `GET /workers` and `GET /summary` — operator-only routes requiring `Authorization: Bearer <WORKER_TOKEN>`.
 - `/admin/credits`, `/admin/payouts` and `/admin/dormancy/*` — separate operator routes requiring `Authorization: Bearer <ADMIN_TOKEN>`.
 
-## Railway variables
+## Zero-cost Cloudflare deployment
+
+The production target is `cloudflare/src/worker.js`, backed by D1. It implements the same routes listed above. The included daily scheduled job applies the dormant-account safeguard, while Qonversion sessions last 24 hours to reduce repeated partner lookups.
+
+```bash
+npm install
+npm run cf:check
+npm run cf:db:local
+```
+
+Create the Cloudflare project, copy the D1 database ID into `cloudflare/wrangler.toml`, apply the remote migration and add secrets as described in `docs/CLOUDFLARE-ZERO-COST-DEPLOYMENT.md`. Never place a real secret in `wrangler.toml`, Git, the APK or `.dev.vars.example`.
+
+Build the Android application with the deployed URL:
+
+```bash
+gradle -p android :app:bundleRelease \
+  -PMARSX_API_BASE_URL=https://marsx-pool-api.<your-subdomain>.workers.dev \
+  -PQONVERSION_PROJECT_KEY=project_key_from_qonversion \
+  -PGOOGLE_WEB_CLIENT_ID=web_oauth_client_id.apps.googleusercontent.com
+```
+
+If `MARSX_API_BASE_URL` is omitted, Beta 0.8 keeps the existing Railway URL as a safe migration fallback. Do not delete Railway until Cloudflare `/health`, Google authentication, activation, registration, account and payout-sandbox checks pass.
+
+## Railway rollback variables
 
 The existing `worker-registry` service requires:
 
@@ -28,7 +53,9 @@ LICENSE_TOKEN_TTL_SECONDS=2592000
 LICENSE_RECORDS_JSON=[...]
 QONVERSION_SECRET_KEY=sk_server_secret_from_qonversion
 QONVERSION_ENTITLEMENT_IDS=pro,farm
-QONVERSION_SESSION_TTL_SECONDS=3600
+QONVERSION_SESSION_TTL_SECONDS=86400
+GOOGLE_WEB_CLIENT_ID=<Google Auth Platform web client ID>
+AUTH_SUBJECT_PEPPER=<separate random secret, at least 32 characters>
 MIN_PAYOUT_UNITS=1000000
 DORMANT_AFTER_MS=31536000000
 ```
@@ -43,7 +70,7 @@ Generate a customer licence record locally with `LICENSE_PEPPER` present:
 npm run license:generate
 ```
 
-Give the displayed key to the authorised tester once. Store only the generated record in `LICENSE_RECORDS_JSON`. Redis enforces the configured device-seat limit across Railway restarts.
+Give the displayed key to the authorised tester once. Store only the generated record in `LICENSE_RECORDS_JSON`. Redis enforces the configured device-seat limit across Railway restarts; D1 enforces the same rule after Cloudflare migration.
 
 ## Development and Android
 
@@ -53,7 +80,7 @@ npm test
 npm start
 ```
 
-The Android project is under `android/`. Release builds enable R8 minification. The app never stores a raw beta key after activation; it stores only the signed session encrypted through Android Keystore. Registration and heartbeat happen only after an explicit button press.
+The Android project is under `android/`. Release builds enable R8 minification. The app never stores a raw beta key after activation; licence and Google account sessions are encrypted through Android Keystore. Returning authorised Google accounts can use Credential Manager auto-select; a new account must tap the visible Google button so an optional referral code can be applied only once.
 
 To activate the subscription UI in a build, provide the public Qonversion SDK Project Key:
 
@@ -73,7 +100,9 @@ Invite 20 genuine testers so at least 12 remain opted in continuously for 14 day
 
 `docs/PARTNER-SHORTLIST.md` records verified public channels for Omanhash, Green Data City and Phoenix Group. `docs/PARTNER-OUTREACH-DRAFT.md` is a draft only and must not be sent without the owner's approval.
 
-Beta 0.6 intentionally contains no advertising SDK. Qonversion and Play Billing are integrated but cannot take payment until the real Qonversion/Play accounts, products and keys are configured. The separate payout screen remains a sandbox even after subscription setup. Add advertising only after the required consent, Data safety and production ad-unit identifiers are ready.
+Beta 0.8 intentionally contains no advertising SDK. Qonversion and Play Billing are integrated but cannot take payment until the real Qonversion/Play accounts, products and keys are configured. The separate payout screen remains a sandbox even after subscription setup. Add advertising only after the required consent, Data safety and production ad-unit identifiers are ready.
+
+The referral is deliberately single-level. A completed sandbox payout models a two-percent platform fee; when the user joined with a valid inviter, three percent of that fee (an effective 0.06 percent of gross) is credited to the inviter. The invited user's net amount is unchanged by the referral. Without a referral, the full platform fee stays with MARS-X.
 
 Qonversion was chosen over Adapty and RevenueCat because its published free tracked-revenue allowance and post-threshold rate were the cheapest of the three when checked on 26 September 2026. See `docs/LICENSING-PROVIDER-DECISION.md` for the comparison and trust boundary.
 

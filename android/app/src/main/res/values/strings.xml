@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">MARS-X Pool Beta</string>
     <string name="app_title" translatable="false">MARS-X POOL</string>
-    <string name="beta_label">Beta 0.6 • licensed sandbox payouts</string>
+    <string name="beta_label">Beta 0.8 • serverless licensed sandbox</string>
     <string name="product_disclaimer">Remote node/pool management prototype. This version does not mine on the phone, run hidden computing or guarantee earnings.</string>
     <string name="worker_identity_title">Worker ID for this device</string>
     <string name="explicit_action_notice">Communication with the server starts only when you press one of the buttons below.</string>
@@ -127,4 +127,52 @@
     <string name="recent_sandbox_payouts">Recent sandbox requests:</string>
     <string name="sandbox_request_failed">The sandbox request failed. Check registration, licence and connection.</string>
     <string name="insufficient_sandbox_balance">Insufficient sandbox balance.</string>
+    <string name="simple_beta_label">Simple remote pool manager • Beta 0.8</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_earnings">Earnings</string>
+    <string name="tab_account">Account</string>
+    <string name="home_title">Everything at a glance</string>
+    <string name="home_subtitle">Your service and linked device, without technical clutter.</string>
+    <string name="service_status_title">Service</string>
+    <string name="refresh_button">Refresh</string>
+    <string name="device_title">Linked device</string>
+    <string name="device_summary">This phone • %1$s</string>
+    <string name="connect_device_button">Connect device</string>
+    <string name="advanced_tools_button">Advanced tools</string>
+    <string name="earnings_title">Earnings</string>
+    <string name="payout_title">Sandbox withdrawal</string>
+    <string name="referral_title">Invite and earn</string>
+    <string name="referral_explanation">One level only. The inviter receives three percent of MARS-X’s two-percent platform fee. The invited user pays nothing extra.</string>
+    <string name="sign_in_to_view_referral">Sign in to view your invitation code and reward.</string>
+    <string name="share_invite_button">Share invitation</string>
+    <string name="account_title">Account</string>
+    <string name="google_signed_out">Sign in quickly with your Google account.</string>
+    <string name="referral_code_hint">Invitation code (optional, first sign-in only)</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="refresh_account_button">Refresh account</string>
+    <string name="plan_title">Plan</string>
+    <string name="delete_account_button">Delete account</string>
+    <string name="google_not_configured">Google sign-in will be available after the OAuth client ID is added to the release build.</string>
+    <string name="google_signing_in">Preparing secure Google sign-in…</string>
+    <string name="google_sign_in_cancelled">Google sign-in was cancelled.</string>
+    <string name="google_sign_in_failed">Google sign-in could not be completed. Try again.</string>
+    <string name="google_confirming">Confirming your account securely…</string>
+    <string name="google_connected">Google connected</string>
+    <string name="account_loading">Loading account…</string>
+    <string name="account_refresh_failed">The account could not be refreshed.</string>
+    <string name="google_account_connected">%1$s\n%2$s</string>
+    <string name="referral_details">Code: %1$s • Invited: %2$d • Reward: %3$s USDT_TEST</string>
+    <string name="referral_invalid">This invitation code is not valid.</string>
+    <string name="referral_self_blocked">You cannot use your own invitation code.</string>
+    <string name="google_session_invalid">Your session expired. Sign in again.</string>
+    <string name="referral_share_text">Join MARS-X Pool with my invitation code: %1$s\n%2$s</string>
+    <string name="delete_account_title">Delete MARS-X account?</string>
+    <string name="delete_account_message">Your Google link and active MARS-X sessions will be removed. This cannot be undone.</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="delete_account_confirm">Delete</string>
+    <string name="deleting_account">Deleting account…</string>
+    <string name="account_deleted">Your MARS-X account was deleted.</string>
+    <string name="account_delete_failed">The account could not be deleted. Try again.</string>
+    <string name="save_server_button">Save server</string>
+    <string name="sandbox_payout_created_with_fee">Net test amount: %1$s USDT_TEST • fee: %2$s • status: %3$s. This is not a real payment.</string>
 </resources>
