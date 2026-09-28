@@ -44,7 +44,7 @@ Add these private deployment variables:
 ```text
 QONVERSION_SECRET_KEY=sk_server_secret_from_qonversion
 QONVERSION_ENTITLEMENT_IDS=pro,farm
-QONVERSION_SESSION_TTL_SECONDS=3600
+QONVERSION_SESSION_TTL_SECONDS=86400
 LICENSE_SESSION_SECRET=a_separate_random_secret_at_least_32_characters
 ```
 

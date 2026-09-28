@@ -4,9 +4,9 @@ Date: 26 September 2026
 
 ## Current release boundary
 
-Beta 0.6 is a licensed remote node/pool management prototype. Qonversion Subscription Management and Google Play Billing are integrated behind account configuration, with server-side entitlement verification. A build without the Qonversion project key cannot start a purchase. The beta still has no advertising SDK, mining engine, wallet custody or real-value payout feature; `USDT_TEST` balances and payout requests are non-withdrawable simulations only. Revenue must not be claimed until the Play/Qonversion accounts and products are configured, sandbox-tested and the useful remote-management functions are production-ready.
+Beta 0.8.2 is a licensed remote node/pool management prototype. Qonversion Subscription Management, Google Play Billing and Google Credential Manager sign-in are integrated behind account configuration, with server-side token/entitlement verification. A build without the required project/client keys cannot start those flows. The beta still has no advertising SDK, mining engine, wallet custody or real-value payout feature; `USDT_TEST` balances and payout requests are non-withdrawable simulations only. Revenue must not be claimed until the Play/Qonversion accounts and products are configured, sandbox-tested and the useful remote-management functions are production-ready.
 
-The Android interface follows the device language for English, Turkish, Indonesian and Arabic. Arabic right-to-left layout is enabled. No locale is transmitted to the backend by this release.
+The Android interface follows the device language for English, Turkish, Indonesian, Arabic, Hindi, Bengali, Urdu and Vietnamese. Arabic and Urdu right-to-left layout is enabled. No locale is transmitted to the backend by this release. Store-listing localization is prepared separately in `PLAY-STORE-LOCALISATIONS.md`.
 
 ## Market sequence
 
@@ -14,8 +14,9 @@ The Android interface follows the device language for English, Turkish, Indonesi
 | --- | --- | --- | --- |
 | 1 | India | English-language beta volume and product feedback | Organic communities first; one tightly targeted campaign only after production readiness |
 | 2 | Indonesia | Android volume and ad-supported free tier | Indonesian store copy, support and onboarding |
-| 3 | Oman | Licensed mining operators and pool integration | Direct B2B pilot; do not use consumer install ads |
-| 4 | UAE | Higher-value enterprise and hosting customers | English/Arabic direct outreach and a paid Farm plan |
+| 3 | Bangladesh, Pakistan and Vietnam | Validate Bengali, Urdu and Vietnamese onboarding organically | One country at a time; do not divide the USD 10 budget |
+| 4 | Oman | Licensed mining operators and pool integration | Direct B2B pilot; do not use consumer install ads |
+| 5 | UAE | Higher-value enterprise and hosting customers | English/Arabic direct outreach and a paid Farm plan |
 
 Do not split a USD 10 monthly acquisition budget across countries. Use one market for a complete 30-day test and compare activation and retention with the next market.
 
@@ -44,7 +45,7 @@ Never sell personal data, show ads on urgent outage/error screens, reward users 
 
 ## Advertising gate
 
-AdMob remains intentionally absent from Beta 0.6. Before adding it:
+AdMob remains intentionally absent from Beta 0.8.2. Before adding it:
 
 1. Create the publisher account and production ad-unit identifiers.
 2. Add a Google-certified consent-management flow for EEA/UK/Switzerland users before requesting personalised ads.

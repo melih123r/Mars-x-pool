@@ -3,8 +3,8 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 const SERVICE = "marsx-pool-worker-api";
-const VERSION = "0.6.0";
-const TERMS_VERSION = "2026-09-26-v2";
+const VERSION = "0.8.0";
+const TERMS_VERSION = "2026-09-27-v3";
 const WORKERS_KEY = "marsx:workers";
 const LICENSE_DEVICES_PREFIX = "marsx:license-devices:";
 const BALANCES_KEY = "marsx:balances:usdt-test";

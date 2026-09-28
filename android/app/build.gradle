@@ -6,6 +6,18 @@ def qonversionProjectKey = providers.gradleProperty("QONVERSION_PROJECT_KEY")
 def escapedQonversionProjectKey = qonversionProjectKey
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
+def marsxApiBaseUrl = providers.gradleProperty("MARSX_API_BASE_URL")
+        .orElse(providers.environmentVariable("MARSX_API_BASE_URL"))
+        .getOrElse("https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-pool-api")
+def escapedMarsxApiBaseUrl = marsxApiBaseUrl
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+def googleWebClientId = providers.gradleProperty("GOOGLE_WEB_CLIENT_ID")
+        .orElse(providers.environmentVariable("GOOGLE_WEB_CLIENT_ID"))
+        .getOrElse("")
+def escapedGoogleWebClientId = googleWebClientId
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
 
 android {
     namespace "com.marsx.pool"
@@ -15,11 +27,13 @@ android {
         applicationId "com.marsx.pool"
         minSdk 26
         targetSdk 36
-        versionCode 6
-        versionName "0.6-beta"
+        versionCode 10
+        versionName "0.8.2-beta"
         buildConfigField "String", "QONVERSION_PROJECT_KEY", "\"${escapedQonversionProjectKey}\""
         buildConfigField "String", "QONVERSION_PRODUCT_PRO", "\"pro_monthly\""
         buildConfigField "String", "QONVERSION_PRODUCT_FARM", "\"farm_monthly\""
+        buildConfigField "String", "MARSX_API_BASE_URL", "\"${escapedMarsxApiBaseUrl}\""
+        buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${escapedGoogleWebClientId}\""
     }
 
     buildFeatures { buildConfig true }
@@ -45,4 +59,7 @@ android {
 
 dependencies {
     implementation "io.qonversion.android.sdk:sdk:9.7.0"
+    implementation "androidx.credentials:credentials:1.6.0"
+    implementation "androidx.credentials:credentials-play-services-auth:1.6.0"
+    implementation "com.google.android.libraries.identity.googleid:googleid:1.1.1"
 }
