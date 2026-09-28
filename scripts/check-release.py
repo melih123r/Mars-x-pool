@@ -52,8 +52,8 @@ if 'android.permission.INTERNET' not in manifest:
     raise SystemExit("INTERNET permission is required")
 if not re.search(r"targetSdk\s+36", gradle):
     raise SystemExit("targetSdk 36 is required")
-if 'versionName "0.8.2-beta"' not in gradle or 'versionCode 10' not in gradle:
-    raise SystemExit("Beta 0.8.2 Android version is required")
+if 'versionName "0.8.3-beta"' not in gradle or 'versionCode 11' not in gradle:
+    raise SystemExit("Beta 0.8.3 Android version is required")
 if "MARSX_API_BASE_URL" not in gradle:
     raise SystemExit("API build-time endpoint is required")
 if "GOOGLE_WEB_CLIENT_ID" not in gradle:

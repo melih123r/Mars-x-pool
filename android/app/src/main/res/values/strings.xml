@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">MARS-X Pool Beta</string>
     <string name="app_title" translatable="false">MARS-X POOL</string>
-    <string name="beta_label">Beta 0.8.2 • serverless licensed sandbox</string>
+    <string name="beta_label">Beta 0.8.3 • serverless licensed sandbox</string>
     <string name="product_disclaimer">Remote node/pool management prototype. This version does not mine on the phone, run hidden computing or guarantee earnings.</string>
     <string name="worker_identity_title">Worker ID for this device</string>
     <string name="explicit_action_notice">Communication with the server starts only when you press one of the buttons below.</string>
@@ -127,7 +127,7 @@
     <string name="recent_sandbox_payouts">Recent sandbox requests:</string>
     <string name="sandbox_request_failed">The sandbox request failed. Check registration, licence and connection.</string>
     <string name="insufficient_sandbox_balance">Insufficient sandbox balance.</string>
-    <string name="simple_beta_label">Simple remote pool manager • Beta 0.8.2</string>
+    <string name="simple_beta_label">Simple remote pool manager • Beta 0.8.3</string>
     <string name="tab_home">Home</string>
     <string name="tab_earnings">Earnings</string>
     <string name="tab_account">Account</string>

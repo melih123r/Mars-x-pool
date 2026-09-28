@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">MARS-X Pool Beta</string>
     <string name="app_title" translatable="false">MARS-X POOL</string>
-    <string name="beta_label">Beta 0.8.2 • môi trường thử nghiệm có giấy phép, không máy chủ</string>
+    <string name="beta_label">Beta 0.8.3 • môi trường thử nghiệm có giấy phép, không máy chủ</string>
     <string name="product_disclaimer">Nguyên mẫu quản lý nút/nhóm từ xa. Phiên bản này không đào trên điện thoại, không chạy tác vụ ẩn và không đảm bảo thu nhập.</string>
     <string name="worker_identity_title">Mã worker của thiết bị này</string>
     <string name="explicit_action_notice">Ứng dụng chỉ liên lạc với máy chủ khi bạn nhấn một trong các nút bên dưới.</string>
@@ -127,7 +127,7 @@
     <string name="recent_sandbox_payouts">Yêu cầu sandbox gần đây:</string>
     <string name="sandbox_request_failed">Yêu cầu sandbox thất bại. Hãy kiểm tra đăng ký, giấy phép và kết nối.</string>
     <string name="insufficient_sandbox_balance">Số dư sandbox không đủ.</string>
-    <string name="simple_beta_label">Trình quản lý nhóm từ xa đơn giản • Beta 0.8.2</string>
+    <string name="simple_beta_label">Trình quản lý nhóm từ xa đơn giản • Beta 0.8.3</string>
     <string name="tab_home">Trang chủ</string>
     <string name="tab_earnings">Thu nhập</string>
     <string name="tab_account">Tài khoản</string>
