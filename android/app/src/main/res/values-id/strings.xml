@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="beta_label">Beta 0.8.2 • sandbox berlisensi tanpa server tetap</string>
+    <string name="beta_label">Beta 0.8.3 • sandbox berlisensi tanpa server tetap</string>
     <string name="product_disclaimer">Prototipe pengelolaan node/pool jarak jauh. Versi ini tidak menambang di ponsel, menjalankan komputasi tersembunyi, atau menjamin penghasilan.</string>
     <string name="worker_identity_title">ID worker perangkat ini</string>
     <string name="explicit_action_notice">Komunikasi dengan server hanya dimulai saat Anda menekan salah satu tombol di bawah.</string>
@@ -125,7 +125,7 @@
     <string name="recent_sandbox_payouts">Permintaan sandbox terbaru:</string>
     <string name="sandbox_request_failed">Permintaan sandbox gagal. Periksa pendaftaran, lisensi, dan koneksi.</string>
     <string name="insufficient_sandbox_balance">Saldo sandbox tidak cukup.</string>
-    <string name="simple_beta_label">Pengelola pool jarak jauh sederhana • Beta 0.8.2</string>
+    <string name="simple_beta_label">Pengelola pool jarak jauh sederhana • Beta 0.8.3</string>
     <string name="tab_home">Beranda</string>
     <string name="tab_earnings">Penghasilan</string>
     <string name="tab_account">Akun</string>

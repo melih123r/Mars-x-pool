@@ -1,6 +1,6 @@
-# MARS-X Pool Beta 0.8.2
+# MARS-X Pool Beta 0.8.3
 
-MARS-X Pool is an authorised Android remote node/pool management beta. It does **not** mine cryptocurrency on the Android device, run third-party workloads, promise earnings, perform hidden background compute or transfer real money in sandbox mode. Beta 0.8.2 keeps the zero-cost Supabase Edge Function + private PostgreSQL deployment, three-tab interface, Google Credential Manager sign-in, self-service account deletion and one-level referral ledger, and expands the interface from four to eight languages. Railway/Redis remains a temporary rollback target only.
+MARS-X Pool is an authorised Android remote node/pool management beta. It does **not** mine cryptocurrency on the Android device, run third-party workloads, promise earnings, perform hidden background compute or transfer real money in sandbox mode. Beta 0.8.3 keeps the zero-cost Supabase Edge Function + private PostgreSQL deployment, three-tab interface, Google Credential Manager sign-in, self-service account deletion and one-level referral ledger, and expands the interface to thirteen languages. Railway/Redis remains a temporary rollback target only.
 
 ## Live API
 
@@ -24,7 +24,7 @@ https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-pool-api
 
 ## Zero-cost Supabase deployment
 
-The Android Beta 0.8.2 build uses the live Beta 0.8.1 `marsx-pool-api` Supabase Edge Function, which stores its records in the private `marsx_pool` PostgreSQL schema. Client roles have no schema privileges and explicit deny policies. Server credentials belong in Supabase Vault, never in source, the APK/AAB or a public table. Apply the migrations under `supabase/migrations/` and deploy the function under `supabase/functions/marsx-pool-api/`.
+The Android Beta 0.8.3 build uses the live Beta 0.8.1 `marsx-pool-api` Supabase Edge Function, which stores its records in the private `marsx_pool` PostgreSQL schema. Client roles have no schema privileges and explicit deny policies. Server credentials belong in Supabase Vault, never in source, the APK/AAB or a public table. Apply the migrations under `supabase/migrations/` and deploy the function under `supabase/functions/marsx-pool-api/`.
 
 The selected Supabase organization is on the Free plan. The app must not be switched to a paid plan or paid add-on without an explicit owner decision. See `docs/SUPABASE-ZERO-COST-DEPLOYMENT.md` for verified limits, deployment checks and the Railway retirement gate.
 
@@ -49,7 +49,7 @@ gradle -p android :app:bundleRelease \
   -PGOOGLE_WEB_CLIENT_ID=web_oauth_client_id.apps.googleusercontent.com
 ```
 
-If `MARSX_API_BASE_URL` is omitted, Beta 0.8.2 uses the live Supabase endpoint. Do not delete Railway until Supabase `/health`, licence activation, registration, account, Google authentication and payout-sandbox checks pass.
+If `MARSX_API_BASE_URL` is omitted, Beta 0.8.3 uses the live Supabase endpoint. Do not delete Railway until Supabase `/health`, licence activation, registration, account, Google authentication and payout-sandbox checks pass.
 
 ## Railway rollback variables
 
@@ -102,7 +102,7 @@ gradle -p android :app:bundleRelease -PQONVERSION_PROJECT_KEY=project_key_from_q
 
 Without that key, the purchase controls remain disabled. The planned mappings are Qonversion products `pro_monthly` and `farm_monthly`, Google Play products `marsx_pro_monthly` and `marsx_farm_monthly`, and entitlements `pro` and `farm`. Follow `docs/QONVERSION-SETUP.md` before producing a payment-enabled build.
 
-GitHub Actions tests the backend, checks all eight translation sets and assembles a debug APK. The interface follows the device language in English, Turkish, Indonesian, Arabic, Hindi, Bengali, Urdu and Vietnamese; Arabic and Urdu use right-to-left layout. Public distribution should use a signed AAB with Play App Signing and Play Integrity. The Qonversion SDK checks entitlements in the app; the MARS-X backend independently resolves the Qonversion identity and entitlement before issuing a short session.
+GitHub Actions tests the backend, checks eight complete translation sets plus five revenue-priority customer-journey sets, and assembles a debug APK. The interface follows the device language in English, Turkish, Indonesian, Arabic, Hindi, Bengali, Urdu, Vietnamese, French, German, Spanish, Brazilian Portuguese and Italian; Arabic and Urdu use right-to-left layout. French, German, Spanish, Brazilian Portuguese and Italian localize the home, earnings, account, subscription and sandbox-payment journey while advanced operator tools deliberately fall back to English until native review. Public distribution should use a signed AAB with Play App Signing and Play Integrity. The Qonversion SDK checks entitlements in the app; the MARS-X backend independently resolves the Qonversion identity and entitlement before issuing a short session.
 
 The CI release gate also runs `scripts/check-release.py`, Android release lint and `bundleRelease`. It uploads a tester APK and an unsigned release AAB; the AAB must be signed with the publisher's private upload key before Play Console submission. Store copy, Data safety answers and the tester procedure are prepared in `docs/PLAY-STORE-LISTING.md`, `docs/DATA-SAFETY-DRAFT.md` and `docs/CLOSED-BETA-RUNBOOK.md`.
 
@@ -112,7 +112,7 @@ Invite 20 genuine testers so at least 12 remain opted in continuously for 14 day
 
 `docs/PARTNER-SHORTLIST.md` records verified public channels for Omanhash, Green Data City and Phoenix Group. `docs/PARTNER-OUTREACH-DRAFT.md` is a draft only and must not be sent without the owner's approval.
 
-Beta 0.8.2 intentionally contains no advertising SDK. Qonversion and Play Billing are integrated but cannot take payment until the real Qonversion/Play accounts, products and keys are configured. The separate payout screen remains a sandbox even after subscription setup. Add advertising only after the required consent, Data safety and production ad-unit identifiers are ready.
+Beta 0.8.3 intentionally contains no advertising SDK. Qonversion and Play Billing are integrated but cannot take payment until the real Qonversion/Play accounts, products and keys are configured. The separate payout screen remains a sandbox even after subscription setup. Add advertising only after the required consent, Data safety and production ad-unit identifiers are ready.
 
 The referral is deliberately single-level. A completed sandbox payout models a two-percent platform fee; when the user joined with a valid inviter, three percent of that fee (an effective 0.06 percent of gross) is credited to the inviter. The invited user's net amount is unchanged by the referral. Without a referral, the full platform fee stays with MARS-X.
 

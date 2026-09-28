@@ -32,7 +32,7 @@ Mining output, uptime, profitability, token value and cost recovery are never gu
 
 - Category: Tools
 - Content rating: Everyone, subject to the final questionnaire
-- Ads: No for Beta 0.8.2
+- Ads: No for Beta 0.8.3
 - Target audience: 18 and over
 - Support URL: `https://github.com/melih123r/Mars-x-pool/issues`
 - Privacy URL: `https://marsx-pool-api.<cloudflare-subdomain>.workers.dev/privacy` — replace the placeholder after the production Worker is deployed
@@ -45,7 +45,7 @@ Mining output, uptime, profitability, token value and cost recovery are never gu
 
 Capture the required screenshots from the exact signed build on a real Android device. The shot list and non-misleading-image rule are in `store-assets/README.md`.
 
-Localized short and full descriptions for all eight interface languages are prepared in `PLAY-STORE-LOCALISATIONS.md`. Add them separately in Play Console; Android interface resources do not localize the store listing automatically.
+Localized short and full descriptions for all thirteen interface languages are prepared in `PLAY-STORE-LOCALISATIONS.md`. Add them separately in Play Console; Android interface resources do not localize the store listing automatically.
 
 ## Review-team access note
 

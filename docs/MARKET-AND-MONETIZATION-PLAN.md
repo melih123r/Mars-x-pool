@@ -4,9 +4,9 @@ Date: 26 September 2026
 
 ## Current release boundary
 
-Beta 0.8.2 is a licensed remote node/pool management prototype. Qonversion Subscription Management, Google Play Billing and Google Credential Manager sign-in are integrated behind account configuration, with server-side token/entitlement verification. A build without the required project/client keys cannot start those flows. The beta still has no advertising SDK, mining engine, wallet custody or real-value payout feature; `USDT_TEST` balances and payout requests are non-withdrawable simulations only. Revenue must not be claimed until the Play/Qonversion accounts and products are configured, sandbox-tested and the useful remote-management functions are production-ready.
+Beta 0.8.3 is a licensed remote node/pool management prototype. Qonversion Subscription Management, Google Play Billing and Google Credential Manager sign-in are integrated behind account configuration, with server-side token/entitlement verification. A build without the required project/client keys cannot start those flows. The beta still has no advertising SDK, mining engine, wallet custody or real-value payout feature; `USDT_TEST` balances and payout requests are non-withdrawable simulations only. Revenue must not be claimed until the Play/Qonversion accounts and products are configured, sandbox-tested and the useful remote-management functions are production-ready.
 
-The Android interface follows the device language for English, Turkish, Indonesian, Arabic, Hindi, Bengali, Urdu and Vietnamese. Arabic and Urdu right-to-left layout is enabled. No locale is transmitted to the backend by this release. Store-listing localization is prepared separately in `PLAY-STORE-LOCALISATIONS.md`.
+The Android interface follows the device language for English, Turkish, Indonesian, Arabic, Hindi, Bengali, Urdu, Vietnamese, French, German, Spanish, Brazilian Portuguese and Italian. The original eight language sets are complete; the five revenue-priority additions localize the customer journey and use English fallback for advanced operator tools until native review. Arabic and Urdu right-to-left layout is enabled. No locale is transmitted to the backend by this release. Store-listing localization is prepared separately in `PLAY-STORE-LOCALISATIONS.md`. Russian, Ukrainian, Kazakh and additional Balkan/CIS locales are deliberately deferred: English remains the fallback where local-language conversion value does not justify maintenance or where Google Play billing/advertising availability prevents the planned monetisation route.
 
 ## Market sequence
 
@@ -27,8 +27,8 @@ These are planning prices. They do not become active offers until the Play produ
 | Tier | Initial market price | Limits and value |
 | --- | ---: | --- |
 | Free | 0 | One node, basic status, restrained contextual ad after consent |
-| Pro Asia | USD 1.99–2.99/month | Up to 10 nodes, alerts, no ads |
-| Pro MENA | USD 4.99–7.99/month | Up to 10 nodes, alerts, no ads, priority support |
+| Pro Asia | USD 1.99–2.99/month | Up to 10 nodes, alerts, restrained bottom banner without forced video |
+| Pro MENA | USD 4.99–7.99/month | Up to 10 nodes, alerts, restrained bottom banner, priority support |
 | Farm pilot | USD 19–49/month | Up to 50 nodes, fleet view, export and role controls |
 
 Final prices must use Play Console local pricing and must be reviewed against tax, consumer-law and support costs. Qonversion was selected as the subscription partner; see `LICENSING-PROVIDER-DECISION.md` and `QONVERSION-SETUP.md`. The application and backend now contain the verification path, but live account credentials and store products are still required.
@@ -38,20 +38,20 @@ Final prices must use Play Console local pricing and must be reviewed against ta
 The free tier may combine:
 
 1. A small, non-disruptive dashboard ad after valid consent.
-2. Conversion to Pro for more nodes, alerts and an ad-free interface.
+2. Conversion to regionally priced Pro for more nodes and alerts; the small bottom banner remains and this must be disclosed before purchase.
 3. Clearly disclosed affiliate links for lawful hardware or hosting partners.
 
 Never sell personal data, show ads on urgent outage/error screens, reward users with cryptocurrency for ad views, or make profitability promises.
 
 ## Advertising gate
 
-AdMob remains intentionally absent from Beta 0.8.2. Before adding it:
+AdMob remains intentionally absent from Beta 0.8.3. Before adding it:
 
 1. Create the publisher account and production ad-unit identifiers.
 2. Add a Google-certified consent-management flow for EEA/UK/Switzerland users before requesting personalised ads.
 3. Update `PRIVACY.md`, the in-app notice and Play Data safety answers with the actual SDK/data flows.
 4. Use test ads in development; never click live ads during testing.
-5. Make ads removable through Pro and keep node status usable if consent is refused.
+5. Use only a clearly separated bottom banner in Free and Pro, with no forced, rewarded, interstitial or app-open ad; keep node status usable if consent is refused.
 
 ## USD 10/month acquisition experiment
 
