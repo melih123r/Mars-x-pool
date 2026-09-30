@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">MARS-X Pool Beta</string>
     <string name="app_title" translatable="false">MARS-X POOL</string>
-    <string name="beta_label">বেটা 0.8.3 • সার্ভারবিহীন লাইসেন্সযুক্ত স্যান্ডবক্স</string>
+    <string name="beta_label">বেটা 0.8.4 • সার্ভারবিহীন লাইসেন্সযুক্ত স্যান্ডবক্স</string>
     <string name="product_disclaimer">দূরবর্তী নোড/পুল ব্যবস্থাপনার প্রোটোটাইপ। এই সংস্করণ ফোনে মাইনিং করে না, গোপন কম্পিউটিং চালায় না এবং আয়ের নিশ্চয়তা দেয় না।</string>
     <string name="worker_identity_title">এই ডিভাইসের ওয়ার্কার আইডি</string>
     <string name="explicit_action_notice">নিচের কোনো বোতাম চাপলেই কেবল সার্ভারের সঙ্গে যোগাযোগ শুরু হয়।</string>
@@ -127,7 +127,7 @@
     <string name="recent_sandbox_payouts">সাম্প্রতিক স্যান্ডবক্স অনুরোধ:</string>
     <string name="sandbox_request_failed">স্যান্ডবক্স অনুরোধ ব্যর্থ হয়েছে। নিবন্ধন, লাইসেন্স ও সংযোগ পরীক্ষা করুন।</string>
     <string name="insufficient_sandbox_balance">স্যান্ডবক্স ব্যালেন্স অপর্যাপ্ত।</string>
-    <string name="simple_beta_label">সহজ দূরবর্তী পুল ম্যানেজার • বেটা 0.8.3</string>
+    <string name="simple_beta_label">সহজ দূরবর্তী পুল ম্যানেজার • বেটা 0.8.4</string>
     <string name="tab_home">হোম</string>
     <string name="tab_earnings">আয়</string>
     <string name="tab_account">অ্যাকাউন্ট</string>

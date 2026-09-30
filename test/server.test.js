@@ -82,7 +82,7 @@ test("health and privacy are public", async () => {
     assert.deepEqual(await health.json(), {
       ok: true,
       service: "marsx-pool-worker-api",
-      version: "0.8.0",
+      version: "0.8.4",
       storage: "memory",
       persistent: false,
       licensing: "ready",

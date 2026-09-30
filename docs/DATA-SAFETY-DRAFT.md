@@ -1,4 +1,4 @@
-# Google Play Data safety draft — Beta 0.8
+# Google Play Data safety draft — Beta 0.8.4
 
 This is a preparation draft. The publisher must reconcile it with the final SDK dependency report and the answers shown in Play Console.
 
@@ -8,8 +8,8 @@ This is a preparation draft. The publisher must reconcile it with the final SDK 
 - Financial information: Google Play and Qonversion process purchase/subscription status. MARS-X does not receive payment-card numbers.
 - Data not requested by the app: contacts, precise or approximate location, photos, microphone, camera, SMS, advertising ID, identity documents, bank credentials or wallet private keys.
 - Data sale: No.
-- Advertising sharing: No advertising SDK is included in Beta 0.8.
-- Service providers: Cloudflare Workers/D1, Google Play, Qonversion and the infrastructure/distribution providers actually configured for the release.
+- Advertising sharing: No advertising SDK is included in Beta 0.8.4.
+- Service providers: Supabase Edge Functions/PostgreSQL, Google Play, Qonversion and the infrastructure/distribution providers actually configured for the release. Cloudflare Workers/D1 and Railway/Redis apply only while those alternative or rollback targets are enabled.
 
 ## Security and user controls
 
@@ -21,4 +21,4 @@ This is a preparation draft. The publisher must reconcile it with the final SDK 
 
 ## Financial-features declaration
 
-Describe Beta 0.8 as remote mining/pool management with simulated `USDT_TEST` accounting. Do not declare real exchange, wallet custody, crypto transfer, staking, investment or on-device mining because the beta provides none of those functions. Re-evaluate the declaration before any real-value payout feature is enabled.
+Describe Beta 0.8.4 as remote mining/pool management with simulated `USDT_TEST` accounting. Do not declare real exchange, wallet custody, crypto transfer, staking, investment or on-device mining because the beta provides none of those functions. Re-evaluate the declaration before any real-value payout feature is enabled.

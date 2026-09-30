@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="beta_label">Beta 0.8.3 • sunucusuz lisanslı sandbox</string>
+    <string name="beta_label">Beta 0.8.4 • sunucusuz lisanslı sandbox</string>
     <string name="product_disclaimer">Uzaktaki node/pool yönetimi prototipi. Bu sürüm cihazda madencilik yapmaz, gizli hesaplama çalıştırmaz ve kazanç garantisi vermez.</string>
     <string name="worker_identity_title">Bu cihazın worker kimliği</string>
     <string name="explicit_action_notice">Sunucuyla iletişim yalnızca aşağıdaki düğmelere bastığında başlar.</string>
@@ -125,7 +125,7 @@
     <string name="recent_sandbox_payouts">Son sandbox talepleri:</string>
     <string name="sandbox_request_failed">Sandbox isteği başarısız. Kayıt, lisans ve bağlantıyı kontrol et.</string>
     <string name="insufficient_sandbox_balance">Sandbox bakiyesi yetersiz.</string>
-    <string name="simple_beta_label">Sade uzak havuz yöneticisi • Beta 0.8.3</string>
+    <string name="simple_beta_label">Sade uzak havuz yöneticisi • Beta 0.8.4</string>
     <string name="tab_home">Ana Sayfa</string>
     <string name="tab_earnings">Kazançlar</string>
     <string name="tab_account">Hesap</string>

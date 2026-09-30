@@ -81,7 +81,7 @@ test("Cloudflare health exposes the serverless runtime contract", async () => {
   const response = await app.fetch(request("/health"), environment());
   assert.equal(response.status, 200);
   const body = await response.json();
-  assert.equal(body.version, "0.8.0");
+  assert.equal(body.version, "0.8.4");
   assert.equal(body.licensing, "ready");
   assert.equal(body.google_auth, "ready");
   assert.equal(body.payoutMode, "sandbox");

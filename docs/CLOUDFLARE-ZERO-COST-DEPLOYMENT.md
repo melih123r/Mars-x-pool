@@ -54,7 +54,7 @@ npx wrangler deploy --config cloudflare/wrangler.toml
 curl https://marsx-pool-api.<your-subdomain>.workers.dev/health
 ```
 
-Expected health fields include `"version":"0.8.0"`, `"storage":"d1"`, `"persistent":true`, `"licensing":"ready"`, `"google_auth":"ready"` and `"payoutMode":"sandbox"`.
+Expected health fields include `"version":"0.8.4"`, `"storage":"d1"`, `"persistent":true`, `"licensing":"ready"`, `"google_auth":"ready"` and `"payoutMode":"sandbox"`.
 
 Then test, in order:
 

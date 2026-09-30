@@ -44,10 +44,15 @@ jobs:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           PLAY_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
         run: |
-          for value in "$KEYSTORE_B64" "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" "$PLAY_JSON"; do
+          for value in "$KEYSTORE_B64" "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" "$PLAY_JSON" "$GOOGLE_WEB_CLIENT_ID"; do
             if [ -z "$value" ]; then echo "Missing signing or Play credential"; exit 1; fi
           done
+          case "$GOOGLE_WEB_CLIENT_ID" in
+            *-*.apps.googleusercontent.com) ;;
+            *) echo "Invalid Google Web OAuth client ID"; exit 1 ;;
+          esac
           printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload-keystore.jks"
           printf '%s' "$PLAY_JSON" > "$RUNNER_TEMP/google-play.json"
           chmod 600 "$RUNNER_TEMP/upload-keystore.jks" "$RUNNER_TEMP/google-play.json"
@@ -58,6 +63,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           QONVERSION_PROJECT_KEY: ${{ secrets.QONVERSION_PROJECT_KEY }}
+          GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
         run: |
           gradle -p android :app:lintRelease :app:bundleRelease --no-daemon \
             -Pandroid.injected.signing.store.file="$KEYSTORE_PATH" \

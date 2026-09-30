@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="beta_label">Bêta 0.8.3 • environnement sous licence sans serveur</string>
+    <string name="beta_label">Bêta 0.8.4 • environnement sous licence sans serveur</string>
     <string name="product_disclaimer">Prototype de gestion à distance de nœuds et de pools. Cette version ne mine pas sur le téléphone, n’exécute aucun calcul caché et ne garantit aucun revenu.</string>
     <string name="server_connection_title">Connexion au serveur</string>
     <string name="not_tested">Pas encore testé.</string>
@@ -69,7 +69,7 @@
     <string name="recent_sandbox_payouts">Demandes sandbox récentes :</string>
     <string name="sandbox_request_failed">Échec de la demande sandbox. Vérifiez l’enregistrement, la licence et la connexion.</string>
     <string name="insufficient_sandbox_balance">Solde sandbox insuffisant.</string>
-    <string name="simple_beta_label">Gestionnaire simple de pool à distance • Bêta 0.8.3</string>
+    <string name="simple_beta_label">Gestionnaire simple de pool à distance • Bêta 0.8.4</string>
     <string name="tab_home">Accueil</string>
     <string name="tab_earnings">Revenus</string>
     <string name="tab_account">Compte</string>
