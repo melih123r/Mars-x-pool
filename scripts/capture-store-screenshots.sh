@@ -19,7 +19,7 @@ sleep 2
 adb exec-out screencap -p > "$output_dir/00-launch.png"
 adb shell uiautomator dump /sdcard/marsx-window.xml >/dev/null
 adb shell cat /sdcard/marsx-window.xml > "$output_dir/window.xml"
-if ! grep -q "MARS-X Pool Beta" "$output_dir/window.xml"; then
+if ! grep -q "MARS-X POOL" "$output_dir/window.xml"; then
   adb logcat -d > "$output_dir/logcat.txt"
   echo "MARS-X activity was not visible after launch" >&2
   exit 1
