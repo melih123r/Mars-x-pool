@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="beta_label">Beta 0.8.3 • serverlose lizenzierte Testumgebung</string>
+    <string name="beta_label">Beta 0.8.4 • serverlose lizenzierte Testumgebung</string>
     <string name="product_disclaimer">Prototyp zur Fernverwaltung von Nodes und Pools. Diese Version schürft nicht auf dem Telefon, führt keine versteckten Berechnungen aus und garantiert keine Einnahmen.</string>
     <string name="server_connection_title">Serververbindung</string>
     <string name="not_tested">Noch nicht getestet.</string>
@@ -69,7 +69,7 @@
     <string name="recent_sandbox_payouts">Letzte Sandbox-Anfragen:</string>
     <string name="sandbox_request_failed">Die Sandbox-Anfrage ist fehlgeschlagen. Prüfen Sie Registrierung, Lizenz und Verbindung.</string>
     <string name="insufficient_sandbox_balance">Unzureichendes Sandbox-Guthaben.</string>
-    <string name="simple_beta_label">Einfacher Pool-Fernmanager • Beta 0.8.3</string>
+    <string name="simple_beta_label">Einfacher Pool-Fernmanager • Beta 0.8.4</string>
     <string name="tab_home">Start</string>
     <string name="tab_earnings">Erträge</string>
     <string name="tab_account">Konto</string>

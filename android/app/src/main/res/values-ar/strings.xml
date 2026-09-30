@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="beta_label">بيتا 0.8.3 • بيئة تجريبية مرخّصة بلا خادم دائم</string>
+    <string name="beta_label">بيتا 0.8.4 • بيئة تجريبية مرخّصة بلا خادم دائم</string>
     <string name="product_disclaimer">نموذج أولي لإدارة العقد ومجمّعات التعدين عن بُعد. لا يقوم هذا الإصدار بالتعدين على الهاتف ولا يشغّل عمليات مخفية ولا يضمن أي أرباح.</string>
     <string name="worker_identity_title">معرّف العامل لهذا الجهاز</string>
     <string name="explicit_action_notice">يبدأ الاتصال بالخادم فقط عند الضغط على أحد الأزرار أدناه.</string>
@@ -125,7 +125,7 @@
     <string name="recent_sandbox_payouts">أحدث الطلبات التجريبية:</string>
     <string name="sandbox_request_failed">فشل الطلب التجريبي. تحقق من التسجيل والترخيص والاتصال.</string>
     <string name="insufficient_sandbox_balance">الرصيد التجريبي غير كافٍ.</string>
-    <string name="simple_beta_label">مدير تجمع بعيد مبسط • بيتا 0.8.3</string>
+    <string name="simple_beta_label">مدير تجمع بعيد مبسط • بيتا 0.8.4</string>
     <string name="tab_home">الرئيسية</string>
     <string name="tab_earnings">الأرباح</string>
     <string name="tab_account">الحساب</string>

@@ -7,6 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "android/app/src/main/AndroidManifest.xml"
 GRADLE = ROOT / "android/app/build.gradle"
 README = ROOT / "README.md"
+PACKAGE = ROOT / "package.json"
+MAIN_ACTIVITY = ROOT / "android/app/src/main/java/com/marsx/pool/MainActivity.java"
 
 required_files = [
     MANIFEST,
@@ -38,6 +40,8 @@ if missing:
 manifest = MANIFEST.read_text(encoding="utf-8")
 gradle = GRADLE.read_text(encoding="utf-8")
 readme = README.read_text(encoding="utf-8")
+package = PACKAGE.read_text(encoding="utf-8")
+main_activity = MAIN_ACTIVITY.read_text(encoding="utf-8")
 
 for forbidden in (
     "android.permission.WAKE_LOCK",
@@ -52,8 +56,19 @@ if 'android.permission.INTERNET' not in manifest:
     raise SystemExit("INTERNET permission is required")
 if not re.search(r"targetSdk\s+36", gradle):
     raise SystemExit("targetSdk 36 is required")
-if 'versionName "0.8.3-beta"' not in gradle or 'versionCode 11' not in gradle:
-    raise SystemExit("Beta 0.8.3 Android version is required")
+if 'versionName "0.8.4-beta"' not in gradle or 'versionCode 12' not in gradle:
+    raise SystemExit("Beta 0.8.4 Android version is required")
+if '"version": "0.8.4"' not in package:
+    raise SystemExit("Package version must match Beta 0.8.4")
+if 'APP_VERSION = "0.8.4-beta"' not in main_activity:
+    raise SystemExit("Android runtime version must match Beta 0.8.4")
+for runtime in (
+    ROOT / "server.js",
+    ROOT / "cloudflare/src/worker.js",
+    ROOT / "supabase/functions/marsx-pool-api/worker.js",
+):
+    if 'const VERSION = "0.8.4"' not in runtime.read_text(encoding="utf-8"):
+        raise SystemExit(f"Runtime version is stale: {runtime.relative_to(ROOT)}")
 if "MARSX_API_BASE_URL" not in gradle:
     raise SystemExit("API build-time endpoint is required")
 if "GOOGLE_WEB_CLIENT_ID" not in gradle:

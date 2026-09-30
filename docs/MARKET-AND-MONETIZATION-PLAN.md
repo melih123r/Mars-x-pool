@@ -4,7 +4,7 @@ Date: 26 September 2026
 
 ## Current release boundary
 
-Beta 0.8.3 is a licensed remote node/pool management prototype. Qonversion Subscription Management, Google Play Billing and Google Credential Manager sign-in are integrated behind account configuration, with server-side token/entitlement verification. A build without the required project/client keys cannot start those flows. The beta still has no advertising SDK, mining engine, wallet custody or real-value payout feature; `USDT_TEST` balances and payout requests are non-withdrawable simulations only. Revenue must not be claimed until the Play/Qonversion accounts and products are configured, sandbox-tested and the useful remote-management functions are production-ready.
+Beta 0.8.4 is a licensed remote node/pool management prototype. Qonversion Subscription Management, Google Play Billing and Google Credential Manager sign-in are integrated behind account configuration, with server-side token/entitlement verification. A build without the required project/client keys cannot start those flows. The beta still has no advertising SDK, mining engine, wallet custody or real-value payout feature; `USDT_TEST` balances and payout requests are non-withdrawable simulations only. Revenue must not be claimed until the Play/Qonversion accounts and products are configured, sandbox-tested and the useful remote-management functions are production-ready.
 
 The Android interface follows the device language for English, Turkish, Indonesian, Arabic, Hindi, Bengali, Urdu, Vietnamese, French, German, Spanish, Brazilian Portuguese and Italian. The original eight language sets are complete; the five revenue-priority additions localize the customer journey and use English fallback for advanced operator tools until native review. Arabic and Urdu right-to-left layout is enabled. No locale is transmitted to the backend by this release. Store-listing localization is prepared separately in `PLAY-STORE-LOCALISATIONS.md`. Russian, Ukrainian, Kazakh and additional Balkan/CIS locales are deliberately deferred: English remains the fallback where local-language conversion value does not justify maintenance or where Google Play billing/advertising availability prevents the planned monetisation route.
 
@@ -45,7 +45,7 @@ Never sell personal data, show ads on urgent outage/error screens, reward users 
 
 ## Advertising gate
 
-AdMob remains intentionally absent from Beta 0.8.3. Before adding it:
+AdMob remains intentionally absent from Beta 0.8.4. Before adding it:
 
 1. Create the publisher account and production ad-unit identifiers.
 2. Add a Google-certified consent-management flow for EEA/UK/Switzerland users before requesting personalised ads.

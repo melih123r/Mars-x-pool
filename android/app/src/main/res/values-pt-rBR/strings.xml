@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="beta_label">Beta 0.8.3 • ambiente licenciado sem servidor</string>
+    <string name="beta_label">Beta 0.8.4 • ambiente licenciado sem servidor</string>
     <string name="product_disclaimer">Protótipo de gerenciamento remoto de nós e pools. Esta versão não minera no celular, não executa computação oculta nem garante ganhos.</string>
     <string name="server_connection_title">Conexão com o servidor</string>
     <string name="not_tested">Ainda não testado.</string>
@@ -69,7 +69,7 @@
     <string name="recent_sandbox_payouts">Solicitações sandbox recentes:</string>
     <string name="sandbox_request_failed">Falha na solicitação sandbox. Verifique o registro, a licença e a conexão.</string>
     <string name="insufficient_sandbox_balance">Saldo sandbox insuficiente.</string>
-    <string name="simple_beta_label">Gerenciador simples de pool remoto • Beta 0.8.3</string>
+    <string name="simple_beta_label">Gerenciador simples de pool remoto • Beta 0.8.4</string>
     <string name="tab_home">Início</string>
     <string name="tab_earnings">Ganhos</string>
     <string name="tab_account">Conta</string>

@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">MARS-X Pool Beta</string>
     <string name="app_title" translatable="false">MARS-X POOL</string>
-    <string name="beta_label">بیٹا 0.8.3 • سرور کے بغیر لائسنس یافتہ سینڈ باکس</string>
+    <string name="beta_label">بیٹا 0.8.4 • سرور کے بغیر لائسنس یافتہ سینڈ باکس</string>
     <string name="product_disclaimer">ریموٹ نوڈ/پول مینجمنٹ کا نمونہ۔ یہ ورژن فون پر مائننگ نہیں کرتا، پوشیدہ کمپیوٹنگ نہیں چلاتا اور آمدنی کی ضمانت نہیں دیتا۔</string>
     <string name="worker_identity_title">اس ڈیوائس کی ورکر آئی ڈی</string>
     <string name="explicit_action_notice">سرور سے رابطہ صرف اس وقت شروع ہوتا ہے جب آپ نیچے دیے گئے بٹنوں میں سے کوئی بٹن دبائیں۔</string>
@@ -127,7 +127,7 @@
     <string name="recent_sandbox_payouts">حالیہ سینڈ باکس درخواستیں:</string>
     <string name="sandbox_request_failed">سینڈ باکس درخواست ناکام ہوئی۔ رجسٹریشن، لائسنس اور کنکشن چیک کریں۔</string>
     <string name="insufficient_sandbox_balance">سینڈ باکس بیلنس ناکافی ہے۔</string>
-    <string name="simple_beta_label">سادہ ریموٹ پول مینیجر • بیٹا 0.8.3</string>
+    <string name="simple_beta_label">سادہ ریموٹ پول مینیجر • بیٹا 0.8.4</string>
     <string name="tab_home">ہوم</string>
     <string name="tab_earnings">آمدنی</string>
     <string name="tab_account">اکاؤنٹ</string>

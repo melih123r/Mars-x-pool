@@ -26,7 +26,7 @@ After 365 days without licensed account activity, an available `USDT_TEST` balan
 
 ## Sharing
 
-Data may be processed by Cloudflare (Workers and D1), Qonversion, Google Play, infrastructure and app-distribution providers used to operate MARS-X Pool. Review [Cloudflare's privacy information](https://www.cloudflare.com/privacypolicy/), [Qonversion's privacy information](https://qonversion.io/privacy) and [Google's privacy policy](https://policies.google.com/privacy). The production notice must identify all actual processors and relevant international-transfer safeguards. Data is not sold or shared with advertisers; it is disclosed only for service delivery, security, valid legal obligations or protection of legal rights.
+Data may be processed by Supabase (Edge Functions and PostgreSQL), Qonversion, Google Play, infrastructure and app-distribution providers used to operate MARS-X Pool. Cloudflare Workers/D1 is an alternative deployment target and Railway/Redis is a temporary rollback target; they process service data only while actually enabled. Review [Supabase's privacy information](https://supabase.com/privacy), [Cloudflare's privacy information](https://www.cloudflare.com/privacypolicy/), [Qonversion's privacy information](https://qonversion.io/privacy) and [Google's privacy policy](https://policies.google.com/privacy). The production notice must identify all actual processors and relevant international-transfer safeguards. Data is not sold or shared with advertisers; it is disclosed only for service delivery, security, valid legal obligations or protection of legal rights.
 
 ## Advertising and consent
 
@@ -38,4 +38,4 @@ Depending on applicable law, a user may request access, correction, deletion, re
 
 ## Security
 
-Traffic uses HTTPS. Qonversion's public Project Key may be compiled into the client, while its Secret Key and the Google service-account credentials remain server/dashboard-only. The service independently checks active Qonversion entitlements, then issues short-lived device-bound sessions. It also uses hashed beta licence records, D1 device binding, rate limiting and pseudonymous audit events; Redis remains only as the temporary rollback store during migration. Suspected compromise results in revocation, secret rotation and an incident review.
+Traffic uses HTTPS. Qonversion's public Project Key may be compiled into the client, while its Secret Key and the Google service-account credentials remain server/dashboard-only. The service independently checks active Qonversion entitlements, then issues short-lived device-bound sessions. It also uses hashed beta licence records, PostgreSQL device binding, rate limiting and pseudonymous audit events; D1 is an alternative store and Redis remains only as the temporary rollback store during migration. Suspected compromise results in revocation, secret rotation and an incident review.

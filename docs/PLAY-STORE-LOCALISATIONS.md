@@ -1,4 +1,4 @@
-# Google Play localized listing copy — MARS-X Pool Beta 0.8.3
+# Google Play localized listing copy — MARS-X Pool Beta 0.8.4
 
 Use the locale codes below when adding translations in Play Console. Keep the default English listing from `PLAY-STORE-LISTING.md`. These texts describe only functions present in the current beta and make no earnings claim.
 
