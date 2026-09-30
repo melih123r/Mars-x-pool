@@ -39,10 +39,11 @@ These Play facts are operational handoff notes. The repository cannot independen
 
 - `.github/workflows/store-screenshot-capture.yml` builds the current Android app in an emulator and captures three real UI screens without secrets.
 - `scripts/capture-store-screenshots.sh` captures Home, Sandbox and Account/Privacy screens without generated mockups.
+- The capture workflow passed and the three visually verified 1080 x 2340 PNG files are stored in `store-assets/screenshots/0.8.4/`.
 
 ## Remaining actions that require Play Console or owner-only input
 
-1. Download and visually verify the screenshot artifact, then upload at least two phone screenshots to the default store listing.
+1. Upload at least two of the verified files from `store-assets/screenshots/0.8.4/` to the default store listing.
 2. Create or select the closed-test tester list. Use 20 genuine testers so at least 12 remain enrolled.
 3. Preview and approve the existing version-code-12 release; do not upload another version-code-12 bundle.
 4. Send the closed-test release to Google for review.
