@@ -8,8 +8,16 @@ test -s "$apk_path"
 mkdir -p "$output_dir"
 
 adb install -r "$apk_path"
+adb shell settings put global stay_on_while_plugged_in 3
+adb shell input keyevent KEYCODE_WAKEUP
+adb shell wm dismiss-keyguard
+adb shell input keyevent 82
 adb shell am force-stop com.marsx.pool
 adb shell am start -W -n com.marsx.pool/.MainActivity
+
+sleep 2
+adb shell uiautomator dump /sdcard/marsx-window.xml >/dev/null
+adb shell cat /sdcard/marsx-window.xml | grep -q "MARS-X Pool Beta"
 
 screen_size="$(adb shell wm size | sed -n 's/.*Physical size: //p' | tail -n 1 | tr -d '\r')"
 case "$screen_size" in
@@ -29,7 +37,6 @@ capture() {
 
 # These are authentic screens rendered by the current Android build. No UI
 # mockups or post-processing are used.
-sleep 2
 capture "01-home.png"
 
 adb shell input tap "$((screen_width / 2))" "$tab_y"
@@ -40,3 +47,10 @@ adb shell input tap "$((screen_width * 5 / 6))" "$tab_y"
 sleep 1
 capture "03-account-and-privacy.png"
 
+home_hash="$(sha256sum "$output_dir/01-home.png" | cut -d ' ' -f 1)"
+sandbox_hash="$(sha256sum "$output_dir/02-sandbox.png" | cut -d ' ' -f 1)"
+account_hash="$(sha256sum "$output_dir/03-account-and-privacy.png" | cut -d ' ' -f 1)"
+if [ "$home_hash" = "$sandbox_hash" ] || [ "$sandbox_hash" = "$account_hash" ]; then
+  echo "Screenshot capture did not change between app tabs" >&2
+  exit 1
+fi
