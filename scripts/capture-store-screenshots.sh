@@ -16,8 +16,14 @@ adb shell am force-stop com.marsx.pool
 adb shell am start -W -n com.marsx.pool/.MainActivity
 
 sleep 2
+adb exec-out screencap -p > "$output_dir/00-launch.png"
 adb shell uiautomator dump /sdcard/marsx-window.xml >/dev/null
-adb shell cat /sdcard/marsx-window.xml | grep -q "MARS-X Pool Beta"
+adb shell cat /sdcard/marsx-window.xml > "$output_dir/window.xml"
+if ! grep -q "MARS-X Pool Beta" "$output_dir/window.xml"; then
+  adb logcat -d > "$output_dir/logcat.txt"
+  echo "MARS-X activity was not visible after launch" >&2
+  exit 1
+fi
 
 screen_size="$(adb shell wm size | sed -n 's/.*Physical size: //p' | tail -n 1 | tr -d '\r')"
 case "$screen_size" in
