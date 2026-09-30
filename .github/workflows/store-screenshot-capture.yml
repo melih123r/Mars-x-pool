@@ -29,11 +29,16 @@ jobs:
           gradle-version: '8.11.1'
       - name: Build debug APK
         run: gradle -p android :app:assembleDebug --no-daemon
+      - name: Enable KVM acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
       - name: Start emulator and capture real app screens
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
-          target: google_apis
+          target: google_atd
           arch: x86_64
           profile: pixel_5
           disable-animations: true
@@ -45,4 +50,3 @@ jobs:
           path: store-screenshots/*.png
           if-no-files-found: error
           retention-days: 14
-
