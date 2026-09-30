@@ -45,8 +45,9 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
           script: bash scripts/capture-store-screenshots.sh
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: marsx-pool-0.8.4-store-screenshots
-          path: store-screenshots/*.png
+          path: store-screenshots/
           if-no-files-found: error
           retention-days: 14
