@@ -11,6 +11,12 @@ Before submitting the closed-test release, capture at least two screenshots from
 .github/workflows/store-screenshot-capture.yml
 ```
 
+The verified Beta 0.8.4 captures are stored in `store-assets/screenshots/0.8.4/` at 1080 x 2340 pixels:
+
+- `01-home.png`
+- `02-sandbox.png`
+- `03-account-and-privacy.png`
+
 The preferred four-screen set from a signed build on a physical device is still:
 
 1. licence/privacy summary;
