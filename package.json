@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check cloudflare/src/worker.js",
+    "check": "node --check server.js && node --check cloudflare/src/worker.js && node token/validate-marsx-manifest.mjs",
     "test": "node --test",
+    "marsx:validate": "node token/validate-marsx-manifest.mjs",
+    "marsx:devnet-plan": "node token/devnet-plan.mjs",
     "license:generate": "node license-tool.js",
     "cf:check": "wrangler deploy --dry-run --config cloudflare/wrangler.toml --outdir .wrangler-dist",
     "cf:db:local": "wrangler d1 migrations apply marsx-pool --local --config cloudflare/wrangler.toml"
