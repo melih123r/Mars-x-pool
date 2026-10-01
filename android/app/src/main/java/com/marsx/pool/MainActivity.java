@@ -238,7 +238,8 @@ public class MainActivity extends Activity {
     private LinearLayout pageRoot() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(24, 12, 24, 32);\n        root.setBackgroundColor(Color.rgb(8, 8, 8));
+        root.setPadding(24, 12, 24, 32);
+        root.setBackgroundColor(Color.rgb(8, 8, 8));
         return root;
     }
 
@@ -880,7 +881,8 @@ public class MainActivity extends Activity {
                         StringBuilder result = new StringBuilder(getString(R.string.recent_sandbox_payouts));
                         for (int i = 0; i < Math.min(3, payouts.length()); i++) {
                             JSONObject payout = payouts.getJSONObject(i);
-                            result.append("\n• ").append(payout.optString("amountDisplay", "?"))
+                            result.append("
+• ").append(payout.optString("amountDisplay", "?"))
                                     .append(" USDT_TEST — ").append(payout.optString("status", "?"));
                         }
                         setText(payoutStatus, result.toString());
