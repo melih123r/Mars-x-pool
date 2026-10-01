@@ -1,0 +1,29 @@
+{
+  "name": "MARS-X",
+  "symbol": "MARSX",
+  "status": "testnet-preparation",
+  "network": "solana",
+  "tokenProgram": "Token-2022",
+  "decimals": 9,
+  "maxGenesisSupply": "1000000000",
+  "minimumProtocolBurnFloor": "500000000",
+  "authorities": {
+    "permanentDelegate": false,
+    "postGenesisMinting": false,
+    "userBalanceForcedBurn": false,
+    "mainnetAuthorityModel": "multisig-plus-timelock"
+  },
+  "allocations": [
+    {"vault":"pool-rewards","amount":"400000000","percent":40},
+    {"vault":"ecosystem-app","amount":"200000000","percent":20},
+    {"vault":"liquidity-reserve","amount":"150000000","percent":15},
+    {"vault":"foundation-treasury","amount":"120000000","percent":12},
+    {"vault":"founder-team-vesting","amount":"70000000","percent":7},
+    {"vault":"community-referral","amount":"30000000","percent":3},
+    {"vault":"security-development","amount":"30000000","percent":3}
+  ],
+  "mainnetEnabled": false,
+  "publicSaleEnabled": false,
+  "brokerageEnabled": false,
+  "foundationAffiliationClaimed": false
+}
