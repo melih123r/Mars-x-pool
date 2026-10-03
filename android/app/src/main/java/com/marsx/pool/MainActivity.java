@@ -139,6 +139,12 @@ public class MainActivity extends Activity {
         addTitle(root, getString(R.string.home_title));
         addText(root, getString(R.string.home_subtitle), 15);
 
+        LinearLayout protectCard = card(root);
+        addText(protectCard, "MARS-X Protect", 18);
+        addText(protectCard, "Insurance & protection · Sandbox", 14);
+        button(protectCard, "Open Protect", view ->
+                startActivity(new Intent(this, ProtectActivity.class)));
+
         LinearLayout serviceCard = card(root);
         addText(serviceCard, getString(R.string.service_status_title), 14);
         status = addText(serviceCard, getString(R.string.connecting), 18);
