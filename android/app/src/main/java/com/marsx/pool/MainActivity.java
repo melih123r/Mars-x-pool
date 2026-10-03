@@ -152,6 +152,12 @@ public class MainActivity extends Activity {
         licenceStatus = addText(deviceCard, getString(R.string.licence_not_checked), 14);
         button(deviceCard, getString(R.string.connect_device_button), view -> sendNodeEvent("/register"));
         button(deviceCard, getString(R.string.advanced_tools_button), view -> showAdvancedTools());
+
+        LinearLayout brokerCard = card(root);
+        addText(brokerCard, "MARS-X Broker Beta", 18);
+        addText(brokerCard, "PAPER / SIMULATION only • no real money or live execution", 13);
+        Button brokerButton = button(brokerCard, "Open Broker Beta", view -> startActivity(new Intent(this, BrokerActivity.class)));
+        brokerButton.setTextColor(Color.rgb(157, 78, 221));
         return scroll(root);
     }
 
