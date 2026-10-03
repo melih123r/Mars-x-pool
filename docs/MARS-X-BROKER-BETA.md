@@ -99,6 +99,18 @@ Live mode cannot be enabled until ALL are true:
 
 Failure of any gate = remain in PAPER mode.
 
+## Google Play distribution gate
+Before Broker/Wallet functionality is included in a Google Play release, re-check the current Play Console account type and policy classification. Google Play's current policy says developers providing financial products/services — including stock trading, cryptocurrency software wallets and cryptocurrency exchanges — must register as an Organization. Do not infer that identity verification alone satisfies this requirement.
+
+For the Pool closed-test release, keep financial-service modules out of the release unless Play Console confirms the account/app is eligible. Paper/simulation labeling does not by itself prove that Google classifies the app outside the financial-services requirement.
+
+Required evidence before enabling a financial-service release:
+- Play Console account type verified as appropriate for the offered functionality;
+- all required organization/contact/device verification completed where applicable;
+- Financial features declaration / App Content answers match the shipped binary;
+- Data Safety and privacy disclosures match actual data flows;
+- no live trading, custody, deposits, withdrawals or crypto transfer paths unless separately approved.
+
 ## Cost policy
 Development should reuse the current repository, CI and backend wherever safe. Do not purchase paid market data, broker infrastructure, licences, or new hosting merely to make Broker Beta function. Paid commitments require an explicit later decision.
 
