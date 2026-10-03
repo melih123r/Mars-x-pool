@@ -1,0 +1,36 @@
+{
+  "name": "MARS-X",
+  "symbol": "MARSX",
+  "status": "testnet-preparation",
+  "network": "solana",
+  "tokenProgram": "Token-2022",
+  "decimals": 9,
+  "maxGenesisSupply": "1000000000",
+  "minimumProtocolBurnFloor": "500000000",
+  "ownerPublicWallet": "5eM82VLPwkKWSmBEn9KEfcGhTkCfN97ZUS1Fe8bfpWQW",
+  "authorities": {
+    "permanentDelegate": false,
+    "postGenesisMinting": false,
+    "userBalanceForcedBurn": false,
+    "mainnetAuthorityModel": "multisig-plus-timelock"
+  },
+  "allocations": [
+    {"vault":"pool-user-rewards","amount":"250000000","percent":25},
+    {"vault":"ecosystem-growth","amount":"200000000","percent":20},
+    {"vault":"foundation-treasury","amount":"180000000","percent":18},
+    {"vault":"liquidity-reserve","amount":"150000000","percent":15},
+    {"vault":"founder-initial-unlock","amount":"20000000","percent":2},
+    {"vault":"founder-vesting","amount":"100000000","percent":10},
+    {"vault":"team-future-contributors","amount":"100000000","percent":10}
+  ],
+  "founderVesting": {
+    "totalPercent": 12,
+    "initialUnlockPercentOfTotalSupply": 2,
+    "vestedPercentOfTotalSupply": 10,
+    "vestingMonths": 48
+  },
+  "mainnetEnabled": false,
+  "publicSaleEnabled": false,
+  "brokerageEnabled": false,
+  "foundationAffiliationClaimed": false
+}
