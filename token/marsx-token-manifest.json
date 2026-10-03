@@ -7,6 +7,7 @@
   "decimals": 9,
   "maxGenesisSupply": "1000000000",
   "minimumProtocolBurnFloor": "500000000",
+  "ownerPublicWallet": "5eM82VLPwkKWSmBEn9KEfcGhTkCfN97ZUS1Fe8bfpWQW",
   "authorities": {
     "permanentDelegate": false,
     "postGenesisMinting": false,
@@ -14,14 +15,19 @@
     "mainnetAuthorityModel": "multisig-plus-timelock"
   },
   "allocations": [
-    {"vault":"pool-rewards","amount":"400000000","percent":40},
-    {"vault":"ecosystem-app","amount":"200000000","percent":20},
+    {"vault":"pool-user-rewards","amount":"250000000","percent":25},
+    {"vault":"ecosystem-growth","amount":"200000000","percent":20},
+    {"vault":"foundation-treasury","amount":"180000000","percent":18},
     {"vault":"liquidity-reserve","amount":"150000000","percent":15},
-    {"vault":"foundation-treasury","amount":"120000000","percent":12},
-    {"vault":"founder-team-vesting","amount":"70000000","percent":7},
-    {"vault":"community-referral","amount":"30000000","percent":3},
-    {"vault":"security-development","amount":"30000000","percent":3}
+    {"vault":"founder-vesting","amount":"120000000","percent":12},
+    {"vault":"team-future-contributors","amount":"100000000","percent":10}
   ],
+  "founderVesting": {
+    "totalPercent": 12,
+    "initialUnlockPercentOfTotalSupply": 2,
+    "vestedPercentOfTotalSupply": 10,
+    "vestingMonths": 48
+  },
   "mainnetEnabled": false,
   "publicSaleEnabled": false,
   "brokerageEnabled": false,
