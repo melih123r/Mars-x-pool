@@ -881,8 +881,7 @@ public class MainActivity extends Activity {
                         StringBuilder result = new StringBuilder(getString(R.string.recent_sandbox_payouts));
                         for (int i = 0; i < Math.min(3, payouts.length()); i++) {
                             JSONObject payout = payouts.getJSONObject(i);
-                            result.append("
-• ").append(payout.optString("amountDisplay", "?"))
+                            result.append("\n• ").append(payout.optString("amountDisplay", "?"))
                                     .append(" USDT_TEST — ").append(payout.optString("status", "?"));
                         }
                         setText(payoutStatus, result.toString());
