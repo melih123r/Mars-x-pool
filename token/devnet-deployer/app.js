@@ -30,6 +30,7 @@ const elements = {
   mint: document.querySelector("#mint"),
   status: document.querySelector("#status"),
   connect: document.querySelector("#connect"),
+  fund: document.querySelector("#fund"),
   prepare: document.querySelector("#prepare"),
   signFirst: document.querySelector("#sign-first"),
   signSecond: document.querySelector("#sign-second"),
@@ -77,6 +78,7 @@ wallet.on("connect", async () => {
   try {
     assertConnectedOwner();
     elements.wallet.textContent = wallet.publicKey.toBase58();
+    elements.fund.disabled = false;
     elements.prepare.disabled = false;
     await refreshBalance();
     setStatus("Approved owner wallet connected on Devnet.", "ok");
@@ -88,9 +90,26 @@ wallet.on("connect", async () => {
 
 wallet.on("disconnect", () => {
   elements.wallet.textContent = "Not connected";
+  elements.fund.disabled = true;
   elements.prepare.disabled = true;
   elements.signFirst.disabled = true;
   elements.signSecond.disabled = true;
+});
+
+elements.fund.addEventListener("click", async () => {
+  try {
+    assertConnectedOwner();
+    elements.fund.disabled = true;
+    setStatus("Requesting 0.1 test-only SOL from the Solana Devnet faucet…");
+    const signature = await connection.requestAirdrop(EXPECTED_WALLET, 100_000_000);
+    await connection.confirmTransaction(signature, "confirmed");
+    await refreshBalance();
+    setStatus(`Devnet faucet confirmed: ${signature}`, "ok");
+  } catch (error) {
+    setStatus(`Devnet faucet unavailable: ${error.message}`, "error");
+  } finally {
+    elements.fund.disabled = false;
+  }
 });
 
 elements.connect.addEventListener("click", async () => {

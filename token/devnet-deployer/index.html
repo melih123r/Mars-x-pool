@@ -43,15 +43,16 @@
       </div>
       <div class="actions">
         <button id="connect">Connect Solflare on Devnet</button>
+        <button id="fund" class="secondary" disabled>Request 0.1 test-only Devnet SOL</button>
         <button id="prepare" class="secondary" disabled>Prepare and verify unsigned plan</button>
         <button id="sign-first" disabled>Sign transaction 1 of 2</button>
         <button id="sign-second" disabled>Sign transaction 2 of 2 and revoke mint authority</button>
       </div>
       <div id="status" role="status">No signature has been requested.</div>
+      <p style="color:#aaa;line-height:1.5">If the programmatic Devnet faucet is rate-limited, use the <a href="https://faucet.solana.com/" target="_blank" rel="noreferrer" style="color:#ff9b42">official Solana Devnet faucet</a>. Devnet SOL has no real value.</p>
       <section class="card" style="margin-top:18px"><strong>Fixed execution</strong><ol><li>Token-2022 mint, 9 decimals, freeze authority null.</li><li>Exactly seven owner-controlled vault accounts.</li><li>Exactly 1,000,000,000 MARSX across the PR #9 allocations.</li><li>Final instruction permanently revokes mint authority.</li></ol></section>
       <section style="margin-top:18px"><div class="label">Verified public deployment record</div><pre id="record">Available only after both Devnet transactions confirm and on-chain verification passes.</pre></section>
     </main>
     <script type="module" src="./app.bundle.js"></script>
   </body>
 </html>
-
