@@ -1,13 +1,17 @@
 import Solflare from "@solflare-wallet/sdk";
+import { Buffer } from "buffer";
 import { Connection, VersionedTransaction } from "@solana/web3.js";
 import { ACCOUNT_SIZE, MINT_SIZE } from "@solana/spl-token";
 import {
-  DECIMALS, EXPECTED_WALLET, NETWORK, RPC_URL, buildNextTransaction, transactionBytes,
+  DECIMALS, EXPECTED_WALLET, NETWORK, RPC_URL, buildNextTransaction,
 } from "./transaction-plan.mjs";
 import {
   assertDevnet, deploymentRecord, discoverDeployment, explorerTransaction,
   publicTransactionRecords, readDeploymentState,
 } from "./chain-state.mjs";
+
+// SPL Token instruction encoders use Buffer; browsers need this reviewed shim.
+globalThis.Buffer ??= Buffer;
 
 const wallet = new Solflare({ network: NETWORK });
 const connection = new Connection(RPC_URL, { commitment: "finalized", disableRetryOnRateLimit: true });
