@@ -7,6 +7,7 @@ MARSX is currently in **devnet/test preparation only**.
 - 9 decimals
 - 1,000,000,000 MARSX genesis supply
 - seven genesis vault allocations
+- founder allocation split into 2% initial-unlock and 10% 48-month vesting vaults
 - no Permanent Delegate
 - no forced burn of user balances
 - mint authority must be revoked after verified genesis allocation

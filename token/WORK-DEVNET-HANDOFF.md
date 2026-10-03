@@ -16,7 +16,7 @@ Status: prepared; requires owner wallet signature. Mainnet is prohibited.
 ## Mandatory safety constraints
 1. Use Solana devnet only. Abort if cluster is mainnet/mainnet-beta.
 2. Never request, print, upload, log, or commit a seed phrase/private key/keypair JSON.
-3. Owner signs with an owner-controlled Phantom wallet.
+3. Owner signs with the owner-controlled Solflare wallet recorded in the manifest.
 4. Do not use an exchange deposit address as mint authority.
 5. Permanent Delegate must remain disabled.
 6. Do not enable transfer taxes, forced user burns, public sale, brokerage, custody, or real rewards.
@@ -28,7 +28,7 @@ Status: prepared; requires owner wallet signature. Mainnet is prohibited.
 ## Execution sequence
 1. Read and validate token/marsx-token-manifest.json.
 2. Run npm run marsx:validate and npm test.
-3. Connect/select the owner's Phantom Solana wallet and switch to devnet.
+3. Connect/select the owner's Solflare wallet and switch to devnet.
 4. Fund only with devnet SOL if needed.
 5. Create a Token-2022 mint with 9 decimals and no Permanent Delegate.
 6. Create the seven vault token accounts using the allocation manifest.

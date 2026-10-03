@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>MARS-X Devnet Genesis Signer</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background:#050607; color:#f7f7f7; }
+      * { box-sizing:border-box; }
+      body { margin:0; min-height:100vh; background:radial-gradient(circle at 80% 0,#3a1600 0,transparent 34rem),#050607; }
+      main { width:min(820px,calc(100% - 32px)); margin:0 auto; padding:32px 0 72px; }
+      .brand { display:flex; align-items:center; gap:12px; margin-bottom:24px; }
+      .mark { display:grid; place-items:center; width:44px; height:44px; border:2px solid #ff7a00; border-radius:12px; color:#ff7a00; font-weight:900; }
+      h1 { margin:0; font-size:clamp(1.6rem,5vw,2.5rem); letter-spacing:-.04em; }
+      .pill { display:inline-flex; padding:7px 10px; border:1px solid #ff7a00; border-radius:999px; color:#ff9b42; font-weight:800; font-size:.82rem; }
+      .warning { margin:20px 0; padding:16px; border-left:4px solid #ff7a00; background:#16100b; line-height:1.5; }
+      .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+      .card { padding:18px; border:1px solid #292929; border-radius:18px; background:#101112; box-shadow:0 20px 50px #0008; }
+      .wide { grid-column:1/-1; }
+      .label { color:#999; font-size:.82rem; margin-bottom:6px; }
+      .value { overflow-wrap:anywhere; font-family:ui-monospace,SFMono-Regular,monospace; line-height:1.45; }
+      .actions { display:grid; gap:12px; margin:18px 0; }
+      button { width:100%; padding:15px 18px; border:0; border-radius:14px; background:#ff7a00; color:#090909; font:inherit; font-weight:900; cursor:pointer; }
+      button.secondary { color:#ff8a1d; background:#1a110a; border:1px solid #743500; }
+      button:disabled { cursor:not-allowed; opacity:.35; }
+      #status { min-height:56px; padding:14px; border-radius:12px; background:#111; color:#d7d7d7; line-height:1.45; }
+      #status[data-kind="ok"] { color:#baffcc; background:#07150c; }
+      #status[data-kind="error"] { color:#ffd0c8; background:#1d0906; }
+      pre { max-height:420px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; padding:16px; border-radius:14px; background:#080909; border:1px solid #242424; font-size:.78rem; }
+      ol { margin:8px 0 0; padding-left:22px; color:#c6c6c6; line-height:1.55; }
+      @media (max-width:640px) { .grid { grid-template-columns:1fr; } .wide { grid-column:auto; } main { padding-top:20px; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="brand"><div class="mark">MX</div><div><h1>MARS-X Genesis Signer</h1><span class="pill">SOLANA DEVNET ONLY</span></div></div>
+      <div class="warning"><strong>No Mainnet path exists on this page.</strong> It never asks for, reads, stores, or transmits a seed phrase/private key. Solflare reviews and signs each transaction.</div>
+      <div class="grid">
+        <section class="card"><div class="label">Approved wallet</div><div class="value" id="wallet"></div></section>
+        <section class="card"><div class="label">Balance</div><div class="value" id="balance">Unknown</div></section>
+        <section class="card wide"><div class="label">Prepared mint address</div><div class="value" id="mint"></div></section>
+      </div>
+      <div class="actions">
+        <button id="connect">Connect Solflare on Devnet</button>
+        <button id="prepare" class="secondary" disabled>Prepare and verify unsigned plan</button>
+        <button id="sign-first" disabled>Sign transaction 1 of 2</button>
+        <button id="sign-second" disabled>Sign transaction 2 of 2 and revoke mint authority</button>
+      </div>
+      <div id="status" role="status">No signature has been requested.</div>
+      <section class="card" style="margin-top:18px"><strong>Fixed execution</strong><ol><li>Token-2022 mint, 9 decimals, freeze authority null.</li><li>Exactly seven owner-controlled vault accounts.</li><li>Exactly 1,000,000,000 MARSX across the PR #9 allocations.</li><li>Final instruction permanently revokes mint authority.</li></ol></section>
+      <section style="margin-top:18px"><div class="label">Verified public deployment record</div><pre id="record">Available only after both Devnet transactions confirm and on-chain verification passes.</pre></section>
+    </main>
+    <script type="module" src="./app.bundle.js"></script>
+  </body>
+</html>
+

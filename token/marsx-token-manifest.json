@@ -19,7 +19,8 @@
     {"vault":"ecosystem-growth","amount":"200000000","percent":20},
     {"vault":"foundation-treasury","amount":"180000000","percent":18},
     {"vault":"liquidity-reserve","amount":"150000000","percent":15},
-    {"vault":"founder-vesting","amount":"120000000","percent":12},
+    {"vault":"founder-initial-unlock","amount":"20000000","percent":2},
+    {"vault":"founder-vesting","amount":"100000000","percent":10},
     {"vault":"team-future-contributors","amount":"100000000","percent":10}
   ],
   "founderVesting": {
