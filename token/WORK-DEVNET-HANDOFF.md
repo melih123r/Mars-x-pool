@@ -2,6 +2,13 @@
 
 Status: prepared; requires owner wallet signature. Mainnet is prohibited.
 
+## Resume the signer
+Use the current commit's `token/devnet-deployer/index.html`. It discovers any earlier mint before allowing a new transaction and recovers public transaction links from Devnet history. On reload, public deterministic addresses and on-chain balances identify the next missing allocations. No private account keypair is needed.
+
+Allocation signatures and the final mint-authority revocation are separate approvals. The page never opens the next wallet signature prompt automatically. The final approval is enabled only after all seven allocations and total supply verify in a finalized on-chain snapshot.
+
+`npm run marsx:devnet-status` independently checks public chain state. Use `npm run marsx:devnet-status -- --write` only after successful completion; incomplete state cannot write `token/devnet-deployment.json`. Commit only real chain addresses/signatures to this file, and leave PR #9 open and unmerged.
+
 ## Source of truth
 - Branch: feature/marsx-token-foundation-v1
 - PR: #9

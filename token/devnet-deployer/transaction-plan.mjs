@@ -1,31 +1,18 @@
+import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import {
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from "@solana/web3.js";
-import {
-  ACCOUNT_SIZE,
-  AuthorityType,
-  MINT_SIZE,
-  TOKEN_2022_PROGRAM_ID,
-  createInitializeAccount3Instruction,
-  createInitializeMint2Instruction,
-  createMintToCheckedInstruction,
-  createSetAuthorityInstruction,
+  ACCOUNT_SIZE, AuthorityType, MINT_SIZE, TOKEN_2022_PROGRAM_ID,
+  createInitializeAccount3Instruction, createInitializeMint2Instruction,
+  createMintToCheckedInstruction, createSetAuthorityInstruction,
 } from "@solana/spl-token";
 
 export const NETWORK = "devnet";
 export const RPC_URL = "https://api.devnet.solana.com";
-export const EXPECTED_WALLET = new PublicKey(
-  "5eM82VLPwkKWSmBEn9KEfcGhTkCfN97ZUS1Fe8bfpWQW",
-);
+export const DEVNET_GENESIS_HASH = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
+export const EXPECTED_WALLET = new PublicKey("5eM82VLPwkKWSmBEn9KEfcGhTkCfN97ZUS1Fe8bfpWQW");
 export const DECIMALS = 9;
 export const GENESIS_SUPPLY = 1_000_000_000n;
 export const RAW_GENESIS_SUPPLY = GENESIS_SUPPLY * 10n ** BigInt(DECIMALS);
-export const PLAN_SHA256 =
-  "12316d0385b27eba3fa200dd0ad4b305c7b8d71a3dfbb64f2c0e4a1b04632201";
-
+export const PLAN_SHA256 = "12316d0385b27eba3fa200dd0ad4b305c7b8d71a3dfbb64f2c0e4a1b04632201";
 export const ALLOCATIONS = Object.freeze([
   { vault: "pool-user-rewards", amount: 250_000_000n, percent: 25 },
   { vault: "ecosystem-growth", amount: 200_000_000n, percent: 20 },
@@ -36,136 +23,90 @@ export const ALLOCATIONS = Object.freeze([
   { vault: "team-future-contributors", amount: 100_000_000n, percent: 10 },
 ]);
 
-export function createEphemeralDeploymentKeys() {
-  return {
-    mint: Keypair.generate(),
-    vaults: ALLOCATIONS.map(({ vault }) => ({ vault, keypair: Keypair.generate() })),
-  };
+export const rawAmount = allocation => allocation.amount * 10n ** BigInt(DECIMALS);
+
+// Public address labels, never wallet recovery phrases. CreateWithSeed needs
+// only the approved owner's wallet signature; no account keypair is generated.
+export async function deriveDeploymentAddresses(mintAddress = null) {
+  const mintSeed = `marsx-mint-${PLAN_SHA256.slice(0, 20)}`;
+  const mint = mintAddress ?? await PublicKey.createWithSeed(EXPECTED_WALLET, mintSeed, TOKEN_2022_PROGRAM_ID);
+  const vaults = await Promise.all(ALLOCATIONS.map(async (allocation, index) => {
+    const seed = `mx-v${index}-${mint.toBase58().slice(0, 24)}`;
+    return { ...allocation, seed,
+      address: await PublicKey.createWithSeed(EXPECTED_WALLET, seed, TOKEN_2022_PROGRAM_ID) };
+  }));
+  return { mint, mintSeed: mintAddress ? null : mintSeed, vaults };
 }
 
-function addVaultInstructions({
-  transaction,
-  payer,
-  mint,
-  vaultEntry,
-  allocation,
-  tokenAccountRent,
-}) {
-  const vault = vaultEntry.keypair.publicKey;
-  transaction.add(
-    SystemProgram.createAccount({
-      fromPubkey: payer,
-      newAccountPubkey: vault,
-      lamports: tokenAccountRent,
-      space: ACCOUNT_SIZE,
-      programId: TOKEN_2022_PROGRAM_ID,
-    }),
-    createInitializeAccount3Instruction(
-      vault,
-      mint,
-      payer,
-      TOKEN_2022_PROGRAM_ID,
-    ),
-    createMintToCheckedInstruction(
-      mint,
-      vault,
-      payer,
-      allocation.amount * 10n ** BigInt(DECIMALS),
-      DECIMALS,
-      [],
-      TOKEN_2022_PROGRAM_ID,
-    ),
-  );
+export function assertOwner(payer) {
+  if (!payer?.equals(EXPECTED_WALLET)) throw new Error("Connect the approved owner wallet before requesting a signature.");
 }
 
-export function buildGenesisTransactions({
-  payer,
-  mintKeypair,
-  vaultEntries,
-  mintRent,
-  tokenAccountRent,
-  firstBlockhash,
-  secondBlockhash,
-}) {
-  if (!payer.equals(EXPECTED_WALLET)) {
-    throw new Error("Safety stop: connected wallet is not the approved owner wallet.");
+export function assertRevocationReady(state) {
+  if (!state.mintExists || state.supply !== RAW_GENESIS_SUPPLY ||
+      state.decimals !== DECIMALS || state.freezeAuthority !== null ||
+      state.permanentDelegate !== false || state.vaults.length !== ALLOCATIONS.length ||
+      !state.mintAuthority?.equals(EXPECTED_WALLET)) {
+    throw new Error("All seven vaults and exactly 1B MARSX must verify before authority revocation.");
   }
-  if (vaultEntries.length !== ALLOCATIONS.length) {
-    throw new Error("Safety stop: exactly seven vault accounts are required.");
+  for (let index = 0; index < ALLOCATIONS.length; index += 1) {
+    const vault = state.vaults[index];
+    if (!vault.exists || vault.amount !== rawAmount(ALLOCATIONS[index]) ||
+        !vault.owner?.equals(EXPECTED_WALLET) || !vault.mint?.equals(state.mint)) {
+      throw new Error(`Vault ${ALLOCATIONS[index].vault} is not ready for authority revocation.`);
+    }
   }
-
-  const mint = mintKeypair.publicKey;
-  const first = new Transaction({
-    feePayer: payer,
-    recentBlockhash: firstBlockhash,
-  });
-  first.add(
-    SystemProgram.createAccount({
-      fromPubkey: payer,
-      newAccountPubkey: mint,
-      lamports: mintRent,
-      space: MINT_SIZE,
-      programId: TOKEN_2022_PROGRAM_ID,
-    }),
-    createInitializeMint2Instruction(
-      mint,
-      DECIMALS,
-      payer,
-      null,
-      TOKEN_2022_PROGRAM_ID,
-    ),
-  );
-
-  for (let index = 0; index < 3; index += 1) {
-    addVaultInstructions({
-      transaction: first,
-      payer,
-      mint,
-      vaultEntry: vaultEntries[index],
-      allocation: ALLOCATIONS[index],
-      tokenAccountRent,
-    });
-  }
-
-  const second = new Transaction({
-    feePayer: payer,
-    recentBlockhash: secondBlockhash,
-  });
-  for (let index = 3; index < ALLOCATIONS.length; index += 1) {
-    addVaultInstructions({
-      transaction: second,
-      payer,
-      mint,
-      vaultEntry: vaultEntries[index],
-      allocation: ALLOCATIONS[index],
-      tokenAccountRent,
-    });
-  }
-  second.add(
-    createSetAuthorityInstruction(
-      mint,
-      payer,
-      AuthorityType.MintTokens,
-      null,
-      [],
-      TOKEN_2022_PROGRAM_ID,
-    ),
-  );
-
-  return {
-    mint,
-    first: {
-      transaction: first,
-      partialSigners: [mintKeypair, ...vaultEntries.slice(0, 3).map(({ keypair }) => keypair)],
-    },
-    second: {
-      transaction: second,
-      partialSigners: vaultEntries.slice(3).map(({ keypair }) => keypair),
-    },
-  };
 }
 
-export function requiredLamports({ mintRent, tokenAccountRent }) {
-  return mintRent + tokenAccountRent * ALLOCATIONS.length + 50_000;
+function addCreation(transaction, address, seed, lamports, space) {
+  if (!seed) throw new Error("Cannot create a recovered address without its public derivation label.");
+  transaction.add(SystemProgram.createAccountWithSeed({ fromPubkey: EXPECTED_WALLET,
+    newAccountPubkey: address, basePubkey: EXPECTED_WALLET, seed, lamports, space,
+    programId: TOKEN_2022_PROGRAM_ID }));
 }
 
+export function transactionBytes(transaction) {
+  return transaction.serialize({ requireAllSignatures: false, verifySignatures: false }).length;
+}
+
+export function buildNextTransaction({ state, payer, mintRent, tokenAccountRent, blockhash }) {
+  assertOwner(payer);
+  if (state.mintExists && state.mintAuthority === null) throw new Error("Mint authority is already revoked; no further mint transaction is allowed.");
+  const transaction = new Transaction({ feePayer: payer, recentBlockhash: blockhash });
+  if (state.supply === RAW_GENESIS_SUPPLY) {
+    assertRevocationReady(state);
+    transaction.add(createSetAuthorityInstruction(state.mint, payer, AuthorityType.MintTokens, null, [], TOKEN_2022_PROGRAM_ID));
+    return { transaction, kind: "revoke", allocations: [], requiredRent: 0 };
+  }
+  if (state.supply > RAW_GENESIS_SUPPLY || (state.mintExists && !state.mintAuthority?.equals(payer))) throw new Error("Unexpected mint supply or mint authority.");
+  let requiredRent = 0;
+  if (!state.mintExists) {
+    addCreation(transaction, state.mint, state.mintSeed, mintRent, MINT_SIZE);
+    transaction.add(createInitializeMint2Instruction(state.mint, DECIMALS, payer, null, TOKEN_2022_PROGRAM_ID));
+    requiredRent += mintRent;
+  }
+  const allocations = [];
+  for (let index = 0; index < ALLOCATIONS.length; index += 1) {
+    const entry = state.vaults[index];
+    const target = rawAmount(ALLOCATIONS[index]);
+    if (entry.amount === target) continue;
+    if (entry.amount !== 0n) throw new Error(`Unexpected balance for ${entry.vault}.`);
+    const instructionCount = transaction.instructions.length;
+    if (!entry.exists) {
+      addCreation(transaction, entry.address, entry.seed, tokenAccountRent, ACCOUNT_SIZE);
+      transaction.add(createInitializeAccount3Instruction(entry.address, state.mint, payer, TOKEN_2022_PROGRAM_ID));
+    }
+    transaction.add(createMintToCheckedInstruction(state.mint, entry.address, payer, target, DECIMALS, [], TOKEN_2022_PROGRAM_ID));
+    let fits = false;
+    try { fits = transactionBytes(transaction) <= 1232; } catch { /* packet overflow */ }
+    if (!fits) {
+      transaction.instructions.splice(instructionCount);
+      if (!allocations.length) throw new Error("Transaction exceeds the Solana packet limit.");
+      break;
+    }
+    if (!entry.exists) requiredRent += tokenAccountRent;
+    allocations.push(ALLOCATIONS[index]);
+  }
+  if (!allocations.length) throw new Error("No allocation can be minted safely.");
+  return { transaction, kind: "mint", allocations, requiredRent };
+}

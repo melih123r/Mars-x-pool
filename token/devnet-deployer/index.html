@@ -29,29 +29,34 @@
       #status[data-kind="error"] { color:#ffd0c8; background:#1d0906; }
       pre { max-height:420px; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; padding:16px; border-radius:14px; background:#080909; border:1px solid #242424; font-size:.78rem; }
       ol { margin:8px 0 0; padding-left:22px; color:#c6c6c6; line-height:1.55; }
+      #transactions { padding-left:20px; line-height:1.6; overflow-wrap:anywhere; font-size:.8rem; }
+      a { color:#ff9b42; }
       @media (max-width:640px) { .grid { grid-template-columns:1fr; } .wide { grid-column:auto; } main { padding-top:20px; } }
     </style>
   </head>
   <body>
     <main>
       <div class="brand"><div class="mark">MX</div><div><h1>MARS-X Genesis Signer</h1><span class="pill">SOLANA DEVNET ONLY</span></div></div>
-      <div class="warning"><strong>No Mainnet path exists on this page.</strong> It never asks for, reads, stores, or transmits a seed phrase/private key. Solflare reviews and signs each transaction.</div>
+      <div class="warning"><strong>Devnet test deployment · 1,000,000,000 MARSX.</strong> Your Solflare wallet reviews each step. The page finds existing transactions before continuing. It never asks for or stores a seed phrase/private key.</div>
       <div class="grid">
         <section class="card"><div class="label">Approved wallet</div><div class="value" id="wallet"></div></section>
         <section class="card"><div class="label">Balance</div><div class="value" id="balance">Unknown</div></section>
-        <section class="card wide"><div class="label">Prepared mint address</div><div class="value" id="mint"></div></section>
+        <section class="card wide"><div class="label">Mint address and chain status</div><div class="value" id="mint">Searching Devnet…</div></section>
+        <section class="card"><div class="label">Verified supply</div><div class="value" id="supply">Checking…</div></section>
+        <section class="card"><div class="label">Authorities</div><div class="value" id="authority">Checking…</div></section>
       </div>
       <div class="actions">
         <button id="connect">Connect Solflare on Devnet</button>
         <button id="fund" class="secondary" disabled>Request 0.1 test-only Devnet SOL</button>
-        <button id="prepare" class="secondary" disabled>Prepare and verify unsigned plan</button>
-        <button id="sign-first" disabled>Sign transaction 1 of 2</button>
-        <button id="sign-second" disabled>Sign transaction 2 of 2 and revoke mint authority</button>
+        <button id="prepare" class="secondary" disabled>Find existing transactions and refresh next step</button>
+        <button id="sign-next" disabled>Approve next Devnet step in Solflare</button>
       </div>
       <div id="status" role="status">No signature has been requested.</div>
       <p style="color:#aaa;line-height:1.5">If the programmatic Devnet faucet is rate-limited, use the <a href="https://faucet.solana.com/" target="_blank" rel="noreferrer" style="color:#ff9b42">official Solana Devnet faucet</a>. Devnet SOL has no real value.</p>
-      <section class="card" style="margin-top:18px"><strong>Fixed execution</strong><ol><li>Token-2022 mint, 9 decimals, freeze authority null.</li><li>Exactly seven owner-controlled vault accounts.</li><li>Exactly 1,000,000,000 MARSX across the PR #9 allocations.</li><li>Final instruction permanently revokes mint authority.</li></ol></section>
-      <section style="margin-top:18px"><div class="label">Verified public deployment record</div><pre id="record">Available only after both Devnet transactions confirm and on-chain verification passes.</pre></section>
+      <section class="card" style="margin-top:18px"><strong>Next step for your review</strong><p id="review">Checking existing chain state…</p></section>
+      <section class="card" style="margin-top:18px"><strong>Public Devnet transaction links</strong><ol id="transactions"></ol></section>
+      <section class="card" style="margin-top:18px"><strong>Fixed execution</strong><ol><li>Token-2022 mint, 9 decimals, freeze authority null, Permanent Delegate absent.</li><li>Exactly seven owner-controlled vault accounts using the PR #9 allocations.</li><li>Complete the distributions and verify exactly 1,000,000,000 MARSX on chain.</li><li>Request a separate final approval to permanently revoke mint authority.</li></ol></section>
+      <section style="margin-top:18px"><div class="label">Verified public deployment record</div><pre id="record">Available after complete on-chain verification.</pre><button id="download" class="secondary" disabled>Download verified devnet-deployment.json</button></section>
     </main>
     <script type="module" src="./app.bundle.js"></script>
   </body>

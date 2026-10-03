@@ -3,9 +3,12 @@
 This browser-only signer is fixed to Solana Devnet and the owner wallet in the PR #9 manifest.
 
 - It never requests, reads, stores, logs, or commits a seed phrase/private key.
-- Ephemeral mint/vault account keypairs exist only in page memory until their creation transactions are signed.
+- Public addresses are derived with CreateWithSeed. No mint/vault keypairs are generated or stored, and page reloads can resume from on-chain balances.
 - Solflare supplies the owner signature and submits each transaction.
-- Transaction 2 contains the final mint instructions and the irreversible mint-authority revocation.
+- Before every signature, the page verifies the Devnet genesis hash, discovers earlier genesis transactions, reads a finalized mint/vault snapshot, and simulates the next unsigned transaction.
+- Allocation transactions never revoke mint authority. A separate final approval is available only after all seven vault balances and exactly 1B MARSX verify on chain.
+- Legacy two-transaction deployments can be recovered using their initialization and allocation instructions. Unknown or ambiguous state stops the flow.
+- Public transaction links are shown after submission and recovered from chain history after reload.
 - The page rejects any connected wallet other than the manifest owner wallet.
 - Mainnet configuration is not exposed.
 
@@ -16,3 +19,5 @@ npx esbuild token/devnet-deployer/app.js --bundle --platform=browser --format=es
 ```
 
 Only public deployment artifacts from the verified result belong in `token/devnet-deployment.json`.
+
+Read-only status: `npm run marsx:devnet-status`. After actual verified completion, `npm run marsx:devnet-status -- --write` writes the public deployment record. This command never signs or submits a transaction. Incomplete or unverifiable deployments cannot produce a success record.

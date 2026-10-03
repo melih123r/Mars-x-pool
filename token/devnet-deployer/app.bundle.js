@@ -6874,7 +6874,7 @@ var require_Layout = __commonJS({
       }
     };
     exports.Boolean = Boolean2;
-    var Blob = class extends Layout2 {
+    var Blob2 = class extends Layout2 {
       constructor(length, property) {
         if (!(length instanceof ExternalLayout && length.isCount() || Number.isInteger(length) && 0 <= length)) {
           throw new TypeError("length must be positive integer or an unsigned integer ExternalLayout");
@@ -6926,7 +6926,7 @@ var require_Layout = __commonJS({
         return span;
       }
     };
-    exports.Blob = Blob;
+    exports.Blob = Blob2;
     var CString = class extends Layout2 {
       constructor(property) {
         super(-1, property);
@@ -7059,7 +7059,7 @@ var require_Layout = __commonJS({
     exports.seq = ((elementLayout, count, property) => new Sequence(elementLayout, count, property));
     exports.union = ((discr, defaultLayout, property) => new Union(discr, defaultLayout, property));
     exports.unionLayoutDiscriminator = ((layout, property) => new UnionLayoutDiscriminator(layout, property));
-    exports.blob = ((length, property) => new Blob(length, property));
+    exports.blob = ((length, property) => new Blob2(length, property));
     exports.cstr = ((property) => new CString(property));
     exports.utf8 = ((maxSpan, property) => new UTF8(maxSpan, property));
     exports.constant = ((value, property) => new Constant(value, property));
@@ -8339,11 +8339,11 @@ var HashMD = class extends Hash {
     if (len % 4)
       throw new Error("_sha2: outputLen should be aligned to 32bit");
     const outLen = len / 4;
-    const state = this.get();
-    if (outLen > state.length)
+    const state2 = this.get();
+    if (outLen > state2.length)
       throw new Error("_sha2: outputLen bigger than state");
     for (let i = 0; i < outLen; i++)
-      oview.setUint32(4 * i, state[i], isLE2);
+      oview.setUint32(4 * i, state2[i], isLE2);
   }
   digest() {
     const { buffer, outputLen } = this;
@@ -10815,24 +10815,24 @@ function getHumanReadableErrorMessage(code, context = {}) {
   if (messageFormatString.length === 0) {
     return "";
   }
-  let state;
+  let state2;
   function commitStateUpTo(endIndex) {
-    if (state[TYPE] === 2) {
-      const variableName = messageFormatString.slice(state[START_INDEX] + 1, endIndex);
+    if (state2[TYPE] === 2) {
+      const variableName = messageFormatString.slice(state2[START_INDEX] + 1, endIndex);
       fragments.push(
         variableName in context ? (
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           `${context[variableName]}`
         ) : `$${variableName}`
       );
-    } else if (state[TYPE] === 1) {
-      fragments.push(messageFormatString.slice(state[START_INDEX], endIndex));
+    } else if (state2[TYPE] === 1) {
+      fragments.push(messageFormatString.slice(state2[START_INDEX], endIndex));
     }
   }
   const fragments = [];
   messageFormatString.split("").forEach((char, ii) => {
     if (ii === 0) {
-      state = {
+      state2 = {
         [START_INDEX]: 0,
         [TYPE]: messageFormatString[0] === "\\" ? 0 : messageFormatString[0] === "$" ? 2 : 1
         /* Text */
@@ -10840,7 +10840,7 @@ function getHumanReadableErrorMessage(code, context = {}) {
       return;
     }
     let nextState;
-    switch (state[TYPE]) {
+    switch (state2[TYPE]) {
       case 0:
         nextState = {
           [START_INDEX]: ii,
@@ -10886,10 +10886,10 @@ function getHumanReadableErrorMessage(code, context = {}) {
         break;
     }
     if (nextState) {
-      if (state !== nextState) {
+      if (state2 !== nextState) {
         commitStateUpTo(ii);
       }
-      state = nextState;
+      state2 = nextState;
     }
   });
   commitStateUpTo();
@@ -11140,10 +11140,10 @@ function* run(value, struct9, options = {}) {
   if (coerce2) {
     value = struct9.coercer(value, ctx);
   }
-  let status = "valid";
+  let status2 = "valid";
   for (const failure of struct9.validator(value, ctx)) {
     failure.explanation = options.message;
-    status = "not_valid";
+    status2 = "not_valid";
     yield [failure, void 0];
   }
   for (let [k, v, s] of struct9.entries(value, ctx)) {
@@ -11156,7 +11156,7 @@ function* run(value, struct9, options = {}) {
     });
     for (const t of ts) {
       if (t[0]) {
-        status = t[0].refinement != null ? "not_refined" : "not_valid";
+        status2 = t[0].refinement != null ? "not_refined" : "not_valid";
         yield [t[0], void 0];
       } else if (coerce2) {
         v = t[1];
@@ -11173,14 +11173,14 @@ function* run(value, struct9, options = {}) {
       }
     }
   }
-  if (status !== "not_valid") {
+  if (status2 !== "not_valid") {
     for (const failure of struct9.refiner(value, ctx)) {
       failure.explanation = options.message;
-      status = "not_refined";
+      status2 = "not_refined";
       yield [failure, void 0];
     }
   }
-  if (status === "valid") {
+  if (status2 === "valid") {
     yield [void 0, value];
   }
 }
@@ -11974,12 +11974,12 @@ var Keccak = class _Keccak extends Hash {
     aexists(this);
     data = toBytes(data);
     abytes(data);
-    const { blockLen, state } = this;
+    const { blockLen, state: state2 } = this;
     const len = data.length;
     for (let pos = 0; pos < len; ) {
       const take = Math.min(blockLen - this.pos, len - pos);
       for (let i = 0; i < take; i++)
-        state[this.pos++] ^= data[pos++];
+        state2[this.pos++] ^= data[pos++];
       if (this.pos === blockLen)
         this.keccak();
     }
@@ -11989,11 +11989,11 @@ var Keccak = class _Keccak extends Hash {
     if (this.finished)
       return;
     this.finished = true;
-    const { state, suffix, pos, blockLen } = this;
-    state[pos] ^= suffix;
+    const { state: state2, suffix, pos, blockLen } = this;
+    state2[pos] ^= suffix;
     if ((suffix & 128) !== 0 && pos === blockLen - 1)
       this.keccak();
-    state[blockLen - 1] ^= 128;
+    state2[blockLen - 1] ^= 128;
     this.keccak();
   }
   writeInto(out) {
@@ -14911,9 +14911,9 @@ async function sendAndConfirmTransaction(connection2, transaction, signers, opti
     minContextSlot: options.minContextSlot
   };
   const signature2 = await connection2.sendTransaction(transaction, signers, sendOptions);
-  let status;
+  let status2;
   if (transaction.recentBlockhash != null && transaction.lastValidBlockHeight != null) {
-    status = (await connection2.confirmTransaction({
+    status2 = (await connection2.confirmTransaction({
       abortSignal: options?.abortSignal,
       signature: signature2,
       blockhash: transaction.recentBlockhash,
@@ -14924,7 +14924,7 @@ async function sendAndConfirmTransaction(connection2, transaction, signers, opti
       nonceInstruction
     } = transaction.nonceInfo;
     const nonceAccountPubkey = nonceInstruction.keys[0].pubkey;
-    status = (await connection2.confirmTransaction({
+    status2 = (await connection2.confirmTransaction({
       abortSignal: options?.abortSignal,
       minContextSlot: transaction.minNonceContextSlot,
       nonceAccountPubkey,
@@ -14935,17 +14935,17 @@ async function sendAndConfirmTransaction(connection2, transaction, signers, opti
     if (options?.abortSignal != null) {
       console.warn("sendAndConfirmTransaction(): A transaction with a deprecated confirmation strategy was supplied along with an `abortSignal`. Only transactions having `lastValidBlockHeight` or a combination of `nonceInfo` and `minNonceContextSlot` are abortable.");
     }
-    status = (await connection2.confirmTransaction(signature2, options && options.commitment)).value;
+    status2 = (await connection2.confirmTransaction(signature2, options && options.commitment)).value;
   }
-  if (status.err) {
+  if (status2.err) {
     if (signature2 != null) {
       throw new SendTransactionError({
         action: "send",
         signature: signature2,
-        transactionMessage: `Status: (${JSON.stringify(status)})`
+        transactionMessage: `Status: (${JSON.stringify(status2)})`
       });
     }
-    throw new Error(`Transaction ${signature2} failed (${JSON.stringify(status)})`);
+    throw new Error(`Transaction ${signature2} failed (${JSON.stringify(status2)})`);
   }
   return signature2;
 }
@@ -15781,14 +15781,14 @@ var AddressLookupTableAccount = class {
     assert2(serializedAddressesLen % 32 === 0, "lookup table is invalid");
     const numSerializedAddresses = serializedAddressesLen / 32;
     const {
-      addresses
+      addresses: addresses2
     } = BufferLayout.struct([BufferLayout.seq(publicKey(), numSerializedAddresses, "addresses")]).decode(accountData.slice(LOOKUP_TABLE_META_SIZE));
     return {
       deactivationSlot: meta.deactivationSlot,
       lastExtendedSlot: meta.lastExtendedSlot,
       lastExtendedSlotStartIndex: meta.lastExtendedStartIndex,
       authority: meta.authority.length !== 0 ? new PublicKey(meta.authority[0]) : void 0,
-      addresses: addresses.map((address) => new PublicKey(address))
+      addresses: addresses2.map((address) => new PublicKey(address))
     };
   }
 };
@@ -17275,15 +17275,15 @@ var Connection = class {
       } else {
         let signatureStatus;
         while (true) {
-          const status = await this.getSignatureStatus(signature2);
-          if (status == null) {
+          const status2 = await this.getSignatureStatus(signature2);
+          if (status2 == null) {
             break;
           }
-          if (status.context.slot < (outcome.slotInWhichNonceDidAdvance ?? minContextSlot)) {
+          if (status2.context.slot < (outcome.slotInWhichNonceDidAdvance ?? minContextSlot)) {
             await sleep(400);
             continue;
           }
-          signatureStatus = status;
+          signatureStatus = status2;
           break;
         }
         if (signatureStatus?.value) {
@@ -17518,12 +17518,12 @@ var Connection = class {
   /**
    * Fetch the inflation reward for a list of addresses for an epoch
    */
-  async getInflationReward(addresses, epoch, commitmentOrConfig) {
+  async getInflationReward(addresses2, epoch, commitmentOrConfig) {
     const {
       commitment,
       config
     } = extractCommitmentFromConfig(commitmentOrConfig);
-    const args = this._buildArgs([addresses.map((pubkey) => pubkey.toBase58())], commitment, void 0, {
+    const args = this._buildArgs([addresses2.map((pubkey) => pubkey.toBase58())], commitment, void 0, {
       ...config,
       epoch: epoch != null ? epoch : config?.epoch
     });
@@ -18490,10 +18490,10 @@ var Connection = class {
       commitment: this.commitment
     };
     if (includeAccounts) {
-      const addresses = (Array.isArray(includeAccounts) ? includeAccounts : message.nonProgramIds()).map((key) => key.toBase58());
+      const addresses2 = (Array.isArray(includeAccounts) ? includeAccounts : message.nonProgramIds()).map((key) => key.toBase58());
       config["accounts"] = {
         encoding: "base64",
-        addresses
+        addresses: addresses2
       };
     }
     if (signers) {
@@ -23805,10 +23805,6 @@ var AccountLayout = (0, import_buffer_layout6.struct)([
   publicKey2("closeAuthority")
 ]);
 var ACCOUNT_SIZE = AccountLayout.span;
-async function getAccount(connection2, address, commitment, programId = TOKEN_PROGRAM_ID) {
-  const info = await connection2.getAccountInfo(address, commitment);
-  return unpackAccount(address, info, programId);
-}
 function unpackAccount(address, info, programId = TOKEN_PROGRAM_ID) {
   if (!info)
     throw new TokenAccountNotFoundError();
@@ -23902,10 +23898,6 @@ var MintLayout = (0, import_buffer_layout8.struct)([
   publicKey2("freezeAuthority")
 ]);
 var MINT_SIZE = MintLayout.span;
-async function getMint(connection2, address, commitment, programId = TOKEN_PROGRAM_ID) {
-  const info = await connection2.getAccountInfo(address, commitment);
-  return unpackMint(address, info, programId);
-}
 function unpackMint(address, info, programId = TOKEN_PROGRAM_ID) {
   if (!info)
     throw new TokenAccountNotFoundError();
@@ -24041,9 +24033,8 @@ function createInitializeAccount3Instruction(account, mint, owner, programId = T
 // token/devnet-deployer/transaction-plan.mjs
 var NETWORK = "devnet";
 var RPC_URL = "https://api.devnet.solana.com";
-var EXPECTED_WALLET = new PublicKey(
-  "5eM82VLPwkKWSmBEn9KEfcGhTkCfN97ZUS1Fe8bfpWQW"
-);
+var DEVNET_GENESIS_HASH = "EtWTRABZaYq6iMfeYKouRu166VU2xqa1wcaWoxPkrZBG";
+var EXPECTED_WALLET = new PublicKey("5eM82VLPwkKWSmBEn9KEfcGhTkCfN97ZUS1Fe8bfpWQW");
 var DECIMALS = 9;
 var GENESIS_SUPPLY = 1000000000n;
 var RAW_GENESIS_SUPPLY = GENESIS_SUPPLY * 10n ** BigInt(DECIMALS);
@@ -24057,385 +24048,492 @@ var ALLOCATIONS = Object.freeze([
   { vault: "founder-vesting", amount: 100000000n, percent: 10 },
   { vault: "team-future-contributors", amount: 100000000n, percent: 10 }
 ]);
-function createEphemeralDeploymentKeys() {
-  return {
-    mint: Keypair.generate(),
-    vaults: ALLOCATIONS.map(({ vault }) => ({ vault, keypair: Keypair.generate() }))
-  };
+var rawAmount = (allocation) => allocation.amount * 10n ** BigInt(DECIMALS);
+async function deriveDeploymentAddresses(mintAddress = null) {
+  const mintSeed = `marsx-mint-${PLAN_SHA256.slice(0, 20)}`;
+  const mint = mintAddress ?? await PublicKey.createWithSeed(EXPECTED_WALLET, mintSeed, TOKEN_2022_PROGRAM_ID);
+  const vaults = await Promise.all(ALLOCATIONS.map(async (allocation, index) => {
+    const seed = `mx-v${index}-${mint.toBase58().slice(0, 24)}`;
+    return {
+      ...allocation,
+      seed,
+      address: await PublicKey.createWithSeed(EXPECTED_WALLET, seed, TOKEN_2022_PROGRAM_ID)
+    };
+  }));
+  return { mint, mintSeed: mintAddress ? null : mintSeed, vaults };
 }
-function addVaultInstructions({
-  transaction,
-  payer,
-  mint,
-  vaultEntry,
-  allocation,
-  tokenAccountRent
-}) {
-  const vault = vaultEntry.keypair.publicKey;
-  transaction.add(
-    SystemProgram.createAccount({
-      fromPubkey: payer,
-      newAccountPubkey: vault,
-      lamports: tokenAccountRent,
-      space: ACCOUNT_SIZE,
-      programId: TOKEN_2022_PROGRAM_ID
-    }),
-    createInitializeAccount3Instruction(
-      vault,
-      mint,
-      payer,
-      TOKEN_2022_PROGRAM_ID
-    ),
-    createMintToCheckedInstruction(
-      mint,
-      vault,
-      payer,
-      allocation.amount * 10n ** BigInt(DECIMALS),
-      DECIMALS,
-      [],
-      TOKEN_2022_PROGRAM_ID
-    )
-  );
+function assertOwner(payer) {
+  if (!payer?.equals(EXPECTED_WALLET)) throw new Error("Connect the approved owner wallet before requesting a signature.");
 }
-function buildGenesisTransactions({
-  payer,
-  mintKeypair,
-  vaultEntries,
-  mintRent,
-  tokenAccountRent,
-  firstBlockhash,
-  secondBlockhash
-}) {
-  if (!payer.equals(EXPECTED_WALLET)) {
-    throw new Error("Safety stop: connected wallet is not the approved owner wallet.");
+function assertRevocationReady(state2) {
+  if (!state2.mintExists || state2.supply !== RAW_GENESIS_SUPPLY || state2.decimals !== DECIMALS || state2.freezeAuthority !== null || state2.permanentDelegate !== false || state2.vaults.length !== ALLOCATIONS.length || !state2.mintAuthority?.equals(EXPECTED_WALLET)) {
+    throw new Error("All seven vaults and exactly 1B MARSX must verify before authority revocation.");
   }
-  if (vaultEntries.length !== ALLOCATIONS.length) {
-    throw new Error("Safety stop: exactly seven vault accounts are required.");
-  }
-  const mint = mintKeypair.publicKey;
-  const first = new Transaction({
-    feePayer: payer,
-    recentBlockhash: firstBlockhash
-  });
-  first.add(
-    SystemProgram.createAccount({
-      fromPubkey: payer,
-      newAccountPubkey: mint,
-      lamports: mintRent,
-      space: MINT_SIZE,
-      programId: TOKEN_2022_PROGRAM_ID
-    }),
-    createInitializeMint2Instruction(
-      mint,
-      DECIMALS,
-      payer,
-      null,
-      TOKEN_2022_PROGRAM_ID
-    )
-  );
-  for (let index = 0; index < 3; index += 1) {
-    addVaultInstructions({
-      transaction: first,
-      payer,
-      mint,
-      vaultEntry: vaultEntries[index],
-      allocation: ALLOCATIONS[index],
-      tokenAccountRent
-    });
-  }
-  const second = new Transaction({
-    feePayer: payer,
-    recentBlockhash: secondBlockhash
-  });
-  for (let index = 3; index < ALLOCATIONS.length; index += 1) {
-    addVaultInstructions({
-      transaction: second,
-      payer,
-      mint,
-      vaultEntry: vaultEntries[index],
-      allocation: ALLOCATIONS[index],
-      tokenAccountRent
-    });
-  }
-  second.add(
-    createSetAuthorityInstruction(
-      mint,
-      payer,
-      AuthorityType.MintTokens,
-      null,
-      [],
-      TOKEN_2022_PROGRAM_ID
-    )
-  );
-  return {
-    mint,
-    first: {
-      transaction: first,
-      partialSigners: [mintKeypair, ...vaultEntries.slice(0, 3).map(({ keypair }) => keypair)]
-    },
-    second: {
-      transaction: second,
-      partialSigners: vaultEntries.slice(3).map(({ keypair }) => keypair)
+  for (let index = 0; index < ALLOCATIONS.length; index += 1) {
+    const vault = state2.vaults[index];
+    if (!vault.exists || vault.amount !== rawAmount(ALLOCATIONS[index]) || !vault.owner?.equals(EXPECTED_WALLET) || !vault.mint?.equals(state2.mint)) {
+      throw new Error(`Vault ${ALLOCATIONS[index].vault} is not ready for authority revocation.`);
     }
+  }
+}
+function addCreation(transaction, address, seed, lamports, space) {
+  if (!seed) throw new Error("Cannot create a recovered address without its public derivation label.");
+  transaction.add(SystemProgram.createAccountWithSeed({
+    fromPubkey: EXPECTED_WALLET,
+    newAccountPubkey: address,
+    basePubkey: EXPECTED_WALLET,
+    seed,
+    lamports,
+    space,
+    programId: TOKEN_2022_PROGRAM_ID
+  }));
+}
+function transactionBytes(transaction) {
+  return transaction.serialize({ requireAllSignatures: false, verifySignatures: false }).length;
+}
+function buildNextTransaction({ state: state2, payer, mintRent, tokenAccountRent, blockhash }) {
+  assertOwner(payer);
+  if (state2.mintExists && state2.mintAuthority === null) throw new Error("Mint authority is already revoked; no further mint transaction is allowed.");
+  const transaction = new Transaction({ feePayer: payer, recentBlockhash: blockhash });
+  if (state2.supply === RAW_GENESIS_SUPPLY) {
+    assertRevocationReady(state2);
+    transaction.add(createSetAuthorityInstruction(state2.mint, payer, AuthorityType.MintTokens, null, [], TOKEN_2022_PROGRAM_ID));
+    return { transaction, kind: "revoke", allocations: [], requiredRent: 0 };
+  }
+  if (state2.supply > RAW_GENESIS_SUPPLY || state2.mintExists && !state2.mintAuthority?.equals(payer)) throw new Error("Unexpected mint supply or mint authority.");
+  let requiredRent = 0;
+  if (!state2.mintExists) {
+    addCreation(transaction, state2.mint, state2.mintSeed, mintRent, MINT_SIZE);
+    transaction.add(createInitializeMint2Instruction(state2.mint, DECIMALS, payer, null, TOKEN_2022_PROGRAM_ID));
+    requiredRent += mintRent;
+  }
+  const allocations = [];
+  for (let index = 0; index < ALLOCATIONS.length; index += 1) {
+    const entry = state2.vaults[index];
+    const target = rawAmount(ALLOCATIONS[index]);
+    if (entry.amount === target) continue;
+    if (entry.amount !== 0n) throw new Error(`Unexpected balance for ${entry.vault}.`);
+    const instructionCount = transaction.instructions.length;
+    if (!entry.exists) {
+      addCreation(transaction, entry.address, entry.seed, tokenAccountRent, ACCOUNT_SIZE);
+      transaction.add(createInitializeAccount3Instruction(entry.address, state2.mint, payer, TOKEN_2022_PROGRAM_ID));
+    }
+    transaction.add(createMintToCheckedInstruction(state2.mint, entry.address, payer, target, DECIMALS, [], TOKEN_2022_PROGRAM_ID));
+    let fits = false;
+    try {
+      fits = transactionBytes(transaction) <= 1232;
+    } catch {
+    }
+    if (!fits) {
+      transaction.instructions.splice(instructionCount);
+      if (!allocations.length) throw new Error("Transaction exceeds the Solana packet limit.");
+      break;
+    }
+    if (!entry.exists) requiredRent += tokenAccountRent;
+    allocations.push(ALLOCATIONS[index]);
+  }
+  if (!allocations.length) throw new Error("No allocation can be minted safely.");
+  return { transaction, kind: "mint", allocations, requiredRent };
+}
+
+// token/devnet-deployer/chain-state.mjs
+var OWNER = EXPECTED_WALLET.toBase58();
+var PROGRAM = TOKEN_2022_PROGRAM_ID.toBase58();
+async function assertDevnet(connection2) {
+  if (await connection2.getGenesisHash() !== DEVNET_GENESIS_HASH) {
+    throw new Error("Network verification failed. Only Solana Devnet is permitted.");
+  }
+}
+function explorerTransaction(signature2) {
+  if (!/^[1-9A-HJ-NP-Za-km-z]{64,88}$/.test(signature2)) throw new Error("Invalid public transaction signature.");
+  return `https://explorer.solana.com/tx/${signature2}?cluster=devnet`;
+}
+async function readHistory(connection2, address) {
+  const signatures = [];
+  let before;
+  for (let page = 0; page < 5; page += 1) {
+    const entries = await connection2.getSignaturesForAddress(address, { limit: 100, before }, "finalized");
+    signatures.push(...entries);
+    if (entries.length < 100) break;
+    before = entries.at(-1).signature;
+    if (page === 4) throw new Error("History is too long to prove a new mint is safe. Supply the previous public mint address.");
+  }
+  const successful = signatures.filter((item) => item.err === null).reverse();
+  const records = [];
+  for (let index = 0; index < successful.length; index += 10) {
+    const batch = successful.slice(index, index + 10);
+    const transactions = await connection2.getParsedTransactions(
+      batch.map((item) => item.signature),
+      { commitment: "finalized", maxSupportedTransactionVersion: 0 }
+    );
+    for (let offset2 = 0; offset2 < batch.length; offset2 += 1) {
+      const transaction = transactions[offset2];
+      if (!transaction) throw new Error("RPC omitted an existing transaction. Retry discovery before minting.");
+      if (transaction.meta?.err !== null) throw new Error("Transaction status changed during discovery.");
+      records.push({ ...batch[offset2], transaction });
+    }
+  }
+  return records;
+}
+function tokenInstructions(record2) {
+  return record2.transaction.transaction.message.instructions.filter(
+    (item) => item.programId.toBase58() === PROGRAM && item.parsed
+  );
+}
+function checkedMints(record2, mint) {
+  return tokenInstructions(record2).filter((item) => item.parsed.type === "mintToChecked" && item.parsed.info.mint === mint && item.parsed.info.mintAuthority === OWNER);
+}
+function matchesAllocations(instructions, allocations) {
+  return instructions.length === allocations.length && instructions.every((item, index) => item.parsed.info.tokenAmount.decimals === DECIMALS && item.parsed.info.tokenAmount.amount === rawAmount(allocations[index]).toString());
+}
+function findLegacyGenesis(records) {
+  const candidates = [];
+  for (const record2 of records) {
+    if (record2.transaction.meta?.err !== null) continue;
+    const message = record2.transaction.transaction.message;
+    if (message.accountKeys[0]?.pubkey.toBase58() !== OWNER || !message.accountKeys[0]?.signer) continue;
+    for (const item of tokenInstructions(record2)) {
+      const { type: type2, info } = item.parsed;
+      if (type2 !== "initializeMint2" || info.decimals !== DECIMALS || info.mintAuthority !== OWNER || info.freezeAuthority != null) continue;
+      const mints = checkedMints(record2, info.mint);
+      if (!matchesAllocations(mints, ALLOCATIONS.slice(0, 3))) continue;
+      const addresses2 = mints.map((instruction) => instruction.parsed.info.account);
+      if (new Set(addresses2).size !== 3) throw new Error("Genesis used duplicate vault addresses.");
+      const initializations = tokenInstructions(record2).filter((instruction) => instruction.parsed.type === "initializeAccount3" && instruction.parsed.info.owner === OWNER && instruction.parsed.info.mint === info.mint);
+      if (addresses2.some((address) => !initializations.some((instruction) => instruction.parsed.info.account === address))) continue;
+      candidates.push({ mint: new PublicKey(info.mint), vaults: addresses2.map((address) => new PublicKey(address)), record: record2 });
+    }
+  }
+  return candidates;
+}
+async function discoverDeployment(connection2) {
+  await assertDevnet(connection2);
+  const records = await readHistory(connection2, EXPECTED_WALLET);
+  const deterministic = await deriveDeploymentAddresses();
+  const candidates = findLegacyGenesis(records).filter((item) => !item.mint.equals(deterministic.mint));
+  if (candidates.length > 1) throw new Error("Multiple previous MARSX mints found. Select the public mint before continuing.");
+  let addresses2 = deterministic;
+  if (candidates.length === 1) {
+    const candidate = candidates[0];
+    if (await connection2.getAccountInfo(deterministic.mint, "finalized")) {
+      throw new Error("Both a legacy and a resumable mint exist. No automatic new mint is permitted.");
+    }
+    addresses2 = await deriveDeploymentAddresses(candidate.mint);
+    candidate.vaults.forEach((address, index) => {
+      addresses2.vaults[index] = { ...addresses2.vaults[index], address, seed: null };
+    });
+    for (const record2 of records) {
+      const mints = checkedMints(record2, candidate.mint.toBase58());
+      if (matchesAllocations(mints, ALLOCATIONS.slice(3))) {
+        mints.forEach((item, index) => {
+          addresses2.vaults[index + 3] = { ...addresses2.vaults[index + 3], address: new PublicKey(item.parsed.info.account), seed: null };
+        });
+      }
+    }
+  }
+  const owned = await connection2.getTokenAccountsByOwner(EXPECTED_WALLET, { programId: TOKEN_2022_PROGRAM_ID }, "finalized");
+  const relevantMints = /* @__PURE__ */ new Set([addresses2.mint.toBase58()]);
+  for (const entry of owned.value) {
+    const account = unpackAccount(entry.pubkey, entry.account, TOKEN_2022_PROGRAM_ID);
+    if (!relevantMints.has(account.mint.toBase58()) && ALLOCATIONS.some((item) => account.amount === rawAmount(item))) {
+      throw new Error("Another possible MARSX allocation exists. Resolve its public mint before creating anything.");
+    }
+  }
+  return { ...addresses2, legacy: candidates.length === 1 };
+}
+function decodeDeploymentSnapshot(addresses2, infos, slot) {
+  if (infos.length !== 8 || addresses2.vaults.length !== 7) throw new Error("Incomplete deployment snapshot.");
+  if (new Set(addresses2.vaults.map((item) => item.address.toBase58())).size !== 7) throw new Error("Vault addresses must be distinct.");
+  const mintAccount = infos[0];
+  if (!mintAccount && infos.slice(1).some(Boolean)) throw new Error("Vault accounts exist without the expected mint.");
+  let mint = null;
+  if (mintAccount) {
+    if (!mintAccount.owner.equals(TOKEN_2022_PROGRAM_ID) || mintAccount.data.length !== MINT_SIZE) {
+      throw new Error("Mint must be plain Token-2022 with no extensions or Permanent Delegate.");
+    }
+    mint = unpackMint(addresses2.mint, mintAccount, TOKEN_2022_PROGRAM_ID);
+    if (!mint.isInitialized || mint.decimals !== DECIMALS || mint.freezeAuthority !== null || mint.mintAuthority !== null && !mint.mintAuthority.equals(EXPECTED_WALLET)) {
+      throw new Error("Unexpected decimals, mint authority, or freeze authority.");
+    }
+    if (mint.supply > RAW_GENESIS_SUPPLY) throw new Error("Mint already exceeds the fixed 1B supply.");
+  }
+  let total = 0n;
+  const vaults = addresses2.vaults.map((entry, index) => {
+    const info = infos[index + 1];
+    if (!info) return { ...entry, exists: false, amount: 0n, owner: null, mint: null };
+    if (info.data.length !== ACCOUNT_SIZE) throw new Error(`Unexpected vault extensions: ${entry.vault}.`);
+    const account = unpackAccount(entry.address, info, TOKEN_2022_PROGRAM_ID);
+    if (!account.isInitialized || account.isFrozen || !account.owner.equals(EXPECTED_WALLET) || !account.mint.equals(addresses2.mint) || account.delegate !== null || account.amount !== 0n && account.amount !== rawAmount(ALLOCATIONS[index])) {
+      throw new Error(`Unexpected vault state: ${entry.vault}.`);
+    }
+    total += account.amount;
+    return { ...entry, exists: true, amount: account.amount, owner: account.owner, mint: account.mint };
+  });
+  if (!mint && total !== 0n || mint && total !== mint.supply) {
+    throw new Error("Supply does not equal the verified vault balances. No mint or revocation is allowed.");
+  }
+  if (mint?.mintAuthority === null && (total !== RAW_GENESIS_SUPPLY || vaults.some((item) => !item.exists))) {
+    throw new Error("Authority was revoked before all seven allocations completed.");
+  }
+  return {
+    ...addresses2,
+    vaults,
+    mintExists: Boolean(mint),
+    decimals: mint?.decimals ?? DECIMALS,
+    supply: mint?.supply ?? 0n,
+    mintAuthority: mint ? mint.mintAuthority : EXPECTED_WALLET,
+    freezeAuthority: null,
+    permanentDelegate: false,
+    verifiedAtSlot: slot,
+    complete: Boolean(mint && mint.mintAuthority === null && total === RAW_GENESIS_SUPPLY)
   };
 }
-function requiredLamports({ mintRent, tokenAccountRent }) {
-  return mintRent + tokenAccountRent * ALLOCATIONS.length + 5e4;
+async function readDeploymentState(connection2, addresses2) {
+  await assertDevnet(connection2);
+  const snapshot = await connection2.getMultipleAccountsInfoAndContext(
+    [addresses2.mint, ...addresses2.vaults.map((item) => item.address)],
+    { commitment: "finalized" }
+  );
+  return decodeDeploymentSnapshot(addresses2, snapshot.value, snapshot.context.slot);
+}
+async function publicTransactionRecords(connection2, state2) {
+  if (!state2.mintExists) return [];
+  const records = await readHistory(connection2, state2.mint);
+  return records.filter((record2) => tokenInstructions(record2).some((item) => ["initializeMint2", "mintToChecked", "setAuthority"].includes(item.parsed.type) && (item.parsed.info.mint === state2.mint.toBase58() || item.parsed.info.account === state2.mint.toBase58()))).map((record2) => ({
+    signature: record2.signature,
+    explorerUrl: explorerTransaction(record2.signature),
+    slot: record2.slot,
+    blockTime: record2.blockTime,
+    confirmationStatus: record2.confirmationStatus
+  }));
+}
+function deploymentRecord(state2, transactions) {
+  if (!state2.complete || !transactions.length) throw new Error("A final deployment record requires verified completion and actual chain signatures.");
+  const deploymentTimes = transactions.map((item) => item.blockTime).filter((value) => value != null);
+  return {
+    network: NETWORK,
+    genesisHash: DEVNET_GENESIS_HASH,
+    mintAddress: state2.mint.toBase58(),
+    ownerPublicWallet: OWNER,
+    tokenProgram: "Token-2022",
+    tokenProgramAddress: PROGRAM,
+    decimals: DECIMALS,
+    totalSupply: GENESIS_SUPPLY.toString(),
+    rawTotalSupply: RAW_GENESIS_SUPPLY.toString(),
+    mintAuthority: null,
+    freezeAuthority: null,
+    permanentDelegate: false,
+    vaults: state2.vaults.map((entry, index) => ({
+      name: entry.vault,
+      address: entry.address.toBase58(),
+      owner: OWNER,
+      amount: ALLOCATIONS[index].amount.toString(),
+      percent: entry.percent
+    })),
+    transactionSignatures: transactions.map((item) => item.signature),
+    transactions,
+    deployedAt: deploymentTimes.length ? new Date(Math.max(...deploymentTimes) * 1e3).toISOString() : null,
+    verifiedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    verifiedAtSlot: state2.verifiedAtSlot,
+    planSha256: PLAN_SHA256,
+    verified: true
+  };
 }
 
 // token/devnet-deployer/app.js
 var wallet = new esm_default({ network: NETWORK });
-var connection = new Connection(RPC_URL, "confirmed");
-var elements = {
-  wallet: document.querySelector("#wallet"),
-  balance: document.querySelector("#balance"),
-  mint: document.querySelector("#mint"),
-  status: document.querySelector("#status"),
-  connect: document.querySelector("#connect"),
-  fund: document.querySelector("#fund"),
-  prepare: document.querySelector("#prepare"),
-  signFirst: document.querySelector("#sign-first"),
-  signSecond: document.querySelector("#sign-second"),
-  record: document.querySelector("#record")
-};
-var deployment = null;
-var firstSignature = null;
-var secondSignature = null;
-async function rebuildPlanWithFreshBlockhashes() {
-  const [firstBlockhash, secondBlockhash] = await Promise.all([
-    connection.getLatestBlockhash("confirmed"),
-    connection.getLatestBlockhash("confirmed")
-  ]);
-  deployment.plan = buildGenesisTransactions({
-    payer: wallet.publicKey,
-    mintKeypair: deployment.keys.mint,
-    vaultEntries: deployment.keys.vaults,
-    mintRent: deployment.mintRent,
-    tokenAccountRent: deployment.tokenAccountRent,
-    firstBlockhash: firstBlockhash.blockhash,
-    secondBlockhash: secondBlockhash.blockhash
-  });
-}
-function setStatus(message, kind = "info") {
+var connection = new Connection(RPC_URL, { commitment: "finalized", disableRetryOnRateLimit: true });
+var $ = (id) => document.getElementById(id);
+var elements = Object.fromEntries([
+  "wallet",
+  "balance",
+  "mint",
+  "supply",
+  "authority",
+  "status",
+  "connect",
+  "fund",
+  "prepare",
+  "sign-next",
+  "record",
+  "transactions",
+  "review",
+  "download"
+].map((id) => [id, $(id)]));
+var addresses = null;
+var state = null;
+var prepared = null;
+var finalRecord = null;
+var busy = false;
+function status(message, kind = "info") {
   elements.status.textContent = message;
   elements.status.dataset.kind = kind;
 }
-function assertConnectedOwner() {
-  if (!wallet.publicKey || !wallet.publicKey.equals(EXPECTED_WALLET)) {
-    throw new Error(`Connect the approved Solflare wallet: ${EXPECTED_WALLET.toBase58()}`);
+function updateControls() {
+  const connected = wallet.publicKey?.equals(EXPECTED_WALLET);
+  elements.connect.disabled = busy || connected;
+  elements.prepare.disabled = busy;
+  elements.fund.disabled = busy;
+  elements["sign-next"].disabled = busy || !connected || !prepared || Boolean(state?.complete);
+  elements.download.disabled = !finalRecord;
+}
+function showTransactions(records) {
+  elements.transactions.replaceChildren();
+  for (const record2 of records) {
+    const item = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = record2.explorerUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer";
+    link.textContent = record2.signature;
+    item.append(link);
+    if (record2.confirmationStatus) item.append(` \u2014 ${record2.confirmationStatus}`);
+    elements.transactions.append(item);
   }
 }
-async function refreshBalance() {
-  const balance = await connection.getBalance(EXPECTED_WALLET, "confirmed");
+function rememberPublicSignature(signature2) {
+  const key = "marsx-devnet-public-transactions-v2";
+  try {
+    const previous = JSON.parse(localStorage.getItem(key) || "[]");
+    const record2 = {
+      network: NETWORK,
+      owner: EXPECTED_WALLET.toBase58(),
+      mintAddress: state.mint.toBase58(),
+      signature: signature2,
+      explorerUrl: explorerTransaction(signature2)
+    };
+    localStorage.setItem(key, JSON.stringify([...previous.filter((item) => item.signature !== signature2), record2]));
+  } catch {
+  }
+}
+async function refresh({ rediscover = false } = {}) {
+  prepared = null;
+  finalRecord = null;
+  await assertDevnet(connection);
+  if (!addresses || rediscover) addresses = await discoverDeployment(connection);
+  state = await readDeploymentState(connection, addresses);
+  const [balance, records] = await Promise.all([
+    connection.getBalance(EXPECTED_WALLET, "finalized"),
+    publicTransactionRecords(connection, state)
+  ]);
+  elements.wallet.textContent = EXPECTED_WALLET.toBase58() + (wallet.publicKey ? " \u2014 connected" : " \u2014 connection required for signing");
   elements.balance.textContent = `${(balance / 1e9).toFixed(6)} Devnet SOL`;
-  return balance;
+  elements.mint.textContent = state.mint.toBase58() + (state.mintExists ? " \u2014 found on Devnet" : " \u2014 unsigned address; not yet created");
+  elements.supply.textContent = `${(state.supply / 10n ** BigInt(DECIMALS)).toLocaleString("en-US")} / 1,000,000,000 MARSX`;
+  elements.authority.textContent = state.complete ? "Mint: null \xB7 Freeze: null \xB7 Permanent Delegate: absent" : "Mint: approved owner \xB7 Freeze: null \xB7 Permanent Delegate: absent";
+  showTransactions(records);
+  if (state.complete) {
+    finalRecord = deploymentRecord(state, records);
+    elements.record.textContent = JSON.stringify(finalRecord, null, 2);
+    elements.review.textContent = "All seven vaults and the fixed supply verified. Mint authority is permanently null.";
+    status("Devnet deployment is complete and verified. The public JSON record is ready.", "ok");
+    return;
+  }
+  elements.record.textContent = "A final deployment record becomes available only after confirmed on-chain completion.";
+  const [mintRent, tokenAccountRent, blockhash] = await Promise.all([
+    connection.getMinimumBalanceForRentExemption(MINT_SIZE),
+    connection.getMinimumBalanceForRentExemption(ACCOUNT_SIZE),
+    connection.getLatestBlockhash("confirmed")
+  ]);
+  const plan = buildNextTransaction({
+    state,
+    payer: EXPECTED_WALLET,
+    mintRent,
+    tokenAccountRent,
+    blockhash: blockhash.blockhash
+  });
+  const fee = await connection.getFeeForMessage(plan.transaction.compileMessage(), "confirmed");
+  if (fee.value === null) throw new Error("Unable to estimate the Devnet transaction fee. Refresh the plan.");
+  const needed = plan.requiredRent + fee.value;
+  const description = plan.kind === "revoke" ? "Final signature: permanently set mint authority to null. Exactly 1B MARSX and all seven vault balances have already verified on chain." : `Next signature: ${state.mintExists ? "continue the existing mint" : "create the mint"} and allocate ${plan.allocations.map((item) => `${item.amount.toLocaleString("en-US")} MARSX \u2192 ${item.vault}`).join("; ")}. Mint authority stays with the owner until the separate final approval.`;
+  elements.review.textContent = `${description} Estimated cost: ${(needed / 1e9).toFixed(9)} Devnet SOL.`;
+  elements["sign-next"].textContent = plan.kind === "revoke" ? "Approve final mint authority revocation in Solflare" : "Review and approve the next Devnet allocation in Solflare";
+  if (balance < needed) {
+    status(`Waiting for test-only funding. Need ${(needed / 1e9).toFixed(9)} Devnet SOL for the next step; current balance ${(balance / 1e9).toFixed(9)}.`, "info");
+    return;
+  }
+  const simulation = await connection.simulateTransaction(new VersionedTransaction(plan.transaction.compileMessage()), {
+    sigVerify: false,
+    commitment: "confirmed"
+  });
+  if (simulation.value.err) throw new Error(`Unsigned simulation failed: ${JSON.stringify(simulation.value.err)}`);
+  prepared = { ...plan, blockhash };
+  status("Existing chain state verified and the next unsigned transaction simulated. Connect the owner wallet and approve only this step.", "ok");
 }
-wallet.on("connect", async () => {
+async function run2(action) {
+  if (busy) return;
+  busy = true;
+  prepared = null;
+  updateControls();
   try {
-    assertConnectedOwner();
-    elements.wallet.textContent = wallet.publicKey.toBase58();
-    elements.fund.disabled = false;
-    elements.prepare.disabled = false;
-    await refreshBalance();
-    setStatus("Approved owner wallet connected on Devnet.", "ok");
+    await action();
   } catch (error) {
-    setStatus(error.message, "error");
-    await wallet.disconnect();
-  }
-});
-wallet.on("disconnect", () => {
-  elements.wallet.textContent = "Not connected";
-  elements.fund.disabled = true;
-  elements.prepare.disabled = true;
-  elements.signFirst.disabled = true;
-  elements.signSecond.disabled = true;
-});
-elements.fund.addEventListener("click", async () => {
-  try {
-    assertConnectedOwner();
-    elements.fund.disabled = true;
-    setStatus("Requesting 0.1 test-only SOL from the Solana Devnet faucet\u2026");
-    const signature2 = await connection.requestAirdrop(EXPECTED_WALLET, 1e8);
-    await connection.confirmTransaction(signature2, "confirmed");
-    await refreshBalance();
-    setStatus(`Devnet faucet confirmed: ${signature2}`, "ok");
-  } catch (error) {
-    setStatus(`Devnet faucet unavailable: ${error.message}`, "error");
+    status(error.message, "error");
   } finally {
-    elements.fund.disabled = false;
+    busy = false;
+    updateControls();
   }
+}
+wallet.on("connect", () => run2(async () => {
+  if (!wallet.publicKey?.equals(EXPECTED_WALLET)) {
+    await wallet.disconnect();
+    throw new Error(`Only the approved owner wallet may connect: ${EXPECTED_WALLET.toBase58()}`);
+  }
+  await refresh({ rediscover: true });
+}));
+wallet.on("disconnect", () => {
+  prepared = null;
+  updateControls();
 });
 elements.connect.addEventListener("click", async () => {
   try {
-    setStatus("Opening Solflare Devnet connection\u2026");
+    await assertDevnet(connection);
     await wallet.connect();
   } catch (error) {
-    setStatus(`Connection stopped: ${error.message}`, "error");
+    status(error.message, "error");
   }
 });
-elements.prepare.addEventListener("click", async () => {
-  try {
-    assertConnectedOwner();
-    setStatus("Preparing the fixed Devnet-only transaction plan\u2026");
-    const [mintRent, tokenAccountRent, balance] = await Promise.all([
-      connection.getMinimumBalanceForRentExemption(MINT_SIZE),
-      connection.getMinimumBalanceForRentExemption(ACCOUNT_SIZE),
-      refreshBalance()
-    ]);
-    const needed = requiredLamports({ mintRent, tokenAccountRent });
-    if (balance < needed) {
-      throw new Error(
-        `Insufficient Devnet SOL. Need at least ${(needed / 1e9).toFixed(6)} Devnet SOL.`
-      );
-    }
-    const keys = createEphemeralDeploymentKeys();
-    deployment = {
-      keys,
-      mintRent,
-      tokenAccountRent,
-      plan: null
-    };
-    await rebuildPlanWithFreshBlockhashes();
-    deployment.plan.first.transaction.partialSign(...deployment.plan.first.partialSigners);
-    deployment.plan.second.transaction.partialSign(...deployment.plan.second.partialSigners);
-    const firstBytes = deployment.plan.first.transaction.serialize({
-      requireAllSignatures: false,
-      verifySignatures: false
-    }).length;
-    const secondBytes = deployment.plan.second.transaction.serialize({
-      requireAllSignatures: false,
-      verifySignatures: false
-    }).length;
-    if (firstBytes > 1232 || secondBytes > 1232) {
-      throw new Error(`Safety stop: transaction packet too large (${firstBytes}/${secondBytes}).`);
-    }
-    elements.mint.textContent = deployment.plan.mint.toBase58();
-    elements.signFirst.disabled = false;
-    elements.signSecond.disabled = true;
-    setStatus(
-      `Ready. Packet sizes ${firstBytes} and ${secondBytes} bytes. No signature has been requested yet.`,
-      "ok"
-    );
-  } catch (error) {
-    deployment = null;
-    elements.signFirst.disabled = true;
-    elements.signSecond.disabled = true;
-    setStatus(error.message, "error");
-  }
+elements.prepare.addEventListener("click", () => run2(() => refresh({ rediscover: true })));
+elements.fund.addEventListener("click", () => run2(async () => {
+  await assertDevnet(connection);
+  status("Requesting 0.1 test-only Devnet SOL. No wallet signature is requested.");
+  const signature2 = await connection.requestAirdrop(EXPECTED_WALLET, 1e8);
+  const result = await connection.confirmTransaction(signature2, "finalized");
+  if (result.value.err) throw new Error("Test-only funding transaction failed.");
+  await refresh({ rediscover: true });
+}));
+elements["sign-next"].addEventListener("click", () => run2(async () => {
+  if (!wallet.publicKey?.equals(EXPECTED_WALLET)) throw new Error("Connect the approved owner wallet.");
+  await refresh({ rediscover: true });
+  if (state.complete) return;
+  if (!prepared) throw new Error("The next step is not ready. Check Devnet funding and unsigned simulation.");
+  const plan = prepared;
+  prepared = null;
+  updateControls();
+  status(`Waiting for your Solflare approval: ${plan.kind === "revoke" ? "permanent mint authority revocation" : "next Devnet allocation"}.`);
+  const signature2 = await wallet.signAndSendTransaction(plan.transaction, {
+    skipPreflight: false,
+    preflightCommitment: "confirmed",
+    maxRetries: 5
+  });
+  rememberPublicSignature(signature2);
+  showTransactions([{ signature: signature2, explorerUrl: explorerTransaction(signature2), confirmationStatus: "submitted; checking finalization" }]);
+  status(`Submitted: ${signature2}. Waiting for finalized chain confirmation.`);
+  const result = await connection.confirmTransaction({ signature: signature2, ...plan.blockhash }, "finalized");
+  if (result.value.err) throw new Error(`The submitted transaction failed: ${JSON.stringify(result.value.err)}`);
+  await refresh({ rediscover: true });
+}));
+elements.download.addEventListener("click", () => {
+  if (!finalRecord) return;
+  const url = URL.createObjectURL(new Blob([JSON.stringify(finalRecord, null, 2) + "\n"], { type: "application/json" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "devnet-deployment.json";
+  link.click();
+  URL.revokeObjectURL(url);
 });
-elements.signFirst.addEventListener("click", async () => {
-  try {
-    assertConnectedOwner();
-    if (!deployment) throw new Error("Prepare the transaction plan first.");
-    elements.signFirst.disabled = true;
-    await rebuildPlanWithFreshBlockhashes();
-    deployment.plan.first.transaction.partialSign(...deployment.plan.first.partialSigners);
-    setStatus("Waiting for Solflare approval for transaction 1 of 2\u2026");
-    firstSignature = await wallet.signAndSendTransaction(deployment.plan.first.transaction, {
-      skipPreflight: false,
-      preflightCommitment: "confirmed",
-      maxRetries: 5
-    });
-    await connection.confirmTransaction(firstSignature, "confirmed");
-    elements.signSecond.disabled = false;
-    setStatus(
-      `Transaction 1 confirmed: ${firstSignature}. Transaction 2 will mint the remaining allocations and permanently revoke mint authority.`,
-      "ok"
-    );
-  } catch (error) {
-    elements.signFirst.disabled = false;
-    setStatus(`Transaction 1 stopped: ${error.message}`, "error");
-  }
-});
-elements.signSecond.addEventListener("click", async () => {
-  try {
-    assertConnectedOwner();
-    if (!deployment || !firstSignature) {
-      throw new Error("Transaction 1 must confirm before transaction 2.");
-    }
-    elements.signSecond.disabled = true;
-    await rebuildPlanWithFreshBlockhashes();
-    deployment.plan.second.transaction.partialSign(...deployment.plan.second.partialSigners);
-    setStatus("Waiting for Solflare approval for transaction 2 of 2\u2026");
-    secondSignature = await wallet.signAndSendTransaction(deployment.plan.second.transaction, {
-      skipPreflight: false,
-      preflightCommitment: "confirmed",
-      maxRetries: 5
-    });
-    await connection.confirmTransaction(secondSignature, "confirmed");
-    const mintAddress = deployment.plan.mint;
-    const mintAccount = await connection.getAccountInfo(mintAddress, "confirmed");
-    if (!mintAccount || !mintAccount.owner.equals(TOKEN_2022_PROGRAM_ID)) {
-      throw new Error("Verification failed: mint is not owned by Token-2022.");
-    }
-    if (mintAccount.data.length !== MINT_SIZE) {
-      throw new Error("Verification failed: unexpected mint extension data.");
-    }
-    const mintInfo = await getMint(
-      connection,
-      mintAddress,
-      "confirmed",
-      TOKEN_2022_PROGRAM_ID
-    );
-    if (mintInfo.decimals !== DECIMALS || mintInfo.supply !== RAW_GENESIS_SUPPLY) {
-      throw new Error("Verification failed: decimals or total supply mismatch.");
-    }
-    if (mintInfo.mintAuthority !== null || mintInfo.freezeAuthority !== null) {
-      throw new Error("Verification failed: an authority remains enabled.");
-    }
-    const vaults = [];
-    let verifiedRawSupply = 0n;
-    for (let index = 0; index < ALLOCATIONS.length; index += 1) {
-      const allocation = ALLOCATIONS[index];
-      const address = deployment.keys.vaults[index].keypair.publicKey;
-      const account = await getAccount(
-        connection,
-        address,
-        "confirmed",
-        TOKEN_2022_PROGRAM_ID
-      );
-      const expectedRawAmount = allocation.amount * 10n ** BigInt(DECIMALS);
-      if (!account.owner.equals(EXPECTED_WALLET) || !account.mint.equals(mintAddress) || account.amount !== expectedRawAmount) {
-        throw new Error(`Verification failed for vault ${allocation.vault}.`);
-      }
-      verifiedRawSupply += account.amount;
-      vaults.push({
-        name: allocation.vault,
-        address: address.toBase58(),
-        owner: EXPECTED_WALLET.toBase58(),
-        amount: allocation.amount.toString(),
-        percent: allocation.percent
-      });
-    }
-    if (verifiedRawSupply !== RAW_GENESIS_SUPPLY) {
-      throw new Error("Verification failed: vault balances do not sum to genesis supply.");
-    }
-    const record2 = {
-      network: NETWORK,
-      mintAddress: mintAddress.toBase58(),
-      ownerPublicWallet: EXPECTED_WALLET.toBase58(),
-      tokenProgram: "Token-2022",
-      tokenProgramAddress: TOKEN_2022_PROGRAM_ID.toBase58(),
-      decimals: DECIMALS,
-      totalSupply: GENESIS_SUPPLY.toString(),
-      mintAuthority: null,
-      freezeAuthority: null,
-      permanentDelegate: false,
-      vaults,
-      transactionSignatures: [firstSignature, secondSignature],
-      deployedAt: (/* @__PURE__ */ new Date()).toISOString(),
-      planSha256: PLAN_SHA256,
-      verified: true
-    };
-    elements.record.textContent = JSON.stringify(record2, null, 2);
-    setStatus("MARSX Devnet genesis verified. Mint authority is permanently revoked.", "ok");
-    await refreshBalance();
-  } catch (error) {
-    setStatus(`Final verification stopped: ${error.message}`, "error");
-  }
-});
-elements.wallet.textContent = "Not connected";
-elements.mint.textContent = "Not generated";
+status("Searching the approved wallet's Devnet history. No signature is requested.");
+run2(() => refresh({ rediscover: true }));
 /*! Bundled license information:
 
 ieee754/index.js:
