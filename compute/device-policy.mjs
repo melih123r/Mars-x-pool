@@ -1,10 +1,13 @@
+// IMPORTANT: Google Play builds must not execute on-device cryptocurrency mining.
+// This policy is for non-Play/internal research builds or non-crypto compute only.
 export const DEFAULT_DEVICE_POLICY = Object.freeze({
   minBatteryPercent: 40,
   maxBatteryTempC: 42,
   requireCharging: true,
   requireUnmeteredNetwork: true,
   maxCpuPercent: 35,
-  foregroundOnly: true
+  foregroundOnly: true,
+  distributionChannel: "google_play"
 });
 
 export function evaluateDevicePolicy(state, policy = DEFAULT_DEVICE_POLICY) {
