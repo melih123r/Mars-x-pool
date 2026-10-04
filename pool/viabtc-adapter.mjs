@@ -1,8 +1,12 @@
 import { createHmac } from "node:crypto";
 import { normalizePoolSnapshot } from "./settlement.mjs";
 
-const DEFAULT_BASE = "https://www.viabtc.net";
-const READ_ONLY_PATHS = new Set(["/res/openapi/v1/hashrate", "/res/openapi/v1/profit"]);
+// Official ViaBTC pool OpenAPI host from viabtc/viapool_api examples.
+const DEFAULT_BASE = "https://pool.viabtc.com";
+const READ_ONLY_PATHS = new Set([
+  "/res/openapi/v1/hashrate",
+  "/res/openapi/v1/profit/history"
+]);
 
 function requireHttps(url) {
   const parsed = new URL(url);
@@ -12,6 +16,11 @@ function requireHttps(url) {
 function secret(env, name) {
   const value = String(env[name] || "").trim();
   if (!value) throw new Error(`missing ${name}`);
+  return value;
+}
+function coin(asset) {
+  const value = String(asset || "").toUpperCase();
+  if (!new Set(["LTC","DOGE"]).has(value)) throw new Error("unsupported ViaBTC asset");
   return value;
 }
 
@@ -45,11 +54,11 @@ export function createViaBtcAdapter({ env = process.env, fetchImpl = fetch, now 
 
   return Object.freeze({
     provider: "viabtc",
-    accountHashrate: (asset) => request("/res/openapi/v1/hashrate", { coin: String(asset).toUpperCase() }),
-    profitSummary: (asset) => request("/res/openapi/v1/profit", { coin: String(asset).toUpperCase() }),
+    accountHashrate: (asset) => request("/res/openapi/v1/hashrate", { coin: coin(asset) }),
+    profitHistory: (asset, params = {}) => request("/res/openapi/v1/profit/history", { coin: coin(asset), ...params }),
     request,
     normalizeSettlement({ asset, workerId, grossUnits, acceptedShares, rejectedShares, hashrate, reference, observedAt }) {
-      return normalizePoolSnapshot({ provider:"viabtc", asset, workerId, grossUnits, acceptedShares, rejectedShares, hashrate, providerReference:reference, observedAt });
+      return normalizePoolSnapshot({ provider:"viabtc", asset:coin(asset), workerId, grossUnits, acceptedShares, rejectedShares, hashrate, providerReference:reference, observedAt });
     },
   });
 }
@@ -57,6 +66,8 @@ export function createViaBtcAdapter({ env = process.env, fetchImpl = fetch, now 
 export function assertRealPoolEnabled(env = process.env) {
   if (env.REAL_POOL_ENABLED !== "true") throw new Error("real pool integration is disabled");
   if (!env.VIABTC_API_KEY) throw new Error("real pool requires VIABTC_API_KEY");
-  if (env.REAL_PAYOUTS_ENABLED === "true") throw new Error("safety stop: real payouts require a separately reviewed signer/custody adapter");
+  if (env.REAL_PAYOUTS_ENABLED === "true" || env.REAL_WITHDRAWALS_ENABLED === "true") {
+    throw new Error("safety stop: real payouts/withdrawals require a separately reviewed signer/custody adapter");
+  }
   return true;
 }
