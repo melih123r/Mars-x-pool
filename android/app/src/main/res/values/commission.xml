@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="commission_policy_title">MARS-X commission policy</string>
+    <string name="commission_policy_body">Planned pool service fee: %1$s%% of the attributable reward after the external pool fee.\n\nPlanned withdrawal service fee: %2$s%% of the requested debit from the user net balance. Network and provider costs are separate and require a final quote.\n\nIf eligible, the referrer receives %3$s%% of the withdrawal service fee, taken from the MARS-X fee rather than added to the user charge. No referral share is applied to the pool fee in this policy.\n\nStatus: collection is not configured. Viewing LuckPool data does not create a commission or a debt. No real mining, conversion, withdrawal or fee collection is enabled by this screen. A future charge requires prior fee disclosure and explicit consent.\n\nPolicy: %4$s</string>
+    <string name="commission_policy_unavailable">Fee policy could not be loaded. No commission collection is enabled.</string>
+</resources>

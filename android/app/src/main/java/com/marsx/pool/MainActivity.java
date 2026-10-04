@@ -149,6 +149,7 @@ public class MainActivity extends Activity {
         addText(vrscCard, getString(R.string.vrsc_intro), 14);
         button(vrscCard, getString(R.string.vrsc_open), view ->
                 startActivity(new Intent(this, VrscPoolActivity.class)));
+        button(vrscCard, getString(R.string.commission_policy_title), view -> CommissionDisclosure.show(this));
 
         LinearLayout deviceCard = card(root);
         addText(deviceCard, getString(R.string.device_title), 14);

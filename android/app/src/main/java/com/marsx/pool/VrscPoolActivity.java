@@ -61,6 +61,7 @@ public final class VrscPoolActivity extends Activity {
         status.setAccessibilityLiveRegion(android.view.View.ACCESSIBILITY_LIVE_REGION_POLITE);
         details = label(root, "", 16); details.setTextIsSelectable(true);
         label(root, getString(R.string.vrsc_money_notice), 14);
+        button(root, getString(R.string.commission_policy_title), () -> CommissionDisclosure.show(this));
         button(root, getString(R.string.vrsc_forget), () -> {
             stop(R.string.vrsc_not_loaded); prefs.edit().clear().apply(); address.setText(""); consent.setChecked(false);
         });
