@@ -24,6 +24,22 @@ The Android client does not retain the raw beta licence key. It stores signed MA
 
 After 365 days without licensed account activity, an available `USDT_TEST` balance is moved to a separately recorded dormant client-liability reserve. It is not treated as company revenue and is automatically restored when the same licensed installation returns. This policy concerns test units only; public real-value services require separate legal, identity, custody and payment controls.
 
+## Optional VRSC public pool monitor (2026-10-04 addendum)
+
+After accepting the VRSC screen's notice and pressing refresh, the Android app
+sends the entered public VRSC address directly to LuckPool over HTTPS. LuckPool
+also receives the connection's network IP. The app reads public worker, hashrate,
+pool-reported balance and payment transaction-reference data. These requests
+carry no MARS-X login token, licence key, private key or seed phrase.
+
+No automatic polling occurs. Leaving the screen stops the request and clears the
+display; the public address remains in device-local preferences until the user
+selects Delete saved address, deletes the MARS-X account, or clears app data.
+MARS-X does not receive or retain this monitor's address or responses on its
+backend. Viewing an address does not establish ownership or credit an account.
+The application does not control LuckPool's retention of its own public data and
+connection records. Address/IP sharing is disclosed before any request in the UI.
+
 ## Sharing
 
 Data may be processed by Supabase (Edge Functions and PostgreSQL), Qonversion, Google Play, infrastructure and app-distribution providers used to operate MARS-X Pool. Cloudflare Workers/D1 is an alternative deployment target and Railway/Redis is a temporary rollback target; they process service data only while actually enabled. Review [Supabase's privacy information](https://supabase.com/privacy), [Cloudflare's privacy information](https://www.cloudflare.com/privacypolicy/), [Qonversion's privacy information](https://qonversion.io/privacy) and [Google's privacy policy](https://policies.google.com/privacy). The production notice must identify all actual processors and relevant international-transfer safeguards. Data is not sold or shared with advertisers; it is disclosed only for service delivery, security, valid legal obligations or protection of legal rights.

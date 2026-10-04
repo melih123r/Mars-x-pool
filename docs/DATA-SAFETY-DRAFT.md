@@ -13,6 +13,14 @@ This is a preparation draft. The publisher must reconcile it with the final SDK 
 
 ## Security and user controls
 
+- Optional VRSC monitoring sends a user-entered public wallet address directly to
+  LuckPool after an explicit in-app acknowledgement. LuckPool receives the network
+  IP and returns public worker, pool balance and payment-reference data. This is
+  optional financial/address data sharing and must be reflected in the final
+  store form before distributing the feature. It is not wallet custody or proof
+  that the user owns the queried address. The address is device-local, can be
+  deleted in the feature and is cleared after successful account deletion.
+
 - Data is encrypted in transit with HTTPS.
 - The app stores the signed licence session with Android Keystore-backed encrypted preferences.
 - A raw beta licence key is not retained after activation.
