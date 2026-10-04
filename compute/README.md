@@ -26,3 +26,10 @@ For LTC/DOGE, the practical path is an explicitly authorised external Scrypt min
 - no spendable credit before provider confirmation;
 - thermal/power stop controls for any first-party compute client;
 - real payouts remain independently gated until signer/custody review.
+
+
+## One-tap user contract
+
+The normal UI may expose a single START/STOP control. START never means hidden or unlimited mining. It records explicit consent and the worker must continuously satisfy the device policy. The worker stops when charging, temperature, battery, network, foreground, or user-stop gates fail.
+
+A device-compute receipt is not money. Only a later provider-confirmed settlement may enter the spendable mining ledger. This keeps mobile compute, estimates, and real pool revenue auditable and separate.
