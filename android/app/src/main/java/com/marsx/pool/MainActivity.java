@@ -144,6 +144,12 @@ public class MainActivity extends Activity {
         status = addText(serviceCard, getString(R.string.connecting), 18);
         button(serviceCard, getString(R.string.refresh_button), view -> testConnection());
 
+        LinearLayout vrscCard = card(root);
+        addText(vrscCard, getString(R.string.vrsc_title), 18);
+        addText(vrscCard, getString(R.string.vrsc_intro), 14);
+        button(vrscCard, getString(R.string.vrsc_open), view ->
+                startActivity(new Intent(this, VrscPoolActivity.class)));
+
         LinearLayout deviceCard = card(root);
         addText(deviceCard, getString(R.string.device_title), 14);
         String worker = prefs.getString("worker_id", "");
@@ -466,6 +472,7 @@ public class MainActivity extends Activity {
                 if (code == 200 && response.optBoolean("deleted")) {
                     secureStore.remove("auth_session");
                     prefs.edit().putBoolean("google_signed_once", false).apply();
+                    getSharedPreferences("vrsc_watch", MODE_PRIVATE).edit().clear().apply();
                     currentReferralCode = "";
                     runOnUiThread(() -> {
                         accountStatus.setText(R.string.account_deleted);
