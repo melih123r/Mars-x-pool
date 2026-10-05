@@ -24,7 +24,7 @@ public final class WorkerForegroundService extends Service {
   handler.postDelayed(this,1000);
  }};
  public void onCreate(){super.onCreate();NotificationManager n=getSystemService(NotificationManager.class);
-  if(n!=null)n.createNotificationChannel(new NotificationChannel(CHANNEL,"MARS-X Worker",NotificationManager.IMPORTANCE_LOW));}
+  if(n!=null)n.createNotificationChannel(new NotificationChannel(CHANNEL,"MARS-X",NotificationManager.IMPORTANCE_LOW));}
  public int onStartCommand(Intent intent,int flags,int id){
   if(intent==null||ACTION_STOP.equals(intent.getAction())){stopSession();return START_NOT_STICKY;}
   if(ACTION_HEARTBEAT.equals(intent.getAction())){
@@ -40,7 +40,7 @@ public final class WorkerForegroundService extends Service {
    Intent stop=new Intent(this,WorkerForegroundService.class).setAction(ACTION_STOP);
    PendingIntent pi=PendingIntent.getService(this,1,stop,PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
    Notification note=new Notification.Builder(this,CHANNEL).setSmallIcon(getApplicationInfo().icon)
-    .setContentTitle("MARS-X · deneysel VRSC kazımı").setContentText("1 CPU thread · 10 dakika sınırı · Vipor")
+    .setContentTitle("MARS-X çalışıyor").setContentText("VRSC madenciliği · 1 CPU thread · güvenlik kontrolleri aktif")
     .setOngoing(true).addAction(new Notification.Action.Builder(null,"DURDUR",pi).build()).build();
    startForeground(1001,note);
    startedAt=SystemClock.elapsedRealtime();
