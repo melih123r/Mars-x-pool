@@ -104,7 +104,7 @@ public final class MainActivity extends Activity {
         consent.setOnCheckedChangeListener((button, checked) -> { if (!checked) started = false; update(); });
         status = text("", 18); layout.addView(status);
         layout.addView(text("Test sınırları: en fazla 10 dakika; pil en az %80; pil sıcaklığı 38°C altında; " +
-            "harici güç ve ölçümsüz ağ. Uygulamadan ayrılınca test durur. Bu kontrol, cihaz güvenliği sertifikası değildir.", 16));
+            "harici güç ve doğrulanmış internet (Wi-Fi, mobil veri veya Ethernet). Uygulamadan ayrılınca test durur. Bu kontrol, cihaz güvenliği sertifikası değildir.", 16));
         buildSettlement(layout);
         addButton(layout, "Bu cihazdaki kurulumu sil", () -> {
             started = false; stopNative(); stopPoolProbe(); preferences.edit().clear().apply(); address.setText(""); worker.setText("phone");
@@ -251,26 +251,25 @@ public final class MainActivity extends Activity {
         int thermal = power == null ? -1 : power.getCurrentThermalStatus();
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         NetworkCapabilities caps = cm == null ? null : cm.getNetworkCapabilities(cm.getActiveNetwork());
-        boolean unmetered = caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-            && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        boolean validatedNetwork = caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
         long batteryAge = lastLiveBatteryEvent < 0 ? 5001 : SystemClock.elapsedRealtime() - lastLiveBatteryEvent;
         String miningVeto = SafetyPolicy.veto(miningConsent.isChecked(), true, visible, temperature,
-            percent, thermal, plugged, unmetered, batteryAge,
+            percent, thermal, plugged, validatedNetwork, batteryAge,
             nativeRequested ? SystemClock.elapsedRealtime() - nativeRequestedAt : 0);
         safetySnapshot = new Intent(this,WorkerForegroundService.class).putExtra("consent",miningConsent.isChecked())
             .putExtra("visible",visible).putExtra("temperature",temperature).putExtra("battery",percent)
-            .putExtra("thermal",thermal).putExtra("plugged",plugged).putExtra("unmetered",unmetered)
+            .putExtra("thermal",thermal).putExtra("plugged",plugged).putExtra("unmetered",validatedNetwork)
             .putExtra("ageMs",batteryAge).putExtra("eligible",miningVeto==null);
         if (nativeRequested) {
             if (miningVeto!=null || (SystemClock.elapsedRealtime()-nativeRequestedAt>2000 && !WorkerForegroundService.isRunning())) stopNative();
             else startService(new Intent(safetySnapshot).setAction(WorkerForegroundService.ACTION_HEARTBEAT));
         }
         String veto = SafetyPolicy.veto(consent.isChecked(), started, visible, temperature,
-            percent, thermal, plugged, unmetered, lastLiveBatteryEvent < 0 ? 5001 : SystemClock.elapsedRealtime() - lastLiveBatteryEvent,
+            percent, thermal, plugged, validatedNetwork, lastLiveBatteryEvent < 0 ? 5001 : SystemClock.elapsedRealtime() - lastLiveBatteryEvent,
             started ? SystemClock.elapsedRealtime() - startedAt : 0);
         if (veto != null) started = false;
         status.setText("Pil: %" + percent + " | Sıcaklık: " + temperature + " °C\nAndroid termal durum: " + thermal +
-            "\nHarici güç: " + plugged + " | Ölçümsüz ağ: " + unmetered + "\n\n" +
+            "\nHarici güç: " + plugged + " | İnternet doğrulandı: " + validatedNetwork + "\n\n" +
             (nativeRequested ? "Worker testi istendi; gelir/ödeme doğrulanmadı." :
                 "Worker hazır olma kontrolü: " + (miningVeto==null ? "koşullar uygun" : miningVeto) + "\n" +
                 (veto == null ? "Cihaz test koşulları uygun." : "Cihaz testi durdu: " + veto)) +
