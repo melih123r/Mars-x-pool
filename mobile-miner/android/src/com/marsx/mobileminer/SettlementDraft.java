@@ -55,8 +55,7 @@ public final class SettlementDraft {
         BigDecimal beforeProviderCosts = gross.subtract(serviceFee);
         return "YEREL TASLAK — İŞLEM GÖNDERİLMEDİ\n\n" + amount + " VRSC → " + target +
             "\nHedef adres:\n" + destination +
-            "\n\nBu seçim işlem çiftinin desteklendiği anlamına gelmez. " +
-            "VRSC dışındaki hedef adreslerin ağ doğrulaması henüz yapılmadı.\n\n" +
+            "\n\nAdres biçimi seçilen ağ için yerel olarak doğrulandı. Bu doğrulama adresin sahibi olduğunu veya provider rotasının canlı olduğunu garanti etmez.\n\n" +
             "Alınacak miktar: canlı rota/quote bağlantısı bekleniyor\n" +
             "MARS-X hizmet bedeli: %2 = " + serviceFee.stripTrailingZeros().toPlainString() + " VRSC eşdeğeri\n" +
             "Provider/network maliyeti öncesi dönüşüme girecek: " + beforeProviderCosts.stripTrailingZeros().toPlainString() + " VRSC eşdeğeri\n" +
