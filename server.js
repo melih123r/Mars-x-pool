@@ -1,6 +1,7 @@
 import http from "node:http";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
+import { createPairingControl } from "./mobile-miner/pairing-control.mjs";
 
 const SERVICE = "marsx-pool-worker-api";
 const VERSION = "0.8.4";
@@ -692,6 +693,7 @@ export function createServer({
   qonversionSessionTtlSeconds = Number(process.env.QONVERSION_SESSION_TTL_SECONDS || 3_600),
   qonversionApiBase = "https://api.qonversion.io/v4",
   qonversionFetch = globalThis.fetch,
+  pairingControl = null,
 } = {}) {
   const records = parseLicenseRecords(licenseRecords);
   const ttlSeconds = Math.min(Math.max(Number(licenseTokenTtlSeconds), 3_600), 7_776_000);
@@ -709,6 +711,7 @@ export function createServer({
   const licenseReady = legacyLicenseReady || qonversionReady;
   const rateLimits = new Map();
   const activationLimits = new Map();
+  const pairing = pairingControl || createPairingControl({ now });
 
   function isRateLimited(req) {
     const key = requestAddress(req);
