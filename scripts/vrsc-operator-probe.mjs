@@ -58,7 +58,7 @@ export async function run() {
   const address = process.env.VRSC_PAYOUT_ADDRESS || config.payoutAddress;
   if (!validAddress(address)) throw new Error('invalid-payout-address-checksum');
   const targets = [['eu.luckpool.net', 3958], ['na.luckpool.net', 3958], ['ap.luckpool.net', 3958],
-    ['verus.farm', 9998], ['veruscoin.cedric-crispin.com', 4025]];
+    ['bzdev.vipor.net', 5140], ['verus.farm', 9998], ['veruscoin.cedric-crispin.com', 4025]];
   const endpoints = await Promise.all(targets.map(([host, port]) => probe(host, address, port)));
   // Authorization proves protocol response only. No work is computed or submitted.
   console.log(JSON.stringify({ observedAt: new Date().toISOString(), address, endpoints,
