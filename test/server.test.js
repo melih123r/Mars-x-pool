@@ -401,3 +401,36 @@ test("Qonversion session is denied without an active configured entitlement", as
     await close(server);
   }
 });
+
+
+test("conversion endpoints fail closed without provider credentials", async () => {
+  const { server, baseUrl } = await runServer({ store: new MemoryStore() });
+  try {
+    const status = await fetch(`${baseUrl}/conversion/changenow-status`);
+    assert.equal(status.status, 503);
+    const statusBody = await status.json();
+    assert.equal(statusBody.configured, false);
+    assert.equal(statusBody.executionEnabled, false);
+
+    const quote = await fetch(`${baseUrl}/conversion/changenow-quote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fromCurrency: "btc", toCurrency: "sol",
+        fromNetwork: "btc", toNetwork: "sol",
+        amount: "0.001"
+      }),
+    });
+    assert.equal(quote.status, 503);
+    assert.equal((await quote.json()).error, "changenow_api_key_required");
+
+    const readiness = await fetch(`${baseUrl}/conversion/readiness`);
+    assert.equal(readiness.status, 200);
+    const readyBody = await readiness.json();
+    assert.equal(readyBody.executionEnabled, false);
+    assert.equal(readyBody.changeNowConfigured, false);
+    assert.equal(readyBody.treasurySignerConfigured, false);
+  } finally {
+    await close(server);
+  }
+});
