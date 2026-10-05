@@ -9,7 +9,7 @@
 - Conversion and withdrawal policy returns execution-disabled even when eligibility checks pass. No new live financial routes added.
 
 ## Required external evidence
-1. Real supported Android device: start, valid accepted share, thermal/battery/network stops, background stop and parent-process death. Current 5-second battery freshness policy is conservative and needs device validation.
+1. Real supported Android device: start, valid accepted share, thermal/battery/network stops, foreground-background behavior and parent-process death. Service-side safety telemetry is implemented; real-device validation is still required.
 2. Authenticated provider settlement transport and actual payout evidence bound to the correct wallet, worker and provider. Boolean providerConfirmed/providerVerified fields are internal adapter contracts, not cryptographic proof. Current generic adapter/tests are not a live payout integration.
 3. Wire the SQLite exact-amount reconciliation ledger to an authenticated provider verifier and persistent deployment volume. The new ledger passes restart, provider-scoped replay and conflict tests, but is not connected to production or spendable balances. Legacy Number-based settlement helpers are prototypes and must not be used for live financial balances.
 4. A supported provider mechanism for fee collection: direct wallet payouts cannot supply a MARS-X 10% pool or 2% withdrawal fee. No fee has been collected.
