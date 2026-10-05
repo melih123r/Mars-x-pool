@@ -15,6 +15,8 @@ const SECRET_NAMES: Record<string, string> = {
   marsx_pool_qonversion_secret_key: "QONVERSION_SECRET_KEY",
   marsx_pool_google_web_client_id: "GOOGLE_WEB_CLIENT_ID",
   marsx_pool_auth_subject_pepper: "AUTH_SUBJECT_PEPPER",
+  marsx_pool_changenow_api_key: "CHANGENOW_API_KEY",
+  marsx_pool_verus_scan_api_key: "VERUS_SCAN_API_KEY",
 };
 
 let cachedEnvironment: Record<string, string> | null = null;
@@ -31,6 +33,8 @@ async function runtimeEnvironment() {
     QONVERSION_SESSION_TTL_SECONDS: "86400",
     MIN_PAYOUT_UNITS: "1000000",
     DORMANT_AFTER_MS: "31536000000",
+    REAL_WITHDRAWALS_ENABLED: "false",
+    REAL_PAYOUTS_ENABLED: "false",
   };
   for (const [vaultName, environmentName] of Object.entries(SECRET_NAMES)) {
     if (secrets[vaultName]) environment[environmentName] = secrets[vaultName];
@@ -56,7 +60,7 @@ Deno.serve(async (request: Request) => {
   } catch (error) {
     console.error("MARS-X Supabase function failed", error);
     return Response.json(
-      { ok: false, service: "marsx-pool-worker-api", version: "0.8.4", error: "service_unavailable" },
+      { ok: false, service: "marsx-pool-worker-api", version: "0.8.5", error: "service_unavailable" },
       { status: 503, headers: { "Cache-Control": "no-store" } },
     );
   }

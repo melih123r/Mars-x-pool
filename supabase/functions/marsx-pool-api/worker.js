@@ -1,5 +1,7 @@
+import { readOnlyConversion } from "./conversion.js";
+
 const SERVICE = "marsx-pool-worker-api";
-const VERSION = "0.8.4";
+const VERSION = "0.8.5";
 const TERMS_VERSION = "2026-09-27-v3";
 const ONLINE_WINDOW_MS = 120_000;
 const MAX_BODY_BYTES = 16_384;
@@ -586,13 +588,21 @@ export class D1Store {
   }
 
   async deleteUser(userId, at) {
-    await this.db.batch([
-      this.db.prepare("UPDATE user_sessions SET revoked_at=? WHERE user_id=? AND revoked_at IS NULL").bind(at, userId),
+    const linkedWorkers = await this.db.prepare("SELECT worker_id FROM user_workers WHERE user_id=?")
+      .bind(userId).all();
+    const statements = [
+      this.db.prepare("DELETE FROM fee_events WHERE user_id=? OR referrer_user_id=?").bind(userId, userId),
+      this.db.prepare("DELETE FROM referral_balances WHERE user_id=?").bind(userId),
+      this.db.prepare("DELETE FROM referrals WHERE invitee_user_id=? OR referrer_user_id=?").bind(userId, userId),
+      this.db.prepare("DELETE FROM referral_codes WHERE user_id=?").bind(userId),
+      this.db.prepare("DELETE FROM user_sessions WHERE user_id=?").bind(userId),
       this.db.prepare("DELETE FROM user_workers WHERE user_id=?").bind(userId),
-      this.db.prepare(`
-        UPDATE users SET google_subject_hash=?,email=NULL,display_name=NULL,deleted_at=?,updated_at=? WHERE user_id=?
-      `).bind(`deleted:${userId}:${randomToken(12)}`, at, at, userId),
-    ]);
+    ];
+    for (const worker of linkedWorkers.results || []) {
+      statements.push(this.db.prepare("DELETE FROM workers WHERE worker_id=?").bind(worker.worker_id));
+    }
+    statements.push(this.db.prepare("DELETE FROM users WHERE user_id=?").bind(userId));
+    await this.db.batch(statements);
   }
 
   async getBalance(workerId) {
@@ -820,12 +830,22 @@ export class D1Store {
 
 const privacyPage = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MARS-X Pool Privacy Policy</title><style>body{font-family:system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;line-height:1.6;color:#172033}h1,h2{color:#144991}</style></head>
-<body><h1>MARS-X Pool Privacy Policy</h1><p>Last updated: 27 September 2026.</p>
+<title>MARS-X Pool Privacy Policy</title><style>body{font-family:system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;line-height:1.6;color:#172033}h1,h2{color:#144991}a{color:#144991}</style></head>
+<body><h1>MARS-X Pool Privacy Policy</h1><p>Last updated: 30 September 2026.</p>
 <p>MARS-X Pool Beta is an authorised remote node/pool management and sandbox-payout test. It does not mine cryptocurrency on the Android device, run hidden background compute, promise earnings, or transfer real money in sandbox mode.</p>
 <h2>Data processed</h2><p>After an explicit action, the service receives a random installation/worker ID, Google account subject identifier, verified email and display name, licence or subscription status, optional one-level referral relationship, app/platform version, request time, sandbox balance activity and security logs. The Google subject is stored only as a keyed hash. Qonversion and Google Play process subscription data; Supabase processes API requests and stores service records in PostgreSQL. Payment-card data is not received by MARS-X.</p>
-<h2>Purpose, retention and rights</h2><p>Data is used to authenticate accounts, protect licences, operate the beta, calculate the disclosed referral share, prevent abuse and troubleshoot faults. The app provides an account-deletion action that removes the Google link, profile fields and active sessions. Security hashes are normally retained for 90 days. After 365 days without account activity, sandbox balances move to a separately recorded client-liability reserve and are restored on licensed return. Data is not sold to advertisers. Users in France may complain to the CNIL.</p>
-<p>Controller: AbdilMelih Demirbaş / MARS-X Pool. A monitored privacy email and legally required publisher details must be added before public commercial release.</p>
+<h2>Purpose, retention and rights</h2><p>Data is used to authenticate accounts, protect licences, operate the beta, calculate the disclosed referral share, prevent abuse and troubleshoot faults. The app provides an account-deletion action that deletes the MARS-X account, linked worker records, profile, active sessions, referral records and sandbox activity associated with that account. Users who no longer have the app can start the same request from the <a href="./delete-account">account deletion page</a>. Data is not sold to advertisers. Users in France may complain to the CNIL.</p>
+<p>Controller: AbdilMelih Demirbaş / MARS-X Pool. Privacy and support contact: <a href="mailto:abdilmelih08@gmail.com">abdilmelih08@gmail.com</a>.</p>
+</body></html>`;
+
+const accountDeletionPage = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Delete your MARS-X Pool account</title><style>body{font-family:system-ui,sans-serif;max-width:760px;margin:40px auto;padding:0 20px;line-height:1.6;color:#172033}h1,h2{color:#144991}a{color:#144991}</style></head>
+<body><h1>Delete your MARS-X Pool account</h1>
+<p>MARS-X Pool Beta users can delete their account immediately in the Android app: open <strong>Account</strong>, choose <strong>Delete account</strong>, and confirm. This deletes the MARS-X account, linked worker records, profile, active sessions, referral records and sandbox activity associated with that account.</p>
+<p>If the app is no longer installed, email <a href="mailto:abdilmelih08@gmail.com?subject=MARS-X%20Pool%20account%20deletion%20request">abdilmelih08@gmail.com</a> from the Google email address used with MARS-X Pool and write “MARS-X Pool account deletion request”. We will verify ownership before deletion and confirm completion by email.</p>
+<p>This request concerns MARS-X Pool data only. It does not delete the user's Google account or Google Play account.</p>
+<p><a href="./privacy">Read the privacy policy</a>.</p>
 </body></html>`;
 
 export function createApp({ store: injectedStore, now = () => Date.now(), fetchImpl = fetch } = {}) {
@@ -978,6 +998,7 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
       },
     });
     if (request.method === "GET" && pathname === "/privacy") return html(200, privacyPage);
+    if (request.method === "GET" && pathname === "/delete-account") return html(200, accountDeletionPage);
 
     let records;
     try { records = parseLicenseRecords(env.LICENSE_RECORDS_JSON); }
@@ -1033,6 +1054,7 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
           license_provider: qonversionReady ? "qonversion" : (legacyReady ? "marsx_beta" : "none"),
           google_auth: googleAuthReady ? "ready" : "not_configured",
           payoutMode: "sandbox", dormantPolicy: "safeguarded-liability-reserve",
+          conversionMode: "read_only", realWithdrawalsEnabled: false,
         });
       } catch {
         return json(503, { ok: false, service: SERVICE, version: VERSION, storage: store.kind });
@@ -1042,6 +1064,24 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
     if (limited(generalLimits, request, 60_000, 300)) return json(429, { error: "rate_limit_exceeded" });
 
     try {
+      if (pathname.startsWith("/conversion/")) {
+        // Readiness and the closed execution gate are safe to inspect publicly.
+        const publicRoute = (request.method === "GET" && pathname === "/conversion/readiness")
+          || (request.method === "POST" && pathname === "/conversion/execute");
+        if (!publicRoute) {
+          const operator = env.WORKER_TOKEN && await safeAuthorization(
+            request.headers.get("authorization"), "Bearer", env.WORKER_TOKEN,
+          );
+          if (!operator && !await authenticateWorker()) {
+            return json(401, { error: "conversion_authorization_required" });
+          }
+          if (limited(activationLimits, request, 60_000, 20)) return json(429, { error: "too_many_attempts" });
+        }
+        const data = request.method === "POST" && pathname !== "/conversion/execute" ? await readJson(request) : {};
+        const response = await readOnlyConversion({ method: request.method, pathname, data, env, fetchImpl });
+        return json(response.status, response.body);
+      }
+
       if (request.method === "POST" && pathname === "/auth/google/nonce") {
         if (!googleAuthReady) return json(503, { error: "google_auth_not_configured" });
         if (limited(activationLimits, request, 600_000, 20)) return json(429, { error: "too_many_attempts" });
