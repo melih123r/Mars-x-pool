@@ -46,7 +46,7 @@ fetch_source monkins1010/ccminer 1667394ad4120d64b0c57367e71cb832ad2e3645 "$TASK
   # Raw Stratum is permitted only on loopback behind the Android verified TLS relay.
   # OpenSSL is required for upstream hashing; remote TLS is handled by Android.
   CPPFLAGS="-I$TASK_PREFIX/include" LDFLAGS="-L$TASK_PREFIX/lib -L$TASK_PREFIX/lib64" \
-    CFLAGS="-O2 -fPIE" CXXFLAGS="-O2 -fPIE" CURL_CONFIG="$TASK_PREFIX/bin/curl-config" \
+    LIBS="-lcrypto -ldl -lm" CFLAGS="-O2 -fPIE" CXXFLAGS="-O2 -fPIE" CURL_CONFIG="$TASK_PREFIX/bin/curl-config" \
     ./configure --host=aarch64-linux-android --target=aarch64-linux-android \
       ac_cv_prog_c_openmp=unsupported ac_cv_prog_cxx_openmp=unsupported
   make -j2
