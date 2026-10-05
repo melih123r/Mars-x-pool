@@ -801,6 +801,30 @@ export function createServer({
     if (isRateLimited(req)) return sendJson(res, 429, { error: "rate_limit_exceeded" });
 
     try {
+      if (req.method === "POST" && pathname === "/pairing/code") {
+        if (!licenseReady) return sendJson(res, 503, { error: "licensing_not_configured" });
+        const data = await readJson(req);
+        const installId = String(data.install_id || "");
+        const session = currentLicense(req, installId);
+        if (!session) return sendJson(res, 401, { error: "valid_license_required" });
+        try {
+          const poolId = String(data.pool_id || ""), workerId = String(data.worker_id || "");
+          const issued = pairing.issue({ poolId, workerId });
+          return sendJson(res, 201, { ok: true, pool_id: poolId, worker_id: workerId,
+            pairing_code: issued.code, expires_at: new Date(issued.expiresAt).toISOString() });
+        } catch { return sendJson(res, 400, { error: "invalid_pairing_identity" }); }
+      }
+
+      if (req.method === "POST" && pathname === "/pairing/redeem") {
+        const data = await readJson(req);
+        const result = pairing.redeem({ code: String(data.pairing_code || ""),
+          poolId: String(data.pool_id || ""), workerId: String(data.worker_id || ""),
+          userConfirmed: data.local_user_confirmed === true });
+        if (!result.paired) return sendJson(res, 403, { error: result.reason });
+        return sendJson(res, 200, { ok: true, session_id: result.sessionId,
+          worker_token: result.token, expires_at: new Date(result.expiresAt).toISOString() });
+      }
+
       if (req.method === "POST" && pathname === "/billing/qonversion/session") {
         if (!qonversionReady) return sendJson(res, 503, { error: "qonversion_not_configured" });
         if (isActivationRateLimited(req)) return sendJson(res, 429, { error: "too_many_attempts" });
