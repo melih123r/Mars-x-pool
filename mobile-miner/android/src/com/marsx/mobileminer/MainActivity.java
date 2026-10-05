@@ -54,7 +54,7 @@ public final class MainActivity extends Activity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL); layout.setPadding(32, 40, 32, 32);
         layout.setBackgroundColor(Color.rgb(8, 12, 23));
-        TextView title = text("MARS-X\nVRSC KURULUM TESTİ", 25);
+        TextView title = text("MARS-X\nVRSC WORKER TESTİ", 25);
         title.setTextColor(Color.rgb(255, 140, 40)); layout.addView(title);
         layout.addView(text("Deneysel worker: uygun ve doğrulanmış ARM64 motor varsa kullanıcı kendi VRSC cüzdanıyla test başlatabilir. Dönüşüm, çekim ve komisyon kapalıdır. Gelir ölçülmez.\n\n" +
             "Telefon madenciliği ısı, elektrik tüketimi ve pil yıpranması oluşturabilir. Kazanç garantisi yoktur.", 17));
@@ -68,6 +68,7 @@ public final class MainActivity extends Activity {
         miningStart = new Button(this); miningStart.setText("Deneysel VRSC worker testini başlat");
         miningStart.setEnabled(EngineArtifact.ready(this));
         miningStart.setOnClickListener(v -> {
+            if (nativeRequested) return;
             if (!miningConsent.isChecked() || !ownWallet.isChecked()) {
                 Toast.makeText(this,"Cüzdan ve deneysel test onayları gerekli.",Toast.LENGTH_LONG).show(); return;
             }
@@ -137,7 +138,7 @@ public final class MainActivity extends Activity {
         address.addTextChangedListener(edited); worker.addTextChangedListener(edited);
         region.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, android.view.View view, int position, long id) {
-                setupStatus.setText("Seçilen bölge: " + VrscConfig.REGIONS[position] + ". Havuza bağlanılmadı. Değişiklikleri kaydet.");
+                setupStatus.setText("Seçilen havuz: " + VrscConfig.REGIONS[position] + ". Havuza bağlanılmadı. Değişiklikleri kaydet.");
             }
             public void onNothingSelected(AdapterView<?> parent) {}
         });
@@ -171,7 +172,7 @@ public final class MainActivity extends Activity {
             }, "marsx-pool-probe").start();
         });
         addButton(layout, "Verus cüzdan seçeneklerini aç", () -> openWeb("https://verus.io/wallet"));
-        addButton(layout, "LuckPool bağlantı bilgilerini aç", () -> openWeb("https://luckpool.net/verus/connect.html"));
+        addButton(layout, "Vipor bağlantı bilgilerini aç", () -> openWeb("https://vipor.net/mine/verus"));
     }
     private void buildSettlement(LinearLayout layout) {
         layout.addView(text("3 · Dönüşüm ve çekim hazırlığı", 22));
@@ -268,9 +269,10 @@ public final class MainActivity extends Activity {
         if (veto != null) started = false;
         status.setText("Pil: %" + percent + " | Sıcaklık: " + temperature + " °C\nAndroid termal durum: " + thermal +
             "\nHarici güç: " + plugged + " | Ölçümsüz ağ: " + unmetered + "\n\n" +
-            (nativeRequested ? "Worker testi istendi; hash/share/gelir doğrulanmadı." :
+            (nativeRequested ? "Worker testi istendi; gelir/ödeme doğrulanmadı." :
                 "Worker hazır olma kontrolü: " + (miningVeto==null ? "koşullar uygun" : miningVeto) + "\n" +
-                (veto == null ? "Cihaz test koşulları uygun." : "Cihaz testi durdu: " + veto)));
+                (veto == null ? "Cihaz test koşulları uygun." : "Cihaz testi durdu: " + veto)) +
+            "\nSon oturumda havuzun kabul ettiği share: " + WorkerForegroundService.acceptedShares() + "\nBu sayı ödeme veya bakiye değildir.");
     }
     private void stopNative() {
         nativeRequested=false; stopService(new Intent(this,WorkerForegroundService.class));

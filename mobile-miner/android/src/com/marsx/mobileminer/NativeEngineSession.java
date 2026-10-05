@@ -23,11 +23,17 @@ public final class NativeEngineSession implements Closeable {
     }
     public synchronized void start(File binary, String expectedSha256, VrscConfig config,
         boolean consent, boolean foreground, String safetyVeto, Runnable onFailure) throws Exception {
+        start(binary,expectedSha256,config,consent,foreground,safetyVeto,onFailure,()->{});
+    }
+    public synchronized void start(File binary, String expectedSha256, VrscConfig config,
+        boolean consent, boolean foreground, String safetyVeto, Runnable onFailure, Runnable onAccepted) throws Exception {
         if (!consent || !foreground || safetyVeto != null) throw new IllegalStateException("safety-veto");
         if (process != null) throw new IllegalStateException("already-running");
         if (!matches(binary, expectedSha256)) throw new SecurityException("unverified-engine");
         final long current = ++generation;
-        relay = new VerifiedTlsRelay();
+        relay = new VerifiedTlsRelay(config.username(),()->{
+            synchronized(NativeEngineSession.this){if(generation==current && process!=null)onAccepted.run();}
+        });
         try {
             relay.serve(() -> fail(current, onFailure));
             ProcessBuilder command = new ProcessBuilder(binary.getAbsolutePath(), "-a", "verus", "-o",

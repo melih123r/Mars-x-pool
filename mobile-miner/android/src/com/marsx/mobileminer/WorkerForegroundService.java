@@ -14,6 +14,8 @@ public final class WorkerForegroundService extends Service {
  private long lastHeartbeat, startedAt;
  private boolean running;
  private static volatile boolean active;
+ private static volatile int acceptedShares;
+ public static int acceptedShares(){return acceptedShares;}
  public static boolean isRunning(){return active;}
  private final Runnable watchdog=new Runnable(){public void run(){
   PowerManager power=getSystemService(PowerManager.class);
@@ -43,9 +45,9 @@ public final class WorkerForegroundService extends Service {
     .setOngoing(true).addAction(new Notification.Action.Builder(null,"DURDUR",pi).build()).build();
    startForeground(1001,note);
    lastHeartbeat=startedAt=SystemClock.elapsedRealtime();
-   engine=new NativeEngineSession();running=true;
+   engine=new NativeEngineSession();running=true;acceptedShares=0;
    engine.start(EngineArtifact.binary(this),EngineArtifact.ENGINE_SHA,config,true,true,null,
-     ()->handler.post(()->stopSession()));
+     ()->handler.post(()->stopSession()),()->acceptedShares++);
    active=true;handler.post(watchdog);
   }catch(Exception error){stopSession();}
   return START_NOT_STICKY;

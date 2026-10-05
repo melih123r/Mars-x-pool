@@ -16,7 +16,7 @@ Loopback network dependency curl 8.12.1:
 https://github.com/curl/curl/tree/57495c64871d18905a0941db9196ef90bafe9a29
 Curl remote TLS is disabled; remote transport is verified by Android SSLSocket.
 
-Android NDK 27.2.12479018 provides libc++_shared.so and its license notices:
+Android NDK 27.2.12479018 provides the statically linked C++ runtime and its license notices:
 https://android.googlesource.com/platform/ndk/+/refs/heads/main/NOTICE
 
 No private keys, custodial signing, withdrawal, commission or conversion provider

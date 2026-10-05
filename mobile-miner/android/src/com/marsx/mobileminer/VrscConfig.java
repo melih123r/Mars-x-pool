@@ -7,21 +7,21 @@ import java.util.Arrays;
 /** Public payout addresses only. No seed, private key or custodial account. */
 public final class VrscConfig {
     private static final String BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-    public static final String[] REGIONS = {"Avrupa", "Kuzey Amerika", "Asya Pasifik"};
-    private static final String[] HOSTS = {"eu.luckpool.net", "na.luckpool.net", "ap.luckpool.net"};
+    public static final String[] REGIONS = {"Vipor · güvenli TLS test havuzu"};
+    private static final String[] HOSTS = {"bzdev.vipor.net"};
     public final String address, worker, host;
 
     public VrscConfig(String address, String worker, int region) {
         if (!validAddress(address)) throw new IllegalArgumentException("Geçerli bir VRSC R-adresi gir. Adresin tamamını kontrol et.");
         if (worker == null || !worker.matches("[A-Za-z0-9_-]{1,24}"))
             throw new IllegalArgumentException("Cihaz adı 1–24 harf, rakam, alt çizgi veya tire içermeli.");
-        if (region < 0 || region >= HOSTS.length) throw new IllegalArgumentException("Havuz bölgesi geçersiz.");
+        if (region < 0 || region >= HOSTS.length) throw new IllegalArgumentException("Havuz seçimi geçersiz.");
         this.address = address; this.worker = worker; this.host = HOSTS[region];
     }
 
     public String username() { return address + "." + worker; }
-    // Setup preview only: the selected upstream engine's TLS support is not verified.
-    public String endpointPreview() { return host + ":3960 (CPU)"; }
+    // Fixed candidate endpoint verified by operator protocol probes; device verification is still required.
+    public String endpointPreview() { return host + ":5140 (TLS)"; }
 
     public static boolean validAddress(String value) {
         if (value == null || value.length() != 34 || value.charAt(0) != 'R') return false;

@@ -7,9 +7,12 @@ import javax.net.ssl.*;
 /** Single-use loopback relay; native engine has no direct pool connection. */
 public final class VerifiedTlsRelay implements Closeable {
     private final ServerSocket listener;
+    private final PoolShareObserver observer;
     private volatile Socket local, remote;
     private volatile boolean closed;
-    public VerifiedTlsRelay() throws IOException {
+    public VerifiedTlsRelay() throws IOException { this(null, () -> {}); }
+    public VerifiedTlsRelay(String username, Runnable onAccepted) throws IOException {
+        observer = new PoolShareObserver(username, onAccepted);
         listener = new ServerSocket(0, 1, InetAddress.getByName("127.0.0.1"));
         listener.setSoTimeout(8000);
     }
@@ -29,17 +32,17 @@ public final class VerifiedTlsRelay implements Closeable {
                 parameters.setEndpointIdentificationAlgorithm("HTTPS"); secure.setSSLParameters(parameters);
                 if (closed) throw new IOException("relay-stopped");
                 secure.startHandshake(); secure.setSoTimeout(0);
-                Thread upstream = new Thread(() -> pipe(local, secure, onFailure), "marsx-tls-upstream");
-                upstream.start(); pipe(secure, local, onFailure);
+                Thread upstream = new Thread(() -> pipe(local, secure, onFailure, true), "marsx-tls-upstream");
+                upstream.start(); pipe(secure, local, onFailure, false);
             } catch (Exception error) { if (!closed) onFailure.run(); }
             finally { close(); }
         }, "marsx-tls-relay").start();
     }
-    private void pipe(Socket from, Socket to, Runnable onFailure) {
+    private void pipe(Socket from, Socket to, Runnable onFailure, boolean fromMiner) {
         try {
             byte[] buffer = new byte[8192]; int count;
             InputStream input = from.getInputStream(); OutputStream output = to.getOutputStream();
-            while (!closed && (count = input.read(buffer)) != -1) { output.write(buffer, 0, count); output.flush(); }
+            while (!closed && (count = input.read(buffer)) != -1) { observer.bytes(fromMiner, buffer, count); output.write(buffer, 0, count); output.flush(); }
             if (!closed) onFailure.run();
         } catch (IOException error) { if (!closed) onFailure.run(); }
         finally { close(); }
