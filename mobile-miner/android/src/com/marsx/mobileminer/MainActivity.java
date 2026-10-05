@@ -65,7 +65,7 @@ public final class MainActivity extends Activity {
         layout.addView(text("MARS-X Başlat / Durdur", 22));
         layout.addView(text("BAŞLAT dediğinde MARS-X güvenli bağlantıyı otomatik kurar. Teknik bağlantı ayarlarını değiştirmen gerekmez.", 16));
         miningConsent = new CheckBox(this);
-        miningConsent.setText("MARS-X Worker'ın VRSC madenciliği için cihazımın 1 CPU thread'ini kullanacağını; internet, ısı, pil ve elektrik tüketimi oluşabileceğini anladım. BAŞLAT komutunu yalnız ben veririm ve DURDUR ile istediğim an sonlandırabilirim. Kazanç garantisi yok. Kabul ediyorum.");
+        miningConsent.setText("MARS-X'ın VRSC madenciliği için cihazımın 1 CPU thread'ini kullanacağını; internet, ısı, pil ve elektrik tüketimi oluşabileceğini anladım. BAŞLAT komutunu yalnız ben veririm ve DURDUR ile istediğim an sonlandırabilirim. Kazanç garantisi yok. Kabul ediyorum.");
         miningConsent.setTextColor(Color.WHITE); layout.addView(miningConsent);
         miningConsent.setOnCheckedChangeListener((button, checked) -> { if (!checked) stopNative(); });
         miningStart = new Button(this); miningStart.setText("BAŞLAT");
