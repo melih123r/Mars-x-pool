@@ -3,7 +3,7 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 const SERVICE = "marsx-pool-worker-api";
-const VERSION = "0.8.5";
+const VERSION = "0.8.6";
 const TERMS_VERSION = "2026-09-27-v3";
 const WORKERS_KEY = "marsx:workers";
 const LICENSE_DEVICES_PREFIX = "marsx:license-devices:";
@@ -1012,10 +1012,42 @@ export function createServer({
         });
       }
 
+      if (req.method === "GET" && pathname === "/conversion/readiness") {
+        const changeNowConfigured = Boolean(process.env.CHANGENOW_API_KEY);
+        const treasurySignerConfigured = Boolean(process.env.VRSC_TREASURY_SIGNER_URL && process.env.VRSC_TREASURY_SIGNER_TOKEN);
+        return sendJson(res, 200, {
+          route: "VRSC -> Verus liquidity/bridge when available -> supported intermediate -> ChangeNOW -> target",
+          verusQuoteRequired: true,
+          changeNowConfigured,
+          treasurySignerConfigured,
+          executionEnabled: changeNowConfigured && treasurySignerConfigured && process.env.REAL_WITHDRAWALS_ENABLED === "true",
+          safeguards: [
+            "provider quote required before execution",
+            "no balance from accepted shares; provider-confirmed settlement only",
+            "2% MARS-X conversion service fee disclosed separately",
+            "provider/network costs taken from live quote",
+            "execution fails closed when liquidity, provider or signer is unavailable"
+          ]
+        });
+      }
+
       if (req.method === "POST" && pathname === "/conversion/execute") {
-        return sendJson(res, 503, {
-          error: "conversion_execution_disabled",
-          reason: "provider_credentials_and_treasury_signer_required",
+        const changeNowConfigured = Boolean(process.env.CHANGENOW_API_KEY);
+        const treasurySignerConfigured = Boolean(process.env.VRSC_TREASURY_SIGNER_URL && process.env.VRSC_TREASURY_SIGNER_TOKEN);
+        if (!changeNowConfigured || !treasurySignerConfigured || process.env.REAL_WITHDRAWALS_ENABLED !== "true") {
+          return sendJson(res, 503, {
+            error: "conversion_execution_disabled",
+            missing: [
+              ...(changeNowConfigured ? [] : ["CHANGENOW_API_KEY"]),
+              ...(treasurySignerConfigured ? [] : ["VRSC_TREASURY_SIGNER"]),
+              ...(process.env.REAL_WITHDRAWALS_ENABLED === "true" ? [] : ["REAL_WITHDRAWALS_ENABLED"])
+            ],
+            reason: "provider_credentials_treasury_signer_and_explicit_withdrawal_enablement_required",
+          });
+        }
+        return sendJson(res, 501, {
+          error: "live_route_not_implemented",
+          reason: "verus_liquidity_quote_and_changenow_exchange_creation_must_be_verified_before_fund_movement"
         });
       }
 
