@@ -34,6 +34,14 @@ public final class MainActivity extends Activity {
     private PoolConnectionProbe poolProbe;
     private int probeGeneration;
     private long startedAt;
+    private long lastLiveBatteryEvent = -1;
+    private boolean batteryReceiverRegistered;
+    private final android.content.BroadcastReceiver batteryEvents = new android.content.BroadcastReceiver() {
+        public void onReceive(android.content.Context context, Intent intent) {
+            if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction()) && !isInitialStickyBroadcast())
+                lastLiveBatteryEvent = SystemClock.elapsedRealtime();
+        }
+    };
     private final Runnable sample = new Runnable() {
         public void run() { update(); if (visible) handler.postDelayed(this, 1000); }
     };
@@ -215,7 +223,7 @@ public final class MainActivity extends Activity {
         boolean unmetered = caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
             && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
         String veto = SafetyPolicy.veto(consent.isChecked(), started, visible, temperature,
-            percent, thermal, plugged, unmetered, b == null ? 5001 : 0,
+            percent, thermal, plugged, unmetered, lastLiveBatteryEvent < 0 ? 5001 : SystemClock.elapsedRealtime() - lastLiveBatteryEvent,
             started ? SystemClock.elapsedRealtime() - startedAt : 0);
         if (veto != null) started = false;
         status.setText("Pil: %" + percent + " | Sıcaklık: " + temperature + " °C\nAndroid termal durum: " + thermal +
@@ -226,7 +234,13 @@ public final class MainActivity extends Activity {
         probeGeneration++;
         if (poolProbe != null) { poolProbe.close(); poolProbe = null; }
     }
-    protected void onResume() { super.onResume(); visible = true; handler.post(sample); }
-    protected void onPause() { stopPoolProbe(); visible = false; started = false; handler.removeCallbacks(sample); super.onPause(); }
+    protected void onResume() {
+        super.onResume(); visible = true; lastLiveBatteryEvent = -1;
+        registerReceiver(batteryEvents, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        batteryReceiverRegistered = true; handler.post(sample);
+    }
+    protected void onPause() {
+        if (batteryReceiverRegistered) { unregisterReceiver(batteryEvents); batteryReceiverRegistered = false; }
+        lastLiveBatteryEvent = -1; stopPoolProbe(); visible = false; started = false; handler.removeCallbacks(sample); super.onPause(); }
     protected void onDestroy() { stopPoolProbe(); handler.removeCallbacks(sample); super.onDestroy(); }
 }
