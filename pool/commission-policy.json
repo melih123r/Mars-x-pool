@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "policyId": "marsx-commission-v1",
+  "poolFeeBps": 1000,
+  "withdrawalFeeBps": 200,
+  "referralShareOfWithdrawalFeeBps": 300,
+  "assetDecimals": { "VRSC": 8, "LTC": 8, "DOGE": 8 },
+  "poolFeeBasis": "provider_net_attributable_reward",
+  "withdrawalFeeBasis": "requested_debit_from_user_net_balance",
+  "rounding": "floor_per_event_to_atomic_unit",
+  "providerAndNetworkFees": "separately_disclosed_user_cost",
+  "directToUserMonitoringIsChargeable": false,
+  "collectionEnabled": false
+}

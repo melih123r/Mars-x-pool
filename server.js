@@ -1,6 +1,8 @@
 import http from "node:http";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
+import { commissionDisclosure, quotePoolCommission, quoteWithdrawalCommission } from "./pool/commission-policy.mjs";
+import { RedisCommissionJournal, summarizeCommissions } from "./pool/commission-journal.mjs";
 
 const SERVICE = "marsx-pool-worker-api";
 const VERSION = "0.9.0";
@@ -752,7 +754,9 @@ export function createServer({
   qonversionSessionTtlSeconds = Number(process.env.QONVERSION_SESSION_TTL_SECONDS || 3_600),
   qonversionApiBase = "https://api.qonversion.io/v4",
   qonversionFetch = globalThis.fetch,
+  commissionJournal,
 } = {}) {
+  const feeJournal = commissionJournal ?? (store.kind === "redis" ? new RedisCommissionJournal(store.client) : null);
   const records = parseLicenseRecords(licenseRecords);
   const ttlSeconds = Math.min(Math.max(Number(licenseTokenTtlSeconds), 3_600), 7_776_000);
   const partnerTtlSeconds = Math.min(Math.max(Number(qonversionSessionTtlSeconds), 900), 86_400);
@@ -858,6 +862,20 @@ export function createServer({
     if (isRateLimited(req)) return sendJson(res, 429, { error: "rate_limit_exceeded" });
 
     try {
+      if (req.method === "GET" && pathname === "/fees") {
+        return sendJson(res, 200, commissionDisclosure());
+      }
+      if (req.method === "POST" && pathname === "/fees/quote") {
+        const data = await readJson(req);
+        try {
+          const quote = data.kind === "pool" ? quotePoolCommission(data) :
+            data.kind === "withdrawal" ? quoteWithdrawalCommission(data) : null;
+          if (!quote) return sendJson(res, 400, { error: "invalid_fee_kind" });
+          return sendJson(res, 200, { ...quote, illustrativeOnly: true, collectionEnabled: false });
+        } catch {
+          return sendJson(res, 400, { error: "invalid_fee_quote", collectionEnabled: false });
+        }
+      }
       if (req.method === "POST" && pathname === "/billing/qonversion/session") {
         if (!qonversionReady) return sendJson(res, 503, { error: "qonversion_not_configured" });
         if (isActivationRateLimited(req)) return sendJson(res, 429, { error: "too_many_attempts" });
@@ -1268,6 +1286,13 @@ export function createServer({
         if (!adminToken) return sendJson(res, 503, { error: "ADMIN_TOKEN_not_configured" });
         if (!safeAuthorization(req.headers.authorization, "Bearer", adminToken)) {
           return sendJson(res, 401, { error: "admin_unauthorized" });
+        }
+        if (req.method === "GET" && pathname === "/admin/commissions") {
+          if (!feeJournal) return sendJson(res, 503, { error: "durable_commission_journal_not_configured" });
+          const events = await feeJournal.snapshot();
+          return sendJson(res, 200, { policy: commissionDisclosure(), hasVerifiedCollections: events.length > 0,
+            byAsset: summarizeCommissions(events), operatorPayoutEnabled: false,
+            note: "Confirmed collection records only; retained net amounts are not a withdrawable treasury balance." });
         }
         if (req.method === "POST" && pathname === "/admin/credits") {
           const data = await readJson(req);

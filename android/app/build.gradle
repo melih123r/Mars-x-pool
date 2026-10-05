@@ -65,3 +65,12 @@ dependencies {
     implementation "androidx.credentials:credentials-play-services-auth:1.6.0"
     implementation "com.google.android.libraries.identity.googleid:googleid:1.1.1"
 }
+
+// Embed the same immutable fee policy served by the backend.
+def feeAssetsDir = layout.buildDirectory.dir("generated/commission-assets")
+tasks.register("syncCommissionPolicy", Copy) {
+    from rootProject.file("../pool/commission-policy.json")
+    into feeAssetsDir
+}
+android.sourceSets.main.assets.srcDir(feeAssetsDir)
+tasks.named("preBuild").configure { dependsOn("syncCommissionPolicy") }
