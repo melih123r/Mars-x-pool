@@ -64,7 +64,7 @@ if 'marsx_parent_death_guard' not in s:
 PARENT_DEATH_PATCH
   # Raw Stratum is permitted only on loopback behind the Android verified TLS relay.
   # OpenSSL is required for upstream hashing; remote TLS is handled by Android.
-  CPPFLAGS="-I$TASK_PREFIX/include" LDFLAGS="-L$TASK_PREFIX/lib -L$TASK_PREFIX/lib64 -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384" \
+  CPPFLAGS="-I$TASK_PREFIX/include" LDFLAGS="-static-libstdc++ -L$TASK_PREFIX/lib -L$TASK_PREFIX/lib64 -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384" \
     LIBS="-lcrypto -ldl -lm" CFLAGS="-O2 -fPIE" CXXFLAGS="-O2 -fPIE" CURL_CONFIG="$TASK_PREFIX/bin/curl-config" \
     ./configure --host=aarch64-linux-android --target=aarch64-linux-android \
       ac_cv_prog_c_openmp=unsupported ac_cv_prog_cxx_openmp=unsupported
