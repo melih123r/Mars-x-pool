@@ -825,6 +825,25 @@ export function createServer({
           worker_token: result.token, expires_at: new Date(result.expiresAt).toISOString() });
       }
 
+      if (req.method === "POST" && pathname === "/pairing/heartbeat") {
+        const data = await readJson(req);
+        const workerId = String(data.worker_id || "");
+        const auth = pairing.authenticate({ sessionId: String(data.session_id || ""),
+          token: authorizationToken(req, "Worker"), workerId, nonce: data.nonce });
+        if (!auth.ok) return sendJson(res, 401, { error: auth.reason });
+        const command = pairing.command({ workerId });
+        return sendJson(res, 200, { ok: true, command: command || { type: "NONE" } });
+      }
+
+      if (req.method === "POST" && pathname === "/pairing/stop/ack") {
+        const data = await readJson(req);
+        const workerId = String(data.worker_id || "");
+        const auth = pairing.authenticate({ sessionId: String(data.session_id || ""),
+          token: authorizationToken(req, "Worker"), workerId, nonce: data.nonce });
+        if (!auth.ok) return sendJson(res, 401, { error: auth.reason });
+        return sendJson(res, 200, { ok: true, acknowledged: pairing.acknowledgeStop({ workerId }) });
+      }
+
       if (req.method === "POST" && pathname === "/billing/qonversion/session") {
         if (!qonversionReady) return sendJson(res, 503, { error: "qonversion_not_configured" });
         if (isActivationRateLimited(req)) return sendJson(res, 429, { error: "too_many_attempts" });
