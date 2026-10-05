@@ -1,8 +1,8 @@
 # MARS-X VRSC setup prototype
 
-Version 0.2.0 is a separate Android 10+ setup and device-test application,
+Version 0.3.0 is a separate Android 10+ setup and device-test application,
 `com.marsx.mobileminer`. It does **not mine, exchange, sign, send or hold funds**.
-No native engine or Internet permission is packaged. The Play application
+No native engine is packaged. Internet permission is used only for an explicit Vipor TLS/protocol connection test. The Play application
 `com.marsx.pool`, production backend and ViaBTC integration are not modified.
 
 ## Implemented
@@ -18,6 +18,8 @@ No native engine or Internet permission is packaged. The Play application
   Target choices are user intentions, **not supported exchange pairs**. Only VRSC
   destination checksums are validated; other network validation is outstanding.
   No quote, order, wallet handoff, transaction, ledger or payout endpoint is implemented.
+- User-initiated Vipor TLS/subscription/authorization check, cancelled when leaving the activity or editing the wallet. No shares are submitted. The address is sent to Vipor, which also sees the network IP.
+- Internal native process and verified TLS relay controllers are prepared but not wired to an enabled mining button; no engine binary is packaged.
 - User-initiated links to Verus wallet/conversion guidance and LuckPool configuration.
 
 No donation/default payout address, seed phrase, ViaBTC API key or admin credential
@@ -75,3 +77,7 @@ validation and draft input handling; no Android device execution has been tested
 - https://verus.io/get-vrsc — wallet-based conversion of supported ecosystem assets;
   this does not establish a VRSC-to-LTC/DOGE route.
 - https://github.com/monkins1010/ccminer/tree/ARM — candidate native source.
+
+## Android native build work
+
+`mobile-miner/native/build-android.sh` cross-compiles pinned source/dependencies with NDK 27.2.12479018. This is experimental and must pass CI, binary dependency checks and real-device tests before packaging or enabling mining. Its libcurl handles loopback Stratum only; the prepared Android relay verifies the pool certificate and hostname. No dependency or ELF check proves accepted shares or payment.

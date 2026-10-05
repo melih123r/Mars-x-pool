@@ -31,6 +31,8 @@ public final class MainActivity extends Activity {
     private SharedPreferences preferences;
     private CheckBox consent;
     private boolean started, visible;
+    private PoolConnectionProbe poolProbe;
+    private int probeGeneration;
     private long startedAt;
     private final Runnable sample = new Runnable() {
         public void run() { update(); if (visible) handler.postDelayed(this, 1000); }
@@ -92,6 +94,7 @@ public final class MainActivity extends Activity {
         ownWallet.setTextColor(Color.WHITE); layout.addView(ownWallet);
         setupStatus = text("Kurulum yalnızca bu cihazda saklanır. Havuza bağlanılmadı.", 16);
         TextWatcher edited = watcher(() -> {
+            stopPoolProbe();
             ownWallet.setChecked(false);
             setupStatus.setText("Kurulum değişti; adresi kontrol edip yeniden kaydet.");
         });
@@ -113,6 +116,24 @@ public final class MainActivity extends Activity {
             } catch (IllegalArgumentException error) { setupStatus.setText(error.getMessage()); }
         });
         layout.addView(setupStatus);
+        addButton(layout, "Vipor güvenli bağlantısını test et — kazım yapmaz", () -> {
+            if (!ownWallet.isChecked()) { setupStatus.setText("Adresini kontrol edip sahiplik kutusunu işaretle."); return; }
+            final String payout = address.getText().toString(), name = worker.getText().toString();
+            try { new VrscConfig(payout, name, 0); }
+            catch (IllegalArgumentException error) { setupStatus.setText(error.getMessage()); return; }
+            stopPoolProbe();
+            final int generation = probeGeneration;
+            final PoolConnectionProbe probe = new PoolConnectionProbe(); poolProbe = probe;
+            setupStatus.setText("Açık adresin Vipor'a gönderiliyor; güvenli bağlantı kontrol ediliyor…");
+            new Thread(() -> {
+                String result;
+                try { result = probe.check(payout, name); }
+                catch (Exception error) { result = "Bağlantı doğrulanamadı: " + error.getClass().getSimpleName(); }
+                finally { probe.close(); }
+                final String message = result;
+                handler.post(() -> { if (visible && generation == probeGeneration) setupStatus.setText(message); });
+            }, "marsx-pool-probe").start();
+        });
         addButton(layout, "Verus cüzdan seçeneklerini aç", () -> openWeb("https://verus.io/wallet"));
         addButton(layout, "LuckPool bağlantı bilgilerini aç", () -> openWeb("https://luckpool.net/verus/connect.html"));
     }
@@ -201,7 +222,11 @@ public final class MainActivity extends Activity {
             "\nHarici güç: " + plugged + " | Ölçümsüz ağ: " + unmetered + "\n\n" +
             (veto == null ? "Cihaz test koşulları uygun. Madencilik motoru mevcut değil." : "Test durdu: " + veto));
     }
+    private void stopPoolProbe() {
+        probeGeneration++;
+        if (poolProbe != null) { poolProbe.close(); poolProbe = null; }
+    }
     protected void onResume() { super.onResume(); visible = true; handler.post(sample); }
-    protected void onPause() { visible = false; started = false; handler.removeCallbacks(sample); super.onPause(); }
-    protected void onDestroy() { handler.removeCallbacks(sample); super.onDestroy(); }
+    protected void onPause() { stopPoolProbe(); visible = false; started = false; handler.removeCallbacks(sample); super.onPause(); }
+    protected void onDestroy() { stopPoolProbe(); handler.removeCallbacks(sample); super.onDestroy(); }
 }

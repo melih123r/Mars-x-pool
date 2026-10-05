@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.marsx.mobileminer" android:versionCode="2" android:versionName="0.2.0-vrsc-setup-test">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.marsx.mobileminer" android:versionCode="3" android:versionName="0.3.0-vrsc-connection-test">
+  <uses-permission android:name="android.permission.INTERNET" />
   <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="36" />
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />

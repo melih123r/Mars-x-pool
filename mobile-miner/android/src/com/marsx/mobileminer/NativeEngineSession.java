@@ -1,0 +1,55 @@
+package com.marsx.mobileminer;
+
+import java.io.*;
+import java.security.*;
+import java.util.concurrent.TimeUnit;
+
+/** Internal experimental controller. No automatic start, shell or remote command. */
+public final class NativeEngineSession implements Closeable {
+    private Process process;
+    private VerifiedTlsRelay relay;
+    public static boolean matches(File binary, String expectedSha256) throws Exception {
+        if (!binary.isFile() || !binary.canExecute() || !expectedSha256.matches("[0-9a-f]{64}")) return false;
+        MessageDigest hash = MessageDigest.getInstance("SHA-256");
+        try (InputStream stream = new FileInputStream(binary)) {
+            byte[] bytes = new byte[8192]; int count;
+            while ((count = stream.read(bytes)) != -1) hash.update(bytes, 0, count);
+        }
+        StringBuilder actual = new StringBuilder();
+        for (byte b : hash.digest()) actual.append(String.format("%02x", b & 255));
+        return actual.toString().equals(expectedSha256);
+    }
+    public synchronized void start(File binary, String expectedSha256, VrscConfig config,
+        boolean consent, boolean foreground, String safetyVeto, Runnable onFailure) throws Exception {
+        if (!consent || !foreground || safetyVeto != null) throw new IllegalStateException("safety-veto");
+        if (process != null) throw new IllegalStateException("already-running");
+        if (!matches(binary, expectedSha256)) throw new SecurityException("unverified-engine");
+        relay = new VerifiedTlsRelay();
+        try {
+            relay.serve(onFailure);
+            ProcessBuilder command = new ProcessBuilder(binary.getAbsolutePath(), "-a", "verus", "-o",
+                "stratum+tcp://127.0.0.1:" + relay.port(), "-u", config.username(), "-p", "X", "-t", "1");
+            command.directory(binary.getParentFile());
+            command.environment().put("LD_LIBRARY_PATH", binary.getParent());
+            command.redirectErrorStream(true);
+            process = command.start();
+            final Process child = process;
+            // Drain without retaining pool lines or treating logs as settlement evidence.
+            new Thread(() -> {
+                try (InputStream stream = child.getInputStream()) {
+                    byte[] bytes = new byte[4096]; while (stream.read(bytes) != -1) {}
+                } catch (IOException ignored) {}
+                onFailure.run();
+            }, "marsx-engine-output").start();
+        } catch (Exception error) { close(); throw error; }
+    }
+    public synchronized void close() {
+        if (relay != null) { relay.close(); relay = null; }
+        if (process != null) {
+            process.destroy();
+            try { if (!process.waitFor(500, TimeUnit.MILLISECONDS)) process.destroyForcibly(); }
+            catch (InterruptedException error) { process.destroyForcibly(); Thread.currentThread().interrupt(); }
+            process = null;
+        }
+    }
+}

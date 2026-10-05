@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 : "${MINER_ANDROID_SDK:?Set MINER_ANDROID_SDK}"
-: "${MINER_ECJ_JAR:?Set MINER_ECJ_JAR}"
+
 MINER_ROOT=$(cd "$(dirname "$0")" && pwd)
 MINER_BUILD="$MINER_ROOT/build"
 MINER_TOOLS="$MINER_ANDROID_SDK/build-tools/36.0.0"
 MINER_PLATFORM="$MINER_ANDROID_SDK/platforms/android-36/android.jar"
-mkdir -p "$MINER_BUILD/classes" "$MINER_BUILD/dex"
-java -jar "$MINER_ECJ_JAR" -1.8 -cp "$MINER_PLATFORM" -d "$MINER_BUILD/classes" \
-  "$MINER_ROOT/src/com/marsx/mobileminer/"*.java
+mkdir -p "$MINER_BUILD/classes" "$MINER_BUILD/dex" "$MINER_BUILD/generated"
+"$MINER_TOOLS/aapt" package -f -m -M "$MINER_ROOT/AndroidManifest.xml" -S "$MINER_ROOT/res" -I "$MINER_PLATFORM" -J "$MINER_BUILD/generated"
+if [ -n "${MINER_ECJ_JAR:-}" ]; then
+  java -jar "$MINER_ECJ_JAR" -1.8 -cp "$MINER_PLATFORM" -d "$MINER_BUILD/classes" \
+    "$MINER_ROOT/src/com/marsx/mobileminer/"*.java "$MINER_BUILD/generated/com/marsx/mobileminer/R.java"
+else
+  javac -source 8 -target 8 -cp "$MINER_PLATFORM" -d "$MINER_BUILD/classes" \
+    "$MINER_ROOT/src/com/marsx/mobileminer/"*.java "$MINER_BUILD/generated/com/marsx/mobileminer/R.java"
+fi
 "$MINER_TOOLS/d8" --min-api 29 --lib "$MINER_PLATFORM" --output "$MINER_BUILD/dex" \
   "$MINER_BUILD/classes/com/marsx/mobileminer/"*.class
 "$MINER_TOOLS/aapt" package -f -M "$MINER_ROOT/AndroidManifest.xml" \

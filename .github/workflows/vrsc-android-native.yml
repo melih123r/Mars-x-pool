@@ -9,6 +9,32 @@ on:
 permissions:
   contents: read
 jobs:
+  android-client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"'
+      - name: Test controller safety and loopback lifecycle
+        run: |
+          mkdir -p mobile-miner/android/build/tests
+          javac -d mobile-miner/android/build/tests \
+            mobile-miner/android/src/com/marsx/mobileminer/VrscConfig.java \
+            mobile-miner/android/src/com/marsx/mobileminer/VerifiedTlsRelay.java \
+            mobile-miner/android/src/com/marsx/mobileminer/NativeEngineSession.java \
+            mobile-miner/android/NativeLifecycleTest.java
+          java -cp mobile-miner/android/build/tests NativeLifecycleTest
+      - name: Build connection diagnostic APK
+        run: MINER_ANDROID_SDK="$ANDROID_HOME" bash mobile-miner/android/build-test.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vrsc-connection-diagnostic-apk
+          path: mobile-miner/android/build/MARS-X-Miner-Device-Test.apk
+          retention-days: 7
   android-engine:
     runs-on: ubuntu-latest
     timeout-minutes: 30

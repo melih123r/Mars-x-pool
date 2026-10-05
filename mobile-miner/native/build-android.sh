@@ -12,7 +12,11 @@ export AR=llvm-ar RANLIB=llvm-ranlib STRIP=llvm-strip
 mkdir -p "$TASK_PREFIX" "$TASK_BUILD"
 fetch_source() {
   local repo="$1" commit="$2" dest="$3"
-  if [ ! -d "$dest/.git" ]; then git clone "https://github.com/$repo.git" "$dest"; fi
+  if [ ! -d "$dest/.git" ]; then
+    git init "$dest"
+    git -C "$dest" remote add origin "https://github.com/$repo.git"
+    git -C "$dest" fetch --depth 1 origin "$commit"
+  fi
   git -C "$dest" checkout --detach "$commit"
   test "$(git -C "$dest" rev-parse HEAD)" = "$commit"
 }
