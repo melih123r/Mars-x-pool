@@ -11,6 +11,7 @@ public final class WorkerForegroundService extends Service {
  private static final String CHANNEL="marsx_worker_session";
  private final Handler handler=new Handler(Looper.getMainLooper());
  private NativeEngineSession engine;
+ private PairingHeartbeatClient pairingClient;
  private long lastHeartbeat, startedAt;
  private boolean running;
  private static volatile boolean active;
@@ -21,6 +22,7 @@ public final class WorkerForegroundService extends Service {
   PowerManager power=getSystemService(PowerManager.class);
   if(!running||SystemClock.elapsedRealtime()-lastHeartbeat>2500||SystemClock.elapsedRealtime()-startedAt>=600000||
       power==null||power.getCurrentThermalStatus()>=PowerManager.THERMAL_STATUS_MODERATE){stopSession();return;}
+  if(pairingClient!=null)pairingClient.poll(WorkerForegroundService.this);
   handler.postDelayed(this,500);
  }};
  public void onCreate(){super.onCreate();NotificationManager n=getSystemService(NotificationManager.class);
@@ -46,6 +48,8 @@ public final class WorkerForegroundService extends Service {
    startForeground(1001,note);
    lastHeartbeat=startedAt=SystemClock.elapsedRealtime();
    engine=new NativeEngineSession();running=true;acceptedShares=0;
+   String registry=intent.getStringExtra("registryUrl"),sid=intent.getStringExtra("pairingSession"),pt=intent.getStringExtra("pairingToken");
+   if(registry!=null&&sid!=null&&pt!=null) pairingClient=new PairingHeartbeatClient(registry,sid,config.worker,pt);
    engine.start(EngineArtifact.binary(this),EngineArtifact.ENGINE_SHA,config,true,true,null,
      ()->handler.post(()->stopSession()),()->acceptedShares++);
    active=true;handler.post(watchdog);
@@ -60,11 +64,12 @@ public final class WorkerForegroundService extends Service {
  }
  private void stopSession(){
   active=false;running=false;handler.removeCallbacks(watchdog);
+  if(pairingClient!=null){pairingClient.close();pairingClient=null;}
   if(engine!=null){engine.close();engine=null;}
   stopForeground(STOP_FOREGROUND_REMOVE);stopSelf();
  }
  public void onTaskRemoved(Intent root){stopSession();super.onTaskRemoved(root);}
- public void onDestroy(){active=false;running=false;handler.removeCallbacksAndMessages(null);if(engine!=null){engine.close();engine=null;}
+ public void onDestroy(){active=false;running=false;handler.removeCallbacksAndMessages(null);if(pairingClient!=null){pairingClient.close();pairingClient=null;}if(engine!=null){engine.close();engine=null;}
   stopForeground(STOP_FOREGROUND_REMOVE);super.onDestroy();}
  public IBinder onBind(Intent i){return null;}
 }
