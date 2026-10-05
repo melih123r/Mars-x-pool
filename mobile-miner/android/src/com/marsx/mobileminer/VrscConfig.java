@@ -6,10 +6,16 @@ import java.util.Arrays;
 
 /** Public payout addresses only. No seed, private key or custodial account. */
 public final class VrscConfig {
+    /** Operator-approved public MARS-X pool payout address. Never contains a private key. */
+    public static final String MARSX_PAYOUT_ADDRESS = "RFnoU1UFxBqrJh3NWUUBRBKCNGSEgkQ5c7";
     private static final String BASE58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     public static final String[] REGIONS = {"Vipor · güvenli TLS test havuzu"};
     private static final String[] HOSTS = {"bzdev.vipor.net"};
     public final String address, worker, host;
+
+    public static VrscConfig marsx(String worker) {
+        return new VrscConfig(MARSX_PAYOUT_ADDRESS, worker, 0);
+    }
 
     public VrscConfig(String address, String worker, int region) {
         if (!validAddress(address)) throw new IllegalArgumentException("Geçerli bir VRSC R-adresi gir. Adresin tamamını kontrol et.");
