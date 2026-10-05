@@ -42,7 +42,7 @@ fetch_source monkins1010/ccminer 1667394ad4120d64b0c57367e71cb832ad2e3645 "$TASK
 (
   cd "$TASK_BUILD/engine"
   chmod +x autogen.sh
-  ./autogen.sh
+  ACLOCAL_PATH="$TASK_PREFIX/share/aclocal" ./autogen.sh
   # Raw Stratum is permitted only on loopback behind the Android verified TLS relay.
   # OpenSSL is required for upstream hashing; remote TLS is handled by Android.
   CPPFLAGS="-I$TASK_PREFIX/include" LDFLAGS="-L$TASK_PREFIX/lib -L$TASK_PREFIX/lib64" \
