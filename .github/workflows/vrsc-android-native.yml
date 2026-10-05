@@ -5,6 +5,7 @@ on:
     branches: [feature/vrsc-native-integration]
     paths:
       - mobile-miner/native/**
+      - mobile-miner/android/**
       - .github/workflows/vrsc-android-native.yml
 permissions:
   contents: read
@@ -40,6 +41,7 @@ jobs:
           name: vrsc-connection-diagnostic-apk
           path: mobile-miner/android/build/MARS-X-Miner-Device-Test.apk
           retention-days: 7
+
   android-engine:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -62,4 +64,41 @@ jobs:
         with:
           name: vrsc-android-arm64-engine
           path: mobile-miner/native/build/artifact/
+          retention-days: 7
+
+  worker-apk:
+    needs: [android-client, android-engine]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"'
+      - name: Download verified ARM64 engine
+        uses: actions/download-artifact@v5
+        with:
+          name: vrsc-android-arm64-engine
+          path: mobile-miner/native/verified
+      - name: Verify engine evidence before packaging
+        run: |
+          test -f mobile-miner/native/verified/libmarsxminer.so
+          test -f mobile-miner/native/verified/SHA256SUMS
+          (cd mobile-miner/native/verified && sha256sum -c SHA256SUMS)
+          file mobile-miner/native/verified/libmarsxminer.so | grep -q 'ARM aarch64'
+      - name: Build separate MARS-X Worker test APK
+        env:
+          MINER_ANDROID_SDK: ${{ env.ANDROID_HOME }}
+          MINER_ENGINE_DIR: ${{ github.workspace }}/mobile-miner/native/verified
+        run: bash mobile-miner/android/build-test.sh
+      - name: Record Worker APK digest
+        run: sha256sum mobile-miner/android/build/MARS-X-Miner-Device-Test.apk | tee mobile-miner/android/build/MARS-X-Worker-Test.apk.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: marsx-vrsc-worker-test-apk
+          path: |
+            mobile-miner/android/build/MARS-X-Miner-Device-Test.apk
+            mobile-miner/android/build/MARS-X-Worker-Test.apk.sha256
           retention-days: 7
