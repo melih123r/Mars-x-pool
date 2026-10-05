@@ -17,13 +17,33 @@ public final class SettlementDraft {
         if (parsed.signum() <= 0) throw new IllegalArgumentException("Miktar sıfırdan büyük olmalı.");
         if (targetIndex < 0 || targetIndex >= TARGETS.length)
             throw new IllegalArgumentException("Coin ve ağ seç.");
-        if (destination == null || !destination.matches("[A-Za-z0-9]{20,128}"))
-            throw new IllegalArgumentException("Hedef cüzdan adresini gir; boşluk ve bağlantı kullanma.");
-        if (targetIndex == 1 && !VrscConfig.validAddress(destination))
-            throw new IllegalArgumentException("Hedef VRSC R-adresi geçersiz.");
+        if (!validDestination(targetIndex, destination))
+            throw new IllegalArgumentException("Seçilen coin/ağ ile hedef adres biçimi uyuşmuyor.");
         amount = parsed.stripTrailingZeros().toPlainString();
         target = TARGETS[targetIndex];
         this.destination = destination;
+    }
+
+    private static boolean validDestination(int targetIndex, String value) {
+        if (value == null || value.length() < 20 || value.length() > 128 || value.matches(".*\\s+.*")) return false;
+        switch (targetIndex) {
+            case 0: // SOL — base58 public key, normally 32-44 chars
+                return value.matches("[1-9A-HJ-NP-Za-km-z]{32,44}");
+            case 1: // VRSC
+                return VrscConfig.validAddress(value);
+            case 2: // LTC: legacy/base58 or bech32
+                return value.matches("(?:[LM3][1-9A-HJ-NP-Za-km-z]{25,34}|ltc1[02-9ac-hj-np-z]{20,90})");
+            case 3: // DOGE
+                return value.matches("D[1-9A-HJ-NP-Za-km-z]{25,34}");
+            case 4: // BTC: legacy, wrapped segwit, or bech32
+                return value.matches("(?:[13][1-9A-HJ-NP-Za-km-z]{25,34}|bc1[02-9ac-hj-np-z]{20,90})");
+            case 5: // USDT — Ethereum
+                return value.matches("0x[0-9a-fA-F]{40}");
+            case 6: // USDT — Tron
+                return value.matches("T[1-9A-HJ-NP-Za-km-z]{33}");
+            default:
+                return false;
+        }
     }
 
     public String preview() {
