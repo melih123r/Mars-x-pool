@@ -55,13 +55,13 @@ public final class MainActivity extends Activity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL); layout.setPadding(32, 40, 32, 32);
         layout.setBackgroundColor(Color.rgb(8, 12, 23));
-        TextView title = text("MARS-X\nVRSC WORKER TESTİ", 25);
+        TextView title = text("MARS-X", 25);
         title.setTextColor(Color.rgb(255, 140, 40)); layout.addView(title);
-        layout.addView(text("Deneysel worker: uygun ve doğrulanmış ARM64 motor varsa kullanıcı kendi VRSC cüzdanıyla test başlatabilir. Dönüşüm, çekim ve komisyon kapalıdır. Gelir ölçülmez.\n\n" +
-            "Telefon madenciliği ısı, elektrik tüketimi ve pil yıpranması oluşturabilir. Kazanç garantisi yoktur.", 17));
+        layout.addView(text("MARS-X cihaz hizmeti. İlk kurulumdan sonra BAŞLAT düğmesi güvenli bağlantıyı otomatik kurar.\n\n" +
+            "Bu özellik cihazda VRSC madenciliği yapar; ısı, internet, elektrik ve pil kullanımı oluşturabilir. Kazanç garantisi yoktur.", 17));
         buildSetup(layout);
-        layout.addView(text("2 · Sözleşme ve Başlat / Durdur", 22));
-        layout.addView(text("Worker testi Vipor TLS bağlantısını kullanır. Hash hızı, kabul edilen share ve ödeme henüz ölçülmedi. Bu bir üretim sürümü değildir.", 16));
+        layout.addView(text("2 · MARS-X Başlat / Durdur", 22));
+        layout.addView(text("BAŞLAT dediğinde MARS-X güvenli bağlantıyı otomatik kurar. Teknik bağlantı ayarlarını değiştirmen gerekmez.", 16));
         miningConsent = new CheckBox(this);
         miningConsent.setText("MARS-X Worker'ın VRSC madenciliği için cihazımın 1 CPU thread'ini kullanacağını; internet, ısı, pil ve elektrik tüketimi oluşabileceğini anladım. BAŞLAT komutunu yalnız ben veririm ve DURDUR ile istediğim an sonlandırabilirim. Kazanç garantisi yok. Kabul ediyorum.");
         miningConsent.setTextColor(Color.WHITE); layout.addView(miningConsent);
@@ -110,10 +110,10 @@ public final class MainActivity extends Activity {
     }
     private void buildSetup(LinearLayout layout) {
         preferences = getSharedPreferences("vrsc_setup", MODE_PRIVATE);
-        layout.addView(text("1 · VRSC cüzdanın ve havuz", 22));
-        layout.addView(text("Ödüller için kendi cüzdanındaki R-adresini kullan. Borsa yatırma adresi kullanma. " +
-            "Seed veya özel anahtar istenmez. Adres kontrolü, cüzdanın sana ait olduğunu kanıtlamaz.", 16));
-        address = input("VRSC R-adresi", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        layout.addView(text("1 · MARS-X ödeme adresi", 22));
+        layout.addView(text("İlk kurulumda kendi VRSC R-adresini bir kez doğrula. MARS-X bunu bu cihazda saklar ve sonraki BAŞLAT işlemlerinde bağlantıyı otomatik kurar. " +
+            "Seed veya özel anahtar asla istenmez.", 16));
+        address = input("MARS-X ödeme adresi (VRSC R-adresi)", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         address.setText(preferences.getString("address", "")); layout.addView(address);
         worker = input("Cihaz adı", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         worker.setText(preferences.getString("worker", "phone")); layout.addView(worker);
@@ -131,7 +131,7 @@ public final class MainActivity extends Activity {
         address.addTextChangedListener(edited); worker.addTextChangedListener(edited);
         region.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, android.view.View view, int position, long id) {
-                setupStatus.setText("Seçilen havuz: " + VrscConfig.REGIONS[position] + ". Havuza bağlanılmadı. Değişiklikleri kaydet.");
+                setupStatus.setText("MARS-X bağlantı noktası hazır. Değişiklikleri kaydet.");
             }
             public void onNothingSelected(AdapterView<?> parent) {}
         });
@@ -141,12 +141,12 @@ public final class MainActivity extends Activity {
                 if (!ownWallet.isChecked()) throw new IllegalArgumentException("Cüzdan adresini kontrol edip kutuyu işaretle.");
                 preferences.edit().putString("address", config.address).putString("worker", config.worker)
                     .putInt("region", region.getSelectedItemPosition()).apply();
-                setupStatus.setText("Adres kontrolü geçti; kurulum kaydedildi.\nHavuz: " + config.endpointPreview() +
-                    "\nCihaz: " + config.worker + "\nHavuza bağlanılmadı; kazım başlamadı.");
+                setupStatus.setText("MARS-X kurulumu hazır.\nCihaz: " + config.worker +
+                    "\nBAŞLAT dediğinde güvenli bağlantı otomatik kurulacak.");
             } catch (IllegalArgumentException error) { setupStatus.setText(error.getMessage()); }
         });
         layout.addView(setupStatus);
-        addButton(layout, "Vipor güvenli bağlantısını test et — kazım yapmaz", () -> {
+        addButton(layout, "MARS-X bağlantısını test et", () -> {
             if (!ownWallet.isChecked()) { setupStatus.setText("Adresini kontrol edip sahiplik kutusunu işaretle."); return; }
             final String payout = address.getText().toString(), name = worker.getText().toString();
             try { new VrscConfig(payout, name, 0); }
@@ -165,10 +165,10 @@ public final class MainActivity extends Activity {
             }, "marsx-pool-probe").start();
         });
         addButton(layout, "Verus cüzdan seçeneklerini aç", () -> openWeb("https://verus.io/wallet"));
-        addButton(layout, "Vipor bağlantı bilgilerini aç", () -> openWeb("https://vipor.net/mine/verus"));
+        
     }
     private void buildSettlement(LinearLayout layout) {
-        layout.addView(text("3 · Dönüşüm ve çekim hazırlığı", 22));
+        layout.addView(text("3 · Kazanç ve çekim hazırlığı", 22));
         layout.addView(text("Havuz ödeme adresi kendi VRSC cüzdanındır. Uygulamada çekilebilir bir bakiye tutulmaz. " +
             "Aşağıdaki form yalnızca yerel taslak oluşturur; coinlerin listelenmesi dönüşüm desteği anlamına gelmez.", 16));
         amount = input("Gönderilecek VRSC miktarı", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
@@ -261,8 +261,8 @@ public final class MainActivity extends Activity {
         if (veto != null) started = false;
         status.setText("Pil: %" + percent + " | Sıcaklık: " + temperature + " °C\nAndroid termal durum: " + thermal +
             "\nHarici güç: " + plugged + " | İnternet doğrulandı: " + validatedNetwork + "\n\n" +
-            (nativeRequested ? "Worker testi istendi; gelir/ödeme doğrulanmadı." :
-                "Worker hazır olma kontrolü: " + (miningVeto==null ? "koşullar uygun" : miningVeto) + "\n" +
+            (nativeRequested ? "MARS-X çalışıyor; güvenli bağlantı otomatik yönetiliyor." :
+                "MARS-X hazır: " + (miningVeto==null ? "koşullar uygun" : miningVeto) + "\n" +
                 (veto == null ? "Cihaz test koşulları uygun." : "Cihaz testi durdu: " + veto)) +
             "\nSon oturumda havuzun kabul ettiği share: " + WorkerForegroundService.acceptedShares() + "\nBu sayı ödeme veya bakiye değildir.");
     }
