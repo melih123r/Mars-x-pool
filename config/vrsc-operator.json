@@ -1,0 +1,7 @@
+{
+  "payoutAddress": "RFnoU1UFxBqrJh3NWUUBRBKCNGSEgkQ5c7",
+  "worker": "marsx_probe",
+  "scope": "operator-only",
+  "creditEnabled": false,
+  "withdrawalsEnabled": false
+}

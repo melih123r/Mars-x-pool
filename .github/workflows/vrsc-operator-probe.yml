@@ -1,0 +1,23 @@
+name: VRSC operator connection evidence
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/vrsc-operator-probe]
+permissions:
+  contents: read
+jobs:
+  connection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test test/vrsc-operator-probe.test.js
+      - run: node scripts/vrsc-operator-probe.mjs > vrsc-connection-evidence.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vrsc-operator-connection-evidence
+          path: vrsc-connection-evidence.json
+          retention-days: 7
