@@ -37,9 +37,7 @@ Conversion after payout requires a distinct user-signed transaction.
    inspected uses `stratum+tcp`; displaying CPU port 3960 is only a configuration
    preview. LuckPool advertises TLS port 3958, but engine compatibility is untested.
 3. Integrate native lifecycle, one-thread limits, foreground notification, current
-   telemetry enforcement, synchronous stop and no automatic restart. Current
-   battery diagnostics read Android's sticky broadcast; they do not establish
-   sensor freshness and must not be treated as a production mining interlock.
+   telemetry enforcement, synchronous stop and no automatic restart. Battery readings are displayed from the platform broadcast, but initial sticky events do not refresh the safety timestamp. A non-sticky battery event must have arrived within five seconds. This is event freshness, not proof of hardware sensor freshness; real-device validation remains required.
 4. Test on actual ARM64 devices: temperature, battery, backgrounding, process death,
    telemetry loss, network reconnection, address attribution and payout receipts.
 5. Integrate a provider with **confirmed VRSC pair and network support**, live quotes,
