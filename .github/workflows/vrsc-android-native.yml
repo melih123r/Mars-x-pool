@@ -86,7 +86,7 @@ jobs:
         run: |
           test -f mobile-miner/native/verified/libmarsxminer.so
           test -f mobile-miner/native/verified/SHA256SUMS
-          (cd mobile-miner/native/verified && sha256sum -c SHA256SUMS)
+          expected="$(awk '{print $1}' mobile-miner/native/verified/SHA256SUMS | head -n1)"\n          actual="$(sha256sum mobile-miner/native/verified/libmarsxminer.so | awk '{print $1}')"\n          test -n "$expected" && test "$actual" = "$expected"
           file mobile-miner/native/verified/libmarsxminer.so | grep -q 'ARM aarch64'
       - name: Build separate MARS-X Worker test APK
         env:
