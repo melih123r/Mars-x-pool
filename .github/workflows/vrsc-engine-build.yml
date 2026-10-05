@@ -1,0 +1,33 @@
+name: vrsc-engine-build
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Android NDK
+        run: |
+          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "ndk;27.2.12479018"
+      - name: Fetch pinned GPL source
+        run: |
+          git clone --filter=blob:none --branch ARM https://github.com/monkins1010/ccminer.git engine-src
+          cd engine-src
+          git checkout 1667394ad4120d64b0c57367e71cb832ad2e3645
+          test "$(git rev-parse HEAD)" = "1667394ad4120d64b0c57367e71cb832ad2e3645"
+          test -f LICENSE || test -f COPYING
+      - name: Inspect reproducible build inputs
+        run: |
+          cd engine-src
+          printf 'source_commit=%s\n' "$(git rev-parse HEAD)" | tee ../engine-build-manifest.txt
+          find . -maxdepth 2 -type f \( -name 'Android.mk' -o -name 'CMakeLists.txt' -o -name 'Makefile*' \) -print | sort | tee -a ../engine-build-manifest.txt
+          grep -RniE 'stratum\+ssl|stratum\+tls|SSL_|TLS_|openssl' . --exclude-dir=.git | head -100 | tee ../engine-tls-evidence.txt || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vrsc-engine-build-evidence
+          path: |
+            engine-build-manifest.txt
+            engine-tls-evidence.txt
