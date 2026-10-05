@@ -42,7 +42,7 @@ public final class WorkerForegroundService extends Service {
    VrscConfig config=new VrscConfig(intent.getStringExtra("address"),intent.getStringExtra("worker"),0);
    Intent stop=new Intent(this,WorkerForegroundService.class).setAction(ACTION_STOP);
    PendingIntent pi=PendingIntent.getService(this,1,stop,PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
-   Notification note=new Notification.Builder(this,CHANNEL).setSmallIcon(com.marsx.mobileminer.R.drawable.ic_launcher)
+   Notification note=new Notification.Builder(this,CHANNEL).setSmallIcon(getApplicationInfo().icon)
     .setContentTitle("MARS-X · deneysel VRSC kazımı").setContentText("1 CPU thread · 10 dakika sınırı · Vipor")
     .setOngoing(true).addAction(new Notification.Action.Builder(null,"DURDUR",pi).build()).build();
    startForeground(1001,note);
