@@ -3,7 +3,7 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 const SERVICE = "marsx-pool-worker-api";
-const VERSION = "0.8.7";
+const VERSION = "0.8.8";
 const TERMS_VERSION = "2026-09-27-v3";
 const WORKERS_KEY = "marsx:workers";
 const LICENSE_DEVICES_PREFIX = "marsx:license-devices:";
@@ -159,6 +159,30 @@ async function fetchVerusMarket(path) {
     const response = await fetch(`https://scan.verus.cx${path}`, { headers, signal: controller.signal });
     if (!response.ok) return { ok: false, status: response.status };
     return { ok: true, status: response.status, data: await response.json() };
+  } catch (error) {
+    return { ok: false, status: 0, error: error?.name === "AbortError" ? "timeout" : "unavailable" };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function changeNowRequest(path, options = {}) {
+  if (!process.env.CHANGENOW_API_KEY) return { ok: false, status: 0, error: "not_configured" };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch(`https://api.changenow.io${path}`, {
+      ...options,
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        "x-changenow-api-key": process.env.CHANGENOW_API_KEY,
+        ...(options.headers || {}),
+      },
+      signal: controller.signal,
+    });
+    const body = await response.json().catch(() => null);
+    return { ok: response.ok, status: response.status, data: body };
   } catch (error) {
     return { ok: false, status: 0, error: error?.name === "AbortError" ? "timeout" : "unavailable" };
   } finally {
@@ -1055,6 +1079,21 @@ export function createServer({
         const estimate = await fetchVerusMarket(`/api/market/best-conversion?from=VRSC&to=${encodeURIComponent(to)}&amount=${encodeURIComponent(amount)}`);
         if (!estimate.ok) return sendJson(res, 503, { error: "verus_quote_unavailable", upstreamStatus: estimate.status });
         return sendJson(res, 200, { provider: "scan.verus.cx", source: "VRSC", target: to, quote: estimate.data, executionEnabled: false });
+      }
+
+      if (req.method === "GET" && pathname === "/conversion/changenow-status") {
+        if (!process.env.CHANGENOW_API_KEY) {
+          return sendJson(res, 503, { provider: "ChangeNOW", configured: false, executionEnabled: false });
+        }
+        const currencies = await changeNowRequest("/v2/exchange/currencies");
+        return sendJson(res, currencies.ok ? 200 : 503, {
+          provider: "ChangeNOW",
+          configured: true,
+          reachable: currencies.ok,
+          upstreamStatus: currencies.status,
+          currencies: currencies.ok ? currencies.data : null,
+          executionEnabled: false,
+        });
       }
 
       if (req.method === "GET" && pathname === "/conversion/readiness") {
