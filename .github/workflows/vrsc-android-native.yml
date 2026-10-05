@@ -95,6 +95,14 @@ jobs:
           MINER_ANDROID_SDK: /usr/local/lib/android/sdk
           MINER_ENGINE_DIR: ${{ github.workspace }}/mobile-miner/native/verified
         run: bash mobile-miner/android/build-test.sh
+      - name: Verify packaged engine inside final APK
+        run: |
+          unzip -l mobile-miner/android/build/MARS-X-Miner-Device-Test.apk | grep -q 'lib/arm64-v8a/libmarsxminer.so'
+          unzip -p mobile-miner/android/build/MARS-X-Miner-Device-Test.apk lib/arm64-v8a/libmarsxminer.so > /tmp/apk-libmarsxminer.so
+          expected="$(sha256sum mobile-miner/native/verified/libmarsxminer.so | awk '{print $1}')"
+          actual="$(sha256sum /tmp/apk-libmarsxminer.so | awk '{print $1}')"
+          test "$actual" = "$expected"
+          file /tmp/apk-libmarsxminer.so | grep -q 'ARM aarch64'
       - name: Record Worker APK digest
         run: sha256sum mobile-miner/android/build/MARS-X-Miner-Device-Test.apk | tee mobile-miner/android/build/MARS-X-Worker-Test.apk.sha256
       - name: Attest Worker APK provenance
