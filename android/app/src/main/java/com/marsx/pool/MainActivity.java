@@ -152,7 +152,7 @@ public class MainActivity extends Activity {
         licenceStatus = addText(deviceCard, getString(R.string.licence_not_checked), 14);
         button(deviceCard, getString(R.string.connect_device_button), view -> sendNodeEvent("/register"));
         if (embeddedWorkerAvailable()) {
-            button(deviceCard, "VRSC Worker · START / STOP", view -> openEmbeddedWorker());
+            button(deviceCard, "MARS-X · BAŞLAT / DURDUR", view -> openEmbeddedWorker());
         }
         button(deviceCard, getString(R.string.advanced_tools_button), view -> showAdvancedTools());
         return scroll(root);
