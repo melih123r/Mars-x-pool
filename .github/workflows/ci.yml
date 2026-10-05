@@ -49,3 +49,32 @@ jobs:
         with:
           name: marsx-pool-release-aab-unsigned
           path: android/app/build/outputs/bundle/release/app-release.aab
+
+  vrsc-engine-evidence:
+    runs-on: ubuntu-24.04-arm
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential automake autoconf libtool pkg-config libcurl4-openssl-dev libssl-dev libjansson-dev
+      - name: Build exact pinned ARM source
+        run: |
+          git clone --single-branch -b ARM https://github.com/monkins1010/ccminer.git engine-src
+          cd engine-src
+          git checkout 1667394ad4120d64b0c57367e71cb832ad2e3645
+          test "$(git rev-parse HEAD)" = "1667394ad4120d64b0c57367e71cb832ad2e3645"
+          chmod +x autogen.sh configure.sh build.sh
+          ./autogen.sh
+          CC=gcc CXX=g++ ./build.sh
+          test -x ./ccminer
+          file ./ccminer | tee ../engine-file.txt
+          sha256sum ./ccminer | tee ../engine-sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vrsc-arm64-engine-evidence
+          path: |
+            engine-file.txt
+            engine-sha256.txt
+          if-no-files-found: ignore
+          retention-days: 7
