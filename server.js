@@ -3,7 +3,7 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 const SERVICE = "marsx-pool-worker-api";
-const VERSION = "0.8.6";
+const VERSION = "0.8.7";
 const TERMS_VERSION = "2026-09-27-v3";
 const WORKERS_KEY = "marsx:workers";
 const LICENSE_DEVICES_PREFIX = "marsx:license-devices:";
@@ -148,6 +148,22 @@ function conversionTarget(value) {
 function validConversionDestination(target, value) {
   const destination = String(value || "").trim();
   return Boolean(target && target.pattern.test(destination));
+}
+
+async function fetchVerusMarket(path) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
+  try {
+    const headers = { accept: "application/json" };
+    if (process.env.VERUS_SCAN_API_KEY) headers.authorization = `Bearer ${process.env.VERUS_SCAN_API_KEY}`;
+    const response = await fetch(`https://scan.verus.cx${path}`, { headers, signal: controller.signal });
+    if (!response.ok) return { ok: false, status: response.status };
+    return { ok: true, status: response.status, data: await response.json() };
+  } catch (error) {
+    return { ok: false, status: 0, error: error?.name === "AbortError" ? "timeout" : "unavailable" };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 function parseLicenseRecords(input) {
@@ -1010,6 +1026,35 @@ export function createServer({
           estimatedOutput: null,
           executionEnabled: false,
         });
+      }
+
+      if (req.method === "GET" && pathname === "/conversion/verus-market") {
+        const protocol = await fetchVerusMarket("/api/market/protocol");
+        const pools = await fetchVerusMarket("/api/market/vrsc-pools");
+        return sendJson(res, protocol.ok || pools.ok ? 200 : 503, {
+          provider: "scan.verus.cx",
+          readOnly: true,
+          protocol: protocol.ok ? protocol.data : null,
+          vrscPools: pools.ok ? pools.data : null,
+          estimateEnabled: Boolean(process.env.VERUS_SCAN_API_KEY),
+          executionEnabled: false,
+        });
+      }
+
+      if (req.method === "POST" && pathname === "/conversion/verus-estimate") {
+        if (!process.env.VERUS_SCAN_API_KEY) {
+          return sendJson(res, 503, { error: "verus_scan_developer_key_required" });
+        }
+        const data = await readJson(req);
+        const amount = String(data.amountVrsc || "").trim();
+        const to = String(data.to || "").trim();
+        if (!/^(?:0|[1-9][0-9]{0,11})(?:\\.[0-9]{1,8})?$/.test(amount) || Number(amount) <= 0) {
+          return sendJson(res, 400, { error: "invalid_vrsc_amount" });
+        }
+        if (!/^[A-Za-z0-9@._-]{1,80}$/.test(to)) return sendJson(res, 400, { error: "invalid_target_currency" });
+        const estimate = await fetchVerusMarket(`/api/market/best-conversion?from=VRSC&to=${encodeURIComponent(to)}&amount=${encodeURIComponent(amount)}`);
+        if (!estimate.ok) return sendJson(res, 503, { error: "verus_quote_unavailable", upstreamStatus: estimate.status });
+        return sendJson(res, 200, { provider: "scan.verus.cx", source: "VRSC", target: to, quote: estimate.data, executionEnabled: false });
       }
 
       if (req.method === "GET" && pathname === "/conversion/readiness") {
