@@ -3,5 +3,15 @@
   "worker": "marsx_probe",
   "scope": "operator-only",
   "creditEnabled": false,
-  "withdrawalsEnabled": false
+  "withdrawalsEnabled": false,
+  "verifiedProtocolEndpoint": {
+    "host": "bzdev.vipor.net",
+    "port": 5140,
+    "tlsVerified": true,
+    "authorized": true,
+    "evidenceRun": 37336141645,
+    "observedAt": "2026-10-05T15:51:13Z",
+    "acceptedShareVerified": false,
+    "settlementVerified": false
+  }
 }
