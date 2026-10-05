@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 /** Local intent, never a quote, transaction, balance or withdrawal authorization. */
 public final class SettlementDraft {
     public static final String[] TARGETS = {
-        "VRSC — Verus", "LTC — Litecoin", "DOGE — Dogecoin", "BTC — Bitcoin",
+        "SOL — Solana", "VRSC — Verus", "LTC — Litecoin", "DOGE — Dogecoin", "BTC — Bitcoin",
         "USDT — Ethereum", "USDT — Tron"
     };
     public final String amount, target, destination;
@@ -19,7 +19,7 @@ public final class SettlementDraft {
             throw new IllegalArgumentException("Coin ve ağ seç.");
         if (destination == null || !destination.matches("[A-Za-z0-9]{20,128}"))
             throw new IllegalArgumentException("Hedef cüzdan adresini gir; boşluk ve bağlantı kullanma.");
-        if (targetIndex == 0 && !VrscConfig.validAddress(destination))
+        if (targetIndex == 1 && !VrscConfig.validAddress(destination))
             throw new IllegalArgumentException("Hedef VRSC R-adresi geçersiz.");
         amount = parsed.stripTrailingZeros().toPlainString();
         target = TARGETS[targetIndex];
@@ -31,9 +31,12 @@ public final class SettlementDraft {
             "\nHedef adres:\n" + destination +
             "\n\nBu seçim işlem çiftinin desteklendiği anlamına gelmez. " +
             "VRSC dışındaki hedef adreslerin ağ doğrulaması henüz yapılmadı.\n\n" +
-            "Alınacak miktar: fiyat alınmadı\nÜcret / minimum: doğrulanmadı\n" +
+            "Alınacak miktar: canlı rota/quote bağlantısı bekleniyor\n" +
+            "MARS-X hizmet bedeli: %2 (yalnız gerçekleşen dönüşümde)\n" +
+            "Pool komisyonu: %10 (provider-confirmed mining settlement üzerinden)\n" +
+            "Network / liquidity / protocol maliyeti: canlı quote sırasında ayrıca gösterilecek\n" +
             "Bakiye: cüzdana bağlanılmadı\nDurum: sağlayıcı ve cüzdan imzası bağlantısı bekleniyor.\n\n" +
-            "Bu uygulama fon tutmaz. Havuzdan cüzdanına yapılan ödeme ile " +
-            "cüzdanından yapılacak dönüşüm veya gönderim ayrı işlemlerdir.";
+            "Gerçek dönüşüm yürütme kapalıdır; yalnız doğrulanmış provider quote ve yetkili treasury imzası olduğunda açılacaktır. " +
+            "Private key veya provider secret APK içine konmaz.";
     }
 }
