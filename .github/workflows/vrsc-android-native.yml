@@ -9,6 +9,8 @@ on:
       - .github/workflows/vrsc-android-native.yml
 permissions:
   contents: read
+  id-token: write
+  attestations: write
 jobs:
   android-client:
     runs-on: ubuntu-latest
@@ -95,6 +97,10 @@ jobs:
         run: bash mobile-miner/android/build-test.sh
       - name: Record Worker APK digest
         run: sha256sum mobile-miner/android/build/MARS-X-Miner-Device-Test.apk | tee mobile-miner/android/build/MARS-X-Worker-Test.apk.sha256
+      - name: Attest Worker APK provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: mobile-miner/android/build/MARS-X-Miner-Device-Test.apk
       - uses: actions/upload-artifact@v4
         with:
           name: marsx-vrsc-worker-test-apk
