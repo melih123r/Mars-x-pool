@@ -93,14 +93,14 @@ public class MainActivity extends Activity {
         googleSignIn = new GoogleSignInManager(this);
         LinearLayout screen = new LinearLayout(this);
         screen.setOrientation(LinearLayout.VERTICAL);
-        screen.setBackgroundColor(Color.rgb(246, 248, 252));
+        screen.setBackgroundColor(Color.rgb(8, 8, 8));
 
         LinearLayout header = new LinearLayout(this);
         header.setOrientation(LinearLayout.VERTICAL);
         header.setPadding(28, 28, 28, 14);
         addTitle(header, getString(R.string.app_title));
         TextView beta = addText(header, getString(R.string.simple_beta_label), 13);
-        beta.setTextColor(Color.rgb(103, 111, 128));
+        beta.setTextColor(Color.rgb(255, 106, 26));
         screen.addView(header);
 
         contentFrame = new FrameLayout(this);
@@ -116,7 +116,7 @@ public class MainActivity extends Activity {
         LinearLayout tabs = new LinearLayout(this);
         tabs.setOrientation(LinearLayout.HORIZONTAL);
         tabs.setPadding(12, 6, 12, 10);
-        tabs.setBackgroundColor(Color.WHITE);
+        tabs.setBackgroundColor(Color.rgb(12, 12, 12));
         homeTab = tabButton(tabs, getString(R.string.tab_home), view -> showTab(0));
         earningsTab = tabButton(tabs, getString(R.string.tab_earnings), view -> showTab(1));
         accountTab = tabButton(tabs, getString(R.string.tab_account), view -> showTab(2));
@@ -244,7 +244,8 @@ public class MainActivity extends Activity {
     private LinearLayout pageRoot() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(24, 8, 24, 32);
+        root.setPadding(24, 12, 24, 32);
+        root.setBackgroundColor(Color.rgb(8, 8, 8));
         return root;
     }
 
@@ -260,7 +261,7 @@ public class MainActivity extends Activity {
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(24, 20, 24, 20);
         GradientDrawable background = new GradientDrawable();
-        background.setColor(Color.WHITE);
+        background.setColor(Color.rgb(20, 20, 20));
         background.setCornerRadius(24f);
         card.setBackground(background);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
