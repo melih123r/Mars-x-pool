@@ -64,7 +64,7 @@ if 'marsx_parent_death_guard' not in s:
 PARENT_DEATH_PATCH
   # Raw Stratum is permitted only on loopback behind the Android verified TLS relay.
   # OpenSSL is required for upstream hashing; remote TLS is handled by Android.
-  CPPFLAGS="-I$TASK_PREFIX/include" LDFLAGS="-L$TASK_PREFIX/lib -L$TASK_PREFIX/lib64" \
+  CPPFLAGS="-I$TASK_PREFIX/include" LDFLAGS="-L$TASK_PREFIX/lib -L$TASK_PREFIX/lib64 -Wl,-z,max-page-size=16384 -Wl,-z,common-page-size=16384" \
     LIBS="-lcrypto -ldl -lm" CFLAGS="-O2 -fPIE" CXXFLAGS="-O2 -fPIE" CURL_CONFIG="$TASK_PREFIX/bin/curl-config" \
     ./configure --host=aarch64-linux-android --target=aarch64-linux-android \
       ac_cv_prog_c_openmp=unsupported ac_cv_prog_cxx_openmp=unsupported
@@ -82,5 +82,5 @@ PARENT_DEATH_PATCH
   fi
   cp LICENSE.txt "$TASK_BUILD/artifact/ENGINE-LICENSE.txt"
   sha256sum "$TASK_BUILD/artifact/"*.so > "$TASK_BUILD/artifact/SHA256SUMS"
-  printf 'engine=1667394ad4120d64b0c57367e71cb832ad2e3645\nopenssl=636dfadc70ce26f2473870570bfd9ec352806b1d\ncurl=57495c64871d18905a0941db9196ef90bafe9a29\nndk=27.2.12479018\nabi=arm64-v8a\nparent_death=SIGKILL\napi=29\n' > "$TASK_BUILD/artifact/PROVENANCE.txt"
+  printf 'engine=1667394ad4120d64b0c57367e71cb832ad2e3645\nopenssl=636dfadc70ce26f2473870570bfd9ec352806b1d\ncurl=57495c64871d18905a0941db9196ef90bafe9a29\nndk=27.2.12479018\nabi=arm64-v8a\nparent_death=SIGKILL\npage_alignment=16384\napi=29\n' > "$TASK_BUILD/artifact/PROVENANCE.txt"
 )
