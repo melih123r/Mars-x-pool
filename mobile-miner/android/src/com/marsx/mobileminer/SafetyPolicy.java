@@ -10,7 +10,7 @@ public final class SafetyPolicy {
         if (Double.isNaN(temperature) || Double.isInfinite(temperature) || temperature < 0 || temperature >= 38)
             return "Pil sıcaklığı uygun değil";
         if (thermal < 0 || thermal >= 2) return "Android sıcaklık sınırı";
-        if (battery < 80 || battery > 100) return "Pil en az %80 olmalı";
+        if (battery < 15 || battery > 100) return "Pil en az %15 olmalı";
         if (!plugged) return "Harici güç bağlı değil";
         if (!unmetered) return "Ölçümsüz ağ gerekli";
         if (sessionMs < 0 || sessionMs >= 600000) return "10 dakika test sınırı";
