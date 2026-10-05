@@ -3,7 +3,7 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 const SERVICE = "marsx-pool-worker-api";
-const VERSION = "0.8.8";
+const VERSION = "0.8.9";
 const TERMS_VERSION = "2026-09-27-v3";
 const WORKERS_KEY = "marsx:workers";
 const LICENSE_DEVICES_PREFIX = "marsx:license-devices:";
@@ -1079,6 +1079,43 @@ export function createServer({
         const estimate = await fetchVerusMarket(`/api/market/best-conversion?from=VRSC&to=${encodeURIComponent(to)}&amount=${encodeURIComponent(amount)}`);
         if (!estimate.ok) return sendJson(res, 503, { error: "verus_quote_unavailable", upstreamStatus: estimate.status });
         return sendJson(res, 200, { provider: "scan.verus.cx", source: "VRSC", target: to, quote: estimate.data, executionEnabled: false });
+      }
+
+      if (req.method === "POST" && pathname === "/conversion/changenow-quote") {
+        if (!process.env.CHANGENOW_API_KEY) {
+          return sendJson(res, 503, { error: "changenow_api_key_required" });
+        }
+        const data = await readJson(req);
+        const fromCurrency = String(data.fromCurrency || "").trim().toLowerCase();
+        const toCurrency = String(data.toCurrency || "").trim().toLowerCase();
+        const fromNetwork = String(data.fromNetwork || "").trim().toLowerCase();
+        const toNetwork = String(data.toNetwork || "").trim().toLowerCase();
+        const amount = String(data.amount || "").trim();
+        if (!/^[a-z0-9_-]{2,20}$/.test(fromCurrency) || !/^[a-z0-9_-]{2,20}$/.test(toCurrency) ||
+            !/^[a-z0-9_-]{2,20}$/.test(fromNetwork) || !/^[a-z0-9_-]{2,20}$/.test(toNetwork) ||
+            !/^(?:0|[1-9][0-9]{0,11})(?:\\.[0-9]{1,8})?$/.test(amount) || Number(amount) <= 0) {
+          return sendJson(res, 400, { error: "invalid_quote_request" });
+        }
+        const query = new URLSearchParams({
+          fromCurrency, toCurrency, fromNetwork, toNetwork, fromAmount: amount, flow: "standard"
+        });
+        const upstream = await changeNowRequest(`/v2/exchange/estimated-amount?${query.toString()}`);
+        if (!upstream.ok) {
+          return sendJson(res, 503, { error: "changenow_quote_unavailable", upstreamStatus: upstream.status });
+        }
+        const inputAtoms = BigInt(amount.includes(".")
+          ? amount.split(".")[0] + amount.split(".")[1].padEnd(8, "0")
+          : amount + "00000000");
+        const marsxFeeAtoms = inputAtoms * BigInt(CONVERSION_SERVICE_FEE_BPS) / 10000n;
+        const display8 = (atoms) => `${atoms / 100000000n}.${String(atoms % 100000000n).padStart(8, "0")}`;
+        return sendJson(res, 200, {
+          provider: "ChangeNOW",
+          providerQuote: upstream.data,
+          marsxServiceFeeBps: CONVERSION_SERVICE_FEE_BPS,
+          marsxServiceFeeInputEquivalent: display8(marsxFeeAtoms),
+          providerAndNetworkFees: "use provider quote fields; never merged into MARS-X service fee",
+          executionEnabled: false,
+        });
       }
 
       if (req.method === "GET" && pathname === "/conversion/changenow-status") {
