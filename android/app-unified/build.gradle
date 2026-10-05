@@ -1,0 +1,70 @@
+plugins { id "com.android.application" }
+
+def qonversionProjectKey = providers.gradleProperty("QONVERSION_PROJECT_KEY")
+        .orElse(providers.environmentVariable("QONVERSION_PROJECT_KEY"))
+        .getOrElse("")
+def escapedQonversionProjectKey = qonversionProjectKey
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+def marsxApiBaseUrl = providers.gradleProperty("MARSX_API_BASE_URL")
+        .orElse(providers.environmentVariable("MARSX_API_BASE_URL"))
+        .getOrElse("https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-pool-api")
+def escapedMarsxApiBaseUrl = marsxApiBaseUrl
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+def googleWebClientId = providers.gradleProperty("GOOGLE_WEB_CLIENT_ID")
+        .orElse(providers.environmentVariable("GOOGLE_WEB_CLIENT_ID"))
+        .getOrElse("")
+def escapedGoogleWebClientId = googleWebClientId
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+
+android {
+    namespace "com.marsx.pool"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.marsx.pool.unified"
+        minSdk 29
+        targetSdk 36
+        versionCode 1
+        versionName "0.9.0-unified-test"
+        buildConfigField "String", "QONVERSION_PROJECT_KEY", "\"${escapedQonversionProjectKey}\""
+        buildConfigField "String", "QONVERSION_PRODUCT_PRO", "\"pro_monthly\""
+        buildConfigField "String", "QONVERSION_PRODUCT_FARM", "\"farm_monthly\""
+        buildConfigField "String", "MARSX_API_BASE_URL", "\"${escapedMarsxApiBaseUrl}\""
+        buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${escapedGoogleWebClientId}\""
+    }
+
+    buildFeatures { buildConfig true }
+
+    sourceSets {
+        main {
+            java.srcDirs = ["../app/src/main/java", "../../mobile-miner/android/src"]
+            res.srcDirs = ["../app/src/main/res"]
+            jniLibs.srcDirs = ["src/main/jniLibs"]
+            manifest.srcFile "src/main/AndroidManifest.xml"
+        }
+    }
+
+    lint { disable "MissingTranslation" }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+}
+
+dependencies {
+    implementation "io.qonversion.android.sdk:sdk:9.7.0"
+    implementation "androidx.credentials:credentials:1.6.0"
+    implementation "androidx.credentials:credentials-play-services-auth:1.6.0"
+    implementation "com.google.android.libraries.identity.googleid:googleid:1.1.1"
+}

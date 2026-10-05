@@ -1,21 +1,91 @@
 package com.marsx.mobileminer;
-import android.app.*; import android.content.*; import android.os.IBinder;
+import android.app.*;
+import android.content.*;
+import android.os.*;
+
+/** Explicit, visible experimental device session. Production money movement is absent. */
 public final class WorkerForegroundService extends Service {
  public static final String ACTION_START="com.marsx.mobileminer.START_SESSION";
  public static final String ACTION_STOP="com.marsx.mobileminer.STOP_SESSION";
+ public static final String ACTION_HEARTBEAT="com.marsx.mobileminer.SESSION_HEARTBEAT";
  private static final String CHANNEL="marsx_worker_session";
- public void onCreate(){super.onCreate(); NotificationManager n=getSystemService(NotificationManager.class);
-  if(n!=null)n.createNotificationChannel(new NotificationChannel(CHANNEL,"MARS-X Worker",NotificationManager.IMPORTANCE_LOW));}
- public int onStartCommand(Intent i,int flags,int id){
-  if(i==null||!ACTION_START.equals(i.getAction())){stopSelf();return START_NOT_STICKY;}
-  Intent stop=new Intent(this,WorkerForegroundService.class).setAction(ACTION_STOP);
-  PendingIntent pi=PendingIntent.getService(this,1,stop,PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
-  Notification note=new Notification.Builder(this,CHANNEL).setSmallIcon(com.marsx.mobileminer.R.drawable.ic_launcher)
-   .setContentTitle("MARS-X Worker oturumu").setContentText("Kullanıcı başlattı · otomatik yeniden başlatma yok")
-   .setOngoing(true).addAction(new Notification.Action.Builder(null,"DURDUR",pi).build()).build();
-  startForeground(1001,note); return START_NOT_STICKY;
+ private final Handler handler=new Handler(Looper.getMainLooper());
+ private NativeEngineSession engine;
+ private PairingHeartbeatClient pairingClient;
+ private long startedAt;
+ private boolean running;
+ private static volatile boolean active;
+ private static volatile int acceptedShares;
+ public static int acceptedShares(){return acceptedShares;}
+ public static boolean isRunning(){return active;}
+ private final Runnable watchdog=new Runnable(){public void run(){
+  if(!running||currentSafetyVeto()!=null){stopSession();return;}
+  if(pairingClient!=null)pairingClient.poll(WorkerForegroundService.this);
+  handler.postDelayed(this,1000);
+ }};
+ public void onCreate(){super.onCreate();NotificationManager n=getSystemService(NotificationManager.class);
+  if(n!=null)n.createNotificationChannel(new NotificationChannel(CHANNEL,"MARS-X",NotificationManager.IMPORTANCE_LOW));}
+ public int onStartCommand(Intent intent,int flags,int id){
+  if(intent==null||ACTION_STOP.equals(intent.getAction())){stopSession();return START_NOT_STICKY;}
+  if(ACTION_HEARTBEAT.equals(intent.getAction())){
+   return START_NOT_STICKY;
+  }
+  if(!ACTION_START.equals(intent.getAction())||running||safe(intent)!=null||!EngineArtifact.ready(this)){
+   stopSession();return START_NOT_STICKY;
+  }
+  NotificationManager manager=getSystemService(NotificationManager.class);
+  if(manager==null||!manager.areNotificationsEnabled()){stopSession();return START_NOT_STICKY;}
+  try{
+   VrscConfig config=new VrscConfig(intent.getStringExtra("address"),intent.getStringExtra("worker"),0);
+   Intent stop=new Intent(this,WorkerForegroundService.class).setAction(ACTION_STOP);
+   PendingIntent pi=PendingIntent.getService(this,1,stop,PendingIntent.FLAG_IMMUTABLE|PendingIntent.FLAG_UPDATE_CURRENT);
+   Notification note=new Notification.Builder(this,CHANNEL).setSmallIcon(getApplicationInfo().icon)
+    .setContentTitle("MARS-X çalışıyor").setContentText("VRSC madenciliği · 1 CPU thread · güvenlik kontrolleri aktif")
+    .setOngoing(true).addAction(new Notification.Action.Builder(null,"DURDUR",pi).build()).build();
+   startForeground(1001,note);
+   startedAt=SystemClock.elapsedRealtime();
+   engine=new NativeEngineSession();running=true;acceptedShares=0;
+   String registry=intent.getStringExtra("registryUrl"),sid=intent.getStringExtra("pairingSession"),pt=intent.getStringExtra("pairingToken");
+   if(registry!=null&&sid!=null&&pt!=null) pairingClient=new PairingHeartbeatClient(registry,sid,config.worker,pt);
+   engine.start(EngineArtifact.binary(this),EngineArtifact.ENGINE_SHA,config,true,true,null,
+     ()->handler.post(()->stopSession()),()->acceptedShares++);
+   active=true;handler.post(watchdog);
+  }catch(Exception error){stopSession();}
+  return START_NOT_STICKY;
  }
- public void onTaskRemoved(Intent root){stopSelf();super.onTaskRemoved(root);}
- public void onDestroy(){stopForeground(STOP_FOREGROUND_REMOVE);super.onDestroy();}
+ private String safe(Intent i){
+  return SafetyPolicy.veto(i.getBooleanExtra("consent",false),true,i.getBooleanExtra("visible",false),
+   i.getDoubleExtra("temperature",Double.NaN),i.getIntExtra("battery",-1),i.getIntExtra("thermal",-1),
+   i.getBooleanExtra("plugged",false),i.getBooleanExtra("unmetered",false),i.getLongExtra("ageMs",5001),
+   running?SystemClock.elapsedRealtime()-startedAt:0);
+ }
+ private String currentSafetyVeto(){
+  Intent batteryIntent=registerReceiver(null,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+  double temperature=Double.NaN;int battery=-1;boolean plugged=false;
+  if(batteryIntent!=null){
+   if(batteryIntent.hasExtra(BatteryManager.EXTRA_TEMPERATURE))
+    temperature=batteryIntent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE,-1)/10.0;
+   int level=batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL,-1);
+   int scale=batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE,-1);
+   if(level>=0&&scale>0)battery=(int)(100L*level/scale);
+   plugged=batteryIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED,0)!=0;
+  }
+  PowerManager power=getSystemService(PowerManager.class);
+  int thermal=power==null?-1:power.getCurrentThermalStatus();
+  android.net.ConnectivityManager cm=getSystemService(android.net.ConnectivityManager.class);
+  android.net.NetworkCapabilities caps=cm==null?null:cm.getNetworkCapabilities(cm.getActiveNetwork());
+  boolean network=caps!=null&&caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+  long sessionMs=running?SystemClock.elapsedRealtime()-startedAt:0;
+  return SafetyPolicy.veto(true,true,true,temperature,battery,thermal,plugged,network,0,sessionMs);
+ }
+ private void stopSession(){
+  active=false;running=false;handler.removeCallbacks(watchdog);
+  if(pairingClient!=null){pairingClient.close();pairingClient=null;}
+  if(engine!=null){engine.close();engine=null;}
+  stopForeground(STOP_FOREGROUND_REMOVE);stopSelf();
+ }
+ public void onTaskRemoved(Intent root){stopSession();super.onTaskRemoved(root);}
+ public void onDestroy(){active=false;running=false;handler.removeCallbacksAndMessages(null);if(pairingClient!=null){pairingClient.close();pairingClient=null;}if(engine!=null){engine.close();engine=null;}
+  stopForeground(STOP_FOREGROUND_REMOVE);super.onDestroy();}
  public IBinder onBind(Intent i){return null;}
 }

@@ -8,11 +8,12 @@ test('ranks only confirmed economical liquid quotes',()=>{
 });
 test('conversion uses settled VRSC and explicit confirmation',()=>{
  assert.equal(canExecuteConversion({userConfirmed:false,settledBalanceVrsc:10,amountVrsc:1,quote:q()}).allowed,false);
- assert.equal(canExecuteConversion({userConfirmed:true,settledBalanceVrsc:10,amountVrsc:1,quote:q()}).allowed,true);
+ assert.deepEqual(canExecuteConversion({userConfirmed:true,settledBalanceVrsc:10,amountVrsc:1,quote:q()}),{allowed:false,eligible:true,reason:'execution-disabled'});
 });
 test('withdrawal uses target balance and destination, never settled VRSC directly',()=>{
  const args={userConfirmed:true,targetBalance:100,amount:10,quote:q(),asset:'TRX',network:'TRON',address:'TQn9Y2khEsLJW1ChVWFMSMeRDow5KcbLSE'};
- assert.equal(canExecuteWithdrawal(args).allowed,true);
+ assert.deepEqual(canExecuteWithdrawal(args),{allowed:false,eligible:true,reason:'execution-disabled'});
+ assert.equal(canExecuteWithdrawal({...args,quote:q({network:'BSC'})}).reason,'quote-destination-mismatch');
  assert.equal(canExecuteWithdrawal({...args,userConfirmed:false}).allowed,false);
  assert.equal(canExecuteWithdrawal({...args,targetBalance:1}).allowed,false);
 });

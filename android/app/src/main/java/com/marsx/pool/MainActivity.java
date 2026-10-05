@@ -151,6 +151,9 @@ public class MainActivity extends Activity {
         addText(deviceCard, getString(R.string.device_summary, suffix), 18);
         licenceStatus = addText(deviceCard, getString(R.string.licence_not_checked), 14);
         button(deviceCard, getString(R.string.connect_device_button), view -> sendNodeEvent("/register"));
+        if (embeddedWorkerAvailable()) {
+            button(deviceCard, "MARS-X · BAŞLAT / DURDUR", view -> openEmbeddedWorker());
+        }
         button(deviceCard, getString(R.string.advanced_tools_button), view -> showAdvancedTools());
         return scroll(root);
     }
@@ -956,8 +959,41 @@ public class MainActivity extends Activity {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(base + "/privacy")));
     }
 
+    private boolean embeddedWorkerAvailable() {
+        try {
+            Class.forName("com.marsx.mobileminer.MainActivity");
+            return true;
+        } catch (ClassNotFoundException ignored) {
+            return false;
+        }
+    }
+
+    private void openEmbeddedWorker() {
+        try {
+            Intent worker = new Intent();
+            worker.setClassName(this, "com.marsx.mobileminer.MainActivity");
+            startActivity(worker);
+        } catch (Exception error) {
+            new AlertDialog.Builder(this)
+                    .setTitle("MARS-X Worker")
+                    .setMessage("Worker component is not available in this build.")
+                    .setPositiveButton(R.string.close_button, null)
+                    .show();
+        }
+    }
+
     private void showTerms() {
-        String terms = getString(R.string.terms_summary, TERMS_VERSION);
+        String terms;
+        if (embeddedWorkerAvailable()) {
+            terms = "MARS-X Pool Unified Worker • " + TERMS_VERSION +
+                    "\n\nThis test build includes an on-device VRSC Worker. Mining starts only after you explicitly accept the Worker notice and press START. " +
+                    "The Worker uses one CPU thread, may consume mobile/Wi-Fi data, power and battery, and may increase device temperature. " +
+                    "You can stop it at any time with STOP or the persistent notification. Safety limits can stop the Worker automatically. " +
+                    "No earnings are guaranteed. Seed phrases and private keys are never requested. The configured public VRSC payout address is used for pool attribution." +
+                    "\n\nThe MARS-X licence and privacy terms otherwise remain in force.";
+        } else {
+            terms = getString(R.string.terms_summary, TERMS_VERSION);
+        }
         new AlertDialog.Builder(this)
                 .setTitle(R.string.terms_dialog_title)
                 .setMessage(terms)

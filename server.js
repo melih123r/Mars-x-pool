@@ -1,6 +1,7 @@
 import http from "node:http";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
+import { createPairingControl } from "./mobile-miner/pairing-control.mjs";
 
 const SERVICE = "marsx-pool-worker-api";
 const VERSION = "0.8.4";
@@ -692,6 +693,7 @@ export function createServer({
   qonversionSessionTtlSeconds = Number(process.env.QONVERSION_SESSION_TTL_SECONDS || 3_600),
   qonversionApiBase = "https://api.qonversion.io/v4",
   qonversionFetch = globalThis.fetch,
+  pairingControl = null,
 } = {}) {
   const records = parseLicenseRecords(licenseRecords);
   const ttlSeconds = Math.min(Math.max(Number(licenseTokenTtlSeconds), 3_600), 7_776_000);
@@ -709,6 +711,7 @@ export function createServer({
   const licenseReady = legacyLicenseReady || qonversionReady;
   const rateLimits = new Map();
   const activationLimits = new Map();
+  const pairing = pairingControl || createPairingControl({ now });
 
   function isRateLimited(req) {
     const key = requestAddress(req);
@@ -798,6 +801,49 @@ export function createServer({
     if (isRateLimited(req)) return sendJson(res, 429, { error: "rate_limit_exceeded" });
 
     try {
+      if (req.method === "POST" && pathname === "/pairing/code") {
+        if (!licenseReady) return sendJson(res, 503, { error: "licensing_not_configured" });
+        const data = await readJson(req);
+        const installId = String(data.install_id || "");
+        const session = currentLicense(req, installId);
+        if (!session) return sendJson(res, 401, { error: "valid_license_required" });
+        try {
+          const poolId = String(data.pool_id || ""), workerId = String(data.worker_id || "");
+          const issued = pairing.issue({ poolId, workerId });
+          return sendJson(res, 201, { ok: true, pool_id: poolId, worker_id: workerId,
+            pairing_code: issued.code, expires_at: new Date(issued.expiresAt).toISOString() });
+        } catch { return sendJson(res, 400, { error: "invalid_pairing_identity" }); }
+      }
+
+      if (req.method === "POST" && pathname === "/pairing/redeem") {
+        const data = await readJson(req);
+        const result = pairing.redeem({ code: String(data.pairing_code || ""),
+          poolId: String(data.pool_id || ""), workerId: String(data.worker_id || ""),
+          userConfirmed: data.local_user_confirmed === true });
+        if (!result.paired) return sendJson(res, 403, { error: result.reason });
+        return sendJson(res, 200, { ok: true, session_id: result.sessionId,
+          worker_token: result.token, expires_at: new Date(result.expiresAt).toISOString() });
+      }
+
+      if (req.method === "POST" && pathname === "/pairing/heartbeat") {
+        const data = await readJson(req);
+        const workerId = String(data.worker_id || "");
+        const auth = pairing.authenticate({ sessionId: String(data.session_id || ""),
+          token: authorizationToken(req, "Worker"), workerId, nonce: data.nonce });
+        if (!auth.ok) return sendJson(res, 401, { error: auth.reason });
+        const command = pairing.command({ workerId });
+        return sendJson(res, 200, { ok: true, command: command || { type: "NONE" } });
+      }
+
+      if (req.method === "POST" && pathname === "/pairing/stop/ack") {
+        const data = await readJson(req);
+        const workerId = String(data.worker_id || "");
+        const auth = pairing.authenticate({ sessionId: String(data.session_id || ""),
+          token: authorizationToken(req, "Worker"), workerId, nonce: data.nonce });
+        if (!auth.ok) return sendJson(res, 401, { error: auth.reason });
+        return sendJson(res, 200, { ok: true, acknowledged: pairing.acknowledgeStop({ workerId }) });
+      }
+
       if (req.method === "POST" && pathname === "/billing/qonversion/session") {
         if (!qonversionReady) return sendJson(res, 503, { error: "qonversion_not_configured" });
         if (isActivationRateLimited(req)) return sendJson(res, 429, { error: "too_many_attempts" });
@@ -1017,6 +1063,17 @@ export function createServer({
           availableUnits: created.balance,
           payoutMode: "sandbox",
         });
+      }
+
+      if (req.method === "POST" && pathname === "/admin/worker-stop") {
+        if (!adminToken) return sendJson(res, 503, { error: "ADMIN_TOKEN_not_configured" });
+        if (!safeAuthorization(req.headers.authorization, "Bearer", adminToken))
+          return sendJson(res, 401, { error: "admin_unauthorized" });
+        const data = await readJson(req);
+        try {
+          const command = pairing.requestStop({ workerId: String(data.worker_id || ""), reason: data.reason || "remote-stop" });
+          return sendJson(res, 202, { ok: true, command });
+        } catch { return sendJson(res, 400, { error: "invalid_worker" }); }
       }
 
       if (pathname.startsWith("/admin/")) {

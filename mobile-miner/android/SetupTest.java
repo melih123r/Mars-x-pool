@@ -21,7 +21,7 @@ public final class SetupTest {
         check(!VrscConfig.validAddress("1BoatSLRHtKNngkdXEeobR76b53LETtpyT"));
         VrscConfig config = new VrscConfig(fixture, "phone_1", 0);
         check(config.username().equals(fixture + ".phone_1"));
-        check(config.endpointPreview().equals("eu.luckpool.net:3960 (CPU)"));
+        check(config.endpointPreview().equals("bzdev.vipor.net:5140 (TLS)"));
         rejects(() -> new VrscConfig(fixture, "bad.worker", 0));
         rejects(() -> new VrscConfig(fixture, "x;touch bad", 0));
         rejects(() -> new VrscConfig(fixture, "phone", 3));

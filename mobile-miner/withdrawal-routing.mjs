@@ -18,7 +18,7 @@ export function canExecuteConversion({userConfirmed,settledBalanceVrsc,amountVrs
  if(!Number.isFinite(amountVrsc)||amountVrsc<=0||!Number.isFinite(settledBalanceVrsc)||settledBalanceVrsc<amountVrsc)
   return{allowed:false,reason:'insufficient-settled-balance'};
  if(!fresh(quote))return{allowed:false,reason:'provider-confirmation-required'};
- return{allowed:true,reason:'eligible-for-conversion'};
+ return{allowed:false,eligible:true,reason:'execution-disabled'};
 }
 export function validateDestination(asset,network,address,memo){
  if(typeof address!=='string')return{valid:false,reason:'address-required'};
@@ -36,5 +36,6 @@ export function canExecuteWithdrawal({userConfirmed,targetBalance,amount,quote,a
   return{allowed:false,reason:'insufficient-target-balance'};
  const d=validateDestination(asset,network,address,memo); if(!d.valid)return{allowed:false,reason:d.reason};
  if(!fresh(quote))return{allowed:false,reason:'provider-confirmation-required'};
- return{allowed:true,reason:'eligible-for-withdrawal'};
+ if(quote.asset!==asset||quote.network!==network)return{allowed:false,reason:'quote-destination-mismatch'};
+ return{allowed:false,eligible:true,reason:'execution-disabled'};
 }

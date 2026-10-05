@@ -1,0 +1,157 @@
+name: Android ARM64 engine build evidence
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/vrsc-native-integration]
+    paths:
+      - mobile-miner/native/**
+      - mobile-miner/android/**
+      - android/**
+      - .github/workflows/vrsc-android-native.yml
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+jobs:
+  android-client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.11.1
+      - run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"'
+      - name: Test controller safety and loopback lifecycle
+        run: |
+          mkdir -p mobile-miner/android/build/tests
+          curl --fail --location --max-time 60 https://repo.maven.apache.org/maven2/org/json/json/20240303/json-20240303.jar -o mobile-miner/android/build/json.jar
+          echo '3cf6cd6892e32e2b4c1c39e0f52f5248a2f5b37646fdfbb79a66b46b618414ed  mobile-miner/android/build/json.jar' | sha256sum -c -
+          javac -cp mobile-miner/android/build/json.jar -d mobile-miner/android/build/tests \
+            mobile-miner/android/src/com/marsx/mobileminer/VrscConfig.java \
+            mobile-miner/android/src/com/marsx/mobileminer/PoolShareObserver.java \
+            mobile-miner/android/src/com/marsx/mobileminer/VerifiedTlsRelay.java \
+            mobile-miner/android/src/com/marsx/mobileminer/NativeEngineSession.java \
+            mobile-miner/android/NativeLifecycleTest.java \
+            mobile-miner/android/PoolShareObserverTest.java
+          java -cp mobile-miner/android/build/tests:mobile-miner/android/build/json.jar NativeLifecycleTest
+          java -cp mobile-miner/android/build/tests:mobile-miner/android/build/json.jar PoolShareObserverTest
+      - name: Build connection diagnostic APK
+        run: MINER_ANDROID_SDK="$ANDROID_HOME" bash mobile-miner/android/build-test.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vrsc-connection-diagnostic-apk
+          path: mobile-miner/android/build/MARS-X-Miner-Device-Test.apk
+          retention-days: 7
+
+  android-engine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y automake autoconf libtool pkg-config perl
+      - name: Install pinned NDK with retry
+        run: |
+          set -euo pipefail
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          for attempt in 1 2 3; do
+            rm -rf "$ANDROID_HOME/ndk/27.2.12479018" "$ANDROID_HOME/.temp" || true
+            if "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install 'ndk;27.2.12479018'; then
+              test -x "$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/bin/clang"
+              exit 0
+            fi
+            echo "NDK download/install attempt $attempt failed; retrying with a clean partial install."
+            sleep $((attempt * 10))
+          done
+          exit 1
+      - name: Cross compile Android Bionic engine
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_HOME }}/ndk/27.2.12479018
+        run: |
+          export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/27.2.12479018"
+          bash mobile-miner/native/build-android.sh
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: vrsc-android-arm64-engine
+          path: mobile-miner/native/build/artifact/
+          retention-days: 7
+
+  worker-apk:
+    needs: [android-client, android-engine]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"'
+      - name: Download verified ARM64 engine
+        uses: actions/download-artifact@v5
+        with:
+          name: vrsc-android-arm64-engine
+          path: mobile-miner/native/verified
+      - name: Verify engine evidence before packaging
+        run: |
+          test -f mobile-miner/native/verified/libmarsxminer.so
+          test -f mobile-miner/native/verified/SHA256SUMS
+          expected="$(awk '{print $1}' mobile-miner/native/verified/SHA256SUMS | head -n1)"\n          actual="$(sha256sum mobile-miner/native/verified/libmarsxminer.so | awk '{print $1}')"\n          test -n "$expected" && test "$actual" = "$expected"
+          file mobile-miner/native/verified/libmarsxminer.so | grep -q 'ARM aarch64'
+      - name: Build separate MARS-X Worker test APK
+        env:
+          MINER_ANDROID_SDK: /usr/local/lib/android/sdk
+          MINER_ENGINE_DIR: ${{ github.workspace }}/mobile-miner/native/verified
+        run: bash mobile-miner/android/build-test.sh
+      - name: Build unified single MARS-X APK
+        run: |
+          set -euo pipefail
+          mkdir -p android/app-unified/src/main/jniLibs/arm64-v8a
+          cp mobile-miner/native/verified/libmarsxminer.so android/app-unified/src/main/jniLibs/arm64-v8a/libmarsxminer.so
+          gradle -p android :app-unified:assembleDebug --no-daemon
+          test -s android/app-unified/build/outputs/apk/debug/app-unified-debug.apk
+          mkdir -p android/app-unified/build/delivery
+          cp android/app-unified/build/outputs/apk/debug/app-unified-debug.apk android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk
+          sha256sum android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk > android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk.sha256
+      - name: Verify engine inside unified APK
+        run: |
+          unzip -l android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk | grep -q 'lib/arm64-v8a/libmarsxminer.so'
+          unzip -p android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk lib/arm64-v8a/libmarsxminer.so > /tmp/unified-libmarsxminer.so
+          expected="$(sha256sum mobile-miner/native/verified/libmarsxminer.so | awk '{print $1}')"
+          actual="$(sha256sum /tmp/unified-libmarsxminer.so | awk '{print $1}')"
+          test "$actual" = "$expected"
+          file /tmp/unified-libmarsxminer.so | grep -q 'ARM aarch64'
+      - name: Verify packaged engine inside final APK
+        run: |
+          unzip -l mobile-miner/android/build/MARS-X-Miner-Device-Test.apk | grep -q 'lib/arm64-v8a/libmarsxminer.so'
+          unzip -p mobile-miner/android/build/MARS-X-Miner-Device-Test.apk lib/arm64-v8a/libmarsxminer.so > /tmp/apk-libmarsxminer.so
+          expected="$(sha256sum mobile-miner/native/verified/libmarsxminer.so | awk '{print $1}')"
+          actual="$(sha256sum /tmp/apk-libmarsxminer.so | awk '{print $1}')"
+          test "$actual" = "$expected"
+          file /tmp/apk-libmarsxminer.so | grep -q 'ARM aarch64'
+      - name: Record Worker APK digest
+        run: sha256sum mobile-miner/android/build/MARS-X-Miner-Device-Test.apk | tee mobile-miner/android/build/MARS-X-Worker-Test.apk.sha256
+      - name: Attest Worker APK provenance
+        uses: actions/attest@v4
+        with:
+          subject-path: mobile-miner/android/build/MARS-X-Miner-Device-Test.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: marsx-vrsc-worker-test-apk
+          path: |
+            mobile-miner/android/build/MARS-X-Miner-Device-Test.apk
+            mobile-miner/android/build/MARS-X-Worker-Test.apk.sha256
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: marsx-unified-single-apk
+          path: |
+            android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk
+            android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk.sha256
+          retention-days: 7

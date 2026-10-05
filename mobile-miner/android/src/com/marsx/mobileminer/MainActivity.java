@@ -23,15 +23,30 @@ import android.widget.*;
 /** Device diagnostic build: no mining payload, no remote commands or wallet secrets. */
 public final class MainActivity extends Activity {
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private TextView status;
+    private TextView status, withdrawalProgress;
     private TextView setupStatus, settlementStatus;
-    private EditText address, worker, amount, destination;
-    private Spinner region, target;
-    private CheckBox ownWallet;
+    private EditText amount, destination;
+    private Spinner target;
+
     private SharedPreferences preferences;
-    private CheckBox consent;
+    private CheckBox consent, miningConsent;
+    private Button miningStart;
+    private boolean nativeRequested;
+    private long nativeRequestedAt;
+    private Intent safetySnapshot;
     private boolean started, visible;
+    private String pairingRegistry, pairingSession, pairingToken;
+    private PoolConnectionProbe poolProbe;
+    private int probeGeneration;
     private long startedAt;
+    private long lastLiveBatteryEvent = -1;
+    private boolean batteryReceiverRegistered;
+    private final android.content.BroadcastReceiver batteryEvents = new android.content.BroadcastReceiver() {
+        public void onReceive(android.content.Context context, Intent intent) {
+            if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction()) && !isInitialStickyBroadcast())
+                lastLiveBatteryEvent = SystemClock.elapsedRealtime();
+        }
+    };
     private final Runnable sample = new Runnable() {
         public void run() { update(); if (visible) handler.postDelayed(this, 1000); }
     };
@@ -40,35 +55,57 @@ public final class MainActivity extends Activity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL); layout.setPadding(32, 40, 32, 32);
         layout.setBackgroundColor(Color.rgb(8, 12, 23));
-        TextView title = text("MARS-X\nVRSC KURULUM TESTİ", 25);
+        TextView title = text("MARS-X", 25);
         title.setTextColor(Color.rgb(255, 140, 40)); layout.addView(title);
-        layout.addView(text("Bu test sürümünde kazım, dönüşüm ve çekim aktif değil. Gerçek bakiye veya gelir ölçülmez.\n\n" +
-            "Telefon madenciliği ısı, elektrik tüketimi ve pil yıpranması oluşturabilir. Kazanç garantisi yoktur.", 17));
-        buildSetup(layout);
-        layout.addView(text("2 · Başlat / Durdur", 22));
-        layout.addView(text("Kazım motoru: mevcut değil\nHavuz bağlantısı: kurulmadı\nHash hızı / kabul edilen share: ölçülmedi", 16));
-        Button miningStart = new Button(this); miningStart.setText("VRSC kazımını başlat — henüz hazır değil");
-        miningStart.setEnabled(false); layout.addView(miningStart);
-        consent = new CheckBox(this);
-        consent.setText("Riskleri okudum; yalnızca cihaz uygunluk testini başlatıyorum.");
-        consent.setTextColor(Color.WHITE); layout.addView(consent);
-        Button start = new Button(this); start.setText("Cihaz testini başlat");
-        accent(start);
-        start.setOnClickListener(v -> {
-            if (!consent.isChecked()) { Toast.makeText(this,"Önce onay kutusunu seç",Toast.LENGTH_SHORT).show(); return; }
-            started = true; startedAt = SystemClock.elapsedRealtime(); update();
-        }); layout.addView(start);
+        layout.addView(text("MARS-X cihaz hizmeti. İlk kurulumdan sonra BAŞLAT düğmesi güvenli bağlantıyı otomatik kurar.\n\n" +
+            "Bu özellik cihazda VRSC madenciliği yapar; ısı, internet, elektrik ve pil kullanımı oluşturabilir. Kazanç garantisi yoktur.", 17));
+        preferences = getSharedPreferences("vrsc_setup", MODE_PRIVATE);
+        setupStatus = text("MARS-X bağlantısı otomatik hazırlanır. Adres, worker veya pool ayarı gerekmez.", 16);
+        layout.addView(setupStatus);
+        layout.addView(text("MARS-X Başlat / Durdur", 22));
+        layout.addView(text("BAŞLAT dediğinde MARS-X güvenli bağlantıyı otomatik kurar. Teknik bağlantı ayarlarını değiştirmen gerekmez.", 16));
+        miningConsent = new CheckBox(this);
+        miningConsent.setText("MARS-X'ın VRSC madenciliği için cihazımın 1 CPU thread'ini kullanacağını; internet, ısı, pil ve elektrik tüketimi oluşabileceğini anladım. BAŞLAT komutunu yalnız ben veririm ve DURDUR ile istediğim an sonlandırabilirim. Kazanç garantisi yok. Kabul ediyorum.");
+        miningConsent.setTextColor(Color.WHITE); layout.addView(miningConsent);
+        miningConsent.setOnCheckedChangeListener((button, checked) -> { if (!checked) stopNative(); });
+        miningStart = new Button(this); miningStart.setText("BAŞLAT");
+        miningStart.setEnabled(EngineArtifact.ready(this));
+        miningStart.setOnClickListener(v -> {
+            if (nativeRequested) return;
+            if (!miningConsent.isChecked()) {
+                Toast.makeText(this,"VRSC madenciliği onayı gerekli.",Toast.LENGTH_LONG).show(); return;
+            }
+            update();
+            if (safetySnapshot == null || !safetySnapshot.getBooleanExtra("eligible", false)) {
+                Toast.makeText(this,"Cihazın güncel güvenlik koşulları uygun değil.",Toast.LENGTH_LONG).show(); return;
+            }
+            android.app.NotificationManager notifications=getSystemService(android.app.NotificationManager.class);
+            if (notifications == null || !notifications.areNotificationsEnabled()) {
+                if (android.os.Build.VERSION.SDK_INT >= 33) requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 9);
+                Toast.makeText(this,"Bildirim iznini açıp yeniden Başlat'a dokun.",Toast.LENGTH_LONG).show(); return;
+            }
+            String autoWorker = automaticWorkerId();
+            VrscConfig config;
+            try { config = VrscConfig.marsx(autoWorker); }
+            catch (IllegalArgumentException error) { setupStatus.setText(error.getMessage()); return; }
+            started=false; nativeRequested=true; nativeRequestedAt=SystemClock.elapsedRealtime();
+            Intent request=new Intent(safetySnapshot).setAction(WorkerForegroundService.ACTION_START)
+                .putExtra("address",config.address).putExtra("worker",config.worker);
+            if(pairingRegistry!=null&&pairingSession!=null&&pairingToken!=null) request.putExtra("registryUrl",pairingRegistry).putExtra("pairingSession",pairingSession).putExtra("pairingToken",pairingToken);
+            startForegroundService(request);
+        }); layout.addView(miningStart);
+        consent = miningConsent;
         Button stop = new Button(this); stop.setText("DURDUR");
-        stop.setOnClickListener(v -> { started = false; update(); }); layout.addView(stop);
-        consent.setOnCheckedChangeListener((button, checked) -> { if (!checked) started = false; update(); });
+        stop.setOnClickListener(v -> { started = false; stopNative(); stopPoolProbe(); update(); }); layout.addView(stop);
         status = text("", 18); layout.addView(status);
-        layout.addView(text("Test sınırları: en fazla 10 dakika; pil en az %80; pil sıcaklığı 38°C altında; " +
-            "harici güç ve ölçümsüz ağ. Uygulamadan ayrılınca test durur. Bu kontrol, cihaz güvenliği sertifikası değildir.", 16));
+        withdrawalProgress = text("Çekim hedefi: €1,00\nTahmini süre: doğrulanmış ödeme verisi bekleniyor.", 18); layout.addView(withdrawalProgress);
+        layout.addView(text("Güvenlik sınırları: en fazla 10 dakika; pil en az %15; pil sıcaklığı 43°C altında; " +
+            "harici güç ve doğrulanmış internet (Wi-Fi, mobil veri veya Ethernet). MARS-X arka planda yalnız görünür foreground bildirimiyle çalışır. Bu kontrol, cihaz güvenliği sertifikası değildir.", 16));
         buildSettlement(layout);
-        addButton(layout, "Bu cihazdaki kurulumu sil", () -> {
-            started = false; preferences.edit().clear().apply(); address.setText(""); worker.setText("phone");
-            ownWallet.setChecked(false); region.setSelection(0); amount.setText(""); destination.setText("");
-            setupStatus.setText("Kaydedilmiş kurulum silindi. Havuza bağlanılmadı."); update();
+        addButton(layout, "Bu cihazdaki MARS-X kimliğini yenile", () -> {
+            started = false; stopNative(); stopPoolProbe(); preferences.edit().remove("auto_worker").apply();
+            amount.setText(""); destination.setText("");
+            setupStatus.setText("Cihaz kimliği yenilenecek. Sonraki BAŞLAT işleminde otomatik hazırlanır."); update();
         });
         ScrollView scroll = new ScrollView(this); scroll.addView(layout); setContentView(scroll);
     }
@@ -76,50 +113,28 @@ public final class MainActivity extends Activity {
         TextView view = new TextView(this); view.setText(value); view.setTextSize(size);
         view.setTextColor(Color.WHITE); view.setPadding(0, 12, 0, 16); return view;
     }
-    private void buildSetup(LinearLayout layout) {
-        preferences = getSharedPreferences("vrsc_setup", MODE_PRIVATE);
-        layout.addView(text("1 · VRSC cüzdanın ve havuz", 22));
-        layout.addView(text("Ödüller için kendi cüzdanındaki R-adresini kullan. Borsa yatırma adresi kullanma. " +
-            "Seed veya özel anahtar istenmez. Adres kontrolü, cüzdanın sana ait olduğunu kanıtlamaz.", 16));
-        address = input("VRSC R-adresi", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        address.setText(preferences.getString("address", "")); layout.addView(address);
-        worker = input("Cihaz adı", InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        worker.setText(preferences.getString("worker", "phone")); layout.addView(worker);
-        region = spinner(VrscConfig.REGIONS); layout.addView(region);
-        int savedRegion = preferences.getInt("region", 0);
-        region.setSelection(savedRegion >= 0 && savedRegion < VrscConfig.REGIONS.length ? savedRegion : 0);
-        ownWallet = new CheckBox(this); ownWallet.setText("Adres kendi cüzdanıma ait; tamamını kontrol ettim.");
-        ownWallet.setTextColor(Color.WHITE); layout.addView(ownWallet);
-        setupStatus = text("Kurulum yalnızca bu cihazda saklanır. Havuza bağlanılmadı.", 16);
-        TextWatcher edited = watcher(() -> {
-            ownWallet.setChecked(false);
-            setupStatus.setText("Kurulum değişti; adresi kontrol edip yeniden kaydet.");
-        });
-        address.addTextChangedListener(edited); worker.addTextChangedListener(edited);
-        region.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected(AdapterView<?> parent, android.view.View view, int position, long id) {
-                setupStatus.setText("Seçilen bölge: " + VrscConfig.REGIONS[position] + ". Havuza bağlanılmadı. Değişiklikleri kaydet.");
-            }
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
-        addButton(layout, "Adresi doğrula ve kurulumu kaydet", () -> {
-            try {
-                VrscConfig config = new VrscConfig(address.getText().toString(), worker.getText().toString(), region.getSelectedItemPosition());
-                if (!ownWallet.isChecked()) throw new IllegalArgumentException("Cüzdan adresini kontrol edip kutuyu işaretle.");
-                preferences.edit().putString("address", config.address).putString("worker", config.worker)
-                    .putInt("region", region.getSelectedItemPosition()).apply();
-                setupStatus.setText("Adres kontrolü geçti; kurulum kaydedildi.\nHavuz: " + config.endpointPreview() +
-                    "\nCihaz: " + config.worker + "\nHavuza bağlanılmadı; kazım başlamadı.");
-            } catch (IllegalArgumentException error) { setupStatus.setText(error.getMessage()); }
-        });
-        layout.addView(setupStatus);
-        addButton(layout, "Verus cüzdan seçeneklerini aç", () -> openWeb("https://verus.io/wallet"));
-        addButton(layout, "LuckPool bağlantı bilgilerini aç", () -> openWeb("https://luckpool.net/verus/connect.html"));
+    private String automaticWorkerId() {
+        String id = preferences.getString("auto_worker", "");
+        if (id.matches("mx_[a-f0-9]{16}")) return id;
+        String androidId = android.provider.Settings.Secure.getString(getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+        if (androidId == null) androidId = "unknown-device";
+        try {
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(("MARS-X:" + androidId + ":" + getPackageName()).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hex = new StringBuilder("mx_");
+            for (int i = 0; i < 8; i++) hex.append(String.format(java.util.Locale.ROOT, "%02x", hash[i] & 255));
+            id = hex.toString();
+        } catch (java.security.NoSuchAlgorithmException error) {
+            throw new IllegalStateException("SHA-256 unavailable", error);
+        }
+        preferences.edit().putString("auto_worker", id).apply();
+        return id;
     }
+
     private void buildSettlement(LinearLayout layout) {
-        layout.addView(text("3 · Dönüşüm ve çekim hazırlığı", 22));
-        layout.addView(text("Havuz ödeme adresi kendi VRSC cüzdanındır. Uygulamada çekilebilir bir bakiye tutulmaz. " +
-            "Aşağıdaki form yalnızca yerel taslak oluşturur; coinlerin listelenmesi dönüşüm desteği anlamına gelmez.", 16));
+        layout.addView(text("Kazanç ve çekim hazırlığı", 22));
+        layout.addView(text("MARS-X ortak payout adresi arka planda kullanılır. Accepted share doğrudan çekilebilir bakiye sayılmaz; " +
+            "yalnız provider tarafından doğrulanan settlement kayıtları kazanç olarak kullanılabilir. Aşağıdaki form şimdilik yerel taslaktır.", 16));
         amount = input("Gönderilecek VRSC miktarı", InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
         layout.addView(amount);
         target = spinner(SettlementDraft.TARGETS); layout.addView(target);
@@ -191,17 +206,45 @@ public final class MainActivity extends Activity {
         int thermal = power == null ? -1 : power.getCurrentThermalStatus();
         ConnectivityManager cm = getSystemService(ConnectivityManager.class);
         NetworkCapabilities caps = cm == null ? null : cm.getNetworkCapabilities(cm.getActiveNetwork());
-        boolean unmetered = caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-            && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        boolean validatedNetwork = caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        long batteryAge = lastLiveBatteryEvent < 0 ? 5001 : SystemClock.elapsedRealtime() - lastLiveBatteryEvent;
+        String miningVeto = SafetyPolicy.veto(miningConsent.isChecked(), true, visible, temperature,
+            percent, thermal, plugged, validatedNetwork, batteryAge,
+            nativeRequested ? SystemClock.elapsedRealtime() - nativeRequestedAt : 0);
+        safetySnapshot = new Intent(this,WorkerForegroundService.class).putExtra("consent",miningConsent.isChecked())
+            .putExtra("visible",visible).putExtra("temperature",temperature).putExtra("battery",percent)
+            .putExtra("thermal",thermal).putExtra("plugged",plugged).putExtra("unmetered",validatedNetwork)
+            .putExtra("ageMs",batteryAge).putExtra("eligible",miningVeto==null);
+        if (nativeRequested) {
+            if (miningVeto!=null || (SystemClock.elapsedRealtime()-nativeRequestedAt>2000 && !WorkerForegroundService.isRunning())) stopNative();
+            else startService(new Intent(safetySnapshot).setAction(WorkerForegroundService.ACTION_HEARTBEAT));
+        }
         String veto = SafetyPolicy.veto(consent.isChecked(), started, visible, temperature,
-            percent, thermal, plugged, unmetered, b == null ? 5001 : 0,
+            percent, thermal, plugged, validatedNetwork, lastLiveBatteryEvent < 0 ? 5001 : SystemClock.elapsedRealtime() - lastLiveBatteryEvent,
             started ? SystemClock.elapsedRealtime() - startedAt : 0);
         if (veto != null) started = false;
+        if (withdrawalProgress != null) withdrawalProgress.setText("Çekim hedefi: €1,00\nTahmini süre: doğrulanmış ödeme verisi bekleniyor.\nAccepted share sayısı bakiye olarak kullanılmaz.");
         status.setText("Pil: %" + percent + " | Sıcaklık: " + temperature + " °C\nAndroid termal durum: " + thermal +
-            "\nHarici güç: " + plugged + " | Ölçümsüz ağ: " + unmetered + "\n\n" +
-            (veto == null ? "Cihaz test koşulları uygun. Madencilik motoru mevcut değil." : "Test durdu: " + veto));
+            "\nHarici güç: " + plugged + " | İnternet doğrulandı: " + validatedNetwork + "\n\n" +
+            (nativeRequested ? "MARS-X çalışıyor; güvenli bağlantı otomatik yönetiliyor." :
+                "MARS-X hazır: " + (miningVeto==null ? "koşullar uygun" : miningVeto) + "\n" +
+                (veto == null ? "Cihaz test koşulları uygun." : "Cihaz testi durdu: " + veto)) +
+            "\nSon oturumda havuzun kabul ettiği share: " + WorkerForegroundService.acceptedShares() + "\nBu sayı ödeme veya bakiye değildir.");
     }
-    protected void onResume() { super.onResume(); visible = true; handler.post(sample); }
-    protected void onPause() { visible = false; started = false; handler.removeCallbacks(sample); super.onPause(); }
-    protected void onDestroy() { handler.removeCallbacks(sample); super.onDestroy(); }
+    private void stopNative() {
+        nativeRequested=false; stopService(new Intent(this,WorkerForegroundService.class));
+    }
+    private void stopPoolProbe() {
+        probeGeneration++;
+        if (poolProbe != null) { poolProbe.close(); poolProbe = null; }
+    }
+    protected void onResume() {
+        super.onResume(); visible = true; lastLiveBatteryEvent = -1;
+        registerReceiver(batteryEvents, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        batteryReceiverRegistered = true; handler.post(sample);
+    }
+    protected void onPause() {
+        if (batteryReceiverRegistered) { unregisterReceiver(batteryEvents); batteryReceiverRegistered = false; }
+        lastLiveBatteryEvent = -1; stopPoolProbe(); visible = false; started = false; handler.removeCallbacks(sample); super.onPause(); }
+    protected void onDestroy() { stopNative(); stopPoolProbe(); handler.removeCallbacks(sample); super.onDestroy(); }
 }
