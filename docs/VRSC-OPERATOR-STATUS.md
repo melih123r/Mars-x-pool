@@ -4,6 +4,8 @@ Operator wallet: `RFnoU1UFxBqrJh3NWUUBRBKCNGSEgkQ5c7`. Base58Check version 60 an
 
 Railway `node-controller / production / worker-registry` has `VRSC_PAYOUT_ADDRESS` saved with deployments skipped. The current backend does not consume that variable; saving it does not start mining or route payouts.
 
+Five release steps remain (items 2–6); no reliable delivery-time or work-percentage estimate is established.
+
 ## Verified evidence
 
 - GitHub run 37335755613: all three LuckPool regional TLS endpoints on port 3958 rejected with `CERT_HAS_EXPIRED`.
@@ -14,7 +16,7 @@ Railway `node-controller / production / worker-registry` has `VRSC_PAYOUT_ADDRES
 
 ## Remaining steps for device mining and real earnings
 
-1. Verify a TLS endpoint and successful Stratum authorization.
+1. **Completed:** verified Vipor `bzdev.vipor.net:5140` TLS, subscription and worker authorization in run 37336141645 at 2026-10-05T15:51:13Z. This is connection evidence only; no shares were submitted.
 2. Build and audit an Android-compatible ARM64 engine with verified TLS support and license provenance.
 3. Integrate the engine lifecycle, current thermal/battery telemetry and foreground service.
 4. Test on a real ARM64 device and capture pool-confirmed accepted shares.
