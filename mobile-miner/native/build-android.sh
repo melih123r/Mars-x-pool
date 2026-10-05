@@ -6,6 +6,7 @@ TASK_BUILD="$TASK_ROOT/build"
 TASK_PREFIX="$TASK_BUILD/prefix"
 TASK_TOOLCHAIN="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"
 export PATH="$TASK_TOOLCHAIN/bin:$PATH"
+export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
 export CC=aarch64-linux-android29-clang CXX=aarch64-linux-android29-clang++
 export AR=llvm-ar RANLIB=llvm-ranlib STRIP=llvm-strip
 mkdir -p "$TASK_PREFIX" "$TASK_BUILD"
@@ -20,7 +21,7 @@ fetch_source curl/curl 57495c64871d18905a0941db9196ef90bafe9a29 "$TASK_BUILD/cur
 fetch_source monkins1010/ccminer 1667394ad4120d64b0c57367e71cb832ad2e3645 "$TASK_BUILD/engine"
 (
   cd "$TASK_BUILD/openssl"
-  ./Configure android-arm64 -D__ANDROID_API__=29 no-shared no-tests --prefix="$TASK_PREFIX"
+  env -u CC -u CXX ./Configure android-arm64 -D__ANDROID_API__=29 no-shared no-tests --prefix="$TASK_PREFIX"
   make -j2
   make install_sw
 )
