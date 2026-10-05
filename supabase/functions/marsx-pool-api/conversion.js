@@ -1,8 +1,11 @@
-// This module only permits GET requests to provider quote/market endpoints.
+// Only provider GET quotes and the fixed, read-only estimateconversion RPC are permitted.
 // It never creates an exchange, touches a balance, or signs a transaction.
 const PLATFORM_FEE_BPS = 200n;
 const CHANGE_NOW = "https://api.changenow.io";
-const VERUS_SCAN = "https://scan.verus.cx";
+const VERUS_PUBLIC_RPC = "https://api.verus.services/";
+const VRSC_ID = "i5w5MuNik5NtLcYmNzcvaoixooEebB6MGV";
+const VETH_ID = "i9nwxtKuVYX4MSbeULLiK2ttVi6rUEhh4X";
+const BRIDGE_POOL_ID = "i3f7tSctFkiPpiedY8QR5Tep9p4qDVebDx";
 
 function result(status, body) {
   return { status, body: { ...body, executionEnabled: false, withdrawable: false } };
@@ -108,18 +111,63 @@ function providerFailure(response, provider) {
   });
 }
 
+async function publicVerusEstimate(fetchImpl, amount) {
+  try {
+    // amount is a validated decimal from amountAfterFee. Emit its exact JSON
+    // number token rather than rounding it through JavaScript's Number type.
+    const body = `{"jsonrpc":"2.0","id":"marsx-readonly-estimate","method":"estimateconversion","params":[{"currency":"VRSC","convertto":"vETH","via":"Bridge.vETH","amount":${amount}}]}`;
+    const response = await fetchImpl(VERUS_PUBLIC_RPC, {
+      method: "POST", redirect: "error",
+      headers: { Accept: "application/json", "Content-Type": "application/json" },
+      body, signal: AbortSignal.timeout(8_000),
+    });
+    let data;
+    try { data = await response.json(); }
+    catch { return result(502, { error: "provider_invalid_response", provider: "VerusPublicRPC" }); }
+    if (!response.ok || data?.error) {
+      return result(response.status === 429 ? 503 : 502, {
+        error: "verus_estimate_unavailable", provider: "VerusPublicRPC",
+        ...(Number.isInteger(data?.error?.code) ? { providerErrorCode: data.error.code } : {}),
+      });
+    }
+    const estimate = data?.result;
+    const output = scalar(estimate?.estimatedcurrencyout);
+    const netInput = scalar(estimate?.netinputamount);
+    if (!estimate || estimate.inputcurrencyid !== VRSC_ID || estimate.outputcurrencyid !== VETH_ID
+      || estimate.estimatedcurrencystate?.currencyid !== BRIDGE_POOL_ID
+      || output === null || netInput === null || Number(output) <= 0 || Number(netInput) <= 0
+      || Number(netInput) > Number(amount)) {
+      return result(502, { error: "provider_invalid_response", provider: "VerusPublicRPC" });
+    }
+    return result(200, {
+      provider: "VerusPublicRPC", mode: "read_only", estimateContractVerified: true,
+      estimate: {
+        fromCurrencyId: VRSC_ID, toCurrencyId: VETH_ID, viaCurrencyId: BRIDGE_POOL_ID,
+        netInputAfterProviderConversionFee: netInput, toAmount: output,
+      },
+      quoteScope: "verus_chain_conversion_only;ethereum_bridge_and_fees_not_quoted",
+      providerFees: "included_in_provider_net_input_and_output_estimate",
+      nativeEthDelivered: false, bridgeVerified: false, fullRouteVerified: false,
+    });
+  } catch (error) {
+    const timeout = error?.name === "TimeoutError" || error?.name === "AbortError";
+    return result(timeout ? 504 : 502, { error: timeout ? "provider_timeout" : "verus_estimate_unavailable", provider: "VerusPublicRPC" });
+  }
+}
+
 function readiness(env) {
   const changeNowConfigured = configured(env.CHANGENOW_API_KEY);
   const verusConfigured = configured(env.VERUS_SCAN_API_KEY);
   return {
     mode: "read_only",
-    route: "VRSC -> Verus -> ETH -> ChangeNOW -> SOL",
+    route: "VRSC -> vETH on Verus -> native ETH on Ethereum -> ChangeNOW -> SOL",
     fullRouteVerified: false,
+    verusEstimateAccess: "public_rpc_no_api_key",
+    verusEstimateProvider: VERUS_PUBLIC_RPC,
     credentials: { changeNowConfigured, verusConfigured, treasurySignerVerified: false },
     platformFeeBps: Number(PLATFORM_FEE_BPS),
     blockers: [
       ...(!changeNowConfigured ? ["changenow_api_key_required"] : []),
-      ...(!verusConfigured ? ["verus_scan_developer_key_required"] : []),
       "verus_to_ethereum_bridge_not_verified",
       "treasury_signer_not_verified",
       "live_execution_not_implemented",
@@ -182,23 +230,14 @@ export async function readOnlyConversion({ method, pathname, data = {}, env = {}
     });
   }
   if (method === "POST" && pathname === "/conversion/verus-estimate") {
-    if (!configured(env.VERUS_SCAN_API_KEY)) return result(503, { error: "verus_scan_developer_key_required" });
     const fee = amountAfterFee(data.amountVrsc, 8);
     if (!fee) return result(400, { error: "invalid_amount" });
-    const target = String(data.toCurrency || "ETH");
-    if (!/^[A-Za-z0-9@._-]{1,80}$/.test(target) || target.toUpperCase() === "VRSC") return result(400, { error: "invalid_target_currency" });
-    const params = new URLSearchParams({ from: "VRSC", to: target, amount: fee.providerInput });
-    const response = await providerGet(fetchImpl, `${VERUS_SCAN}/api/market/best-conversion?${params}`, {
-      Authorization: `Bearer ${env.VERUS_SCAN_API_KEY}`,
-    });
-    if (!response.ok) return providerFailure(response, "VerusScan");
-    // A Verus-chain estimate does not prove an Ethereum bridge or a spendable ETH balance.
-    // Until its authenticated response contract is verified, do not expose an arbitrary body.
-    return result(200, {
-      provider: "VerusScan", providerReachable: true, estimateContractVerified: false,
-      fromCurrency: "VRSC", toCurrency: target, ...fee,
-      fullRouteVerified: false, bridgeVerified: false,
-    });
+    const target = String(data.toCurrency || "vETH").toLowerCase();
+    // ETH is a compatibility alias for the Verus-chain vETH quote, never native ETH.
+    if (target !== "veth" && target !== "eth") return result(400, { error: "unsupported_verus_target" });
+    const response = await publicVerusEstimate(fetchImpl, fee.providerInput);
+    if (response.status !== 200) return response;
+    return result(200, { ...response.body, fromCurrency: "VRSC", toCurrency: "vETH", toNetwork: "verus", ...fee });
   }
   return result(404, { error: "not_found" });
 }

@@ -1,7 +1,7 @@
 import { readOnlyConversion } from "./conversion.js";
 
 const SERVICE = "marsx-pool-worker-api";
-const VERSION = "0.8.5";
+const VERSION = "0.8.6";
 const TERMS_VERSION = "2026-09-27-v3";
 const ONLINE_WINDOW_MS = 120_000;
 const MAX_BODY_BYTES = 16_384;

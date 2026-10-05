@@ -92,12 +92,58 @@ test("invalid amounts and mismatched asset networks never contact providers", as
   assert.equal(provider.calls.length, 0);
 });
 
-test("missing credentials fail closed without contacting providers", async () => {
+test("missing ChangeNOW credentials fail closed without contacting the provider", async () => {
   const fetchImpl = () => { throw new Error("provider must not be called"); };
   assert.equal((await quote({ env: {}, fetchImpl })).body.error, "changenow_api_key_required");
-  const verus = await readOnlyConversion({ method: "POST", pathname: "/conversion/verus-estimate", data: { amountVrsc: "1" }, env: ENV, fetchImpl });
-  assert.equal(verus.status, 503);
-  assert.equal(verus.body.error, "verus_scan_developer_key_required");
+});
+
+function verusProvider(overrides = {}) {
+  return Response.json({ result: {
+    inputcurrencyid: "i5w5MuNik5NtLcYmNzcvaoixooEebB6MGV",
+    outputcurrencyid: "i9nwxtKuVYX4MSbeULLiK2ttVi6rUEhh4X",
+    netinputamount: 0.97951, estimatedcurrencyout: 0.00032336,
+    estimatedcurrencystate: { currencyid: "i3f7tSctFkiPpiedY8QR5Tep9p4qDVebDx" },
+    ...overrides,
+  } });
+}
+
+test("Verus public RPC quotes vETH without credentials or any wallet method", async () => {
+  let calls = 0;
+  const response = await readOnlyConversion({ method: "POST", pathname: "/conversion/verus-estimate", env: {},
+    data: { amountVrsc: "1", toCurrency: "ETH", rpcMethod: "sendcurrency", rpcUrl: "https://untrusted.example/" },
+    fetchImpl: async (url, options) => {
+      calls++;
+      assert.equal(url, "https://api.verus.services/");
+      assert.equal(options.method, "POST");
+      assert.equal(options.headers.Authorization, undefined);
+      const request = JSON.parse(options.body);
+      assert.equal(request.method, "estimateconversion");
+      assert.deepEqual(request.params, [{ currency: "VRSC", convertto: "vETH", via: "Bridge.vETH", amount: 0.98 }]);
+      return verusProvider();
+    },
+  });
+  assert.equal(calls, 1);
+  assert.equal(response.status, 200);
+  assert.equal(response.body.platformFeeInput, "0.02");
+  assert.equal(response.body.providerInput, "0.98");
+  assert.equal(response.body.toCurrency, "vETH");
+  assert.equal(response.body.toNetwork, "verus");
+  assert.equal(response.body.estimate.toAmount, 0.00032336);
+  assert.equal(response.body.nativeEthDelivered, false);
+  assert.equal(response.body.executionEnabled, false);
+});
+
+test("Verus mismatched currencies, quote failures and unsupported targets remain blocked", async () => {
+  const args = { method: "POST", pathname: "/conversion/verus-estimate", data: { amountVrsc: "1" } };
+  for (const values of [{ outputcurrencyid: "different" }, { inputcurrencyid: "different" }, { netinputamount: 2 }, { estimatedcurrencyout: 0 }, { estimatedcurrencystate: {} }]) {
+    const response = await readOnlyConversion({ ...args, fetchImpl: async () => verusProvider(values) });
+    assert.equal(response.status, 502);
+  }
+  const failed = await readOnlyConversion({ ...args, fetchImpl: async () => Response.json({ error: { code: -1, message: KEY } }) });
+  assert.equal(failed.status, 502);
+  assert.ok(!JSON.stringify(failed).includes(KEY));
+  const unsupported = await readOnlyConversion({ ...args, data: { amountVrsc: "1", toCurrency: "SOL" }, fetchImpl: () => { throw new Error("no network call allowed"); } });
+  assert.equal(unsupported.status, 400);
 });
 
 test("provider errors and timeouts are sanitized, including unsupported VRSC", async () => {

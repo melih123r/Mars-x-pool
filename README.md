@@ -24,7 +24,7 @@ https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-pool-api
 
 ## Zero-cost Supabase deployment
 
-The Android Beta 0.8.4 build uses the live `marsx-pool-api` Supabase Edge Function (API 0.8.5), which stores its records in the private `marsx_pool` PostgreSQL schema. Client roles have no schema privileges and explicit deny policies. Server credentials belong in Supabase Vault, never in source, the APK/AAB or a public table. Apply the migrations under `supabase/migrations/` and deploy the function under `supabase/functions/marsx-pool-api/`. Read-only conversion checks use this same existing Free project; see [conversion readiness](docs/CONVERSION-READINESS.md). The retired Railway deployment is not the Android API endpoint.
+The Android Beta 0.8.4 build uses the live `marsx-pool-api` Supabase Edge Function (API 0.8.6), which stores its records in the private `marsx_pool` PostgreSQL schema. Client roles have no schema privileges and explicit deny policies. Server credentials belong in Supabase Vault, never in source, the APK/AAB or a public table. Apply the migrations under `supabase/migrations/` and deploy the function under `supabase/functions/marsx-pool-api/`. Read-only conversion checks use this same existing Free project; see [conversion readiness](docs/CONVERSION-READINESS.md). The retired Railway deployment is not the Android API endpoint.
 
 The selected Supabase organization is on the Free plan. The app must not be switched to a paid plan or paid add-on without an explicit owner decision. See `docs/SUPABASE-ZERO-COST-DEPLOYMENT.md` for verified limits, deployment checks and the Railway retirement gate.
 

@@ -60,7 +60,7 @@ Deno.serve(async (request: Request) => {
   } catch (error) {
     console.error("MARS-X Supabase function failed", error);
     return Response.json(
-      { ok: false, service: "marsx-pool-worker-api", version: "0.8.5", error: "service_unavailable" },
+      { ok: false, service: "marsx-pool-worker-api", version: "0.8.6", error: "service_unavailable" },
       { status: 503, headers: { "Cache-Control": "no-store" } },
     );
   }

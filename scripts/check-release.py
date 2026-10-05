@@ -69,7 +69,7 @@ if 'APP_VERSION = "0.8.4-beta"' not in main_activity:
 runtime_versions = {
     ROOT / "server.js": "0.9.0",
     ROOT / "cloudflare/src/worker.js": "0.8.4",
-    ROOT / "supabase/functions/marsx-pool-api/worker.js": "0.8.5",
+    ROOT / "supabase/functions/marsx-pool-api/worker.js": "0.8.6",
 }
 for runtime, version in runtime_versions.items():
     if f'const VERSION = "{version}"' not in runtime.read_text(encoding="utf-8"):
