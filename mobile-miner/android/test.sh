@@ -11,3 +11,6 @@ java -jar "$MINER_ECJ_JAR" -1.8 -d "$MINER_TESTS" \
   "$MINER_ROOT/SafetyPolicyTest.java" "$MINER_ROOT/SetupTest.java"
 java -cp "$MINER_TESTS" SafetyPolicyTest
 java -cp "$MINER_TESTS" SetupTest
+
+javac -d "$MINER_TESTS" "$MINER_ROOT/PairingIntegrationTest.java"
+(cd "$MINER_ROOT" && java -cp "$MINER_TESTS" PairingIntegrationTest)
