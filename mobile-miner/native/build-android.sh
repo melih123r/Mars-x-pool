@@ -43,6 +43,25 @@ fetch_source monkins1010/ccminer 1667394ad4120d64b0c57367e71cb832ad2e3645 "$TASK
   cd "$TASK_BUILD/engine"
   chmod +x autogen.sh
   ACLOCAL_PATH="$TASK_PREFIX/share/aclocal" ./autogen.sh
+  # Kill the native child if its Android parent dies, including process death without onDestroy.
+  python3 - <<'PARENT_DEATH_PATCH'
+from pathlib import Path
+p = Path('ccminer.cpp')
+s = p.read_text()
+marker = '#include <signal.h>'
+patch = '''
+#ifdef __ANDROID__
+#include <sys/prctl.h>
+__attribute__((constructor)) static void marsx_parent_death_guard() {
+    pid_t parent = getppid();
+    if (parent == 1 || prctl(PR_SET_PDEATHSIG, SIGKILL) != 0 || getppid() != parent) _exit(125);
+}
+#endif
+'''
+if 'marsx_parent_death_guard' not in s:
+    if s.count(marker) != 1: raise SystemExit('unexpected upstream include layout')
+    p.write_text(s.replace(marker, marker + patch))
+PARENT_DEATH_PATCH
   # Raw Stratum is permitted only on loopback behind the Android verified TLS relay.
   # OpenSSL is required for upstream hashing; remote TLS is handled by Android.
   CPPFLAGS="-I$TASK_PREFIX/include" LDFLAGS="-L$TASK_PREFIX/lib -L$TASK_PREFIX/lib64" \
@@ -63,5 +82,5 @@ fetch_source monkins1010/ccminer 1667394ad4120d64b0c57367e71cb832ad2e3645 "$TASK
   fi
   cp LICENSE.txt "$TASK_BUILD/artifact/ENGINE-LICENSE.txt"
   sha256sum "$TASK_BUILD/artifact/"*.so > "$TASK_BUILD/artifact/SHA256SUMS"
-  printf 'engine=1667394ad4120d64b0c57367e71cb832ad2e3645\nopenssl=636dfadc70ce26f2473870570bfd9ec352806b1d\ncurl=57495c64871d18905a0941db9196ef90bafe9a29\nndk=27.2.12479018\nabi=arm64-v8a\napi=29\n' > "$TASK_BUILD/artifact/PROVENANCE.txt"
+  printf 'engine=1667394ad4120d64b0c57367e71cb832ad2e3645\nopenssl=636dfadc70ce26f2473870570bfd9ec352806b1d\ncurl=57495c64871d18905a0941db9196ef90bafe9a29\nndk=27.2.12479018\nabi=arm64-v8a\nparent_death=SIGKILL\napi=29\n' > "$TASK_BUILD/artifact/PROVENANCE.txt"
 )

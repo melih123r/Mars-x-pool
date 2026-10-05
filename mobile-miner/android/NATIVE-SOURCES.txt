@@ -1,0 +1,24 @@
+MARS-X experimental worker: corresponding source and build instructions
+
+Android client, local TLS relay, native launcher policy, exact cross-build recipe:
+https://github.com/melih123r/Mars-x-pool/tree/feature/vrsc-native-integration/mobile-miner
+
+Verus ARM engine, GPL-3.0:
+https://github.com/monkins1010/ccminer/tree/1667394ad4120d64b0c57367e71cb832ad2e3645
+The only source change is the Android PR_SET_PDEATHSIG/SIGKILL constructor in
+mobile-miner/native/build-android.sh. Autotools generates configuration files.
+ENGINE-LICENSE.txt is included in this APK.
+
+Hashing dependency OpenSSL 3.5.0, Apache-2.0:
+https://github.com/openssl/openssl/tree/636dfadc70ce26f2473870570bfd9ec352806b1d
+
+Loopback network dependency curl 8.12.1:
+https://github.com/curl/curl/tree/57495c64871d18905a0941db9196ef90bafe9a29
+Curl remote TLS is disabled; remote transport is verified by Android SSLSocket.
+
+Android NDK 27.2.12479018 provides libc++_shared.so and its license notices:
+https://android.googlesource.com/platform/ndk/+/refs/heads/main/NOTICE
+
+No private keys, custodial signing, withdrawal, commission or conversion provider
+are implemented in this experimental worker. Pool rewards go to the user's
+explicitly selected VRSC address. MARS-X accounting remains separate and disabled.

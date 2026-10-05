@@ -29,7 +29,11 @@ public final class MainActivity extends Activity {
     private Spinner region, target;
     private CheckBox ownWallet;
     private SharedPreferences preferences;
-    private CheckBox consent;
+    private CheckBox consent, miningConsent;
+    private Button miningStart;
+    private boolean nativeRequested;
+    private long nativeRequestedAt;
+    private Intent safetySnapshot;
     private boolean started, visible;
     private PoolConnectionProbe poolProbe;
     private int probeGeneration;
@@ -52,13 +56,37 @@ public final class MainActivity extends Activity {
         layout.setBackgroundColor(Color.rgb(8, 12, 23));
         TextView title = text("MARS-X\nVRSC KURULUM TESTİ", 25);
         title.setTextColor(Color.rgb(255, 140, 40)); layout.addView(title);
-        layout.addView(text("Bu test sürümünde kazım, dönüşüm ve çekim aktif değil. Gerçek bakiye veya gelir ölçülmez.\n\n" +
+        layout.addView(text("Deneysel worker: uygun ve doğrulanmış ARM64 motor varsa kullanıcı kendi VRSC cüzdanıyla test başlatabilir. Dönüşüm, çekim ve komisyon kapalıdır. Gelir ölçülmez.\n\n" +
             "Telefon madenciliği ısı, elektrik tüketimi ve pil yıpranması oluşturabilir. Kazanç garantisi yoktur.", 17));
         buildSetup(layout);
         layout.addView(text("2 · Başlat / Durdur", 22));
-        layout.addView(text("Kazım motoru: mevcut değil\nHavuz bağlantısı: kurulmadı\nHash hızı / kabul edilen share: ölçülmedi", 16));
-        Button miningStart = new Button(this); miningStart.setText("VRSC kazımını başlat — henüz hazır değil");
-        miningStart.setEnabled(false); layout.addView(miningStart);
+        layout.addView(text("Worker testi Vipor TLS bağlantısını kullanır. Hash hızı, kabul edilen share ve ödeme henüz ölçülmedi. Bu bir üretim sürümü değildir.", 16));
+        miningConsent = new CheckBox(this);
+        miningConsent.setText("Deneysel VRSC worker testini kendim başlatıyorum. Açık adresim Vipor'a gider; 1 CPU thread kullanılır. Isı, pil ve elektrik risklerini kabul ediyorum. Kazanç garantisi ve MARS-X komisyonu yok.");
+        miningConsent.setTextColor(Color.WHITE); layout.addView(miningConsent);
+        miningConsent.setOnCheckedChangeListener((button, checked) -> { if (!checked) stopNative(); });
+        miningStart = new Button(this); miningStart.setText("Deneysel VRSC worker testini başlat");
+        miningStart.setEnabled(EngineArtifact.ready(this));
+        miningStart.setOnClickListener(v -> {
+            if (!miningConsent.isChecked() || !ownWallet.isChecked()) {
+                Toast.makeText(this,"Cüzdan ve deneysel test onayları gerekli.",Toast.LENGTH_LONG).show(); return;
+            }
+            update();
+            if (safetySnapshot == null || !safetySnapshot.getBooleanExtra("eligible", false)) {
+                Toast.makeText(this,"Cihazın güncel güvenlik koşulları uygun değil.",Toast.LENGTH_LONG).show(); return;
+            }
+            android.app.NotificationManager notifications=getSystemService(android.app.NotificationManager.class);
+            if (notifications == null || !notifications.areNotificationsEnabled()) {
+                if (android.os.Build.VERSION.SDK_INT >= 33) requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, 9);
+                Toast.makeText(this,"Bildirim iznini açıp yeniden Başlat'a dokun.",Toast.LENGTH_LONG).show(); return;
+            }
+            try { new VrscConfig(address.getText().toString(),worker.getText().toString(),0); }
+            catch (IllegalArgumentException error) { setupStatus.setText(error.getMessage()); return; }
+            started=false; nativeRequested=true; nativeRequestedAt=SystemClock.elapsedRealtime();
+            Intent request=new Intent(safetySnapshot).setAction(WorkerForegroundService.ACTION_START)
+                .putExtra("address",address.getText().toString()).putExtra("worker",worker.getText().toString());
+            startForegroundService(request);
+        }); layout.addView(miningStart);
         consent = new CheckBox(this);
         consent.setText("Riskleri okudum; yalnızca cihaz uygunluk testini başlatıyorum.");
         consent.setTextColor(Color.WHITE); layout.addView(consent);
@@ -69,14 +97,14 @@ public final class MainActivity extends Activity {
             started = true; startedAt = SystemClock.elapsedRealtime(); update();
         }); layout.addView(start);
         Button stop = new Button(this); stop.setText("DURDUR");
-        stop.setOnClickListener(v -> { started = false; update(); }); layout.addView(stop);
+        stop.setOnClickListener(v -> { started = false; stopNative(); stopPoolProbe(); update(); }); layout.addView(stop);
         consent.setOnCheckedChangeListener((button, checked) -> { if (!checked) started = false; update(); });
         status = text("", 18); layout.addView(status);
         layout.addView(text("Test sınırları: en fazla 10 dakika; pil en az %80; pil sıcaklığı 38°C altında; " +
             "harici güç ve ölçümsüz ağ. Uygulamadan ayrılınca test durur. Bu kontrol, cihaz güvenliği sertifikası değildir.", 16));
         buildSettlement(layout);
         addButton(layout, "Bu cihazdaki kurulumu sil", () -> {
-            started = false; preferences.edit().clear().apply(); address.setText(""); worker.setText("phone");
+            started = false; stopNative(); stopPoolProbe(); preferences.edit().clear().apply(); address.setText(""); worker.setText("phone");
             ownWallet.setChecked(false); region.setSelection(0); amount.setText(""); destination.setText("");
             setupStatus.setText("Kaydedilmiş kurulum silindi. Havuza bağlanılmadı."); update();
         });
@@ -102,7 +130,7 @@ public final class MainActivity extends Activity {
         ownWallet.setTextColor(Color.WHITE); layout.addView(ownWallet);
         setupStatus = text("Kurulum yalnızca bu cihazda saklanır. Havuza bağlanılmadı.", 16);
         TextWatcher edited = watcher(() -> {
-            stopPoolProbe();
+            stopNative(); stopPoolProbe();
             ownWallet.setChecked(false);
             setupStatus.setText("Kurulum değişti; adresi kontrol edip yeniden kaydet.");
         });
@@ -222,13 +250,30 @@ public final class MainActivity extends Activity {
         NetworkCapabilities caps = cm == null ? null : cm.getNetworkCapabilities(cm.getActiveNetwork());
         boolean unmetered = caps != null && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
             && caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+        long batteryAge = lastLiveBatteryEvent < 0 ? 5001 : SystemClock.elapsedRealtime() - lastLiveBatteryEvent;
+        String miningVeto = SafetyPolicy.veto(miningConsent.isChecked(), true, visible, temperature,
+            percent, thermal, plugged, unmetered, batteryAge,
+            nativeRequested ? SystemClock.elapsedRealtime() - nativeRequestedAt : 0);
+        safetySnapshot = new Intent(this,WorkerForegroundService.class).putExtra("consent",miningConsent.isChecked())
+            .putExtra("visible",visible).putExtra("temperature",temperature).putExtra("battery",percent)
+            .putExtra("thermal",thermal).putExtra("plugged",plugged).putExtra("unmetered",unmetered)
+            .putExtra("ageMs",batteryAge).putExtra("eligible",miningVeto==null);
+        if (nativeRequested) {
+            if (miningVeto!=null || (SystemClock.elapsedRealtime()-nativeRequestedAt>2000 && !WorkerForegroundService.isRunning())) stopNative();
+            else startService(new Intent(safetySnapshot).setAction(WorkerForegroundService.ACTION_HEARTBEAT));
+        }
         String veto = SafetyPolicy.veto(consent.isChecked(), started, visible, temperature,
             percent, thermal, plugged, unmetered, lastLiveBatteryEvent < 0 ? 5001 : SystemClock.elapsedRealtime() - lastLiveBatteryEvent,
             started ? SystemClock.elapsedRealtime() - startedAt : 0);
         if (veto != null) started = false;
         status.setText("Pil: %" + percent + " | Sıcaklık: " + temperature + " °C\nAndroid termal durum: " + thermal +
             "\nHarici güç: " + plugged + " | Ölçümsüz ağ: " + unmetered + "\n\n" +
-            (veto == null ? "Cihaz test koşulları uygun. Madencilik motoru mevcut değil." : "Test durdu: " + veto));
+            (nativeRequested ? "Worker testi istendi; hash/share/gelir doğrulanmadı." :
+                "Worker hazır olma kontrolü: " + (miningVeto==null ? "koşullar uygun" : miningVeto) + "\n" +
+                (veto == null ? "Cihaz test koşulları uygun." : "Cihaz testi durdu: " + veto)));
+    }
+    private void stopNative() {
+        nativeRequested=false; stopService(new Intent(this,WorkerForegroundService.class));
     }
     private void stopPoolProbe() {
         probeGeneration++;
@@ -241,6 +286,6 @@ public final class MainActivity extends Activity {
     }
     protected void onPause() {
         if (batteryReceiverRegistered) { unregisterReceiver(batteryEvents); batteryReceiverRegistered = false; }
-        lastLiveBatteryEvent = -1; stopPoolProbe(); visible = false; started = false; handler.removeCallbacks(sample); super.onPause(); }
-    protected void onDestroy() { stopPoolProbe(); handler.removeCallbacks(sample); super.onDestroy(); }
+        lastLiveBatteryEvent = -1; stopNative(); stopPoolProbe(); visible = false; started = false; handler.removeCallbacks(sample); super.onPause(); }
+    protected void onDestroy() { stopNative(); stopPoolProbe(); handler.removeCallbacks(sample); super.onDestroy(); }
 }
