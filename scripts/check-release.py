@@ -28,6 +28,8 @@ required_files = [
     ROOT / "cloudflare/migrations/0002_google_auth_referrals.sql",
     ROOT / "cloudflare/wrangler.toml",
     ROOT / "supabase/functions/marsx-pool-api/index.ts",
+    ROOT / "supabase/functions/marsx-pool-api/worker.js",
+    ROOT / "supabase/functions/marsx-pool-api/conversion.js",
     ROOT / "supabase/functions/marsx-pool-api/postgres-d1.ts",
     ROOT / "supabase/migrations/20260928154000_marsx_pool_backend.sql",
     ROOT / "supabase/migrations/20260928155000_marsx_pool_security_indexes.sql",
@@ -62,12 +64,15 @@ if '"version": "0.8.4"' not in package:
     raise SystemExit("Package version must match Beta 0.8.4")
 if 'APP_VERSION = "0.8.4-beta"' not in main_activity:
     raise SystemExit("Android runtime version must match Beta 0.8.4")
-for runtime in (
-    ROOT / "server.js",
-    ROOT / "cloudflare/src/worker.js",
-    ROOT / "supabase/functions/marsx-pool-api/worker.js",
-):
-    if 'const VERSION = "0.8.4"' not in runtime.read_text(encoding="utf-8"):
+# Backend APIs can be deployed independently of the unchanged Android beta.
+# Pin each runtime explicitly instead of assuming all platforms share a release.
+runtime_versions = {
+    ROOT / "server.js": "0.9.0",
+    ROOT / "cloudflare/src/worker.js": "0.8.4",
+    ROOT / "supabase/functions/marsx-pool-api/worker.js": "0.8.6",
+}
+for runtime, version in runtime_versions.items():
+    if f'const VERSION = "{version}"' not in runtime.read_text(encoding="utf-8"):
         raise SystemExit(f"Runtime version is stale: {runtime.relative_to(ROOT)}")
 if "MARSX_API_BASE_URL" not in gradle:
     raise SystemExit("API build-time endpoint is required")

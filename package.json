@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check cloudflare/src/worker.js",
+    "check": "node --check server.js && node --check cloudflare/src/worker.js && node --check supabase/functions/marsx-pool-api/worker.js && node --check supabase/functions/marsx-pool-api/conversion.js",
     "test": "node --test",
     "license:generate": "node license-tool.js",
     "cf:check": "wrangler deploy --dry-run --config cloudflare/wrangler.toml --outdir .wrangler-dist",
