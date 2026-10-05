@@ -3,7 +3,7 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 const SERVICE = "marsx-pool-worker-api";
-const VERSION = "0.8.9";
+const VERSION = "0.9.0";
 const TERMS_VERSION = "2026-09-27-v3";
 const WORKERS_KEY = "marsx:workers";
 const LICENSE_DEVICES_PREFIX = "marsx:license-devices:";
@@ -1130,6 +1130,25 @@ export function createServer({
           upstreamStatus: currencies.status,
           currencies: currencies.ok ? currencies.data : null,
           executionEnabled: false,
+        });
+      }
+
+      if (req.method === "GET" && pathname === "/conversion/route-health") {
+        const protocol = await fetchVerusMarket("/api/market/protocol");
+        const pools = await fetchVerusMarket("/api/market/vrsc-pools");
+        const protocolData = protocol.ok ? protocol.data : null;
+        const poolsData = pools.ok ? pools.data : null;
+        const liveMarketEvidence = Boolean(protocolData && poolsData);
+        return sendJson(res, liveMarketEvidence ? 200 : 503, {
+          source: "VRSC",
+          verusMarketReachable: liveMarketEvidence,
+          conversionEstimateConfigured: Boolean(process.env.VERUS_SCAN_API_KEY),
+          changeNowConfigured: Boolean(process.env.CHANGENOW_API_KEY),
+          signerConfigured: Boolean(process.env.VRSC_TREASURY_SIGNER_URL && process.env.VRSC_TREASURY_SIGNER_TOKEN),
+          executionEnabled: false,
+          policy: "fail_closed_until_live_quote_and_liquidity_are_verified",
+          protocol: protocolData,
+          vrscPools: poolsData,
         });
       }
 
