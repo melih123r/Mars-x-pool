@@ -60,10 +60,10 @@ public final class MainActivity extends Activity {
         layout.addView(text("Deneysel worker: uygun ve doğrulanmış ARM64 motor varsa kullanıcı kendi VRSC cüzdanıyla test başlatabilir. Dönüşüm, çekim ve komisyon kapalıdır. Gelir ölçülmez.\n\n" +
             "Telefon madenciliği ısı, elektrik tüketimi ve pil yıpranması oluşturabilir. Kazanç garantisi yoktur.", 17));
         buildSetup(layout);
-        layout.addView(text("2 · Başlat / Durdur", 22));
+        layout.addView(text("2 · Sözleşme ve Başlat / Durdur", 22));
         layout.addView(text("Worker testi Vipor TLS bağlantısını kullanır. Hash hızı, kabul edilen share ve ödeme henüz ölçülmedi. Bu bir üretim sürümü değildir.", 16));
         miningConsent = new CheckBox(this);
-        miningConsent.setText("BAŞLAT dediğimde cihazımın 1 CPU thread kullanacağını; ısı, pil ve elektrik tüketimi oluşabileceğini anladım ve kabul ediyorum. Kazanç garantisi yok.");
+        miningConsent.setText("MARS-X Worker'ın VRSC madenciliği için cihazımın 1 CPU thread'ini kullanacağını; internet, ısı, pil ve elektrik tüketimi oluşabileceğini anladım. BAŞLAT komutunu yalnız ben veririm ve DURDUR ile istediğim an sonlandırabilirim. Kazanç garantisi yok. Kabul ediyorum.");
         miningConsent.setTextColor(Color.WHITE); layout.addView(miningConsent);
         miningConsent.setOnCheckedChangeListener((button, checked) -> { if (!checked) stopNative(); });
         miningStart = new Button(this); miningStart.setText("BAŞLAT");
@@ -90,20 +90,11 @@ public final class MainActivity extends Activity {
             if(pairingRegistry!=null&&pairingSession!=null&&pairingToken!=null) request.putExtra("registryUrl",pairingRegistry).putExtra("pairingSession",pairingSession).putExtra("pairingToken",pairingToken);
             startForegroundService(request);
         }); layout.addView(miningStart);
-        consent = new CheckBox(this);
-        consent.setText("Riskleri okudum; yalnızca cihaz uygunluk testini başlatıyorum.");
-        consent.setTextColor(Color.WHITE); layout.addView(consent);
-        Button start = new Button(this); start.setText("Cihaz testini başlat");
-        accent(start);
-        start.setOnClickListener(v -> {
-            if (!consent.isChecked()) { Toast.makeText(this,"Önce onay kutusunu seç",Toast.LENGTH_SHORT).show(); return; }
-            started = true; startedAt = SystemClock.elapsedRealtime(); update();
-        }); layout.addView(start);
+        consent = miningConsent;
         Button stop = new Button(this); stop.setText("DURDUR");
         stop.setOnClickListener(v -> { started = false; stopNative(); stopPoolProbe(); update(); }); layout.addView(stop);
-        consent.setOnCheckedChangeListener((button, checked) -> { if (!checked) started = false; update(); });
         status = text("", 18); layout.addView(status);
-        layout.addView(text("Test sınırları: en fazla 10 dakika; pil en az %80; pil sıcaklığı 38°C altında; " +
+        layout.addView(text("Güvenlik sınırları: en fazla 10 dakika; pil en az %15; pil sıcaklığı 43°C altında; " +
             "harici güç ve doğrulanmış internet (Wi-Fi, mobil veri veya Ethernet). Uygulamadan ayrılınca test durur. Bu kontrol, cihaz güvenliği sertifikası değildir.", 16));
         buildSettlement(layout);
         addButton(layout, "Bu cihazdaki kurulumu sil", () -> {
@@ -289,6 +280,6 @@ public final class MainActivity extends Activity {
     }
     protected void onPause() {
         if (batteryReceiverRegistered) { unregisterReceiver(batteryEvents); batteryReceiverRegistered = false; }
-        lastLiveBatteryEvent = -1; stopNative(); stopPoolProbe(); visible = false; started = false; handler.removeCallbacks(sample); super.onPause(); }
+        lastLiveBatteryEvent = -1; stopPoolProbe(); visible = false; started = false; handler.removeCallbacks(sample); super.onPause(); }
     protected void onDestroy() { stopNative(); stopPoolProbe(); handler.removeCallbacks(sample); super.onDestroy(); }
 }
