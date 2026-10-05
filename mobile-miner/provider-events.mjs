@@ -7,18 +7,24 @@ export function normalizeShare(raw) {
     return {accepted:false,reason:'share-id-invalid'};
   if (!Number.isFinite(raw.acceptedAtMs) || raw.acceptedAtMs<=0)
     return {accepted:false,reason:'share-time-invalid'};
-  return {accepted:true,workerId:raw.workerId,shareId:raw.shareId,acceptedAtMs:raw.acceptedAtMs};
+  return {accepted:true,providerVerified:true,workerId:raw.workerId,shareId:raw.shareId,acceptedAtMs:raw.acceptedAtMs};
 }
 
 export function normalizeSettlement(raw) {
   if (!raw || raw.providerConfirmed!==true) return {confirmed:false,reason:'provider-unconfirmed'};
-  if (typeof raw.settlementId!=='string' || raw.settlementId.length<8)
+  const settlementId=raw.settlementId ?? raw.providerSettlementId;
+  const amountVrsc=raw.amountVrsc ?? raw.settledVrsc;
+  if (raw.settlementId!==undefined && raw.providerSettlementId!==undefined && raw.settlementId!==raw.providerSettlementId)
+    return {confirmed:false,reason:'settlement-id-conflict'};
+  if (raw.amountVrsc!==undefined && raw.settledVrsc!==undefined && raw.amountVrsc!==raw.settledVrsc)
+    return {confirmed:false,reason:'settlement-amount-conflict'};
+  if (typeof settlementId!=='string' || settlementId.length<8)
     return {confirmed:false,reason:'settlement-id-invalid'};
-  if (!Number.isFinite(raw.amountVrsc) || raw.amountVrsc<=0)
+  if (!Number.isFinite(amountVrsc) || amountVrsc<=0)
     return {confirmed:false,reason:'amount-invalid'};
   if (!Number.isFinite(raw.confirmedAtMs) || raw.confirmedAtMs<=0)
     return {confirmed:false,reason:'confirmation-time-invalid'};
-  return {confirmed:true,providerSettlementId:raw.settlementId,settledVrsc:raw.amountVrsc,
+  return {confirmed:true,providerSettlementId:settlementId,settledVrsc:amountVrsc,
     confirmedAtMs:raw.confirmedAtMs,providerConfirmed:true};
 }
 
