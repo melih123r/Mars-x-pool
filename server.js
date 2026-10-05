@@ -3,7 +3,7 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 const SERVICE = "marsx-pool-worker-api";
-const VERSION = "0.8.4";
+const VERSION = "0.8.5";
 const TERMS_VERSION = "2026-09-27-v3";
 const WORKERS_KEY = "marsx:workers";
 const LICENSE_DEVICES_PREFIX = "marsx:license-devices:";
@@ -128,6 +128,26 @@ function normalizeDestination(value) {
 function normalizeIdempotencyKey(value) {
   const key = String(value || "").trim();
   return /^[A-Za-z0-9_-]{8,80}$/.test(key) ? key : null;
+}
+
+const CONVERSION_SERVICE_FEE_BPS = 200;
+const CONVERSION_TARGETS = Object.freeze({
+  SOL: { network: "Solana", pattern: /^[1-9A-HJ-NP-Za-km-z]{32,44}$/ },
+  VRSC: { network: "Verus", pattern: /^R[1-9A-HJ-NP-Za-km-z]{25,40}$/ },
+  LTC: { network: "Litecoin", pattern: /^(?:[LM3][1-9A-HJ-NP-Za-km-z]{25,34}|ltc1[02-9ac-hj-np-z]{20,90})$/ },
+  DOGE: { network: "Dogecoin", pattern: /^D[1-9A-HJ-NP-Za-km-z]{25,34}$/ },
+  BTC: { network: "Bitcoin", pattern: /^(?:[13][1-9A-HJ-NP-Za-km-z]{25,34}|bc1[02-9ac-hj-np-z]{20,90})$/ },
+  "USDT-ETH": { network: "Ethereum", pattern: /^0x[0-9a-fA-F]{40}$/ },
+  "USDT-TRON": { network: "Tron", pattern: /^T[1-9A-HJ-NP-Za-km-z]{33}$/ },
+});
+
+function conversionTarget(value) {
+  return CONVERSION_TARGETS[String(value || "").trim().toUpperCase()] || null;
+}
+
+function validConversionDestination(target, value) {
+  const destination = String(value || "").trim();
+  return Boolean(target && target.pattern.test(destination));
 }
 
 function parseLicenseRecords(input) {
@@ -944,6 +964,59 @@ export function createServer({
         const worker = normalizeWorker(data, await store.get(workerId), now(), session.lic, installId);
         await store.set(worker);
         return sendJson(res, 200, { ok: true, worker });
+      }
+
+      if (req.method === "GET" && pathname === "/conversion/networks") {
+        return sendJson(res, 200, {
+          source: "VRSC",
+          targets: Object.entries(CONVERSION_TARGETS).map(([asset, config]) => ({ asset, network: config.network })),
+          marsxServiceFeeBps: CONVERSION_SERVICE_FEE_BPS,
+          executionEnabled: false,
+        });
+      }
+
+      if (req.method === "POST" && pathname === "/conversion/quote") {
+        if (!licenseReady) return sendJson(res, 503, { error: "licensing_not_configured" });
+        const auth = await authenticateWorker(req);
+        if (!auth) return sendJson(res, 401, { error: "valid_license_and_worker_required" });
+        const data = await readJson(req);
+        const targetCode = String(data.target || "").trim().toUpperCase();
+        const target = conversionTarget(targetCode);
+        const destination = String(data.destination || "").trim();
+        const amount = String(data.amountVrsc || "").trim();
+        if (!/^(?:0|[1-9][0-9]{0,11})(?:\\.[0-9]{1,8})?$/.test(amount) || Number(amount) <= 0) {
+          return sendJson(res, 400, { error: "invalid_vrsc_amount" });
+        }
+        if (!target) return sendJson(res, 400, { error: "unsupported_target" });
+        if (!validConversionDestination(target, destination)) {
+          return sendJson(res, 400, { error: "address_network_mismatch", target: targetCode, network: target.network });
+        }
+        const inputAtoms = BigInt(amount.includes(".")
+          ? amount.split(".")[0] + amount.split(".")[1].padEnd(8, "0")
+          : amount + "00000000");
+        const feeAtoms = inputAtoms * BigInt(CONVERSION_SERVICE_FEE_BPS) / 10000n;
+        const netAtoms = inputAtoms - feeAtoms;
+        const display8 = (atoms) => `${atoms / 100000000n}.${String(atoms % 100000000n).padStart(8, "0")}`;
+        return sendJson(res, 200, {
+          status: "provider_quote_required",
+          source: "VRSC",
+          target: targetCode,
+          network: target.network,
+          inputVrsc: display8(inputAtoms),
+          marsxServiceFeeBps: CONVERSION_SERVICE_FEE_BPS,
+          marsxServiceFeeVrscEquivalent: display8(feeAtoms),
+          providerInputVrsc: display8(netAtoms),
+          providerAndNetworkFee: null,
+          estimatedOutput: null,
+          executionEnabled: false,
+        });
+      }
+
+      if (req.method === "POST" && pathname === "/conversion/execute") {
+        return sendJson(res, 503, {
+          error: "conversion_execution_disabled",
+          reason: "provider_credentials_and_treasury_signer_required",
+        });
       }
 
       if (req.method === "GET" && pathname === "/account") {
