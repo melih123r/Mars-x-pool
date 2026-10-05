@@ -23,7 +23,7 @@ import android.widget.*;
 /** Device diagnostic build: no mining payload, no remote commands or wallet secrets. */
 public final class MainActivity extends Activity {
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private TextView status;
+    private TextView status, withdrawalProgress;
     private TextView setupStatus, settlementStatus;
     private EditText address, worker, amount, destination;
     private Spinner region, target;
@@ -94,8 +94,9 @@ public final class MainActivity extends Activity {
         Button stop = new Button(this); stop.setText("DURDUR");
         stop.setOnClickListener(v -> { started = false; stopNative(); stopPoolProbe(); update(); }); layout.addView(stop);
         status = text("", 18); layout.addView(status);
+        withdrawalProgress = text("Çekim hedefi: €1,00\nTahmini süre: doğrulanmış ödeme verisi bekleniyor.", 18); layout.addView(withdrawalProgress);
         layout.addView(text("Güvenlik sınırları: en fazla 10 dakika; pil en az %15; pil sıcaklığı 43°C altında; " +
-            "harici güç ve doğrulanmış internet (Wi-Fi, mobil veri veya Ethernet). Uygulamadan ayrılınca test durur. Bu kontrol, cihaz güvenliği sertifikası değildir.", 16));
+            "harici güç ve doğrulanmış internet (Wi-Fi, mobil veri veya Ethernet). MARS-X arka planda yalnız görünür foreground bildirimiyle çalışır. Bu kontrol, cihaz güvenliği sertifikası değildir.", 16));
         buildSettlement(layout);
         addButton(layout, "Bu cihazdaki kurulumu sil", () -> {
             started = false; stopNative(); stopPoolProbe(); preferences.edit().clear().apply(); address.setText(""); worker.setText("phone");
@@ -259,6 +260,7 @@ public final class MainActivity extends Activity {
             percent, thermal, plugged, validatedNetwork, lastLiveBatteryEvent < 0 ? 5001 : SystemClock.elapsedRealtime() - lastLiveBatteryEvent,
             started ? SystemClock.elapsedRealtime() - startedAt : 0);
         if (veto != null) started = false;
+        if (withdrawalProgress != null) withdrawalProgress.setText("Çekim hedefi: €1,00\nTahmini süre: doğrulanmış ödeme verisi bekleniyor.\nAccepted share sayısı bakiye olarak kullanılmaz.");
         status.setText("Pil: %" + percent + " | Sıcaklık: " + temperature + " °C\nAndroid termal durum: " + thermal +
             "\nHarici güç: " + plugged + " | İnternet doğrulandı: " + validatedNetwork + "\n\n" +
             (nativeRequested ? "MARS-X çalışıyor; güvenli bağlantı otomatik yönetiliyor." :
