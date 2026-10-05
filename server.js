@@ -1065,6 +1065,17 @@ export function createServer({
         });
       }
 
+      if (req.method === "POST" && pathname === "/admin/worker-stop") {
+        if (!adminToken) return sendJson(res, 503, { error: "ADMIN_TOKEN_not_configured" });
+        if (!safeAuthorization(req.headers.authorization, "Bearer", adminToken))
+          return sendJson(res, 401, { error: "admin_unauthorized" });
+        const data = await readJson(req);
+        try {
+          const command = pairing.requestStop({ workerId: String(data.worker_id || ""), reason: data.reason || "remote-stop" });
+          return sendJson(res, 202, { ok: true, command });
+        } catch { return sendJson(res, 400, { error: "invalid_worker" }); }
+      }
+
       if (pathname.startsWith("/admin/")) {
         if (!adminToken) return sendJson(res, 503, { error: "ADMIN_TOKEN_not_configured" });
         if (!safeAuthorization(req.headers.authorization, "Bearer", adminToken)) {
