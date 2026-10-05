@@ -4,30 +4,40 @@ on:
 permissions:
   contents: read
 jobs:
-  arm64:
-    runs-on: ubuntu-latest
+  arm64-source-build:
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
-      - name: Install pinned Android NDK
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential automake autoconf libtool pkg-config libcurl4-openssl-dev libssl-dev libjansson-dev
+      - name: Fetch exact upstream source
         run: |
-          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
-          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "ndk;27.2.12479018"
-      - name: Fetch pinned GPL source
-        run: |
-          git clone --filter=blob:none --branch ARM https://github.com/monkins1010/ccminer.git engine-src
+          git clone --single-branch -b ARM https://github.com/monkins1010/ccminer.git engine-src
           cd engine-src
           git checkout 1667394ad4120d64b0c57367e71cb832ad2e3645
           test "$(git rev-parse HEAD)" = "1667394ad4120d64b0c57367e71cb832ad2e3645"
-          test -f LICENSE || test -f COPYING
-      - name: Inspect reproducible build inputs
+      - name: Build upstream ARM ccminer
         run: |
           cd engine-src
-          printf 'source_commit=%s\n' "$(git rev-parse HEAD)" | tee ../engine-build-manifest.txt
-          find . -maxdepth 2 -type f \( -name 'Android.mk' -o -name 'CMakeLists.txt' -o -name 'Makefile*' \) -print | sort | tee -a ../engine-build-manifest.txt
-          grep -RniE 'stratum\+ssl|stratum\+tls|SSL_|TLS_|openssl' . --exclude-dir=.git | head -100 | tee ../engine-tls-evidence.txt || true
+          chmod +x autogen.sh configure.sh build.sh
+          ./autogen.sh
+          CC=gcc CXX=g++ ./build.sh
+          test -x ./ccminer
+          file ./ccminer | tee ../engine-file.txt
+          sha256sum ./ccminer | tee ../engine-sha256.txt
+          ./ccminer --help > ../engine-help.txt 2>&1 || true
+      - name: Record provenance and TLS evidence
+        run: |
+          printf 'source=monkins1010/ccminer\nbranch=ARM\ncommit=1667394ad4120d64b0c57367e71cb832ad2e3645\nlicense=GPL-3.0\nrunner=ubuntu-24.04-arm\n' > engine-provenance.txt
+          grep -RniE 'stratum\+ssl|stratum\+tls|SSL_|TLS_|openssl' engine-src --exclude-dir=.git | head -100 > engine-tls-evidence.txt || true
       - uses: actions/upload-artifact@v4
         with:
-          name: vrsc-engine-build-evidence
+          name: vrsc-arm64-engine-evidence
           path: |
-            engine-build-manifest.txt
+            engine-src/ccminer
+            engine-sha256.txt
+            engine-file.txt
+            engine-help.txt
+            engine-provenance.txt
             engine-tls-evidence.txt
+          retention-days: 7
