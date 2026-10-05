@@ -13,12 +13,12 @@ export function validAddress(address) {
   return bytes.length === 25 && bytes[0] === 60 && hash(hash(bytes.subarray(0, 21))).subarray(0, 4).equals(bytes.subarray(21));
 }
 
-export function probe(host, address) {
+export function probe(host, address, port = 3958) {
   return new Promise(resolve => {
-    const result = { host, port: 3958, tlsVerified: false, subscribed: false, authorized: false,
+    const result = { host, port, tlsVerified: false, subscribed: false, authorized: false,
       acceptedShareVerified: false, settlementVerified: false };
     let buffer = '', done = false;
-    const socket = tls.connect({ host, port: 3958, servername: host, rejectUnauthorized: true });
+    const socket = tls.connect({ host, port, servername: host, rejectUnauthorized: true });
     const finish = error => {
       if (done) return; done = true;
       clearTimeout(timer); socket.destroy();
@@ -57,7 +57,9 @@ export async function run() {
   const config = JSON.parse(await readFile(new URL('../config/vrsc-operator.json', import.meta.url)));
   const address = process.env.VRSC_PAYOUT_ADDRESS || config.payoutAddress;
   if (!validAddress(address)) throw new Error('invalid-payout-address-checksum');
-  const endpoints = await Promise.all(['eu.luckpool.net', 'na.luckpool.net', 'ap.luckpool.net'].map(host => probe(host, address)));
+  const targets = [['eu.luckpool.net', 3958], ['na.luckpool.net', 3958], ['ap.luckpool.net', 3958],
+    ['verus.farm', 9998], ['veruscoin.cedric-crispin.com', 4025]];
+  const endpoints = await Promise.all(targets.map(([host, port]) => probe(host, address, port)));
   // Authorization proves protocol response only. No work is computed or submitted.
   console.log(JSON.stringify({ observedAt: new Date().toISOString(), address, endpoints,
     creditEnabled: false, withdrawalsEnabled: false }, null, 2));

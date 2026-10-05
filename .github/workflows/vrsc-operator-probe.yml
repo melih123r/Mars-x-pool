@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 22
       - run: node --test test/vrsc-operator-probe.test.js
-      - run: node scripts/vrsc-operator-probe.mjs > vrsc-connection-evidence.json
+      - run: node scripts/vrsc-operator-probe.mjs | tee vrsc-connection-evidence.json
       - uses: actions/upload-artifact@v4
         with:
           name: vrsc-operator-connection-evidence
