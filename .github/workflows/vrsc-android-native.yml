@@ -90,7 +90,7 @@ jobs:
           file mobile-miner/native/verified/libmarsxminer.so | grep -q 'ARM aarch64'
       - name: Build separate MARS-X Worker test APK
         env:
-          MINER_ANDROID_SDK: ${{ env.ANDROID_HOME }}
+          MINER_ANDROID_SDK: ${{ env.ANDROID_SDK_ROOT }}
           MINER_ENGINE_DIR: ${{ github.workspace }}/mobile-miner/native/verified
         run: bash mobile-miner/android/build-test.sh
       - name: Record Worker APK digest
