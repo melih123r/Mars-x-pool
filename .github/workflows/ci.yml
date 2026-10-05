@@ -108,3 +108,33 @@ jobs:
             tls-evidence.txt
           if-no-files-found: ignore
           retention-days: 7
+
+  vrsc-stratum-protocol-probe:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Probe Stratum protocol over verified TLS without authorization
+        run: |
+          set -euo pipefail
+          HOST=eu.luckpool.net
+          PORT=3958
+          printf '{"id":1,"method":"mining.subscribe","params":["MARS-X-protocol-probe"]}\n' > request.txt
+          set +e
+          timeout 15 openssl s_client -quiet -connect "$HOST:$PORT" -servername "$HOST" -verify_return_error < request.txt > stratum-response.txt 2>tls-stderr.txt
+          RC=$?
+          set -e
+          cat stratum-response.txt
+          cat tls-stderr.txt
+          grep -Eq '"id"[[:space:]]*:[[:space:]]*1|"method"[[:space:]]*:[[:space:]]*"mining\.' stratum-response.txt
+          printf 'host=%s\nport=%s\nprotocol_response=true\nopenssl_exit=%s\nobserved_at=%s\n' "$HOST" "$PORT" "$RC" "$(date -u +%FT%TZ)" > stratum-evidence.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vrsc-stratum-protocol-probe
+          path: |
+            request.txt
+            stratum-response.txt
+            tls-stderr.txt
+            stratum-evidence.txt
+          if-no-files-found: ignore
+          retention-days: 7
