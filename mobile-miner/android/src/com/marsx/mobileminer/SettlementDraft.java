@@ -1,6 +1,7 @@
 package com.marsx.mobileminer;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /** Local intent, never a quote, transaction, balance or withdrawal authorization. */
 public final class SettlementDraft {
@@ -8,6 +9,8 @@ public final class SettlementDraft {
         "SOL — Solana", "VRSC — Verus", "LTC — Litecoin", "DOGE — Dogecoin", "BTC — Bitcoin",
         "USDT — Ethereum", "USDT — Tron"
     };
+    public static final BigDecimal POOL_FEE_RATE = new BigDecimal("0.10");
+    public static final BigDecimal CONVERSION_FEE_RATE = new BigDecimal("0.02");
     public final String amount, target, destination;
 
     public SettlementDraft(String inputAmount, int targetIndex, String destination) {
@@ -47,12 +50,16 @@ public final class SettlementDraft {
     }
 
     public String preview() {
+        BigDecimal gross = new BigDecimal(amount);
+        BigDecimal serviceFee = gross.multiply(CONVERSION_FEE_RATE).setScale(8, RoundingMode.DOWN);
+        BigDecimal beforeProviderCosts = gross.subtract(serviceFee);
         return "YEREL TASLAK — İŞLEM GÖNDERİLMEDİ\n\n" + amount + " VRSC → " + target +
             "\nHedef adres:\n" + destination +
             "\n\nBu seçim işlem çiftinin desteklendiği anlamına gelmez. " +
             "VRSC dışındaki hedef adreslerin ağ doğrulaması henüz yapılmadı.\n\n" +
             "Alınacak miktar: canlı rota/quote bağlantısı bekleniyor\n" +
-            "MARS-X hizmet bedeli: %2 (yalnız gerçekleşen dönüşümde)\n" +
+            "MARS-X hizmet bedeli: %2 = " + serviceFee.stripTrailingZeros().toPlainString() + " VRSC eşdeğeri\n" +
+            "Provider/network maliyeti öncesi dönüşüme girecek: " + beforeProviderCosts.stripTrailingZeros().toPlainString() + " VRSC eşdeğeri\n" +
             "Pool komisyonu: %10 (provider-confirmed mining settlement üzerinden)\n" +
             "Network / liquidity / protocol maliyeti: canlı quote sırasında ayrıca gösterilecek\n" +
             "Bakiye: cüzdana bağlanılmadı\nDurum: sağlayıcı ve cüzdan imzası bağlantısı bekleniyor.\n\n" +
