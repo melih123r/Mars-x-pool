@@ -60,14 +60,13 @@ public final class MainActivity extends Activity {
         layout.addView(text("Deneysel worker: uygun ve doğrulanmış ARM64 motor varsa kullanıcı kendi VRSC cüzdanıyla test başlatabilir. Dönüşüm, çekim ve komisyon kapalıdır. Gelir ölçülmez.\n\n" +
             "Telefon madenciliği ısı, elektrik tüketimi ve pil yıpranması oluşturabilir. Kazanç garantisi yoktur.", 17));
         buildSetup(layout);
-        buildPairing(layout);
         layout.addView(text("2 · Başlat / Durdur", 22));
         layout.addView(text("Worker testi Vipor TLS bağlantısını kullanır. Hash hızı, kabul edilen share ve ödeme henüz ölçülmedi. Bu bir üretim sürümü değildir.", 16));
         miningConsent = new CheckBox(this);
-        miningConsent.setText("Deneysel VRSC worker testini kendim başlatıyorum. Açık adresim Vipor'a gider; 1 CPU thread kullanılır. Isı, pil ve elektrik risklerini kabul ediyorum. Kazanç garantisi ve MARS-X komisyonu yok.");
+        miningConsent.setText("BAŞLAT dediğimde cihazımın 1 CPU thread kullanacağını; ısı, pil ve elektrik tüketimi oluşabileceğini anladım ve kabul ediyorum. Kazanç garantisi yok.");
         miningConsent.setTextColor(Color.WHITE); layout.addView(miningConsent);
         miningConsent.setOnCheckedChangeListener((button, checked) -> { if (!checked) stopNative(); });
-        miningStart = new Button(this); miningStart.setText("Deneysel VRSC worker testini başlat");
+        miningStart = new Button(this); miningStart.setText("BAŞLAT");
         miningStart.setEnabled(EngineArtifact.ready(this));
         miningStart.setOnClickListener(v -> {
             if (nativeRequested) return;
@@ -117,22 +116,6 @@ public final class MainActivity extends Activity {
     private TextView text(String value, int size) {
         TextView view = new TextView(this); view.setText(value); view.setTextSize(size);
         view.setTextColor(Color.WHITE); view.setPadding(0, 12, 0, 16); return view;
-    }
-    private void buildPairing(LinearLayout layout) {
-        layout.addView(text("Worker eşleştirme (isteğe bağlı)", 20));
-        final EditText registry=input("Registry HTTPS adresi",InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        registry.setText("https://worker-registry-production.up.railway.app"); layout.addView(registry);
-        final EditText session=input("Pairing session ID",InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS); layout.addView(session);
-        final EditText token=input("Geçici Worker token",InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_PASSWORD); layout.addView(token);
-        addButton(layout,"Bu oturum için eşleştir",()->{
-            String r=registry.getText().toString().trim(),s=session.getText().toString().trim(),t=token.getText().toString().trim();
-            if(!r.startsWith("https://")||!s.matches("[A-Za-z0-9_-]{8,64}")||t.length()<32){
-                Toast.makeText(this,"Geçerli HTTPS registry, session ve token gerekli.",Toast.LENGTH_LONG).show();return;
-            }
-            pairingRegistry=r;pairingSession=s;pairingToken=t;token.setText("");
-            Toast.makeText(this,"Eşleştirme yalnız bu uygulama oturumunda tutuluyor.",Toast.LENGTH_LONG).show();
-        });
-        addButton(layout,"Eşleştirmeyi kaldır",()->{pairingRegistry=null;pairingSession=null;pairingToken=null;session.setText("");token.setText("");stopNative();});
     }
     private void buildSetup(LinearLayout layout) {
         preferences = getSharedPreferences("vrsc_setup", MODE_PRIVATE);
