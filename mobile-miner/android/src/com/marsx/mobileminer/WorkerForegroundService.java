@@ -12,25 +12,22 @@ public final class WorkerForegroundService extends Service {
  private final Handler handler=new Handler(Looper.getMainLooper());
  private NativeEngineSession engine;
  private PairingHeartbeatClient pairingClient;
- private long lastHeartbeat, startedAt;
+ private long startedAt;
  private boolean running;
  private static volatile boolean active;
  private static volatile int acceptedShares;
  public static int acceptedShares(){return acceptedShares;}
  public static boolean isRunning(){return active;}
  private final Runnable watchdog=new Runnable(){public void run(){
-  PowerManager power=getSystemService(PowerManager.class);
-  if(!running||SystemClock.elapsedRealtime()-lastHeartbeat>2500||SystemClock.elapsedRealtime()-startedAt>=600000||
-      power==null||power.getCurrentThermalStatus()>=PowerManager.THERMAL_STATUS_MODERATE){stopSession();return;}
+  if(!running||currentSafetyVeto()!=null){stopSession();return;}
   if(pairingClient!=null)pairingClient.poll(WorkerForegroundService.this);
-  handler.postDelayed(this,500);
+  handler.postDelayed(this,1000);
  }};
  public void onCreate(){super.onCreate();NotificationManager n=getSystemService(NotificationManager.class);
   if(n!=null)n.createNotificationChannel(new NotificationChannel(CHANNEL,"MARS-X Worker",NotificationManager.IMPORTANCE_LOW));}
  public int onStartCommand(Intent intent,int flags,int id){
   if(intent==null||ACTION_STOP.equals(intent.getAction())){stopSession();return START_NOT_STICKY;}
   if(ACTION_HEARTBEAT.equals(intent.getAction())){
-   if(running&&safe(intent)==null)lastHeartbeat=SystemClock.elapsedRealtime();else stopSession();
    return START_NOT_STICKY;
   }
   if(!ACTION_START.equals(intent.getAction())||running||safe(intent)!=null||!EngineArtifact.ready(this)){
@@ -46,7 +43,7 @@ public final class WorkerForegroundService extends Service {
     .setContentTitle("MARS-X · deneysel VRSC kazımı").setContentText("1 CPU thread · 10 dakika sınırı · Vipor")
     .setOngoing(true).addAction(new Notification.Action.Builder(null,"DURDUR",pi).build()).build();
    startForeground(1001,note);
-   lastHeartbeat=startedAt=SystemClock.elapsedRealtime();
+   startedAt=SystemClock.elapsedRealtime();
    engine=new NativeEngineSession();running=true;acceptedShares=0;
    String registry=intent.getStringExtra("registryUrl"),sid=intent.getStringExtra("pairingSession"),pt=intent.getStringExtra("pairingToken");
    if(registry!=null&&sid!=null&&pt!=null) pairingClient=new PairingHeartbeatClient(registry,sid,config.worker,pt);
@@ -61,6 +58,25 @@ public final class WorkerForegroundService extends Service {
    i.getDoubleExtra("temperature",Double.NaN),i.getIntExtra("battery",-1),i.getIntExtra("thermal",-1),
    i.getBooleanExtra("plugged",false),i.getBooleanExtra("unmetered",false),i.getLongExtra("ageMs",5001),
    running?SystemClock.elapsedRealtime()-startedAt:0);
+ }
+ private String currentSafetyVeto(){
+  Intent batteryIntent=registerReceiver(null,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+  double temperature=Double.NaN;int battery=-1;boolean plugged=false;
+  if(batteryIntent!=null){
+   if(batteryIntent.hasExtra(BatteryManager.EXTRA_TEMPERATURE))
+    temperature=batteryIntent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE,-1)/10.0;
+   int level=batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL,-1);
+   int scale=batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE,-1);
+   if(level>=0&&scale>0)battery=(int)(100L*level/scale);
+   plugged=batteryIntent.getIntExtra(BatteryManager.EXTRA_PLUGGED,0)!=0;
+  }
+  PowerManager power=getSystemService(PowerManager.class);
+  int thermal=power==null?-1:power.getCurrentThermalStatus();
+  android.net.ConnectivityManager cm=getSystemService(android.net.ConnectivityManager.class);
+  android.net.NetworkCapabilities caps=cm==null?null:cm.getNetworkCapabilities(cm.getActiveNetwork());
+  boolean network=caps!=null&&caps.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED);
+  long sessionMs=running?SystemClock.elapsedRealtime()-startedAt:0;
+  return SafetyPolicy.veto(true,true,true,temperature,battery,thermal,plugged,network,0,sessionMs);
  }
  private void stopSession(){
   active=false;running=false;handler.removeCallbacks(watchdog);
