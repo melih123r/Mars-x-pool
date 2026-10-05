@@ -6,6 +6,7 @@ on:
     paths:
       - mobile-miner/native/**
       - mobile-miner/android/**
+      - android/**
       - .github/workflows/vrsc-android-native.yml
 permissions:
   contents: read
@@ -21,6 +22,9 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.11.1
       - run: '"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"'
       - name: Test controller safety and loopback lifecycle
         run: |
@@ -105,6 +109,24 @@ jobs:
           MINER_ANDROID_SDK: /usr/local/lib/android/sdk
           MINER_ENGINE_DIR: ${{ github.workspace }}/mobile-miner/native/verified
         run: bash mobile-miner/android/build-test.sh
+      - name: Build unified single MARS-X APK
+        run: |
+          set -euo pipefail
+          mkdir -p android/app-unified/src/main/jniLibs/arm64-v8a
+          cp mobile-miner/native/verified/libmarsxminer.so android/app-unified/src/main/jniLibs/arm64-v8a/libmarsxminer.so
+          gradle -p android :app-unified:assembleDebug --no-daemon
+          test -s android/app-unified/build/outputs/apk/debug/app-unified-debug.apk
+          mkdir -p android/app-unified/build/delivery
+          cp android/app-unified/build/outputs/apk/debug/app-unified-debug.apk android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk
+          sha256sum android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk > android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk.sha256
+      - name: Verify engine inside unified APK
+        run: |
+          unzip -l android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk | grep -q 'lib/arm64-v8a/libmarsxminer.so'
+          unzip -p android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk lib/arm64-v8a/libmarsxminer.so > /tmp/unified-libmarsxminer.so
+          expected="$(sha256sum mobile-miner/native/verified/libmarsxminer.so | awk '{print $1}')"
+          actual="$(sha256sum /tmp/unified-libmarsxminer.so | awk '{print $1}')"
+          test "$actual" = "$expected"
+          file /tmp/unified-libmarsxminer.so | grep -q 'ARM aarch64'
       - name: Verify packaged engine inside final APK
         run: |
           unzip -l mobile-miner/android/build/MARS-X-Miner-Device-Test.apk | grep -q 'lib/arm64-v8a/libmarsxminer.so'
@@ -125,4 +147,11 @@ jobs:
           path: |
             mobile-miner/android/build/MARS-X-Miner-Device-Test.apk
             mobile-miner/android/build/MARS-X-Worker-Test.apk.sha256
+          retention-days: 7
+      - uses: actions/upload-artifact@v4
+        with:
+          name: marsx-unified-single-apk
+          path: |
+            android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk
+            android/app-unified/build/delivery/MARS-X-Pool-Unified-Worker.apk.sha256
           retention-days: 7
