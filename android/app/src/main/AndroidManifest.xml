@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MarsX"
         android:usesCleartextTraffic="false">
-        <activity android:name=".VrscPoolActivity" android:exported="false" />
+        <receiver android:name=".WorkerStatusReceiver" android:exported="true" android:permission="com.marsx.permission.CONTROL_WORKER"><intent-filter><action android:name="com.marsx.pool.WORKER_STATUS"/></intent-filter></receiver>\n        <activity android:name=".VrscPoolActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
         <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="true">
             <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
