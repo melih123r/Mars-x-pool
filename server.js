@@ -3,7 +3,7 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { pathToFileURL } from "node:url";
 
 const SERVICE = "marsx-pool-worker-api";
-const VERSION = "0.9.0";
+const VERSION = "0.8.4";
 const TERMS_VERSION = "2026-09-27-v3";
 const WORKERS_KEY = "marsx:workers";
 const LICENSE_DEVICES_PREFIX = "marsx:license-devices:";
@@ -707,7 +707,11 @@ class RedisStore {
   }
 }
 
-export async function createStore(redisUrl = process.env.REDIS_URL) {
+export async function createStore(redisUrl = process.env.REDIS_URL, databaseUrl = process.env.DATABASE_URL) {
+  if (databaseUrl) {
+    const { createPostgresStore } = await import("./postgres-store.mjs");
+    return createPostgresStore(databaseUrl);
+  }
   if (!redisUrl) return new MemoryStore();
   const { createClient } = await import("redis");
   const client = createClient({
@@ -837,7 +841,7 @@ export function createServer({
           service: SERVICE,
           version: VERSION,
           storage: store.kind,
-          persistent: store.kind === "redis",
+          persistent: store.kind === "redis" || store.kind === "postgres",
           licensing: licenseReady ? "ready" : "not_configured",
           license_provider: qonversionReady ? "qonversion" : (legacyLicenseReady ? "marsx_beta" : "none"),
           payoutMode: "sandbox",
