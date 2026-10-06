@@ -1,0 +1,21 @@
+name: Global Engine CI
+on:
+  pull_request:
+    paths:
+      - "global-engine/**"
+      - "test/global-engine*.test.js"
+      - ".github/workflows/global-engine-ci.yml"
+  push:
+    branches: ["marsx-global-engine-v01"]
+    paths:
+      - "global-engine/**"
+      - "test/global-engine*.test.js"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm test -- --test-name-pattern="global|router|alpaca|public crypto|stale|universal"
