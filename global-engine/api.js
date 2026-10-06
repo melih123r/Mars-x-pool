@@ -59,7 +59,7 @@ export function createApi(engine=buildEngine()){
           backtest:{status:"PLANNED",paperOnly:true},
           optionsChain:{status:"DATA_SOURCE_REQUIRED",requires:"options market-data feed"},
           impliedVolatilitySurface:{status:"DATA_SOURCE_REQUIRED",requires:"options chain + IV"},
-          economicCalendar:{status:"PLANNED",referenceOnly:true},
+          economicCalendar:{status:"MACRO_COLLECTOR_FOUNDATION",referenceOnly:true},
           newsMarkers:{status:"PLANNED",referenceOnly:true},
           alerts:{status:"PLANNED",types:["PRICE","INDICATOR","MARSX_SIGNAL","RISK"]},
           screener:{status:"PLANNED",filters:["ASSET_CLASS","PRICE","VOLUME","VOLATILITY","MARSX_CONFIDENCE"]},
@@ -76,7 +76,7 @@ export function createApi(engine=buildEngine()){
           limits:{liveAccountActions:false,realMoneyRiskChanges:false}
         }
       }));
-      if(req.method==="GET" && url.pathname==="/analytics/capabilities") return res.end(JSON.stringify({mode:"READ_ONLY",tca:["SLIPPAGE_BPS","DECISION_BPS","FEE_BPS","TOTAL_COST_BPS","LATENCY_MS","VENUE_SCORE"],risk:["GROSS_EXPOSURE","NET_EXPOSURE","LEVERAGE","CONCENTRATION","SCENARIO_SHOCK"],storage:{historical:"CRYPTO_PROVIDERS_READY",providers:["coinbase-history","kraken-history"],symbols:["BTC-USD","ETH-USD"],quality:["OHLCV_VALIDITY","DUPLICATES","GAPS","STALE","CROSS_PROVIDER_DEVIATION"],minQualityScore:80,replay:"QUALITY_GATED_FOUNDATION",persistent:"POSTGRES_READY_NOT_PROVISIONED",schema:"marsx_ohlcv"}}));
+      if(req.method==="GET" && url.pathname==="/analytics/capabilities") return res.end(JSON.stringify({mode:"READ_ONLY",tca:["SLIPPAGE_BPS","DECISION_BPS","FEE_BPS","TOTAL_COST_BPS","LATENCY_MS","VENUE_SCORE"],risk:["GROSS_EXPOSURE","NET_EXPOSURE","LEVERAGE","CONCENTRATION","SCENARIO_SHOCK"],engines:{backtest:"PAPER_QUALITY_GATED",confidence:"ANALYTICS_ONLY",portfolioRisk:"PAPER_SIMULATION",audit:"IN_MEMORY_FOUNDATION"},storage:{historical:"CRYPTO_PROVIDERS_READY",providers:["coinbase-history","kraken-history"],symbols:["BTC-USD","ETH-USD"],quality:["OHLCV_VALIDITY","DUPLICATES","GAPS","STALE","CROSS_PROVIDER_DEVIATION"],minQualityScore:80,replay:"QUALITY_GATED_FOUNDATION",persistent:"POSTGRES_READY_NOT_PROVISIONED",schema:"marsx_ohlcv"}}));
       if(req.method==="GET" && url.pathname==="/macro/sources") return res.end(JSON.stringify({mode:"REFERENCE_ONLY",sources:[
         {id:"UST_YIELD_CURVE",provider:"U.S. Treasury",frequency:"DAILY",status:"AVAILABLE",series:["1M","3M","6M","1Y","2Y","5Y","10Y","20Y","30Y"],executionReady:false},
         {id:"FED_H15",provider:"Federal Reserve Board",frequency:"DAILY",status:"AVAILABLE",series:["FED_FUNDS","TREASURY_CONSTANT_MATURITY"],executionReady:false},
