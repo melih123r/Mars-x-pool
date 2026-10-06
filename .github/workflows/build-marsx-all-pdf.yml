@@ -1,0 +1,92 @@
+name: build-marsx-all-pdf
+on:
+  push:
+    branches: [bundle/marsx-all]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install reportlab
+      - name: Build complete source PDF
+        run: |
+          cat > /tmp/build_pdf.py <<'PY'
+          import os, hashlib
+          from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak, Preformatted, KeepTogether
+          from reportlab.lib.pagesizes import A4
+          from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+          from reportlab.lib.enums import TA_CENTER
+          from reportlab.lib import colors
+          from reportlab.pdfbase.ttfonts import TTFont
+          from reportlab.pdfbase import pdfmetrics
+
+          ROOT='.'
+          OUT='MARS-X-ALL-COMPLETE-SOURCE.pdf'
+          SKIP={'.git','.gradle','build','node_modules','.idea'}
+          TEXT_EXT={'.js','.mjs','.cjs','.ts','.tsx','.jsx','.java','.kt','.kts','.xml','.json','.yml','.yaml','.md','.txt','.html','.css','.scss','.sql','.py','.sh','.properties','.gradle','.toml','.env','.gitignore'}
+          TEXT_NAMES={'Dockerfile','Procfile','LICENSE','README','gradlew','package.json','package-lock.json'}
+          files=[]
+          for dp,dns,fns in os.walk(ROOT):
+            dns[:]=[d for d in dns if d not in SKIP]
+            for fn in fns:
+              p=os.path.join(dp,fn)
+              rel=os.path.relpath(p,ROOT)
+              if rel==OUT or rel.startswith('.github/workflows/build-marsx-all-pdf'): continue
+              files.append(rel)
+          files.sort()
+          text=[]; binary=[]
+          for rel in files:
+            ext=os.path.splitext(rel)[1].lower()
+            try: size=os.path.getsize(rel)
+            except: continue
+            if (ext in TEXT_EXT or os.path.basename(rel) in TEXT_NAMES) and size<=1000000:
+              try:
+                raw=open(rel,'rb').read()
+                s=raw.decode('utf-8')
+                text.append((rel,s,hashlib.sha256(raw).hexdigest()))
+              except Exception: binary.append((rel,size))
+            else: binary.append((rel,size))
+          styles=getSampleStyleSheet()
+          title=ParagraphStyle('title',parent=styles['Title'],fontName='Helvetica-Bold',fontSize=22,leading=27,alignment=TA_CENTER,spaceAfter=16)
+          h1=ParagraphStyle('h1',parent=styles['Heading1'],fontName='Helvetica-Bold',fontSize=14,leading=18,spaceBefore=8,spaceAfter=6)
+          body=ParagraphStyle('body',parent=styles['BodyText'],fontName='Helvetica',fontSize=8.5,leading=11)
+          code=ParagraphStyle('code',fontName='Courier',fontSize=5.6,leading=7.1,leftIndent=0,rightIndent=0,spaceAfter=8,backColor=colors.HexColor('#f4f4f4'),borderPadding=5)
+          doc=SimpleDocTemplate(OUT,pagesize=A4,rightMargin=28,leftMargin=28,topMargin=34,bottomMargin=34,title='MARS-X ALL Complete Source')
+          story=[Paragraph('MARS-X ALL - COMPLETE SOURCE ARCHIVE',title),
+                 Paragraph('Combined source snapshot: Pool, Global Engine, Broker/Finance, Token Foundation, Premium UI, ecosystem design, VRSC integrations, real-pool adapter, commission accounting, production hardening and conversion modules.',body),
+                 Spacer(1,10),
+                 Paragraph(f'Readable source/document files: {len(text)} | Binary/non-text manifest entries: {len(binary)}',body),
+                 Paragraph('Security note: repository secrets, private keys and seed phrases are not intentionally embedded by this generator.',body),
+                 PageBreak(),
+                 Paragraph('MODULE / FILE INDEX',h1)]
+          for rel,_,sha in text:
+            story.append(Paragraph(rel.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')+' - SHA256 '+sha[:16],body))
+          story += [PageBreak(),Paragraph('BINARY / NON-TEXT MANIFEST',h1)]
+          for rel,size in binary:
+            story.append(Paragraph((rel+f' ({size} bytes)').replace('&','&amp;').replace('<','&lt;').replace('>','&gt;'),body))
+          story.append(PageBreak())
+          for n,(rel,s,sha) in enumerate(text,1):
+            story.append(Paragraph(f'{n}. {rel}'.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;'),h1))
+            story.append(Paragraph('SHA-256: '+sha,body))
+            safe=s.replace('\t','    ').replace('\x00','')
+            # split huge source into manageable blocks
+            lines=safe.splitlines() or ['']
+            for i in range(0,len(lines),120):
+              story.append(Preformatted('\n'.join(lines[i:i+120]),code,maxLineLength=140))
+            story.append(Spacer(1,8))
+          def footer(canvas,doc):
+            canvas.saveState(); canvas.setFont('Helvetica',7); canvas.drawString(28,18,'MARS-X ALL Complete Source'); canvas.drawRightString(A4[0]-28,18,f'Page {doc.page}'); canvas.restoreState()
+          doc.build(story,onFirstPage=footer,onLaterPages=footer)
+          print(OUT, os.path.getsize(OUT), len(text), len(binary))
+          PY
+          python /tmp/build_pdf.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MARS-X-ALL-COMPLETE-SOURCE-PDF
+          path: MARS-X-ALL-COMPLETE-SOURCE.pdf
