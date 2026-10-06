@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: marsx-pool-worker-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    repo: https://github.com/melih123r/Mars-x-pool
+    branch: main
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    autoDeploy: false
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: marsx-pool-db
+          property: connectionString
+
+databases:
+  - name: marsx-pool-db
+    plan: free
+    region: frankfurt
+    databaseName: marsx_pool_db
+    user: marsx_pool_db_user
