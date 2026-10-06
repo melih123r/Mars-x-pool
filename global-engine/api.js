@@ -55,6 +55,13 @@ export function createApi(engine=buildEngine()){
           impliedVolatilitySurface:{status:"DATA_SOURCE_REQUIRED",requires:"options chain + IV"},
           economicCalendar:{status:"PLANNED",referenceOnly:true},
           newsMarkers:{status:"PLANNED",referenceOnly:true}
+        },
+        riskTerminal:{
+          mode:"PAPER_SIMULATION",
+          metrics:["PNL","REALIZED_PNL","UNREALIZED_PNL","GROSS_EXPOSURE","NET_EXPOSURE","CONCENTRATION","CORRELATION","VAR","MAX_DRAWDOWN","MARGIN"],
+          derivatives:["DELTA","GAMMA","THETA","VEGA"],
+          analytics:["STRESS_TEST","WHAT_IF","SCENARIO_SHOCK","CORRELATION_MATRIX"],
+          limits:{liveAccountActions:false,realMoneyRiskChanges:false}
         }
       }));
       if(req.method==="GET" && url.pathname==="/macro/sources") return res.end(JSON.stringify({mode:"REFERENCE_ONLY",sources:[
