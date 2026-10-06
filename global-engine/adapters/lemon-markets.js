@@ -74,28 +74,45 @@ export class LemonBrokerAdapter extends VenueAdapter {
       method:"POST",body:payload,...ctx,justification:ctx.justification||"onboarding.knowledge_and_experience"
     });
   }
+  createSecuritiesAccount(accountId,ctx={}) {
+    nonEmpty(accountId,"accountId");
+    return this.request(`/accounts/${enc(accountId)}/securities_accounts`,{
+      method:"POST",...ctx,justification:ctx.justification||"securities_account.create"
+    });
+  }
   getPositions(accountId,ctx={}) {
     nonEmpty(accountId,"accountId");
     return this.request(`/accounts/${enc(accountId)}/positions`,{...ctx,justification:ctx.justification||"portfolio.positions"});
+  }
+  getTrades(accountId,ctx={}) {
+    nonEmpty(accountId,"accountId");
+    return this.request(`/accounts/${enc(accountId)}/trades`,{...ctx,justification:ctx.justification||"portfolio.trades"});
   }
   createWebhook({url,events},ctx={}) {
     nonEmpty(url,"webhook url");
     if(!Array.isArray(events)||events.length===0) throw new Error("webhook events required");
     return this.request("/webhooks",{method:"POST",body:{url,events},...ctx,justification:ctx.justification||"webhook.configure"});
   }
-  async createOrder(accountId,payload,{submit=false,principal="backend-marsx",justification="order.create",idempotencyKey}={}) {
+  async createOrder(accountId,payload,{confirm=false,sca,principal="backend-marsx",justification="order.create",idempotencyKey}={}) {
     nonEmpty(accountId,"accountId"); nonEmpty(payload,"order payload");
     if(!this.allowOrderSubmission) throw new Error("lemon.markets order submission disabled");
     const created=await this.request(`/accounts/${enc(accountId)}/orders`,{
       method:"POST",body:payload,principal,justification,idempotencyKey
     });
-    if(!submit) return {created,submitted:false};
-    const orderId=created?.results?.id??created?.id;
+    if(!confirm) return {created,confirmed:false};
+    const orderId=created?.data?.id??created?.results?.id??created?.id;
     if(!orderId) throw new Error("lemon.markets order id missing");
-    const submitted=await this.request(`/accounts/${enc(accountId)}/orders/${enc(orderId)}/activate`,{
-      method:"PUT",principal,justification:"order.activate"
+    if(!sca || typeof sca!=="object" || Array.isArray(sca)) throw new Error("SCA confirmation required");
+    const confirmed=await this.confirmOrder(accountId,orderId,sca,{principal});
+    return {created,confirmed};
+  }
+  confirmOrder(accountId,orderId,sca,ctx={}) {
+    nonEmpty(accountId,"accountId"); nonEmpty(orderId,"orderId");
+    if(!this.allowOrderSubmission) throw new Error("lemon.markets order submission disabled");
+    if(!sca || typeof sca!=="object" || Array.isArray(sca)) throw new Error("SCA confirmation required");
+    return this.request(`/accounts/${enc(accountId)}/orders/${enc(orderId)}/confirm`,{
+      method:"POST",body:{sca},...ctx,justification:ctx.justification||"order.confirm"
     });
-    return {created,submitted};
   }
   createWithdrawal(accountId,{amount,currency="EUR"},ctx={}) {
     nonEmpty(accountId,"accountId");
@@ -103,6 +120,14 @@ export class LemonBrokerAdapter extends VenueAdapter {
     if(!amount) throw new Error("withdrawal amount required");
     return this.request(`/accounts/${enc(accountId)}/withdrawals`,{
       method:"POST",body:{amount:String(amount),currency},...ctx,justification:ctx.justification||"withdrawal.create"
+    });
+  }
+  confirmWithdrawal(accountId,withdrawalId,sca,ctx={}) {
+    nonEmpty(accountId,"accountId"); nonEmpty(withdrawalId,"withdrawalId");
+    if(!this.allowWithdrawals) throw new Error("lemon.markets withdrawals disabled");
+    if(!sca || typeof sca!=="object" || Array.isArray(sca)) throw new Error("SCA confirmation required");
+    return this.request(`/accounts/${enc(accountId)}/withdrawals/${enc(withdrawalId)}/confirm`,{
+      method:"POST",body:{sca},...ctx,justification:ctx.justification||"withdrawal.confirm"
     });
   }
   async placeOrder(){ throw new Error("generic live execution disabled; use explicit sandbox createOrder gate"); }
