@@ -14,6 +14,7 @@ export function marketCapabilities(env=process.env){
     {symbol:"ETH-USD",assetClass:"CRYPTO",status:"AVAILABLE",venues:["coinbase-public","kraken-public"]},
     ...["EUR-USD","GBP-USD","USD-JPY","USD-CHF","EUR-GBP","USD-TRY"].map(symbol=>({symbol,assetClass:"FX",status:"AVAILABLE_REFERENCE",venues:["frankfurter-fx"],executionReady:false})),
     {symbol:"XAU-USD",assetClass:"COMMODITY",status:"AVAILABLE_REFERENCE",venues:metals?["gold-api-public","metals-dev-gold"]:["gold-api-public"],requires:metals?undefined:"METALS_DEV_API_KEY optional for second source",executionReady:false},
+    ...["XAG-USD","XPT-USD","XPD-USD","HG-USD"].map(symbol=>({symbol,assetClass:"COMMODITY",status:"AVAILABLE_REFERENCE",venues:["gold-api-public"],executionReady:false})),
     {symbol:"AAPL",assetClass:"EQUITY",status:alpaca?"AVAILABLE":"CREDENTIAL_REQUIRED",venues:alpaca?["alpaca-market-data"]:[],requires:"ALPACA_API_KEY + ALPACA_API_SECRET",executionReady:false},
     {symbol:"SPY",assetClass:"ETF",status:alpaca?"AVAILABLE":"CREDENTIAL_REQUIRED",venues:alpaca?["alpaca-market-data"]:[],requires:"ALPACA_API_KEY + ALPACA_API_SECRET",executionReady:false}
   ];
