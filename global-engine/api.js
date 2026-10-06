@@ -6,6 +6,9 @@ import { PublicFxAdapter } from "./adapters/public-fx.js";
 import { AlpacaMarketDataAdapter } from "./adapters/alpaca.js";
 import { MetalsDevGoldAdapter } from "./adapters/metals-dev.js";
 import { GoldApiAdapter } from "./adapters/gold-api.js";
+import { learningConsent } from "./learning-consent.js";
+import { sanitizeTrainingEvent } from "./training-sanitize.js";
+import { TrainingBuffer } from "./training-buffer.js";
 
 export function marketCapabilities(env=process.env){
   const alpaca=Boolean(env.ALPACA_API_KEY&&env.ALPACA_API_SECRET), metals=Boolean(env.METALS_DEV_API_KEY);
@@ -28,7 +31,7 @@ export function buildEngine(){
 }
 
 export function createApi(engine=buildEngine()){
-  const buckets=new Map(), limit=Number(process.env.MARSX_RATE_LIMIT_PER_MIN||120);
+  const buckets=new Map(), limit=Number(process.env.MARSX_RATE_LIMIT_PER_MIN||120), trainingBuffer=new TrainingBuffer({minCohort:Number(process.env.MARSX_TRAINING_MIN_COHORT||20)});
   return http.createServer(async(req,res)=>{
     res.setHeader("content-type","application/json"); res.setHeader("cache-control","no-store"); res.setHeader("x-content-type-options","nosniff");
     res.setHeader("referrer-policy","no-referrer"); res.setHeader("x-frame-options","DENY"); res.setHeader("permissions-policy","geolocation=(), microphone=(), camera=()");
@@ -55,18 +58,18 @@ export function createApi(engine=buildEngine()){
           footprint:{status:"DATA_SOURCE_REQUIRED",requires:"trade-side/order-flow feed"},
           liquidityHeatmap:{status:"DATA_SOURCE_REQUIRED",requires:"depth/order-book history"},
           liquidationHeatmap:{status:"DATA_SOURCE_REQUIRED",requires:"derivatives liquidation feed"},
-          replay:{status:"PLANNED",paperOnly:true},
-          backtest:{status:"PLANNED",paperOnly:true},
+          replay:{status:"QUALITY_GATED_FOUNDATION",paperOnly:true},
+          backtest:{status:"PAPER_QUALITY_GATED",paperOnly:true},
           optionsChain:{status:"DATA_SOURCE_REQUIRED",requires:"options market-data feed"},
           impliedVolatilitySurface:{status:"DATA_SOURCE_REQUIRED",requires:"options chain + IV"},
           economicCalendar:{status:"MACRO_COLLECTOR_FOUNDATION",referenceOnly:true},
           newsMarkers:{status:"PLANNED",referenceOnly:true},
-          alerts:{status:"PLANNED",types:["PRICE","INDICATOR","MARSX_SIGNAL","RISK"]},
-          screener:{status:"PLANNED",filters:["ASSET_CLASS","PRICE","VOLUME","VOLATILITY","MARSX_CONFIDENCE"]},
-          workspace:{status:"PLANNED",savedLayouts:true,symbolSync:true,crosshairSync:true},
+          alerts:{status:"FOUNDATION_READY",types:["PRICE","INDICATOR","MARSX_SIGNAL","RISK"]},
+          screener:{status:"FOUNDATION_READY",filters:["ASSET_CLASS","PRICE","VOLUME","VOLATILITY","MARSX_CONFIDENCE"]},
+          workspace:{status:"FOUNDATION_READY",savedLayouts:true,symbolSync:true,crosshairSync:true},
           advancedOrders:{status:"PAPER_ONLY",types:["LIMIT","STOP","STOP_LIMIT","BRACKET","OCO"]},
-          portfolioAttribution:{status:"PLANNED"},
-          optionsStrategyBuilder:{status:"DATA_SOURCE_REQUIRED",requires:"options chain + Greeks"}
+          portfolioAttribution:{status:"FOUNDATION_READY"},
+          optionsStrategyBuilder:{status:"ANALYTICS_READY_DATA_SOURCE_REQUIRED",requires:"options chain for live market inputs; Greeks model ready"}
         },
         riskTerminal:{
           mode:"PAPER_SIMULATION",
@@ -76,7 +79,15 @@ export function createApi(engine=buildEngine()){
           limits:{liveAccountActions:false,realMoneyRiskChanges:false}
         }
       }));
-      if(req.method==="GET" && url.pathname==="/analytics/capabilities") return res.end(JSON.stringify({mode:"READ_ONLY",tca:["SLIPPAGE_BPS","DECISION_BPS","FEE_BPS","TOTAL_COST_BPS","LATENCY_MS","VENUE_SCORE"],risk:["GROSS_EXPOSURE","NET_EXPOSURE","LEVERAGE","CONCENTRATION","SCENARIO_SHOCK"],engines:{backtest:"PAPER_QUALITY_GATED",confidence:"ANALYTICS_ONLY",portfolioRisk:"PAPER_SIMULATION",audit:"IN_MEMORY_FOUNDATION"},storage:{historical:"CRYPTO_PROVIDERS_READY",providers:["coinbase-history","kraken-history"],symbols:["BTC-USD","ETH-USD"],quality:["OHLCV_VALIDITY","DUPLICATES","GAPS","STALE","CROSS_PROVIDER_DEVIATION"],minQualityScore:80,replay:"QUALITY_GATED_FOUNDATION",persistent:"POSTGRES_READY_NOT_PROVISIONED",schema:"marsx_ohlcv"}}));
+      if(req.method==="GET" && url.pathname==="/analytics/capabilities") return res.end(JSON.stringify({mode:"READ_ONLY",tca:["SLIPPAGE_BPS","DECISION_BPS","FEE_BPS","TOTAL_COST_BPS","LATENCY_MS","VENUE_SCORE"],risk:["GROSS_EXPOSURE","NET_EXPOSURE","LEVERAGE","CONCENTRATION","SCENARIO_SHOCK"],engines:{backtest:"PAPER_QUALITY_GATED",confidence:"ANALYTICS_ONLY",portfolioRisk:"PAPER_SIMULATION",audit:"IN_MEMORY_FOUNDATION",learning:"OPT_IN_AGGREGATE_ONLY"},storage:{historical:"CRYPTO_PROVIDERS_READY",providers:["coinbase-history","kraken-history"],symbols:["BTC-USD","ETH-USD"],quality:["OHLCV_VALIDITY","DUPLICATES","GAPS","STALE","CROSS_PROVIDER_DEVIATION"],minQualityScore:80,replay:"QUALITY_GATED_FOUNDATION",persistent:"POSTGRES_READY_NOT_PROVISIONED",schema:"marsx_ohlcv"}}));
+      if(req.method==="GET" && url.pathname==="/learning/status") return res.end(JSON.stringify({mode:"OPT_IN_AGGREGATE_ONLY",rawIdentifiersStored:false,modelInternalsExposed:false,bufferCount:trainingBuffer.rows.length,minCohort:trainingBuffer.minCohort,ready:trainingBuffer.eligible()}));
+      if(req.method==="POST" && url.pathname==="/learning/event"){
+        let raw=""; for await (const chunk of req){raw+=chunk;if(raw.length>8192)throw new Error("PAYLOAD_TOO_LARGE");}
+        const body=JSON.parse(raw||"{}"), consent=learningConsent(body.user||{});
+        if(!consent.allowed){res.statusCode=403;return res.end(JSON.stringify({error:"TRAINING_CONSENT_REQUIRED"}));}
+        const event=sanitizeTrainingEvent(body.event||{}); trainingBuffer.add(event,{consent});
+        return res.end(JSON.stringify({accepted:true,mode:"OPT_IN_AGGREGATE_ONLY",rawIdentifiersStored:false}));
+      }
       if(req.method==="GET" && url.pathname==="/macro/sources") return res.end(JSON.stringify({mode:"REFERENCE_ONLY",sources:[
         {id:"UST_YIELD_CURVE",provider:"U.S. Treasury",frequency:"DAILY",status:"AVAILABLE",series:["1M","3M","6M","1Y","2Y","5Y","10Y","20Y","30Y"],executionReady:false},
         {id:"FED_H15",provider:"Federal Reserve Board",frequency:"DAILY",status:"AVAILABLE",series:["FED_FUNDS","TREASURY_CONSTANT_MATURITY"],executionReady:false},
