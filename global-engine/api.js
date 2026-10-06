@@ -43,7 +43,19 @@ export function createApi(engine=buildEngine()){
         layouts:[1,2,4],
         panels:["WATCHLIST","CHART","ORDER_BOOK","TRADES","POSITIONS","VENUE_COMPARISON","MARSX_INTELLIGENCE"],
         overlays:["LIQUIDITY","MACRO","MOMENTUM","POSITIONING","VOLATILITY","RISK","CONFIDENCE"],
-        execution:{enabled:false,chartTrading:false,paperOnly:true}
+        execution:{enabled:false,chartTrading:false,paperOnly:true},
+        advanced:{
+          dom:{status:"DATA_SOURCE_REQUIRED",level2:true},
+          footprint:{status:"DATA_SOURCE_REQUIRED",requires:"trade-side/order-flow feed"},
+          liquidityHeatmap:{status:"DATA_SOURCE_REQUIRED",requires:"depth/order-book history"},
+          liquidationHeatmap:{status:"DATA_SOURCE_REQUIRED",requires:"derivatives liquidation feed"},
+          replay:{status:"PLANNED",paperOnly:true},
+          backtest:{status:"PLANNED",paperOnly:true},
+          optionsChain:{status:"DATA_SOURCE_REQUIRED",requires:"options market-data feed"},
+          impliedVolatilitySurface:{status:"DATA_SOURCE_REQUIRED",requires:"options chain + IV"},
+          economicCalendar:{status:"PLANNED",referenceOnly:true},
+          newsMarkers:{status:"PLANNED",referenceOnly:true}
+        }
       }));
       if(req.method==="GET" && url.pathname==="/macro/sources") return res.end(JSON.stringify({mode:"REFERENCE_ONLY",sources:[
         {id:"UST_YIELD_CURVE",provider:"U.S. Treasury",frequency:"DAILY",status:"AVAILABLE",series:["1M","3M","6M","1Y","2Y","5Y","10Y","20Y","30Y"],executionReady:false},
