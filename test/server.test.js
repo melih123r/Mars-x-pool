@@ -471,3 +471,40 @@ test("worker command channel is license scoped and heartbeat returns desired sta
     assert.equal(foreign.status, 401);
   } finally { await close(server); }
 });
+
+
+test("one-tap fleet command starts and stops only licensed online workers", async () => {
+  let timestamp = Date.parse("2026-10-07T00:00:00.000Z");
+  const { server, baseUrl } = await runServer(licensedOptions({ store: new MemoryStore(), now: () => timestamp }));
+  try {
+    const { headers } = await activateAndRegister(baseUrl);
+    const startAll = await fetch(`${baseUrl}/my/workers-command`, {
+      method: "POST", headers,
+      body: JSON.stringify({ install_id: "install_1234567890", command: "start" }),
+    });
+    assert.equal(startAll.status, 200);
+    const startBody = await startAll.json();
+    assert.equal(startBody.targeted, 1);
+    assert.equal(startBody.command, "start");
+
+    const heartbeat = await fetch(`${baseUrl}/heartbeat`, {
+      method: "POST", headers,
+      body: JSON.stringify({ node_id: "node-001", install_id: "install_1234567890", miner_state: "stopped", hashrate_sols: 0 }),
+    });
+    assert.equal((await heartbeat.json()).command.minerState, "running");
+
+    const stopAll = await fetch(`${baseUrl}/my/workers-command`, {
+      method: "POST", headers,
+      body: JSON.stringify({ install_id: "install_1234567890", command: "stop" }),
+    });
+    assert.equal(stopAll.status, 200);
+    assert.equal((await stopAll.json()).targeted, 1);
+
+    const denied = await fetch(`${baseUrl}/my/workers-command`, {
+      method: "POST",
+      headers: { ...headers, Authorization: "License invalid-session" },
+      body: JSON.stringify({ install_id: "install_1234567890", command: "start" }),
+    });
+    assert.equal(denied.status, 401);
+  } finally { await close(server); }
+});
