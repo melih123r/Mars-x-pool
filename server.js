@@ -110,7 +110,7 @@ function normalizeWorker(data, oldWorker, now, licenseId, installId) {
     lastActivityMs: now,
     dormantAt: null,
     reactivatedAt: oldWorker?.reactivatedAt || null,
-    sessionId: oldWorker?.sessionId || randomUUID(),
+    sessionId: oldWorker?.sessionId || randomUUID(),\n    desiredMinerState: oldWorker?.desiredMinerState || "stopped",\n    desiredCpuPercent: oldWorker?.desiredCpuPercent ?? 50,\n    commandSeq: oldWorker?.commandSeq || 0,
   };
 }
 
@@ -972,6 +972,30 @@ export function createServer({
         });
       }
 
+      if (req.method === "POST" && pathname === "/my/worker-command") {
+        if (!licenseReady) return sendJson(res, 503, { error: "licensing_not_configured" });
+        const data = await readJson(req);
+        const installId = String(data.install_id || req.headers["x-install-id"] || "");
+        const session = currentLicense(req, installId);
+        if (!session) return sendJson(res, 401, { error: "valid_license_required" });
+        const workerId = normalizeWorkerId(data);
+        const command = String(data.command || "");
+        const cpu = Number(data.cpu_percent);
+        if (!workerId || !["start","stop","set_power"].includes(command)) return sendJson(res, 400, { error: "invalid_command" });
+        const worker = await store.get(workerId);
+        if (!worker || worker.licenseId !== session.lic) return sendJson(res, 404, { error: "worker_not_found" });
+        if (command === "start") worker.desiredMinerState = "running";
+        if (command === "stop") worker.desiredMinerState = "stopped";
+        if (command === "set_power") {
+          if (!Number.isFinite(cpu) || cpu < 10 || cpu > 100) return sendJson(res, 400, { error: "invalid_cpu_percent" });
+          worker.desiredCpuPercent = Math.round(cpu);
+        }
+        worker.commandSeq = Number(worker.commandSeq || 0) + 1;
+        worker.commandUpdatedAt = new Date(now()).toISOString();
+        await store.set(worker);
+        return sendJson(res, 200, { ok:true, commandSeq:worker.commandSeq, desiredMinerState:worker.desiredMinerState, desiredCpuPercent:worker.desiredCpuPercent });
+      }
+
       if (req.method === "GET" && pathname === "/my/workers") {
         if (!licenseReady) return sendJson(res, 503, { error: "licensing_not_configured" });
         const installId = String(req.headers["x-install-id"] || "");
@@ -1034,7 +1058,7 @@ export function createServer({
         if (oldWorker) await store.touchActivity(workerId, now());
         const worker = normalizeWorker(data, await store.get(workerId), now(), session.lic, installId);
         await store.set(worker);
-        return sendJson(res, 200, { ok: true, worker });
+        return sendJson(res, 200, { ok: true, worker, command: { seq: worker.commandSeq || 0, minerState: worker.desiredMinerState || "stopped", cpuPercent: worker.desiredCpuPercent ?? 50 } });
       }
 
       if (req.method === "GET" && pathname === "/conversion/networks") {
