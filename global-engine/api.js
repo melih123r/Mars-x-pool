@@ -28,8 +28,14 @@ export function buildEngine(){
 }
 
 export function createApi(engine=buildEngine()){
+  const buckets=new Map(), limit=Number(process.env.MARSX_RATE_LIMIT_PER_MIN||120);
   return http.createServer(async(req,res)=>{
     res.setHeader("content-type","application/json"); res.setHeader("cache-control","no-store"); res.setHeader("x-content-type-options","nosniff");
+    res.setHeader("referrer-policy","no-referrer"); res.setHeader("x-frame-options","DENY"); res.setHeader("permissions-policy","geolocation=(), microphone=(), camera=()");
+    const ip=String(req.headers["x-forwarded-for"]||req.socket.remoteAddress||"unknown").split(",")[0].trim(), minute=Math.floor(Date.now()/60000), key=ip+":"+minute, used=(buckets.get(key)||0)+1;
+    buckets.set(key,used); if(buckets.size>5000) for(const k of buckets.keys()) if(!k.endsWith(":"+minute)) buckets.delete(k);
+    res.setHeader("x-ratelimit-limit",String(limit)); res.setHeader("x-ratelimit-remaining",String(Math.max(0,limit-used)));
+    if(used>limit){res.statusCode=429; return res.end(JSON.stringify({error:"RATE_LIMITED"}));}
     try{
       const url=new URL(req.url,"http://localhost");
       if(req.method==="GET" && url.pathname==="/health") return res.end(JSON.stringify({ok:true,mode:"READ_ONLY",liveExecution:false,venues:engine.health.snapshot()}));
@@ -64,6 +70,7 @@ export function createApi(engine=buildEngine()){
           limits:{liveAccountActions:false,realMoneyRiskChanges:false}
         }
       }));
+      if(req.method==="GET" && url.pathname==="/analytics/capabilities") return res.end(JSON.stringify({mode:"READ_ONLY",tca:["SLIPPAGE_BPS","DECISION_BPS","FEE_BPS","TOTAL_COST_BPS","LATENCY_MS","VENUE_SCORE"],risk:["GROSS_EXPOSURE","NET_EXPOSURE","LEVERAGE","CONCENTRATION","SCENARIO_SHOCK"],storage:{historical:"PLANNED",replay:"PLANNED"}}));
       if(req.method==="GET" && url.pathname==="/macro/sources") return res.end(JSON.stringify({mode:"REFERENCE_ONLY",sources:[
         {id:"UST_YIELD_CURVE",provider:"U.S. Treasury",frequency:"DAILY",status:"AVAILABLE",series:["1M","3M","6M","1Y","2Y","5Y","10Y","20Y","30Y"],executionReady:false},
         {id:"FED_H15",provider:"Federal Reserve Board",frequency:"DAILY",status:"AVAILABLE",series:["FED_FUNDS","TREASURY_CONSTANT_MATURITY"],executionReady:false},
