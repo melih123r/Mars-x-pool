@@ -1,5 +1,5 @@
 package com.marsx.worker;
-import android.app.*;import android.content.*;import android.os.*;import androidx.annotation.Nullable;import java.io.*;import java.util.*;import java.util.regex.*;import java.security.*;
+import android.app.*;import android.content.*;import android.os.*;import java.io.*;import java.util.*;import java.util.regex.*;import java.security.*;
 public final class WorkerService extends Service {
  static final String CHANNEL="marsx_worker"; static final int ID=4101; static final Pattern RATE=Pattern.compile("(?i)([0-9]+(?:\\.[0-9]+)?)\\s*([kmg]?)h?/?s");
  Handler h; Runnable safety; Process miner; volatile double hashrate;
@@ -23,5 +23,5 @@ public final class WorkerService extends Service {
  void readMiner(Process p){try(BufferedReader r=new BufferedReader(new InputStreamReader(p.getInputStream()))){String line;while((line=r.readLine())!=null&&p==miner){Matcher m=RATE.matcher(line);if(m.find()){double v=Double.parseDouble(m.group(1));String u=m.group(2).toLowerCase(Locale.ROOT);if("k".equals(u))v*=1e3;else if("m".equals(u))v*=1e6;else if("g".equals(u))v*=1e9;hashrate=v;}}}catch(Exception ignored){}finally{if(p==miner){miner=null;hashrate=0;}}}
  String sha256(File f){try{MessageDigest d=MessageDigest.getInstance("SHA-256");try(InputStream in=new FileInputStream(f)){byte[] b=new byte[8192];for(int n;(n=in.read(b))>0;)d.update(b,0,n);}StringBuilder s=new StringBuilder();for(byte x:d.digest())s.append(String.format(Locale.ROOT,"%02x",x));return s.toString();}catch(Exception e){return "";}}\n synchronized void stopCompute(){Process p=miner;miner=null;hashrate=0;if(p!=null){p.destroy();try{if(!p.waitFor(3,java.util.concurrent.TimeUnit.SECONDS))p.destroyForcibly();}catch(InterruptedException e){Thread.currentThread().interrupt();p.destroyForcibly();}}}
  public void onDestroy(){if(h!=null)h.removeCallbacksAndMessages(null);stopCompute();super.onDestroy();}
- @Nullable public IBinder onBind(Intent i){return null;}
+ public IBinder onBind(Intent i){return null;}
 }
