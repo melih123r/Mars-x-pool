@@ -6,8 +6,8 @@ import java.util.regex.Pattern;
 
 final class MinerLogParser {
  private static final Pattern RATE=Pattern.compile("(?i)([0-9]+(?:\\.[0-9]+)?)\\s*([kmg]?)h?/?s");
- private static final Pattern ACCEPTED=Pattern.compile("(?i)(?:share\\s+accepted|accepted(?:\\s+share)?|yay!!!)");
- private static final Pattern REJECTED=Pattern.compile("(?i)(?:share\\s+rejected|rejected(?:\\s+share)?|booooo)");
+ private static final Pattern ACCEPTED=Pattern.compile("(?i)(?:share\\s+accepted|accepted\\s+share|yay!!!)");
+ private static final Pattern REJECTED=Pattern.compile("(?i)(?:share\\s+rejected|rejected\\s+share|booooo)");
  private static final Pattern CONNECTED=Pattern.compile("(?i)(?:stratum.*(?:connected|subscribed|authorized)|connected to|login succeeded)");
 
  static double hashrate(String line){
