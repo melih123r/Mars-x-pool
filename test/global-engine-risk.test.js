@@ -33,7 +33,7 @@ test("venue circuit breaker excludes repeatedly failing venue", async()=>{
     async getQuote(){this.calls++;throw new Error("upstream down");}
   }
   const bad=new BadVenue();
-  const engine=new MarsXGlobalEngine([bad],{maxVenueFailures:2});
+  const engine=new MarsXGlobalEngine([bad],{maxVenueFailures:2,venueFailureCooldownMs:60000});
   const o=order({instrument:{symbol:"BTC-USD",assetClass:"CRYPTO"},side:"BUY",amount:1000});
   await assert.rejects(()=>engine.route(o));
   await assert.rejects(()=>engine.route(o));
