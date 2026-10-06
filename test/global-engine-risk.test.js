@@ -22,3 +22,22 @@ test("two venues with material disagreement fail closed", async()=>{
   const o=order({instrument:{symbol:"BTC-USD",assetClass:"CRYPTO"},side:"BUY",amount:1000});
   await assert.rejects(()=>engine.route(o),/VENUE_DISAGREEMENT/);
 });
+
+
+test("venue circuit breaker excludes repeatedly failing venue", async()=>{
+  const { MarsXGlobalEngine }=await import("../global-engine/engine.js");
+  const { VenueAdapter }=await import("../global-engine/venue.js");
+  const { order }=await import("../global-engine/core.js");
+  class BadVenue extends VenueAdapter {
+    constructor(){super("bad",["CRYPTO"]);this.calls=0;}
+    async getQuote(){this.calls++;throw new Error("upstream down");}
+  }
+  const bad=new BadVenue();
+  const engine=new MarsXGlobalEngine([bad],{maxVenueFailures:2});
+  const o=order({instrument:{symbol:"BTC-USD",assetClass:"CRYPTO"},side:"BUY",amount:1000});
+  await assert.rejects(()=>engine.route(o));
+  await assert.rejects(()=>engine.route(o));
+  assert.equal(bad.calls,2);
+  await assert.rejects(()=>engine.route(o),/no healthy eligible venues/);
+  assert.equal(bad.calls,2);
+});
