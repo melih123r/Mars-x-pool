@@ -19,6 +19,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - run: node --check worker-agent/agent.mjs
+      - run: node --test worker-agent/miner-log-parser.test.mjs
       - run: npm test
       - run: npm run cf:check
       - run: npm run cf:db:local
@@ -43,13 +45,20 @@ jobs:
         with:
           gradle-version: 8.11.1
       - name: Android unit tests
-        run: gradle -p android :app:testDebugUnitTest --no-daemon
+        run: gradle -p android :app:testDebugUnitTest :worker:testDebugUnitTest --no-daemon
       - name: Android release lint
-        run: gradle -p android :app:lintRelease --no-daemon
-      - name: Build debug APK
-        run: gradle -p android :app:assembleDebug --no-daemon
+        run: gradle -p android :app:lintRelease :worker:lintRelease --no-daemon
+      - name: Build debug APKs
+        run: gradle -p android :app:assembleDebug :worker:assembleDebug --no-daemon
       - name: Build release AAB
         run: gradle -p android :app:bundleRelease --no-daemon
+      - name: Verify Play bundle contains no local miner executable
+        run: |
+          unzip -l android/app/build/outputs/bundle/release/app-release.aab > /tmp/aab-files.txt
+          if grep -Ei '(^|/)(ccminer|miner)([.]|$)|lib[^/]*miner[^/]*[.]so$' /tmp/aab-files.txt; then
+            echo "Local mining executable found in Play bundle" >&2
+            exit 1
+          fi
       - uses: actions/upload-artifact@v4
         with:
           name: marsx-pool-debug-apk

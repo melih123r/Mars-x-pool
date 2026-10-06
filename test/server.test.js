@@ -168,10 +168,20 @@ test("licensed registration and heartbeat work while admin listing stays separat
     const heartbeat = await fetch(`${baseUrl}/heartbeat`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ node_id: "node-001", install_id: "install_1234567890", cpu_percent: 12.5 }),
+      body: JSON.stringify({ node_id: "node-001", install_id: "install_1234567890", cpu_percent: 12.5, miner_state: "running", hashrate_sols: 1234.5, pool_connected: true, accepted_shares: 7, rejected_shares: 1, last_share_at: timestamp - 5000, battery_percent: 81, temperature_c: 39.5 }),
     });
     assert.equal(heartbeat.status, 200);
-    assert.equal((await heartbeat.json()).worker.cpuPercent, 12.5);
+    const heartbeatWorker = (await heartbeat.json()).worker;
+    assert.equal(heartbeatWorker.cpuPercent, 12.5);
+    assert.equal(heartbeatWorker.minerState, "running");
+    assert.equal(heartbeatWorker.hashrateSols, 1234.5);
+    assert.equal(heartbeatWorker.poolConnected, true);
+    assert.equal(heartbeatWorker.acceptedShares, 7);
+    assert.equal(heartbeatWorker.rejectedShares, 1);
+    assert.equal(heartbeatWorker.lastShareAt, new Date(timestamp - 5000).toISOString());
+    assert.equal(heartbeatWorker.batteryPercent, 81);
+    assert.equal(heartbeatWorker.temperatureC, 39.5);
+    assert.deepEqual(heartbeatWorker.safety, { batteryMinPercent: 15, thermalMaxC: 43, batteryRule: "active", thermalRule: "active" });
 
     const adminDenied = await fetch(`${baseUrl}/summary`, { headers: { Authorization: `License ${sessionToken}` } });
     assert.equal(adminDenied.status, 401);
@@ -433,4 +443,72 @@ test("conversion endpoints fail closed without provider credentials", async () =
   } finally {
     await close(server);
   }
+});
+
+test("worker command channel is license scoped and heartbeat returns desired state", async () => {
+  const { server, baseUrl } = await runServer(licensedOptions({ store: new MemoryStore() }));
+  try {
+    const { headers } = await activateAndRegister(baseUrl);
+    const command = await fetch(`${baseUrl}/my/worker-command`, {
+      method: "POST", headers,
+      body: JSON.stringify({ workerId: "node-001", install_id: "install_1234567890", command: "start" }),
+    });
+    assert.equal(command.status, 200);
+    const commandBody = await command.json();
+    assert.equal(commandBody.desiredMinerState, "running");
+    assert.equal(commandBody.commandSeq, 1);
+
+    const heartbeat = await fetch(`${baseUrl}/heartbeat`, {
+      method: "POST", headers,
+      body: JSON.stringify({ node_id: "node-001", install_id: "install_1234567890", miner_state: "stopped", hashrate_sols: 0 }),
+    });
+    assert.equal(heartbeat.status, 200);
+    const heartbeatBody = await heartbeat.json();
+    assert.equal(heartbeatBody.command.minerState, "running");
+    assert.equal(heartbeatBody.command.seq, 1);
+
+    const foreign = await fetch(`${baseUrl}/my/worker-command`, {
+      method: "POST",
+      headers: { ...headers, Authorization: "License invalid-session" },
+      body: JSON.stringify({ workerId: "node-001", install_id: "install_1234567890", command: "stop" }),
+    });
+    assert.equal(foreign.status, 401);
+  } finally { await close(server); }
+});
+
+
+test("one-tap fleet command starts and stops only licensed online workers", async () => {
+  let timestamp = Date.parse("2026-10-07T00:00:00.000Z");
+  const { server, baseUrl } = await runServer(licensedOptions({ store: new MemoryStore(), now: () => timestamp }));
+  try {
+    const { headers } = await activateAndRegister(baseUrl);
+    const startAll = await fetch(`${baseUrl}/my/workers-command`, {
+      method: "POST", headers,
+      body: JSON.stringify({ install_id: "install_1234567890", command: "start" }),
+    });
+    assert.equal(startAll.status, 200);
+    const startBody = await startAll.json();
+    assert.equal(startBody.targeted, 1);
+    assert.equal(startBody.command, "start");
+
+    const heartbeat = await fetch(`${baseUrl}/heartbeat`, {
+      method: "POST", headers,
+      body: JSON.stringify({ node_id: "node-001", install_id: "install_1234567890", miner_state: "stopped", hashrate_sols: 0 }),
+    });
+    assert.equal((await heartbeat.json()).command.minerState, "running");
+
+    const stopAll = await fetch(`${baseUrl}/my/workers-command`, {
+      method: "POST", headers,
+      body: JSON.stringify({ install_id: "install_1234567890", command: "stop" }),
+    });
+    assert.equal(stopAll.status, 200);
+    assert.equal((await stopAll.json()).targeted, 1);
+
+    const denied = await fetch(`${baseUrl}/my/workers-command`, {
+      method: "POST",
+      headers: { ...headers, Authorization: "License invalid-session" },
+      body: JSON.stringify({ install_id: "install_1234567890", command: "start" }),
+    });
+    assert.equal(denied.status, 401);
+  } finally { await close(server); }
 });

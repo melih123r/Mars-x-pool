@@ -1,0 +1,20 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+ <permission android:name="com.marsx.permission.CONTROL_WORKER" android:protectionLevel="signature"/>
+ <uses-permission android:name="com.marsx.permission.CONTROL_WORKER"/>
+ <uses-permission android:name="android.permission.INTERNET"/>
+ <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+ <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+ <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
+ <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+ <application android:allowBackup="false" android:label="MARS-X Worker" android:theme="@style/AppTheme">
+  <receiver android:name=".WorkerCommandReceiver" android:exported="true" android:permission="com.marsx.permission.CONTROL_WORKER">
+   <intent-filter><action android:name="com.marsx.worker.START"/><action android:name="com.marsx.worker.STOP"/><action android:name="com.marsx.worker.STATUS"/></intent-filter>
+  </receiver>
+  <service android:name=".WorkerService" android:exported="false" android:foregroundServiceType="specialUse">
+   <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="User-authorized compute worker with battery and thermal safety limits"/>
+  </service>
+  <activity android:name=".WorkerActivity" android:exported="true">
+   <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
+  </activity>
+ </application>
+</manifest>

@@ -98,7 +98,19 @@ function normalizeWorker(data, oldWorker, now, licenseId, installId) {
     installId: installId || oldWorker?.installId || null,
     label: String(data.label || oldWorker?.label || "worker").slice(0, 80),
     platform: String(data.platform || oldWorker?.platform || "unknown").slice(0, 40),
+    arch: String(data.arch || oldWorker?.arch || "unknown").slice(0, 32),
+    deviceClass: ["phone","tablet","desktop","laptop","server","sbc","other"].includes(String(data.device_class)) ? String(data.device_class) : oldWorker?.deviceClass || "other",
+    capabilities: Array.isArray(data.capabilities) ? data.capabilities.map(String).filter(x => /^[a-z0-9_-]{2,32}$/i.test(x)).slice(0, 16) : oldWorker?.capabilities || [],
     cpuPercent,
+    minerState: ["running","stopped","thermal_paused","battery_paused"].includes(String(data.miner_state)) ? String(data.miner_state) : oldWorker?.minerState || "stopped",
+    hashrateSols: Number.isFinite(Number(data.hashrate_sols)) ? Math.max(0, Math.min(1000000000, Number(data.hashrate_sols))) : oldWorker?.hashrateSols ?? 0,
+    poolConnected: typeof data.pool_connected === "boolean" ? data.pool_connected : oldWorker?.poolConnected ?? false,
+    acceptedShares: Number.isSafeInteger(Number(data.accepted_shares)) ? Math.max(0, Math.min(1000000000, Number(data.accepted_shares))) : oldWorker?.acceptedShares ?? 0,
+    rejectedShares: Number.isSafeInteger(Number(data.rejected_shares)) ? Math.max(0, Math.min(1000000000, Number(data.rejected_shares))) : oldWorker?.rejectedShares ?? 0,
+    lastShareAt: Number.isFinite(Number(data.last_share_at)) && Number(data.last_share_at) > 0 ? new Date(Number(data.last_share_at)).toISOString() : oldWorker?.lastShareAt ?? null,
+    batteryPercent: Number.isFinite(Number(data.battery_percent)) ? Math.max(0, Math.min(100, Number(data.battery_percent))) : oldWorker?.batteryPercent ?? null,
+    temperatureC: Number.isFinite(Number(data.temperature_c)) ? Math.max(-20, Math.min(120, Number(data.temperature_c))) : oldWorker?.temperatureC ?? null,
+    safety: { batteryMinPercent: 15, thermalMaxC: 43, batteryRule: data.battery_percent == null ? "not_applicable" : "active", thermalRule: data.temperature_c == null ? "telemetry_optional" : "active" },
     registeredAt: oldWorker?.registeredAt || new Date(now).toISOString(),
     lastSeen: new Date(now).toISOString(),
     lastActivityAt: new Date(now).toISOString(),
@@ -106,6 +118,9 @@ function normalizeWorker(data, oldWorker, now, licenseId, installId) {
     dormantAt: null,
     reactivatedAt: oldWorker?.reactivatedAt || null,
     sessionId: oldWorker?.sessionId || randomUUID(),
+    desiredMinerState: oldWorker?.desiredMinerState || "stopped",
+    desiredCpuPercent: oldWorker?.desiredCpuPercent ?? 50,
+    commandSeq: oldWorker?.commandSeq || 0,
   };
 }
 
@@ -346,7 +361,8 @@ function auditLicense(event, req, pepper, data = {}) {
     eventId: randomUUID(),
     ipHash,
     ...data,
-  })}\n`);
+  })}
+`);
 }
 
 export class MemoryStore {
@@ -967,6 +983,78 @@ export function createServer({
         });
       }
 
+      if (req.method === "POST" && pathname === "/my/worker-command") {
+        if (!licenseReady) return sendJson(res, 503, { error: "licensing_not_configured" });
+        const data = await readJson(req);
+        const installId = String(data.install_id || req.headers["x-install-id"] || "");
+        const session = currentLicense(req, installId);
+        if (!session) return sendJson(res, 401, { error: "valid_license_required" });
+        const workerId = normalizeWorkerId(data);
+        const command = String(data.command || "");
+        const cpu = Number(data.cpu_percent);
+        if (!workerId || !["start","stop","set_power"].includes(command)) return sendJson(res, 400, { error: "invalid_command" });
+        const worker = await store.get(workerId);
+        if (!worker || worker.licenseId !== session.lic) return sendJson(res, 404, { error: "worker_not_found" });
+        if (command === "start") worker.desiredMinerState = "running";
+        if (command === "stop") worker.desiredMinerState = "stopped";
+        if (command === "set_power") {
+          if (!Number.isFinite(cpu) || cpu < 10 || cpu > 100) return sendJson(res, 400, { error: "invalid_cpu_percent" });
+          worker.desiredCpuPercent = Math.round(cpu);
+        }
+        worker.commandSeq = Number(worker.commandSeq || 0) + 1;
+        worker.commandUpdatedAt = new Date(now()).toISOString();
+        await store.set(worker);
+        return sendJson(res, 200, { ok:true, commandSeq:worker.commandSeq, desiredMinerState:worker.desiredMinerState, desiredCpuPercent:worker.desiredCpuPercent });
+      }
+
+      if (req.method === "POST" && pathname === "/my/workers-command") {
+        if (!licenseReady) return sendJson(res, 503, { error: "licensing_not_configured" });
+        const data = await readJson(req);
+        const installId = String(data.install_id || req.headers["x-install-id"] || "");
+        const session = currentLicense(req, installId);
+        if (!session) return sendJson(res, 401, { error: "valid_license_required" });
+        const command = String(data.command || "");
+        if (!["start","stop"].includes(command)) return sendJson(res, 400, { error: "invalid_command" });
+        const timestamp = now();
+        const own = (await store.all()).filter((worker) => worker.licenseId === session.lic);
+        let targeted = 0;
+        for (const worker of own) {
+          if (timestamp - Date.parse(worker.lastSeen) >= ONLINE_WINDOW_MS) continue;
+          worker.desiredMinerState = command === "start" ? "running" : "stopped";
+          worker.commandSeq = Number(worker.commandSeq || 0) + 1;
+          worker.commandUpdatedAt = new Date(timestamp).toISOString();
+          await store.set(worker);
+          targeted++;
+        }
+        return sendJson(res, 200, { ok:true, command, targeted, total:own.length });
+      }
+
+      if (req.method === "GET" && pathname === "/my/workers") {
+        if (!licenseReady) return sendJson(res, 503, { error: "licensing_not_configured" });
+        const installId = String(req.headers["x-install-id"] || "");
+        const session = currentLicense(req, installId);
+        if (!session) return sendJson(res, 401, { error: "valid_license_required" });
+        const timestamp = now();
+        const own = (await store.all()).filter((worker) => worker.licenseId === session.lic);
+        const workers = own.map((worker) => ({
+          workerId: worker.workerId, label: worker.label, platform: worker.platform, arch: worker.arch,
+          desiredMinerState: worker.desiredMinerState || "stopped", desiredCpuPercent: worker.desiredCpuPercent ?? 50,
+          deviceClass: worker.deviceClass, capabilities: worker.capabilities || [], minerState: worker.minerState,
+          hashrateSols: worker.hashrateSols || 0, batteryPercent: worker.batteryPercent,
+          temperatureC: worker.temperatureC, lastSeen: worker.lastSeen,
+          status: timestamp - Date.parse(worker.lastSeen) < ONLINE_WINDOW_MS ? "online" : "offline"
+        })).sort((a,b)=>Date.parse(b.lastSeen)-Date.parse(a.lastSeen));
+        return sendJson(res, 200, {
+          workers,
+          summary: { total: workers.length, online: workers.filter(w=>w.status==="online").length,
+            running: workers.filter(w=>w.status==="online"&&w.minerState==="running").length,
+            poolConnected: workers.filter(w=>w.status==="online"&&w.poolConnected===true).length,
+            acceptedShares: workers.filter(w=>w.status==="online").reduce((n,w)=>n+Number(w.acceptedShares||0),0),
+            rejectedShares: workers.filter(w=>w.status==="online").reduce((n,w)=>n+Number(w.rejectedShares||0),0),
+            totalHashrateSols: workers.filter(w=>w.status==="online").reduce((n,w)=>n+Number(w.hashrateSols||0),0) }
+        });
+      }
+
       if (req.method === "GET" && (pathname === "/workers" || pathname === "/summary")) {
         if (!token) return sendJson(res, 503, { error: "WORKER_TOKEN not configured" });
         if (!safeAuthorization(req.headers.authorization, "Bearer", token)) {
@@ -1007,7 +1095,7 @@ export function createServer({
         if (oldWorker) await store.touchActivity(workerId, now());
         const worker = normalizeWorker(data, await store.get(workerId), now(), session.lic, installId);
         await store.set(worker);
-        return sendJson(res, 200, { ok: true, worker });
+        return sendJson(res, 200, { ok: true, worker, command: { seq: worker.commandSeq || 0, minerState: worker.desiredMinerState || "stopped", cpuPercent: worker.desiredCpuPercent ?? 50 } });
       }
 
       if (req.method === "GET" && pathname === "/conversion/networks") {

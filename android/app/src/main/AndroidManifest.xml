@@ -1,7 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <permission android:name="com.marsx.permission.CONTROL_WORKER" android:protectionLevel="signature" />
+    <uses-permission android:name="com.marsx.permission.CONTROL_WORKER" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="com.android.vending.BILLING" />
+    <queries><package android:name="com.marsx.worker" /></queries>
     <application
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,13 +15,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MarsX"
         android:usesCleartextTraffic="false">
+        <receiver android:name=".WorkerStatusReceiver" android:exported="true" android:permission="com.marsx.permission.CONTROL_WORKER"><intent-filter><action android:name="com.marsx.pool.WORKER_STATUS"/></intent-filter></receiver>
         <activity android:name=".VrscPoolActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
         <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            <intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter>
         </activity>
     </application>
 </manifest>

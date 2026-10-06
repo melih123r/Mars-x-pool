@@ -1,0 +1,3 @@
+import test from "node:test";import assert from "node:assert/strict";import {parseMinerLine} from "./miner-log-parser.mjs";
+test("parses ccminer hashrate without confusing latency",()=>{assert.equal(parseMinerLine("Speed [15 sec]: 0.595002 MH/s,").hashrate,595002);assert.equal(parseMinerLine("latency 45 ms").hashrate,-1)});
+test("detects pool connection and real share outcomes",()=>{assert.equal(parseMinerLine("stratum | Authorized worker droidMiner.217232").poolConnected,true);assert.equal(parseMinerLine("stratum | Accepted share #4").accepted,true);assert.equal(parseMinerLine("share rejected booooo").rejected,true);assert.equal(parseMinerLine("connection accepted by proxy").accepted,false)});
