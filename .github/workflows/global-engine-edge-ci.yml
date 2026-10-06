@@ -22,4 +22,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - run: npm ci
       - run: npm run global-engine:test
+      - run: npx wrangler deploy --dry-run --config cloudflare/wrangler.global-engine.toml --outdir .wrangler-global-engine
