@@ -19,6 +19,13 @@ def escapedGoogleWebClientId = googleWebClientId
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
 
+def marsxVrscPoolAddress = providers.gradleProperty("MARSX_VRSC_POOL_ADDRESS")
+        .orElse(providers.environmentVariable("MARSX_VRSC_POOL_ADDRESS"))
+        .getOrElse("RFnoU1UFxBqrJh3NWUUBRBKCNGSEgkQ5c7")
+def escapedMarsxVrscPoolAddress = marsxVrscPoolAddress
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+
 android {
     namespace "com.marsx.pool"
     compileSdk 36
@@ -34,6 +41,7 @@ android {
         buildConfigField "String", "QONVERSION_PRODUCT_FARM", "\"farm_monthly\""
         buildConfigField "String", "MARSX_API_BASE_URL", "\"${escapedMarsxApiBaseUrl}\""
         buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${escapedGoogleWebClientId}\""
+        buildConfigField "String", "MARSX_VRSC_POOL_ADDRESS", "\"${escapedMarsxVrscPoolAddress}\""
     }
 
     buildFeatures { buildConfig true }
