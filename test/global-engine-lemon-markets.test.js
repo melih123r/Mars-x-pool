@@ -21,17 +21,23 @@ test("privacy tracing headers are mandatory",()=>{
 test("order submission and withdrawals are disabled by default", async()=>{
   const a=new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://example.invalid"});
   await assert.rejects(()=>a.createOrder("acct-1",{side:"buy"}),/order submission disabled/);
- assert.throws(()=>a.createWithdrawal("acct-1",{amount:"10.00"}),/withdrawals disabled/);
+  assert.throws(()=>a.createWithdrawal("acct-1",{amount:"10.00"}),/withdrawals disabled/);
 });
 
-test("identity verification validates redirect contract before network call", async()=>{
-  const a=new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://example.invalid"});
- assert.throws(()=>a.startIdentityVerification("acct-1",{redirectSuccess:"marsx://ok"}),/redirectFailure required/);
+test("order and withdrawal confirmation require SCA",()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://example.invalid",allowOrderSubmission:true,allowWithdrawals:true});
+  assert.throws(()=>a.confirmOrder("acct-1","ord-1",null),/SCA confirmation required/);
+  assert.throws(()=>a.confirmWithdrawal("acct-1","wd-1",null),/SCA confirmation required/);
 });
 
-test("webhook requires at least one event", async()=>{
+test("identity verification validates redirect contract before network call",()=>{
   const a=new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://example.invalid"});
- assert.throws(()=>a.createWebhook({url:"https://example.test/hook",events:[]}),/webhook events required/);
+  assert.throws(()=>a.startIdentityVerification("acct-1",{redirectSuccess:"marsx://ok"}),/redirectFailure required/);
+});
+
+test("webhook requires at least one event",()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://example.invalid"});
+  assert.throws(()=>a.createWebhook({url:"https://example.test/hook",events:[]}),/webhook events required/);
 });
 
 test("generic live execution remains disabled", async()=>{
