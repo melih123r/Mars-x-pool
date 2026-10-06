@@ -7,7 +7,7 @@ export const MARSX_CHART_THEME=Object.freeze({
   signal:{strongBuy:"#00D084",buy:"#52D6A0",neutral:"#F5B642",sell:"#FF7B72",strongSell:"#FF3B4D"},
   risk:{safe:"#16C784",warning:"#F5B642",danger:"#EA3943",blocked:"#8B98A9"},
   order:{entry:"#4EA1FF",takeProfit:"#16C784",stopLoss:"#EA3943",pending:"#F5B642",filled:"#B783FF"},
-  selection:{primary:"#FF7A18",secondary:"#4EA1FF"},
+  selection:{primary:"#B93CFF",secondary:"#00D8FF"},
   typography:{family:"Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",priceWeight:600,labelWeight:500},
   geometry:{candleBodyMinPx:1,crosshairWidth:1,gridWidth:1,indicatorWidth:2,markerRadius:4}
 });
