@@ -5,10 +5,11 @@ import { MetalsDevGoldAdapter } from "../global-engine/adapters/metals-dev.js";
 
 test("six-market capability list fails closed without credentials",()=>{
  const m=marketCapabilities({});
- assert.equal(m.length,6);
+ assert.equal(m.length,11);
  assert.equal(m.find(x=>x.symbol==="BTC-USD").status,"AVAILABLE");
  assert.equal(m.find(x=>x.symbol==="ETH-USD").status,"AVAILABLE");
  assert.equal(m.find(x=>x.symbol==="EUR-USD").status,"AVAILABLE_REFERENCE");
+ for(const s of ["GBP-USD","USD-JPY","USD-CHF","EUR-GBP","USD-TRY"]) assert.equal(m.find(x=>x.symbol===s).status,"AVAILABLE_REFERENCE");
  assert.equal(m.find(x=>x.symbol==="XAU-USD").status,"AVAILABLE_REFERENCE");
  assert.deepEqual(m.find(x=>x.symbol==="XAU-USD").venues,["gold-api-public"]);
  assert.equal(m.find(x=>x.symbol==="AAPL").status,"CREDENTIAL_REQUIRED");
