@@ -146,9 +146,9 @@ public class MainActivity extends Activity {
         LinearLayout earningsHero = card(root);
         TextView heroLabel = addText(earningsHero, "TOPLAM MARS-X KAZANÇ", 13);
         heroLabel.setTextColor(MARS_ORANGE);
-        TextView heroValue = addText(earningsHero, "0.0000 MARS-X", 28);
+        TextView heroValue = addText(earningsHero, "— MARS-X", 28);
         heroValue.setTextColor(MARS_TEXT);
-        addText(earningsHero, "Günlük • Haftalık • Aylık performans", 13).setTextColor(MARS_MUTED);
+        addText(earningsHero, "Doğrulanmış kazanç verisi bekleniyor", 13).setTextColor(MARS_MUTED);
 
         LinearLayout serviceCard = card(root);
         addText(serviceCard, getString(R.string.service_status_title), 14);
