@@ -5,6 +5,7 @@ import { coinbaseBtcUsd, krakenBtcUsd } from "./adapters/public-crypto.js";
 import { PublicFxAdapter } from "./adapters/public-fx.js";
 import { AlpacaMarketDataAdapter } from "./adapters/alpaca.js";
 import { MetalsDevGoldAdapter } from "./adapters/metals-dev.js";
+import { GoldApiAdapter } from "./adapters/gold-api.js";
 
 export function marketCapabilities(env=process.env){
   const alpaca=Boolean(env.ALPACA_API_KEY&&env.ALPACA_API_SECRET), metals=Boolean(env.METALS_DEV_API_KEY);
@@ -12,14 +13,14 @@ export function marketCapabilities(env=process.env){
     {symbol:"BTC-USD",assetClass:"CRYPTO",status:"AVAILABLE",venues:["coinbase-public","kraken-public"]},
     {symbol:"ETH-USD",assetClass:"CRYPTO",status:"AVAILABLE",venues:["coinbase-public","kraken-public"]},
     {symbol:"EUR-USD",assetClass:"FX",status:"AVAILABLE_REFERENCE",venues:["frankfurter-public"],executionReady:false},
-    {symbol:"XAU-USD",assetClass:"COMMODITY",status:metals?"AVAILABLE_REFERENCE":"CREDENTIAL_REQUIRED",venues:metals?["metals-dev-gold"]:[],requires:"METALS_DEV_API_KEY",executionReady:false},
+    {symbol:"XAU-USD",assetClass:"COMMODITY",status:"AVAILABLE_REFERENCE",venues:metals?["gold-api-public","metals-dev-gold"]:["gold-api-public"],requires:metals?undefined:"METALS_DEV_API_KEY optional for second source",executionReady:false},
     {symbol:"AAPL",assetClass:"EQUITY",status:alpaca?"AVAILABLE":"CREDENTIAL_REQUIRED",venues:alpaca?["alpaca-market-data"]:[],requires:"ALPACA_API_KEY + ALPACA_API_SECRET",executionReady:false},
     {symbol:"SPY",assetClass:"ETF",status:alpaca?"AVAILABLE":"CREDENTIAL_REQUIRED",venues:alpaca?["alpaca-market-data"]:[],requires:"ALPACA_API_KEY + ALPACA_API_SECRET",executionReady:false}
   ];
 }
 
 export function buildEngine(){
-  const adapters=[coinbaseBtcUsd(),krakenBtcUsd(),new PublicFxAdapter()];
+  const adapters=[coinbaseBtcUsd(),krakenBtcUsd(),new PublicFxAdapter(),new GoldApiAdapter()];
   if(process.env.ALPACA_API_KEY && process.env.ALPACA_API_SECRET) adapters.push(new AlpacaMarketDataAdapter());
   if(process.env.METALS_DEV_API_KEY) adapters.push(new MetalsDevGoldAdapter());
   return new MarsXGlobalEngine(adapters,{maxStaleMs:Number(process.env.MARSX_MAX_STALE_MS||15000),maxSpreadBps:Number(process.env.MARSX_MAX_SPREAD_BPS||50),minConsensus:Number(process.env.MARSX_MIN_CONSENSUS||1)});
