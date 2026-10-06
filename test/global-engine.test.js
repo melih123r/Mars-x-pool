@@ -22,10 +22,10 @@ test("router selects lowest effective BUY quote", async () => {
 });
 
 test("same engine routes an equity order without core changes", async () => {
-  const o=order({instrument:{symbol:"AAPL",assetClass:"EQUITY"},side:"SELL",amount:10});
+  const o=order({instrument:{symbol:"AAPL",assetClass:"EQUITY"},side:"SELL",amount:1000});
   const engine=new MarsXGlobalEngine([
-    new PaperVenue("equity-a",["EQUITY"],async()=>quote({venue:"equity-a",price:250,fee:0.1})),
-    new PaperVenue("equity-b",["EQUITY"],async()=>quote({venue:"equity-b",price:251,fee:0.2}))
+    new PaperVenue("equity-a",["EQUITY"],async()=>quote({venue:"equity-a",price:250,fee:1})),
+    new PaperVenue("equity-b",["EQUITY"],async()=>quote({venue:"equity-b",price:251,fee:0.5}))
   ]);
   const result=await engine.paperExecute(o);
   assert.equal(result.best.venue,"equity-b");
