@@ -18,7 +18,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run check
+      - run: npm run check\n      - run: node --check worker-agent/agent.mjs
       - run: npm test
       - run: npm run cf:check
       - run: npm run cf:db:local
