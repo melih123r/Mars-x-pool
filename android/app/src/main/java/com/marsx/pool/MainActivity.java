@@ -93,14 +93,14 @@ public class MainActivity extends Activity {
         googleSignIn = new GoogleSignInManager(this);
         LinearLayout screen = new LinearLayout(this);
         screen.setOrientation(LinearLayout.VERTICAL);
-        screen.setBackgroundColor(Color.rgb(246, 248, 252));
+        screen.setBackgroundColor(Color.rgb(8, 9, 12));
 
         LinearLayout header = new LinearLayout(this);
         header.setOrientation(LinearLayout.VERTICAL);
         header.setPadding(28, 28, 28, 14);
         addTitle(header, getString(R.string.app_title));
         TextView beta = addText(header, getString(R.string.simple_beta_label), 13);
-        beta.setTextColor(Color.rgb(103, 111, 128));
+        beta.setTextColor(Color.rgb(255, 122, 24));
         screen.addView(header);
 
         contentFrame = new FrameLayout(this);
@@ -116,7 +116,7 @@ public class MainActivity extends Activity {
         LinearLayout tabs = new LinearLayout(this);
         tabs.setOrientation(LinearLayout.HORIZONTAL);
         tabs.setPadding(12, 6, 12, 10);
-        tabs.setBackgroundColor(Color.WHITE);
+        tabs.setBackgroundColor(Color.rgb(14, 15, 19));
         homeTab = tabButton(tabs, getString(R.string.tab_home), view -> showTab(0));
         earningsTab = tabButton(tabs, getString(R.string.tab_earnings), view -> showTab(1));
         accountTab = tabButton(tabs, getString(R.string.tab_account), view -> showTab(2));
@@ -145,9 +145,9 @@ public class MainActivity extends Activity {
         button(serviceCard, getString(R.string.refresh_button), view -> testConnection());
 
         LinearLayout vrscCard = card(root);
-        addText(vrscCard, getString(R.string.vrsc_title), 18);
-        addText(vrscCard, getString(R.string.vrsc_intro), 14);
-        button(vrscCard, getString(R.string.vrsc_open), view ->
+        addText(vrscCard, "MARS-X", 18);
+        addText(vrscCard, "MARS-X kazanç motoru • Beta", 14);
+        button(vrscCard, "BAŞLAT", view ->
                 startActivity(new Intent(this, VrscPoolActivity.class)));
 
         LinearLayout deviceCard = card(root);
@@ -260,7 +260,8 @@ public class MainActivity extends Activity {
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(24, 20, 24, 20);
         GradientDrawable background = new GradientDrawable();
-        background.setColor(Color.WHITE);
+        background.setColor(Color.rgb(20, 21, 26));
+        background.setStroke(2, Color.rgb(255, 112, 18));
         background.setCornerRadius(24f);
         card.setBackground(background);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -283,8 +284,8 @@ public class MainActivity extends Activity {
         homePage.setVisibility(selected == 0 ? View.VISIBLE : View.GONE);
         earningsPage.setVisibility(selected == 1 ? View.VISIBLE : View.GONE);
         accountPage.setVisibility(selected == 2 ? View.VISIBLE : View.GONE);
-        int active = Color.rgb(20, 73, 145);
-        int inactive = Color.rgb(89, 98, 115);
+        int active = Color.rgb(255, 112, 18);
+        int inactive = Color.rgb(155, 158, 168);
         homeTab.setTextColor(selected == 0 ? active : inactive);
         earningsTab.setTextColor(selected == 1 ? active : inactive);
         accountTab.setTextColor(selected == 2 ? active : inactive);
