@@ -1,0 +1,2 @@
+import test from "node:test";import assert from "node:assert/strict";import {loadPrivateModel,publicModelInfo} from "../global-engine/model-registry.js";
+test("private model weights are never exposed by public info",()=>{const m=loadPrivateModel({MARSX_MODEL_WEIGHTS_JSON:'{"a":1,"b":2}',MARSX_MODEL_VERSION:"v1"});const p=publicModelInfo(m);assert.equal(p.ready,true);assert.equal(p.version,"v1");assert.equal(p.internalsExposed,false);assert.equal("weights" in p,false);});
