@@ -3,6 +3,7 @@ export const DEFAULT_RISK_POLICY=Object.freeze({
   maxSpreadBps:50,
   minConsensus:1,
   maxVenueFailures:2,
+  venueFailureCooldownMs:30000,
   liveExecutionEnabled:false
 });
 
