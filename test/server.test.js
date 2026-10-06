@@ -168,10 +168,16 @@ test("licensed registration and heartbeat work while admin listing stays separat
     const heartbeat = await fetch(`${baseUrl}/heartbeat`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ node_id: "node-001", install_id: "install_1234567890", cpu_percent: 12.5 }),
+      body: JSON.stringify({ node_id: "node-001", install_id: "install_1234567890", cpu_percent: 12.5, miner_state: "running", hashrate_sols: 1234.5, battery_percent: 81, temperature_c: 39.5 }),
     });
     assert.equal(heartbeat.status, 200);
-    assert.equal((await heartbeat.json()).worker.cpuPercent, 12.5);
+    const heartbeatWorker = (await heartbeat.json()).worker;
+    assert.equal(heartbeatWorker.cpuPercent, 12.5);
+    assert.equal(heartbeatWorker.minerState, "running");
+    assert.equal(heartbeatWorker.hashrateSols, 1234.5);
+    assert.equal(heartbeatWorker.batteryPercent, 81);
+    assert.equal(heartbeatWorker.temperatureC, 39.5);
+    assert.deepEqual(heartbeatWorker.safety, { batteryMinPercent: 15, thermalMaxC: 43 });
 
     const adminDenied = await fetch(`${baseUrl}/summary`, { headers: { Authorization: `License ${sessionToken}` } });
     assert.equal(adminDenied.status, 401);
