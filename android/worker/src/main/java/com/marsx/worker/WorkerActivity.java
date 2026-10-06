@@ -1,0 +1,6 @@
+package com.marsx.worker;
+import android.app.*;import android.os.*;import android.content.*;import android.graphics.Color;import android.widget.*;
+public final class WorkerActivity extends Activity {
+ TextView status;
+ public void onCreate(Bundle b){super.onCreate(b);LinearLayout r=new LinearLayout(this);r.setOrientation(LinearLayout.VERTICAL);r.setPadding(36,48,36,36);r.setBackgroundColor(Color.rgb(9,10,13));TextView t=new TextView(this);t.setText("MARS-X WORKER");t.setTextSize(26);t.setTextColor(Color.rgb(255,122,0));r.addView(t);status=new TextView(this);status.setText("Worker durduruldu");status.setTextColor(Color.WHITE);status.setTextSize(16);status.setPadding(0,24,0,24);r.addView(status);Button s=new Button(this);s.setText("WORKER'I BAŞLAT");s.setOnClickListener(v->{startForegroundService(new Intent(this,WorkerService.class).setAction("START"));status.setText("Worker başlatma isteği gönderildi");});r.addView(s);Button x=new Button(this);x.setText("DURDUR");x.setOnClickListener(v->{startService(new Intent(this,WorkerService.class).setAction("STOP"));status.setText("Worker durduruldu");});r.addView(x);TextView n=new TextView(this);n.setText("\nGüvenlik: pil %15 altında veya sıcaklık 43°C ve üzerinde compute durdurulur. Miner executable doğrulanmadan hashrate üretilmez.");n.setTextColor(Color.LTGRAY);r.addView(n);setContentView(r);}
+}
