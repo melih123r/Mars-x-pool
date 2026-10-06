@@ -20,7 +20,7 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: node --check worker-agent/agent.mjs
-      - run: npm test
+      - run: node --test worker-agent/miner-log-parser.test.mjs\n      - run: npm test
       - run: npm run cf:check
       - run: npm run cf:db:local
       - run: python3 scripts/check-translations.py
