@@ -9,7 +9,7 @@ public final class WorkerService extends Service {
  boolean safe(){BatteryManager b=(BatteryManager)getSystemService(BATTERY_SERVICE);int pct=b==null?-1:b.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);float temp=readBatteryTemp();boolean batteryOk=pct<0||pct>=15;boolean tempOk=temp<=0f||temp<43f;if(Build.VERSION.SDK_INT>=29){PowerManager pm=(PowerManager)getSystemService(POWER_SERVICE);if(pm!=null&&pm.getCurrentThermalStatus()>=PowerManager.THERMAL_STATUS_SEVERE)tempOk=false;}return batteryOk&&tempOk;}
  float readBatteryTemp(){Intent x=registerReceiver(null,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));return x==null?0f:x.getIntExtra(BatteryManager.EXTRA_TEMPERATURE,0)/10f;}
  synchronized void startComputeIfAvailable(){
-  if(miner!=null&&miner.isAlive())return;
+  if(miner!=null){try{miner.exitValue();miner=null;}catch(IllegalThreadStateException running){return;}}
   File bin=new File(getFilesDir(),"miner/ccminer");
   SharedPreferences p=getSharedPreferences("worker",MODE_PRIVATE);
   String pool=p.getString("pool",""), user=p.getString("user",""); int threads=Math.max(1,Math.min(Runtime.getRuntime().availableProcessors(),p.getInt("threads",Math.max(1,Runtime.getRuntime().availableProcessors()/2))));
@@ -22,7 +22,7 @@ public final class WorkerService extends Service {
  }
  void readMiner(java.lang.Process p){try(BufferedReader r=new BufferedReader(new InputStreamReader(p.getInputStream()))){String line;while((line=r.readLine())!=null&&p==miner){Matcher m=RATE.matcher(line);if(m.find()){double v=Double.parseDouble(m.group(1));String u=m.group(2).toLowerCase(Locale.ROOT);if("k".equals(u))v*=1e3;else if("m".equals(u))v*=1e6;else if("g".equals(u))v*=1e9;hashrate=v;}}}catch(Exception ignored){}finally{if(p==miner){miner=null;hashrate=0;}}}
  String sha256(File f){try{MessageDigest d=MessageDigest.getInstance("SHA-256");try(InputStream in=new FileInputStream(f)){byte[] b=new byte[8192];for(int n;(n=in.read(b))>0;)d.update(b,0,n);}StringBuilder s=new StringBuilder();for(byte x:d.digest())s.append(String.format(Locale.ROOT,"%02x",x));return s.toString();}catch(Exception e){return "";}}
- synchronized void stopCompute(){java.lang.Process p=miner;miner=null;hashrate=0;if(p!=null){p.destroy();try{if(!p.waitFor(3,java.util.concurrent.TimeUnit.SECONDS))p.destroyForcibly();}catch(InterruptedException e){Thread.currentThread().interrupt();p.destroyForcibly();}}}
+ synchronized void stopCompute(){java.lang.Process p=miner;miner=null;hashrate=0;if(p!=null){p.destroy();try{long until=System.currentTimeMillis()+3000;while(System.currentTimeMillis()<until){try{p.exitValue();return;}catch(IllegalThreadStateException running){try{Thread.sleep(50);}catch(InterruptedException e){Thread.currentThread().interrupt();break;}}}p.destroy();}catch(InterruptedException e){Thread.currentThread().interrupt();p.destroyForcibly();}}}
  public void onDestroy(){if(h!=null)h.removeCallbacksAndMessages(null);stopCompute();super.onDestroy();}
  public IBinder onBind(Intent i){return null;}
 }
