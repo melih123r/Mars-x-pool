@@ -440,3 +440,34 @@ test("conversion endpoints fail closed without provider credentials", async () =
     await close(server);
   }
 });
+
+test("worker command channel is license scoped and heartbeat returns desired state", async () => {
+  const { server, baseUrl } = await runServer(licensedOptions({ store: new MemoryStore() }));
+  try {
+    const { headers } = await activateAndRegister(baseUrl);
+    const command = await fetch(`${baseUrl}/my/worker-command`, {
+      method: "POST", headers,
+      body: JSON.stringify({ workerId: "node-001", install_id: "install_1234567890", command: "start" }),
+    });
+    assert.equal(command.status, 200);
+    const commandBody = await command.json();
+    assert.equal(commandBody.desiredMinerState, "running");
+    assert.equal(commandBody.commandSeq, 1);
+
+    const heartbeat = await fetch(`${baseUrl}/heartbeat`, {
+      method: "POST", headers,
+      body: JSON.stringify({ node_id: "node-001", install_id: "install_1234567890", miner_state: "stopped", hashrate_sols: 0 }),
+    });
+    assert.equal(heartbeat.status, 200);
+    const heartbeatBody = await heartbeat.json();
+    assert.equal(heartbeatBody.command.minerState, "running");
+    assert.equal(heartbeatBody.command.seq, 1);
+
+    const foreign = await fetch(`${baseUrl}/my/worker-command`, {
+      method: "POST",
+      headers: { ...headers, Authorization: "License invalid-session" },
+      body: JSON.stringify({ workerId: "node-001", install_id: "install_1234567890", command: "stop" }),
+    });
+    assert.equal(foreign.status, 401);
+  } finally { await close(server); }
+});
