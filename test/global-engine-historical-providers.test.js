@@ -1,0 +1,2 @@
+import test from "node:test";import assert from "node:assert/strict";import {CoinbaseHistoricalAdapter,KrakenHistoricalAdapter} from "../global-engine/adapters/historical-crypto.js";
+test("historical adapters fail closed on unsupported markets",async()=>{await assert.rejects(()=>new CoinbaseHistoricalAdapter().fetchBars({symbol:"SOL-USD",timeframe:"1h"}));await assert.rejects(()=>new KrakenHistoricalAdapter().fetchBars({symbol:"BTC-USD",timeframe:"2h"}));});
