@@ -3,6 +3,7 @@ package com.marsx.worker;
 import android.app.*;
 import android.content.*;
 import android.os.*;
+import android.net.*;
 import java.io.*;
 import java.security.*;
 import java.util.*;
@@ -19,6 +20,7 @@ public final class WorkerService extends Service {
  Handler h; Runnable safety; java.lang.Process miner; SharedPreferences prefs;
  volatile double hashrate; volatile long accepted,rejected,lastShareAt; volatile boolean poolConnected;
  long restartAfter; int crashCount;
+ ConnectivityManager connectivity; ConnectivityManager.NetworkCallback networkCallback; volatile boolean networkAvailable=true;
 
  @Override public void onCreate(){
   super.onCreate();
@@ -26,6 +28,15 @@ public final class WorkerService extends Service {
   if(Build.VERSION.SDK_INT>=26) nm.createNotificationChannel(new NotificationChannel(CHANNEL,"MARS-X Worker",NotificationManager.IMPORTANCE_LOW));
   h=new Handler(Looper.getMainLooper()); prefs=getSharedPreferences("worker",MODE_PRIVATE);
   accepted=prefs.getLong("accepted_shares",0); rejected=prefs.getLong("rejected_shares",0); lastShareAt=prefs.getLong("last_share_at",0);
+  connectivity=(ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+  networkAvailable=isNetworkUsable();
+  if(Build.VERSION.SDK_INT>=24&&connectivity!=null){
+   networkCallback=new ConnectivityManager.NetworkCallback(){
+    @Override public void onAvailable(Network network){networkAvailable=true;restartAfter=0;h.post(()->{if(prefs.getBoolean("desired_running",false)&&safeToResume())startComputeIfAvailable();});}
+    @Override public void onLost(Network network){networkAvailable=isNetworkUsable();if(!networkAvailable){stopCompute();saveState("waiting_network");}}
+   };
+   try{connectivity.registerDefaultNetworkCallback(networkCallback);}catch(Exception ignored){}
+  }
   safety=()->{boolean running=miner!=null; boolean ok=running?safeToKeepRunning():safeToResume(); if(!ok){stopCompute();saveState("protected");}else if(prefs.getBoolean("desired_running",false)&&System.currentTimeMillis()>=restartAfter)startComputeIfAvailable(); h.postDelayed(safety,15000);};
  }
 
@@ -42,7 +53,10 @@ public final class WorkerService extends Service {
  boolean safeLimits(int batteryMin,float thermalMax){BatteryManager b=(BatteryManager)getSystemService(BATTERY_SERVICE);int pct=b==null?-1:b.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);float temp=readBatteryTemp();boolean batteryOk=pct<0||pct>=batteryMin,tempOk=temp<=0f||temp<thermalMax;if(Build.VERSION.SDK_INT>=29){PowerManager pm=(PowerManager)getSystemService(POWER_SERVICE);if(pm!=null&&pm.getCurrentThermalStatus()>=PowerManager.THERMAL_STATUS_SEVERE)tempOk=false;}return batteryOk&&tempOk;}
  float readBatteryTemp(){Intent x=registerReceiver(null,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));return x==null?0f:x.getIntExtra(BatteryManager.EXTRA_TEMPERATURE,0)/10f;}
 
+ boolean isNetworkUsable(){if(connectivity==null)return true;Network n=connectivity.getActiveNetwork();if(n==null)return false;NetworkCapabilities caps=connectivity.getNetworkCapabilities(n);return caps!=null&&caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);}
+
  synchronized void startComputeIfAvailable(){
+  if(!networkAvailable||!isNetworkUsable()){networkAvailable=false;saveState("waiting_network");return;}
   if(miner!=null){try{miner.exitValue();miner=null;}catch(IllegalThreadStateException running){return;}}
   File bin=new File(getFilesDir(),"miner/ccminer");String pool=prefs.getString("pool",""),user=prefs.getString("user","");
   int threads=Math.max(1,Math.min(Runtime.getRuntime().availableProcessors(),prefs.getInt("threads",Math.max(1,Runtime.getRuntime().availableProcessors()/2))));
@@ -69,6 +83,6 @@ public final class WorkerService extends Service {
  void saveTelemetry(){prefs.edit().putLong("hashrate_bits",Double.doubleToRawLongBits(hashrate)).putLong("accepted_shares",accepted).putLong("rejected_shares",rejected).putLong("last_share_at",lastShareAt).putBoolean("pool_connected",poolConnected).putLong("telemetry_at",System.currentTimeMillis()).apply();}
  void saveState(String s){prefs.edit().putString("service_state",s).putLong("state_at",System.currentTimeMillis()).putLong("hashrate_bits",Double.doubleToRawLongBits(hashrate)).apply();}
  synchronized void stopCompute(){java.lang.Process p=miner;miner=null;hashrate=0;poolConnected=false;saveTelemetry();if(p!=null){p.destroy();long until=System.currentTimeMillis()+3000;while(System.currentTimeMillis()<until){try{p.exitValue();return;}catch(IllegalThreadStateException running){try{Thread.sleep(50);}catch(InterruptedException e){Thread.currentThread().interrupt();break;}}}p.destroy();}}
- @Override public void onDestroy(){if(h!=null)h.removeCallbacksAndMessages(null);stopCompute();super.onDestroy();}
+ @Override public void onDestroy(){if(h!=null)h.removeCallbacksAndMessages(null);if(connectivity!=null&&networkCallback!=null){try{connectivity.unregisterNetworkCallback(networkCallback);}catch(Exception ignored){}}stopCompute();super.onDestroy();}
  @Override public IBinder onBind(Intent i){return null;}
 }
