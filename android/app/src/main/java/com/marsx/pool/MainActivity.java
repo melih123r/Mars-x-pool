@@ -78,6 +78,9 @@ public class MainActivity extends Activity {
     private Button homeTab;
     private Button earningsTab;
     private Button accountTab;
+    private static final int MARS_ORANGE = Color.rgb(255, 112, 18);
+    private static final int MARS_TEXT = Color.rgb(242, 242, 245);
+    private static final int MARS_MUTED = Color.rgb(165, 168, 178);
     private GoogleSignInManager googleSignIn;
     private String currentReferralCode = "";
 
@@ -136,8 +139,16 @@ public class MainActivity extends Activity {
 
     private View buildHomePage() {
         LinearLayout root = pageRoot();
-        addTitle(root, getString(R.string.home_title));
-        addText(root, getString(R.string.home_subtitle), 15);
+        addTitle(root, "MARS-X");
+        TextView hero = addText(root, "Mine the Future • Build on Mars", 15);
+        hero.setTextColor(MARS_MUTED);
+
+        LinearLayout earningsHero = card(root);
+        TextView heroLabel = addText(earningsHero, "TOPLAM MARS-X KAZANÇ", 13);
+        heroLabel.setTextColor(MARS_ORANGE);
+        TextView heroValue = addText(earningsHero, "0.0000 MARS-X", 28);
+        heroValue.setTextColor(MARS_TEXT);
+        addText(earningsHero, "Günlük • Haftalık • Aylık performans", 13).setTextColor(MARS_MUTED);
 
         LinearLayout serviceCard = card(root);
         addText(serviceCard, getString(R.string.service_status_title), 14);
@@ -163,7 +174,7 @@ public class MainActivity extends Activity {
 
     private View buildEarningsPage() {
         LinearLayout root = pageRoot();
-        addTitle(root, getString(R.string.earnings_title));
+        addTitle(root, "Kazançlar");
         addText(root, getString(R.string.sandbox_balance_disclaimer), 13);
 
         LinearLayout balanceCard = card(root);
@@ -196,7 +207,7 @@ public class MainActivity extends Activity {
 
     private View buildAccountPage() {
         LinearLayout root = pageRoot();
-        addTitle(root, getString(R.string.account_title));
+        addTitle(root, "MARS-X Hesabım");
 
         LinearLayout accountCard = card(root);
         accountStatus = addText(accountCard, getString(R.string.google_signed_out), 16);
@@ -268,6 +279,10 @@ public class MainActivity extends Activity {
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         params.setMargins(0, 8, 0, 14);
         parent.addView(card, params);
+        for (int i = 0; i < card.getChildCount(); i++) {
+            View child = card.getChildAt(i);
+            if (child instanceof TextView) ((TextView) child).setTextColor(MARS_TEXT);
+        }
         return card;
     }
 
