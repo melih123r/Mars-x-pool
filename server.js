@@ -707,7 +707,11 @@ class RedisStore {
   }
 }
 
-export async function createStore(redisUrl = process.env.REDIS_URL) {
+export async function createStore(redisUrl = process.env.REDIS_URL, databaseUrl = process.env.DATABASE_URL) {
+  if (databaseUrl) {
+    const { createPostgresStore } = await import("./postgres-store.mjs");
+    return createPostgresStore(databaseUrl);
+  }
   if (!redisUrl) return new MemoryStore();
   const { createClient } = await import("redis");
   const client = createClient({
