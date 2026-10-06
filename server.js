@@ -97,7 +97,10 @@ function normalizeWorker(data, oldWorker, now, licenseId, installId) {
     licenseId: licenseId || oldWorker?.licenseId || "legacy-admin",
     installId: installId || oldWorker?.installId || null,
     label: String(data.label || oldWorker?.label || "worker").slice(0, 80),
-    platform: String(data.platform || oldWorker?.platform || "unknown").slice(0, 40),\n    arch: String(data.arch || oldWorker?.arch || "unknown").slice(0, 32),\n    deviceClass: ["phone","tablet","desktop","laptop","server","sbc","other"].includes(String(data.device_class)) ? String(data.device_class) : oldWorker?.deviceClass || "other",\n    capabilities: Array.isArray(data.capabilities) ? data.capabilities.map(String).filter(x => /^[a-z0-9_-]{2,32}$/i.test(x)).slice(0, 16) : oldWorker?.capabilities || [],
+    platform: String(data.platform || oldWorker?.platform || "unknown").slice(0, 40),
+    arch: String(data.arch || oldWorker?.arch || "unknown").slice(0, 32),
+    deviceClass: ["phone","tablet","desktop","laptop","server","sbc","other"].includes(String(data.device_class)) ? String(data.device_class) : oldWorker?.deviceClass || "other",
+    capabilities: Array.isArray(data.capabilities) ? data.capabilities.map(String).filter(x => /^[a-z0-9_-]{2,32}$/i.test(x)).slice(0, 16) : oldWorker?.capabilities || [],
     cpuPercent,
     minerState: ["running","stopped","thermal_paused","battery_paused"].includes(String(data.miner_state)) ? String(data.miner_state) : oldWorker?.minerState || "stopped",
     hashrateSols: Number.isFinite(Number(data.hashrate_sols)) ? Math.max(0, Math.min(1000000000, Number(data.hashrate_sols))) : oldWorker?.hashrateSols ?? 0,
@@ -110,7 +113,10 @@ function normalizeWorker(data, oldWorker, now, licenseId, installId) {
     lastActivityMs: now,
     dormantAt: null,
     reactivatedAt: oldWorker?.reactivatedAt || null,
-    sessionId: oldWorker?.sessionId || randomUUID(),\n    desiredMinerState: oldWorker?.desiredMinerState || "stopped",\n    desiredCpuPercent: oldWorker?.desiredCpuPercent ?? 50,\n    commandSeq: oldWorker?.commandSeq || 0,
+    sessionId: oldWorker?.sessionId || randomUUID(),
+    desiredMinerState: oldWorker?.desiredMinerState || "stopped",
+    desiredCpuPercent: oldWorker?.desiredCpuPercent ?? 50,
+    commandSeq: oldWorker?.commandSeq || 0,
   };
 }
 
@@ -351,7 +357,8 @@ function auditLicense(event, req, pepper, data = {}) {
     eventId: randomUUID(),
     ipHash,
     ...data,
-  })}\n`);
+  })}
+`);
 }
 
 export class MemoryStore {
@@ -1004,7 +1011,8 @@ export function createServer({
         const timestamp = now();
         const own = (await store.all()).filter((worker) => worker.licenseId === session.lic);
         const workers = own.map((worker) => ({
-          workerId: worker.workerId, label: worker.label, platform: worker.platform, arch: worker.arch,\n          desiredMinerState: worker.desiredMinerState || "stopped", desiredCpuPercent: worker.desiredCpuPercent ?? 50,
+          workerId: worker.workerId, label: worker.label, platform: worker.platform, arch: worker.arch,
+          desiredMinerState: worker.desiredMinerState || "stopped", desiredCpuPercent: worker.desiredCpuPercent ?? 50,
           deviceClass: worker.deviceClass, capabilities: worker.capabilities || [], minerState: worker.minerState,
           hashrateSols: worker.hashrateSols || 0, batteryPercent: worker.batteryPercent,
           temperatureC: worker.temperatureC, lastSeen: worker.lastSeen,
