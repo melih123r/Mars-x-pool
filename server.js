@@ -841,7 +841,7 @@ export function createServer({
           service: SERVICE,
           version: VERSION,
           storage: store.kind,
-          persistent: store.kind === "redis",
+          persistent: store.kind === "redis" || store.kind === "postgres",
           licensing: licenseReady ? "ready" : "not_configured",
           license_provider: qonversionReady ? "qonversion" : (legacyLicenseReady ? "marsx_beta" : "none"),
           payoutMode: "sandbox",
