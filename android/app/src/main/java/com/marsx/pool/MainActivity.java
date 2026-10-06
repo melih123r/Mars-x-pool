@@ -80,6 +80,20 @@ public class MainActivity extends Activity {
     private Button accountTab;
     private static final int MARS_ORANGE = Color.rgb(255, 112, 18);
     private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
+    private void styleInput(EditText input) {
+        input.setTextColor(MARS_TEXT);
+        input.setHintTextColor(MARS_MUTED);
+        input.setMinHeight(dp(48));
+        input.setPadding(dp(12), 0, dp(12), 0);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(Color.rgb(14, 15, 19));
+        bg.setStroke(dp(1), Color.rgb(74, 77, 86));
+        bg.setCornerRadius(dp(12));
+        input.setBackground(bg);
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        p.setMargins(0, dp(5), 0, dp(8));
+        input.setLayoutParams(p);
+    }
     private static final int MARS_TEXT = Color.rgb(242, 242, 245);
     private static final int MARS_MUTED = Color.rgb(165, 168, 178);
     private GoogleSignInManager googleSignIn;
@@ -188,11 +202,13 @@ public class MainActivity extends Activity {
         payoutAmount.setSingleLine(true);
         payoutAmount.setHint(R.string.payout_amount_hint);
         payoutAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        styleInput(payoutAmount);
         payoutCard.addView(payoutAmount);
         payoutDestination = new EditText(this);
         payoutDestination.setSingleLine(true);
         payoutDestination.setHint(R.string.payout_destination_hint);
         payoutDestination.setText(prefs.getString("sandbox_destination", ""));
+        styleInput(payoutDestination);
         payoutCard.addView(payoutDestination);
         button(payoutCard, getString(R.string.request_sandbox_payout_button), view -> requestPayout());
         button(payoutCard, getString(R.string.refresh_payouts_button), view -> refreshPayouts());
@@ -216,12 +232,16 @@ public class MainActivity extends Activity {
         referralInput.setSingleLine(true);
         referralInput.setHint(R.string.referral_code_hint);
         referralInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        styleInput(referralInput);
         accountCard.addView(referralInput);
         googleSignInButton = button(accountCard, getString(R.string.continue_with_google), view -> beginGoogleSignIn(false));
         button(accountCard, getString(R.string.refresh_account_button), view -> refreshUserProfile());
 
         acceptTerms = new CheckBox(this);
         acceptTerms.setText(R.string.accept_terms);
+        acceptTerms.setTextColor(MARS_TEXT);
+        acceptTerms.setMinHeight(dp(48));
+        acceptTerms.setButtonTintList(new ColorStateList(new int[][]{new int[]{android.R.attr.state_checked},new int[]{}},new int[]{MARS_ORANGE,MARS_MUTED}));
         acceptTerms.setChecked(prefs.getBoolean("terms_accepted_" + TERMS_VERSION, false));
         acceptTerms.setOnCheckedChangeListener((button, checked) ->
                 prefs.edit().putBoolean("terms_accepted_" + TERMS_VERSION, checked).apply());
