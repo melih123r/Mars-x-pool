@@ -34,6 +34,17 @@ export function createApi(engine=buildEngine()){
       const url=new URL(req.url,"http://localhost");
       if(req.method==="GET" && url.pathname==="/health") return res.end(JSON.stringify({ok:true,mode:"READ_ONLY",liveExecution:false,venues:engine.health.snapshot()}));
       if(req.method==="GET" && url.pathname==="/markets") return res.end(JSON.stringify({mode:"READ_ONLY",liveExecution:false,markets:marketCapabilities()}));
+      if(req.method==="GET" && url.pathname==="/terminal/config") return res.end(JSON.stringify({
+        version:"0.1",mode:"READ_ONLY",liveExecution:false,
+        charts:["CANDLESTICK","LINE","AREA","HEIKIN_ASHI"],
+        timeframes:["1m","5m","15m","1h","4h","1D","1W"],
+        indicators:["VOLUME","SMA","EMA","RSI","MACD","BOLLINGER_BANDS","ATR"],
+        drawings:["TRENDLINE","FIBONACCI"],
+        layouts:[1,2,4],
+        panels:["WATCHLIST","CHART","ORDER_BOOK","TRADES","POSITIONS","VENUE_COMPARISON","MARSX_INTELLIGENCE"],
+        overlays:["LIQUIDITY","MACRO","MOMENTUM","POSITIONING","VOLATILITY","RISK","CONFIDENCE"],
+        execution:{enabled:false,chartTrading:false,paperOnly:true}
+      }));
       if(req.method==="GET" && url.pathname==="/macro/sources") return res.end(JSON.stringify({mode:"REFERENCE_ONLY",sources:[
         {id:"UST_YIELD_CURVE",provider:"U.S. Treasury",frequency:"DAILY",status:"AVAILABLE",series:["1M","3M","6M","1Y","2Y","5Y","10Y","20Y","30Y"],executionReady:false},
         {id:"FED_H15",provider:"Federal Reserve Board",frequency:"DAILY",status:"AVAILABLE",series:["FED_FUNDS","TREASURY_CONSTANT_MATURITY"],executionReady:false},
