@@ -14,7 +14,7 @@ public class MinerLogParserTest {
   assertTrue(MinerLogParser.accepted("share accepted yay!!!"));
   assertTrue(MinerLogParser.rejected("share rejected booooo"));
   assertFalse(MinerLogParser.accepted("connection accepted by proxy"));
-  assertFalse(MinerLogParser.rejected("no rejected share text here"));
+  assertFalse(MinerLogParser.rejected("connection refused; retrying"));
  }
  @Test public void detectsPoolConnection(){
   assertTrue(MinerLogParser.connected("stratum connected"));
