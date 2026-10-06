@@ -12,10 +12,6 @@ import java.util.regex.*;
 public final class WorkerService extends Service {
  static final String CHANNEL="marsx_worker";
  static final int ID=4101;
- static final Pattern RATE=Pattern.compile("(?i)([0-9]+(?:\\\\.[0-9]+)?)\\\\s*([kmg]?)h?/?s");
- static final Pattern ACCEPTED=Pattern.compile("(?i)(accepted|share accepted|yay!!!)");
- static final Pattern REJECTED=Pattern.compile("(?i)(rejected|share rejected|booooo)");
- static final Pattern CONNECTED=Pattern.compile("(?i)(stratum.*(connected|subscribed|authorized)|connected to|login succeeded)");
 
  Handler h; Runnable safety; java.lang.Process miner; SharedPreferences prefs;
  volatile double hashrate; volatile long accepted,rejected,lastShareAt; volatile boolean poolConnected;
@@ -69,10 +65,10 @@ public final class WorkerService extends Service {
  void readMiner(java.lang.Process p){
   try(BufferedReader r=new BufferedReader(new InputStreamReader(p.getInputStream()))){
    String line; while((line=r.readLine())!=null&&p==miner){
-    Matcher m=RATE.matcher(line); if(m.find()){double v=Double.parseDouble(m.group(1));String u=m.group(2).toLowerCase(Locale.ROOT);if("k".equals(u))v*=1e3;else if("m".equals(u))v*=1e6;else if("g".equals(u))v*=1e9;hashrate=v;}
-    if(CONNECTED.matcher(line).find())poolConnected=true;
-    if(ACCEPTED.matcher(line).find()){accepted++;lastShareAt=System.currentTimeMillis();crashCount=0;}
-    if(REJECTED.matcher(line).find()){rejected++;lastShareAt=System.currentTimeMillis();}
+    double parsedRate=MinerLogParser.hashrate(line);if(parsedRate>=0)hashrate=parsedRate;
+    if(MinerLogParser.connected(line))poolConnected=true;
+    if(MinerLogParser.accepted(line)){accepted++;lastShareAt=System.currentTimeMillis();crashCount=0;}
+    if(MinerLogParser.rejected(line)){rejected++;lastShareAt=System.currentTimeMillis();}
     saveTelemetry();
    }
   }catch(Exception ignored){}
