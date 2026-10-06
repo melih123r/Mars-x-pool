@@ -1,0 +1,2 @@
+export function learningConsent(user={}){return user?.consent?.analyticsTraining===true&&user?.consent?.version&&user?.consent?.acceptedAt?{allowed:true,version:String(user.consent.version),acceptedAt:String(user.consent.acceptedAt)}:{allowed:false,reason:"TRAINING_CONSENT_REQUIRED"};}
+export function revokeLearningConsent(user={}){return {...user,consent:{...(user.consent||{}),analyticsTraining:false,revokedAt:new Date().toISOString()}};}
