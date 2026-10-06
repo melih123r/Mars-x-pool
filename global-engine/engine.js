@@ -14,7 +14,7 @@ export class MarsXGlobalEngine {
   register(adapter){ this.adapters.push(adapter); return this; }
 
   async quotes(order){
-    const eligible=this.adapters.filter(v=>v.supports(order.instrument) && this.health.get(v.name).failures < this.policy.maxVenueFailures);
+    const eligible=this.adapters.filter(v=>v.supports(order.instrument) && this.health.canTry(v.name,{maxFailures:this.policy.maxVenueFailures,cooldownMs:this.policy.venueFailureCooldownMs}));
     if(!eligible.length) throw new Error("no healthy eligible venues");
     const settled=await Promise.allSettled(eligible.map(async v=>{
       const start=Date.now();
@@ -40,7 +40,7 @@ export class MarsXGlobalEngine {
     const {best,quotes,health}=await this.route(order);
     const venue=this.adapters.find(v=>v.name.toLowerCase()===best.venue);
     if(!venue) throw new Error("winning venue unavailable");
-    if(venue.constructor.name!=="PaperVenue") throw new Error("paper execution requires a PaperVenue; live execution is disabled");
+    if(venue.mode!=="paper") throw new Error("paper execution requires a paper-mode venue; live execution is disabled");
     const execution=await venue.placeOrder(order,best);
     return {order,best,quotes,health,execution};
   }
