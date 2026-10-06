@@ -177,7 +177,7 @@ test("licensed registration and heartbeat work while admin listing stays separat
     assert.equal(heartbeatWorker.hashrateSols, 1234.5);
     assert.equal(heartbeatWorker.batteryPercent, 81);
     assert.equal(heartbeatWorker.temperatureC, 39.5);
-    assert.deepEqual(heartbeatWorker.safety, { batteryMinPercent: 15, thermalMaxC: 43 });
+    assert.deepEqual(heartbeatWorker.safety, { batteryMinPercent: 15, thermalMaxC: 43, batteryRule: "active", thermalRule: "active" });
 
     const adminDenied = await fetch(`${baseUrl}/summary`, { headers: { Authorization: `License ${sessionToken}` } });
     assert.equal(adminDenied.status, 401);
