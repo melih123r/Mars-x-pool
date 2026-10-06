@@ -1,60 +1,27 @@
 package com.marsx.pool;
 
-import android.app.*;
-import android.os.*;
-import android.graphics.*;
-import android.graphics.drawable.*;
-import android.view.*;
-import android.widget.*;
-import java.util.*;
+import android.app.*;import android.os.*;import android.graphics.*;import android.graphics.drawable.*;import android.view.*;import android.widget.*;
 
-public class PremiumActivity extends Activity {
-  final int BG=Color.rgb(7,8,11), CARD=Color.rgb(19,20,25), ORANGE=Color.rgb(255,105,15), WHITE=Color.rgb(242,243,246), MUTED=Color.rgb(150,154,166);
-  LinearLayout page, nav; TextView state, mainValue; Button start;
-  boolean running=false;
-
-  @Override public void onCreate(Bundle b){super.onCreate(b); showSplash();}
-
-  TextView text(String s,int sp,int color){ TextView v=new TextView(this); v.setText(s); v.setTextSize(sp); v.setTextColor(color); v.setPadding(0,8,0,8); return v; }
-  GradientDrawable bg(int color,float r){GradientDrawable g=new GradientDrawable();g.setColor(color);g.setCornerRadius(r);return g;}
-  LinearLayout card(){LinearLayout c=new LinearLayout(this);c.setOrientation(LinearLayout.VERTICAL);c.setPadding(28,24,28,24);GradientDrawable g=bg(CARD,30);g.setStroke(2,Color.rgb(66,48,36));c.setBackground(g);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.setMargins(0,10,0,14);c.setLayoutParams(p);return c;}
-  Button button(String s){Button b=new Button(this);b.setText(s);b.setTextColor(Color.WHITE);b.setTextSize(16);b.setAllCaps(false);b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(ORANGE));return b;}
-
-  void showSplash(){
-    LinearLayout r=new LinearLayout(this);r.setOrientation(LinearLayout.VERTICAL);r.setGravity(Gravity.CENTER);r.setPadding(40,60,40,60);r.setBackgroundColor(BG);
-    TextView mark=text("MARS—X",42,WHITE);mark.setGravity(Gravity.CENTER);r.addView(mark);
-    TextView planet=text("◉",92,ORANGE);planet.setGravity(Gravity.CENTER);r.addView(planet);
-    TextView tag=text("MINE THE FUTURE\nBUILD ON MARS",18,ORANGE);tag.setGravity(Gravity.CENTER);r.addView(tag);
-    TextView sub=text("Basit  •  Güvenli  •  Otomatik",14,MUTED);sub.setGravity(Gravity.CENTER);r.addView(sub);
-    Button enter=button("MARS-X'E BAŞLA"); LinearLayout.LayoutParams bp=new LinearLayout.LayoutParams(-1,130);bp.setMargins(0,60,0,0);r.addView(enter,bp);enter.setOnClickListener(v->showConsent());
-    setContentView(r);
-  }
-  void showConsent(){
-    LinearLayout r=base();r.setPadding(32,48,32,36);
-    r.addView(text("MARS—X",30,WHITE));r.addView(text("Kontrol sende",24,ORANGE));
-    LinearLayout c=card();c.addView(text("MARS-X Pool Beta",20,WHITE));c.addView(text("Başlat düğmesi yalnızca senin açık komutunla havuz oturumunu başlatır. Uygulama gizli cihaz madenciliği yapmaz. Kazanç yalnızca sağlayıcı tarafından doğrulanan ve uzlaştırılan sonuçlardan sonra bakiyeye yazılır.",15,MUTED));r.addView(c);
-    CheckBox ok=new CheckBox(this);ok.setText("Koşulları ve gizlilik bildirimini kabul ediyorum");ok.setTextColor(WHITE);r.addView(ok);
-    Button go=button("KABUL ET VE DEVAM ET");r.addView(go,new LinearLayout.LayoutParams(-1,120));go.setOnClickListener(v->{if(ok.isChecked()) showShell(); else Toast.makeText(this,"Devam etmek için onay gerekli.",Toast.LENGTH_SHORT).show();});
-    setContentView(r);
-  }
-  LinearLayout base(){LinearLayout r=new LinearLayout(this);r.setOrientation(LinearLayout.VERTICAL);r.setBackgroundColor(BG);return r;}
-  void showShell(){
-    LinearLayout root=base();
-    ScrollView sv=new ScrollView(this);page=base();page.setPadding(28,28,28,30);sv.addView(page);root.addView(sv,new LinearLayout.LayoutParams(-1,0,1));
-    nav=new LinearLayout(this);nav.setOrientation(LinearLayout.HORIZONTAL);nav.setPadding(8,6,8,10);nav.setBackgroundColor(Color.rgb(12,13,17));
-    addNav("Ana Sayfa",0);addNav("Kazanç",1);addNav("Cüzdan",2);addNav("Ayarlar",3);root.addView(nav);
-    setContentView(root);home();
-  }
-  void addNav(String s,int n){Button b=new Button(this);b.setText(s);b.setTextSize(12);b.setTextColor(n==0?ORANGE:MUTED);b.setAllCaps(false);b.setBackgroundColor(Color.TRANSPARENT);nav.addView(b,new LinearLayout.LayoutParams(0,110,1));b.setOnClickListener(v->{if(n==0)home();if(n==1)earnings();if(n==2)wallet();if(n==3)settings();});}
-  void clear(String title){page.removeAllViews();page.addView(text("MARS—X",28,WHITE));page.addView(text(title,16,ORANGE));}
-  void home(){
-    clear("POOL BETA");
-    LinearLayout hero=card();hero.addView(text("TOPLAM MARS-X KAZANÇ",13,ORANGE));mainValue=text("0.0000 MARS-X",32,WHITE);hero.addView(mainValue);hero.addView(text("Doğrulanmış bakiye",13,MUTED));page.addView(hero);
-    LinearLayout live=card();state=text("● Hazır",17,MUTED);live.addView(state);live.addView(text("MARS-X kazanç oturumu",22,WHITE));live.addView(text("Altyapı otomatik seçilir • teknik worker ayrıntıları gizlidir",13,MUTED));start=button("BAŞLAT");live.addView(start,new LinearLayout.LayoutParams(-1,120));start.setOnClickListener(v->toggle());page.addView(live);
-    LinearLayout stats=card();stats.addView(text("BUGÜN     0.0000 MARS-X",16,WHITE));stats.addView(text("BU HAFTA  0.0000 MARS-X",16,WHITE));stats.addView(text("BU AY     0.0000 MARS-X",16,WHITE));page.addView(stats);
-  }
-  void toggle(){running=!running;state.setText(running?"● Kazım Aktif":"● Durduruldu");state.setTextColor(running?ORANGE:MUTED);start.setText(running?"DURDUR":"BAŞLAT");Toast.makeText(this,running?"MARS-X oturumu başlatıldı":"Oturum durduruldu",Toast.LENGTH_SHORT).show();}
-  void earnings(){clear("KAZANÇLAR");LinearLayout c=card();c.addView(text("0.0000 MARS-X",34,WHITE));c.addView(text("Günlük   Haftalık   Aylık",14,ORANGE));c.addView(text("▁▂▃▂▄▅▃▆▅▇",34,ORANGE));c.addView(text("Henüz doğrulanmış kazanç hareketi yok.",14,MUTED));page.addView(c);LinearLayout h=card();h.addView(text("Son Kazançlar",20,WHITE));h.addView(text("Sağlayıcı uzlaştırması tamamlandığında burada görünür.",14,MUTED));page.addView(h);}
-  void wallet(){clear("CÜZDAN");LinearLayout c=card();c.addView(text("MARS-X BAKİYE",13,ORANGE));c.addView(text("0.0000",36,WHITE));c.addView(text("Beta içi kazanç gösterimi",13,MUTED));page.addView(c);LinearLayout x=card();x.addView(text("Dönüştür & Çek",20,WHITE));x.addView(text("COMING SOON",16,ORANGE));x.addView(text("Gerçek çekim ve dönüşüm güvenlik kapıları doğrulanana kadar kapalıdır.",14,MUTED));page.addView(x);LinearLayout ref=card();ref.addView(text("Invite & Earn  +3%",20,WHITE));ref.addView(text("Davet sistemi beta",14,MUTED));page.addView(ref);}
-  void settings(){clear("AYARLAR");LinearLayout c=card();c.addView(text("MARS-X Pool Beta",20,WHITE));c.addView(text("Tema  •  Mars Dark",15,MUTED));c.addView(text("Pil alt sınırı  •  %15",15,MUTED));c.addView(text("Sıcaklık koruması  •  43°C",15,MUTED));c.addView(text("Gizlilik  •  Açık kullanıcı kontrolü",15,MUTED));page.addView(c);LinearLayout about=card();about.addView(text("Şeffaflık",18,WHITE));about.addView(text("MARS-X bir kullanıcı arayüzü/hesaplama katmanıdır. Transfer edilebilir MARSX token henüz canlı değildir. Gerçek bakiye yalnızca doğrulanmış havuz uzlaştırmasından doğar.",14,MUTED));page.addView(about);}
+public class PremiumActivity extends Activity{
+ final int BG=Color.rgb(6,7,10),CARD=Color.rgb(18,19,24),ORANGE=Color.rgb(255,105,12),WHITE=Color.rgb(244,244,247),MUTED=Color.rgb(145,149,160),GREEN=Color.rgb(35,210,105);
+ LinearLayout page,nav; TextView state; Button start; boolean running=false;
+ @Override public void onCreate(Bundle b){super.onCreate(b);showSplash();}
+ TextView t(String s,int z,int c){TextView v=new TextView(this);v.setText(s);v.setTextSize(z);v.setTextColor(c);v.setPadding(0,9,0,9);return v;}
+ GradientDrawable shape(int c,float r){GradientDrawable g=new GradientDrawable();g.setColor(c);g.setCornerRadius(r);return g;}
+ LinearLayout base(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);l.setBackgroundColor(BG);return l;}
+ LinearLayout card(){LinearLayout c=base();c.setPadding(28,24,28,24);GradientDrawable g=shape(CARD,30);g.setStroke(2,Color.rgb(72,48,30));c.setBackground(g);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.setMargins(0,10,0,14);c.setLayoutParams(p);return c;}
+ Button btn(String s){Button b=new Button(this);b.setText(s);b.setTextColor(Color.WHITE);b.setTextSize(16);b.setAllCaps(false);b.setBackgroundTintList(android.content.res.ColorStateList.valueOf(ORANGE));return b;}
+ TextView logo(){TextView x=t("M▲RS-X",31,WHITE);x.setLetterSpacing(.08f);return x;}
+ void showSplash(){LinearLayout r=base();r.setGravity(Gravity.CENTER);r.setPadding(40,60,40,60);TextView emblem=t("▲",110,ORANGE);emblem.setGravity(Gravity.CENTER);r.addView(emblem);TextView l=logo();l.setTextSize(43);l.setGravity(Gravity.CENTER);r.addView(l);TextView q=t("GELECEĞİ BUGÜNDEN KAZAN",15,ORANGE);q.setGravity(Gravity.CENTER);r.addView(q);r.addView(t("Basit  •  Güvenli  •  Otomatik",14,MUTED));Button b=btn("MARS-X'E BAŞLA");LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,130);p.setMargins(0,60,0,0);r.addView(b,p);b.setOnClickListener(v->consent());setContentView(r);}
+ void consent(){LinearLayout r=base();r.setPadding(32,48,32,36);r.addView(logo());r.addView(t("Kontrol sende",25,ORANGE));LinearLayout c=card();c.addView(t("MARS-X Pool Beta",20,WHITE));c.addView(t("Başlat düğmesi yalnızca senin açık komutunla havuz oturumunu başlatır. Gizli cihaz madenciliği yapılmaz. Gerçek bakiye yalnızca sağlayıcı tarafından doğrulanmış uzlaştırmadan sonra oluşur.",15,MUTED));r.addView(c);CheckBox ok=new CheckBox(this);ok.setText("Koşulları ve gizlilik bildirimini kabul ediyorum");ok.setTextColor(WHITE);r.addView(ok);Button b=btn("KABUL ET VE DEVAM ET");r.addView(b,new LinearLayout.LayoutParams(-1,120));b.setOnClickListener(v->{if(ok.isChecked())shell();else Toast.makeText(this,"Onay gerekli.",0).show();});setContentView(r);}
+ void shell(){LinearLayout root=base();ScrollView s=new ScrollView(this);page=base();page.setPadding(28,26,28,28);s.addView(page);root.addView(s,new LinearLayout.LayoutParams(-1,0,1));nav=new LinearLayout(this);nav.setOrientation(LinearLayout.HORIZONTAL);nav.setBackgroundColor(Color.rgb(11,12,16));addNav("⌂\nAna Sayfa",0);addNav("⌁\nKazanç",1);addNav("▣\nCüzdan",2);addNav("♧\nDavet",3);addNav("⚙\nAyarlar",4);root.addView(nav);setContentView(root);home();}
+ void addNav(String s,int n){Button b=new Button(this);b.setText(s);b.setTextSize(10);b.setTextColor(MUTED);b.setAllCaps(false);b.setBackgroundColor(Color.TRANSPARENT);nav.addView(b,new LinearLayout.LayoutParams(0,118,1));b.setOnClickListener(v->{if(n==0)home();if(n==1)earn();if(n==2)wallet();if(n==3)invite();if(n==4)settings();});}
+ void head(String s){page.removeAllViews();page.addView(logo());page.addView(t(s,16,ORANGE));}
+ void home(){head("POOL BETA");LinearLayout b=card();b.addView(t("MEVCUT KAZANÇ",13,MUTED));b.addView(t("0.000000 MARS-X",34,WHITE));b.addView(t("Doğrulanmış bakiye",13,GREEN));page.addView(b);LinearLayout c=card();state=t("● HAZIR",16,MUTED);c.addView(state);TextView orb=t("◉",94,ORANGE);orb.setGravity(Gravity.CENTER);c.addView(orb);TextView k=t("MARS-X KAZANÇ OTURUMU",20,WHITE);k.setGravity(Gravity.CENTER);c.addView(k);start=btn("BAŞLAT");c.addView(start,new LinearLayout.LayoutParams(-1,120));start.setOnClickListener(v->toggle());page.addView(c);LinearLayout s=card();s.addView(t("BUGÜN        0.0000",16,WHITE));s.addView(t("BU HAFTA     0.0000",16,WHITE));s.addView(t("BU AY        0.0000",16,WHITE));s.addView(t("Durum: sağlayıcı uzlaştırması bekleniyor",13,MUTED));page.addView(s);}
+ void toggle(){running=!running;state.setText(running?"● KAZIM AKTİF":"● DURDURULDU");state.setTextColor(running?GREEN:MUTED);start.setText(running?"DURDUR":"BAŞLAT");}
+ void earn(){head("KAZANÇ İSTATİSTİKLERİ");LinearLayout c=card();c.addView(t("Günlük     Haftalık     Aylık",15,ORANGE));c.addView(t("0.000000 MARS-X",33,WHITE));c.addView(t("▁▁▁▁▁▁▁▁▁▁▁▁",38,ORANGE));c.addView(t("00:00        06:00        12:00        18:00        24:00",11,MUTED));page.addView(c);LinearLayout g=card();g.addView(t("GRAFİKLER",19,WHITE));g.addView(t("Kazanç  •  Oturum  •  Sistem",13,ORANGE));g.addView(t("Henüz doğrulanmış veri yok. Sahte grafik verisi gösterilmez.",14,MUTED));page.addView(g);history();}
+ void history(){LinearLayout h=card();h.addView(t("İŞLEM GEÇMİŞİ",19,WHITE));h.addView(t("Doğrulanmış kazanç hareketleri burada listelenecek.",14,MUTED));h.addView(t("Henüz işlem yok",15,WHITE));page.addView(h);}
+ void wallet(){head("CÜZDAN");LinearLayout c=card();c.addView(t("TOPLAM BAKİYE",13,MUTED));c.addView(t("0.000000 MARS-X",34,WHITE));c.addView(t("Beta içi kazanç gösterimi",13,ORANGE));page.addView(c);LinearLayout a=card();a.addView(t("GÖNDER                 ÇEKİM",17,WHITE));a.addView(t("Coming Soon            Coming Soon",14,ORANGE));a.addView(t("Transfer edilebilir MARSX token henüz canlı değildir.",13,MUTED));page.addView(a);history();}
+ void invite(){head("DAVET ET KAZAN");LinearLayout c=card();TextView i=t("♧♧♧",54,ORANGE);i.setGravity(Gravity.CENTER);c.addView(i);c.addView(t("Arkadaşlarını Davet Et",23,WHITE));c.addView(t("Uygun referral kazanç modeli: +%3",20,ORANGE));c.addView(t("Davet bağlantısı ve gerçek bonus kaydı backend doğrulamasıyla etkinleşecek.",14,MUTED));Button b=btn("PAYLAŞ — BETA");c.addView(b,new LinearLayout.LayoutParams(-1,110));page.addView(c);}
+ void settings(){head("AYARLAR");LinearLayout c=card();c.addView(t("Hesap Bilgileri                 ›",16,WHITE));c.addView(t("Bildirimler                     ›",16,WHITE));c.addView(t("Tema                    Mars Dark",16,WHITE));c.addView(t("Dil                         Türkçe",16,WHITE));c.addView(t("Pil alt sınırı                  %15",16,WHITE));c.addView(t("Sıcaklık koruması               43°C",16,WHITE));c.addView(t("Güvenlik                       ›",16,WHITE));page.addView(c);LinearLayout n=card();n.addView(t("BİLDİRİMLER",19,WHITE));n.addView(t("Kazanç başladı • Günlük hedef • Davet • Sistem mesajları",14,MUTED));page.addView(n);LinearLayout a=card();a.addView(t("HAKKINDA",19,WHITE));a.addView(logo());a.addView(t("MARS-X Pool Beta",15,ORANGE));a.addView(t("MARS-X uygulama içi kazanç gösterimidir; transfer edilebilir token henüz canlı değildir. Gerçek bakiye yalnızca doğrulanmış havuz uzlaştırmasından doğar.",14,MUTED));page.addView(a);}
 }
