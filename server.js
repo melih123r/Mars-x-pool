@@ -972,6 +972,28 @@ export function createServer({
         });
       }
 
+      if (req.method === "GET" && pathname === "/my/workers") {
+        if (!licenseReady) return sendJson(res, 503, { error: "licensing_not_configured" });
+        const installId = String(req.headers["x-install-id"] || "");
+        const session = currentLicense(req, installId);
+        if (!session) return sendJson(res, 401, { error: "valid_license_required" });
+        const timestamp = now();
+        const own = (await store.all()).filter((worker) => worker.licenseId === session.lic);
+        const workers = own.map((worker) => ({
+          workerId: worker.workerId, label: worker.label, platform: worker.platform, arch: worker.arch,
+          deviceClass: worker.deviceClass, capabilities: worker.capabilities || [], minerState: worker.minerState,
+          hashrateSols: worker.hashrateSols || 0, batteryPercent: worker.batteryPercent,
+          temperatureC: worker.temperatureC, lastSeen: worker.lastSeen,
+          status: timestamp - Date.parse(worker.lastSeen) < ONLINE_WINDOW_MS ? "online" : "offline"
+        })).sort((a,b)=>Date.parse(b.lastSeen)-Date.parse(a.lastSeen));
+        return sendJson(res, 200, {
+          workers,
+          summary: { total: workers.length, online: workers.filter(w=>w.status==="online").length,
+            running: workers.filter(w=>w.status==="online"&&w.minerState==="running").length,
+            totalHashrateSols: workers.filter(w=>w.status==="online").reduce((n,w)=>n+Number(w.hashrateSols||0),0) }
+        });
+      }
+
       if (req.method === "GET" && (pathname === "/workers" || pathname === "/summary")) {
         if (!token) return sendJson(res, 503, { error: "WORKER_TOKEN not configured" });
         if (!safeAuthorization(req.headers.authorization, "Bearer", token)) {
