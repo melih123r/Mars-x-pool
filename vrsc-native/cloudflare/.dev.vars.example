@@ -1,0 +1,8 @@
+WORKER_TOKEN=replace-with-random-operator-secret
+ADMIN_TOKEN=replace-with-different-random-admin-secret
+LICENSE_PEPPER=replace-with-random-secret-at-least-32-characters
+LICENSE_SESSION_SECRET=replace-with-another-random-secret-at-least-32-characters
+LICENSE_RECORDS_JSON=[]
+QONVERSION_SECRET_KEY=test_sk_replace-with-server-side-key
+GOOGLE_WEB_CLIENT_ID=000000000000-example.apps.googleusercontent.com
+AUTH_SUBJECT_PEPPER=replace-with-random-secret-at-least-32-characters

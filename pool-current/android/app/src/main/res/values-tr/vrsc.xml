@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vrsc_open">VRSC · Gerçek havuz verisi</string>
+    <string name="vrsc_title">MARS-X Pool · VRSC</string>
+    <string name="vrsc_intro">Bir VRSC adresinin LuckPool verilerini görüntüle. Bu ekran harici madencileri salt okunur olarak izler. Bu telefonda madencilik başlatmaz.</string>
+    <string name="vrsc_address">VRSC ana ağ R-adresi · seed veya özel anahtar girme</string>
+    <string name="vrsc_consent">Yenile dediğimde bu açık adres LuckPool’a gönderilsin. LuckPool ağ IP adresimi de görür. Cüzdan adresi ben silene kadar yalnızca bu cihazda saklansın.</string>
+    <string name="vrsc_refresh">Gerçek havuz verisini getir</string>
+    <string name="vrsc_stop">İzlemeyi durdur</string>
+    <string name="vrsc_stopped">Durduruldu. Otomatik yenileme veya kazım yapılmaz.</string>
+    <string name="vrsc_not_loaded">Henüz havuz verisi alınmadı.</string>
+    <string name="vrsc_money_notice">Tutarlar sorgulanan açık adrese aittir; doğrulanmış bir MARS-X hesabına ait değildir. Bunlar havuz bildirimidir, uygulama bakiyesi değildir. Ödeme TXID’leri havuz tarafından bildirilmiştir; blokzincir onayları kontrol edilmemiştir. Bu ekranda bakiye yazılmaz, dönüşüm veya çekim yapılmaz, MARS-X komisyonu alınmaz.</string>
+    <string name="vrsc_forget">Kayıtlı adresi sil</string>
+    <string name="vrsc_back">Pool’a dön</string>
+    <string name="vrsc_invalid_address">VRSC R-adresinin doğrulaması başarısız. Adresin tamamını kontrol et.</string>
+    <string name="vrsc_need_consent">Önce adres paylaşımı açıklamasını onayla.</string>
+    <string name="vrsc_cooldown">Sorgular arasında 30 saniye bekle.</string>
+    <string name="vrsc_loading">LuckPool verisi alınıyor…</string>
+    <string name="vrsc_stale">Havuz verisi 5 dakikadan eski. Kontrol etmek için yenile.</string>
+    <string name="vrsc_not_found">LuckPool bu adres için madenci kaydı bulamadı. Kazım doğrulanmadı.</string>
+    <string name="vrsc_invalid_response">Havuz verisi doğrulanamadı. Hesaba bakiye yazılmadı.</string>
+    <string name="vrsc_unavailable">Havuza bağlanılamadı. Ağını kontrol edip tekrar dene.</string>
+    <string name="vrsc_loaded">Kaynak: LuckPool · Havuz verisinin zamanı: %1$s</string>
+    <string name="vrsc_hashrate">Bildirilen hash hızı: %1$s</string>
+    <string name="vrsc_shares">Havuzun “shares” değeri: %1$s (doğrulanmış kabul edilen share adedi değildir)</string>
+    <string name="vrsc_totals">Havuz bakiyesi: %1$s VRSC\nOlgunlaşmamış ödül: %2$s VRSC\nHavuzun toplam ödediği: %3$s VRSC</string>
+    <string name="vrsc_workers">Havuzun bildirdiği worker’lar</string>
+    <string name="vrsc_no_workers">Worker bildirilmedi.</string>
+    <string name="vrsc_online">çevrimiçi</string>
+    <string name="vrsc_offline">çevrimdışı</string>
+    <string name="vrsc_payments">Havuzun bildirdiği son ödemeler · en fazla 10</string>
+    <string name="vrsc_no_payments">Bu API üzerinden ödeme bildirilmedi.</string>
+</resources>

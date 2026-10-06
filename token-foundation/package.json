@@ -1,0 +1,31 @@
+{
+  "name": "marsx-pool-worker-api",
+  "version": "0.8.4",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check cloudflare/src/worker.js && node token/validate-marsx-manifest.mjs",
+    "test": "node --test",
+    "marsx:validate": "node token/validate-marsx-manifest.mjs",
+    "marsx:devnet-plan": "node token/devnet-plan.mjs",
+    "marsx:devnet-status": "node token/devnet-status.mjs",
+    "license:generate": "node license-tool.js",
+    "cf:check": "wrangler deploy --dry-run --config cloudflare/wrangler.toml --outdir .wrangler-dist",
+    "cf:db:local": "wrangler d1 migrations apply marsx-pool --local --config cloudflare/wrangler.toml"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "redis": "6.2.0"
+  },
+  "devDependencies": {
+    "@solana/spl-token": "0.4.14",
+    "@solana/web3.js": "1.98.4",
+    "@solflare-wallet/sdk": "1.4.2",
+    "buffer": "6.0.3",
+    "esbuild": "0.25.10",
+    "wrangler": "4.42.0"
+  }
+}

@@ -1,0 +1,146 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run cf:check
+      - run: npm run cf:db:local
+      - run: python3 scripts/check-translations.py
+      - run: python3 scripts/check-release.py
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Install Android API 36 SDK
+        run: |
+          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses >/dev/null
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.11.1
+      - run: gradle -p android :app:lintRelease :app:assembleDebug :app:bundleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: marsx-pool-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: marsx-pool-release-aab-unsigned
+          path: android/app/build/outputs/bundle/release/app-release.aab
+
+  vrsc-engine-evidence:
+    runs-on: ubuntu-24.04-arm
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential automake autoconf libtool pkg-config libcurl4-openssl-dev libssl-dev libjansson-dev
+      - name: Build exact pinned ARM source
+        run: |
+          git clone --single-branch -b ARM https://github.com/monkins1010/ccminer.git engine-src
+          cd engine-src
+          git checkout 1667394ad4120d64b0c57367e71cb832ad2e3645
+          test "$(git rev-parse HEAD)" = "1667394ad4120d64b0c57367e71cb832ad2e3645"
+          chmod +x autogen.sh configure.sh build.sh
+          ./autogen.sh
+          CC=gcc CXX=g++ ./build.sh
+          test -x ./ccminer
+          file ./ccminer | tee ../engine-file.txt
+          sha256sum ./ccminer | tee ../engine-sha256.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vrsc-arm64-engine-evidence
+          path: |
+            engine-file.txt
+            engine-sha256.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+  vrsc-tls-probe:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Probe LuckPool VRSC TLS endpoint
+        run: |
+          set -euo pipefail
+          HOST=bzdev.vipor.net
+          PORT=5140
+          set +e
+          timeout 15 openssl s_client -connect "$HOST:$PORT" -servername "$HOST" -verify_return_error </dev/null > tls-probe.txt 2>&1
+          RC=$?
+          set -e
+          cat tls-probe.txt
+          if grep -Eq "Verify return code: 0 \(ok\)|Verification: OK" tls-probe.txt; then
+            printf 'host=%s\nport=%s\ntls_verified=true\nobserved_at=%s\n' "$HOST" "$PORT" "$(date -u +%FT%TZ)" > tls-evidence.txt
+          else
+            printf 'host=%s\nport=%s\ntls_verified=false\nopenssl_exit=%s\nobserved_at=%s\n' "$HOST" "$PORT" "$RC" "$(date -u +%FT%TZ)" > tls-evidence.txt
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vrsc-tls-probe
+          path: |
+            tls-probe.txt
+            tls-evidence.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+  vrsc-stratum-protocol-probe:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Probe Stratum protocol over verified TLS without authorization
+        run: |
+          set -euo pipefail
+          # Keep the protocol probe on the same verified endpoint used by the app.
+          # The former LuckPool endpoint presented an expired certificate and caused
+          # misleading CI failure notifications even though the MARS-X Vipor TLS path was healthy.
+          HOST=bzdev.vipor.net
+          PORT=5140
+          printf '{"id":1,"method":"mining.subscribe","params":["MARS-X-protocol-probe"]}\n' > request.txt
+          set +e
+          timeout 15 openssl s_client -quiet -connect "$HOST:$PORT" -servername "$HOST" -verify_return_error < request.txt > stratum-response.txt 2>tls-stderr.txt
+          RC=$?
+          set -e
+          cat stratum-response.txt
+          cat tls-stderr.txt
+          if ! grep -Eq '"id"[[:space:]]*:[[:space:]]*1|"method"[[:space:]]*:[[:space:]]*"mining\.' stratum-response.txt; then
+            printf 'host=%s\nport=%s\nprotocol_response=false\nopenssl_exit=%s\nobserved_at=%s\n' "$HOST" "$PORT" "$RC" "$(date -u +%FT%TZ)" > stratum-evidence.txt
+            exit 1
+          fi
+          printf 'host=%s\nport=%s\nprotocol_response=true\nopenssl_exit=%s\nobserved_at=%s\n' "$HOST" "$PORT" "$RC" "$(date -u +%FT%TZ)" > stratum-evidence.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: vrsc-stratum-protocol-probe
+          path: |
+            request.txt
+            stratum-response.txt
+            tls-stderr.txt
+            stratum-evidence.txt
+          if-no-files-found: ignore
+          retention-days: 7

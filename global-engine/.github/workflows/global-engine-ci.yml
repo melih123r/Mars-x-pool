@@ -1,0 +1,29 @@
+name: Global Engine CI
+on:
+  pull_request:
+    paths:
+      - "global-engine/**"
+      - "test/global-engine*.test.js"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/global-engine-ci.yml"
+  push:
+    branches: ["marsx-global-engine-v01"]
+    paths:
+      - "global-engine/**"
+      - "test/global-engine*.test.js"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/global-engine-ci.yml"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci
+      - run: npm run global-engine:test
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high

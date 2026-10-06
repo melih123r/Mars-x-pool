@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="commission_policy_title">MARS-X komisyon politikası</string>
+    <string name="commission_policy_body">Planlanan havuz hizmet komisyonu: dış havuz kesintisinden sonra kullanıcıya ait olduğu doğrulanan ödülün %1$s%% tutarı.\n\nPlanlanan çekim hizmet komisyonu: kullanıcının net bakiyesinden çekmek istediği tutarın %2$s%% tutarı. Ağ ve sağlayıcı masrafları ayrıca gösterilir; son işlem teklifi gerekir.\n\nUygun bir davet eden varsa, çekim komisyonunun %3$s%% tutarı MARS-X payından ayrılır; kullanıcıya ek ücret yazılmaz. Bu politikada havuz komisyonundan referral payı ayrılmaz.\n\nDurum: tahsilat bağlantısı kurulmadı. LuckPool verisini görüntülemek komisyon veya borç oluşturmaz. Bu ekran gerçek kazım, dönüşüm, çekim veya komisyon tahsilatını açmaz. Gelecekte ücret alınmadan önce oranlar gösterilecek ve açık onay istenecek.\n\nPolitika: %4$s</string>
+    <string name="commission_policy_unavailable">Komisyon politikası yüklenemedi. Komisyon tahsilatı açık değil.</string>
+</resources>

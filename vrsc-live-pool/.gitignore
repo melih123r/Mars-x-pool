@@ -1,0 +1,11 @@
+node_modules/
+.env
+*.log
+*.jks
+*.keystore
+android/.gradle/
+android/local.properties
+android/**/build/
+.wrangler/
+.wrangler-dist/
+cloudflare/.dev.vars

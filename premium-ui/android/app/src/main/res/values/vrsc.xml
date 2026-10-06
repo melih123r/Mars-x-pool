@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vrsc_open">VRSC · Real pool data</string>
+    <string name="vrsc_title">MARS-X Pool · VRSC</string>
+    <string name="vrsc_intro">View public LuckPool data for a VRSC address. This is a read-only monitor for external miners. It does not start mining on this phone.</string>
+    <string name="vrsc_address">VRSC mainnet R-address · never a seed or private key</string>
+    <string name="vrsc_consent">Send this public address to LuckPool when I refresh. LuckPool also receives my network IP. The address is saved only on this device until I delete it.</string>
+    <string name="vrsc_refresh">Fetch real pool data</string>
+    <string name="vrsc_stop">Stop viewing</string>
+    <string name="vrsc_stopped">Stopped. No automatic refresh or mining.</string>
+    <string name="vrsc_not_loaded">No pool data loaded.</string>
+    <string name="vrsc_money_notice">Amounts belong to the queried public address, not a verified MARS-X account. These are pool-reported values, not an app balance. Payment TXIDs are pool reports; blockchain confirmations have not been checked. No credit, exchange, withdrawal or MARS-X fee is created here.</string>
+    <string name="vrsc_forget">Delete saved address</string>
+    <string name="vrsc_back">Back to Pool</string>
+    <string name="vrsc_invalid_address">Invalid VRSC R-address checksum. Check the full address.</string>
+    <string name="vrsc_need_consent">Confirm the address-sharing notice first.</string>
+    <string name="vrsc_cooldown">Please wait 30 seconds between requests.</string>
+    <string name="vrsc_loading">Reading LuckPool…</string>
+    <string name="vrsc_stale">Pool data is over 5 minutes old. Refresh to check again.</string>
+    <string name="vrsc_not_found">LuckPool has no miner record for this address. Mining has not been confirmed.</string>
+    <string name="vrsc_invalid_response">Pool data could not be validated. No balance has been credited.</string>
+    <string name="vrsc_unavailable">Pool connection failed. Check your network and try again.</string>
+    <string name="vrsc_loaded">Source: LuckPool · Pool timestamp: %1$s</string>
+    <string name="vrsc_hashrate">Reported hashrate: %1$s</string>
+    <string name="vrsc_shares">Pool “shares” value: %1$s (not a verified accepted-share count)</string>
+    <string name="vrsc_totals">Pool balance: %1$s VRSC\nImmature rewards: %2$s VRSC\nTotal paid by pool: %3$s VRSC</string>
+    <string name="vrsc_workers">Pool-reported workers</string>
+    <string name="vrsc_no_workers">No workers reported.</string>
+    <string name="vrsc_online">online</string>
+    <string name="vrsc_offline">offline</string>
+    <string name="vrsc_payments">Recent pool-reported payments · up to 10</string>
+    <string name="vrsc_no_payments">No payments reported by this endpoint.</string>
+</resources>
