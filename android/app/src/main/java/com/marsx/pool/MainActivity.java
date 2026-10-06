@@ -78,6 +78,24 @@ public class MainActivity extends Activity {
     private Button homeTab;
     private Button earningsTab;
     private Button accountTab;
+    private static final int MARS_ORANGE = Color.rgb(255, 112, 18);
+    private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
+    private void styleInput(EditText input) {
+        input.setTextColor(MARS_TEXT);
+        input.setHintTextColor(MARS_MUTED);
+        input.setMinHeight(dp(48));
+        input.setPadding(dp(12), 0, dp(12), 0);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(Color.rgb(14, 15, 19));
+        bg.setStroke(dp(1), Color.rgb(74, 77, 86));
+        bg.setCornerRadius(dp(12));
+        input.setBackground(bg);
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        p.setMargins(0, dp(5), 0, dp(8));
+        input.setLayoutParams(p);
+    }
+    private static final int MARS_TEXT = Color.rgb(242, 242, 245);
+    private static final int MARS_MUTED = Color.rgb(165, 168, 178);
     private GoogleSignInManager googleSignIn;
     private String currentReferralCode = "";
 
@@ -93,14 +111,14 @@ public class MainActivity extends Activity {
         googleSignIn = new GoogleSignInManager(this);
         LinearLayout screen = new LinearLayout(this);
         screen.setOrientation(LinearLayout.VERTICAL);
-        screen.setBackgroundColor(Color.rgb(246, 248, 252));
+        screen.setBackgroundColor(Color.rgb(8, 9, 12));
 
         LinearLayout header = new LinearLayout(this);
         header.setOrientation(LinearLayout.VERTICAL);
-        header.setPadding(28, 28, 28, 14);
+        header.setPadding(dp(20), dp(20), dp(20), dp(10));
         addTitle(header, getString(R.string.app_title));
         TextView beta = addText(header, getString(R.string.simple_beta_label), 13);
-        beta.setTextColor(Color.rgb(103, 111, 128));
+        beta.setTextColor(Color.rgb(255, 122, 24));
         screen.addView(header);
 
         contentFrame = new FrameLayout(this);
@@ -115,8 +133,8 @@ public class MainActivity extends Activity {
 
         LinearLayout tabs = new LinearLayout(this);
         tabs.setOrientation(LinearLayout.HORIZONTAL);
-        tabs.setPadding(12, 6, 12, 10);
-        tabs.setBackgroundColor(Color.WHITE);
+        tabs.setPadding(dp(8), dp(4), dp(8), dp(8));
+        tabs.setBackgroundColor(Color.rgb(14, 15, 19));
         homeTab = tabButton(tabs, getString(R.string.tab_home), view -> showTab(0));
         earningsTab = tabButton(tabs, getString(R.string.tab_earnings), view -> showTab(1));
         accountTab = tabButton(tabs, getString(R.string.tab_account), view -> showTab(2));
@@ -136,8 +154,16 @@ public class MainActivity extends Activity {
 
     private View buildHomePage() {
         LinearLayout root = pageRoot();
-        addTitle(root, getString(R.string.home_title));
-        addText(root, getString(R.string.home_subtitle), 15);
+        addTitle(root, "MARS-X");
+        TextView hero = addText(root, "Mine the Future • Build on Mars", 15);
+        hero.setTextColor(MARS_MUTED);
+
+        LinearLayout earningsHero = card(root);
+        TextView heroLabel = addText(earningsHero, "TOPLAM MARS-X KAZANÇ", 13);
+        heroLabel.setTextColor(MARS_ORANGE);
+        TextView heroValue = addText(earningsHero, "— MARS-X", 28);
+        heroValue.setTextColor(MARS_TEXT);
+        addText(earningsHero, "Doğrulanmış kazanç verisi bekleniyor", 13).setTextColor(MARS_MUTED);
 
         LinearLayout serviceCard = card(root);
         addText(serviceCard, getString(R.string.service_status_title), 14);
@@ -145,9 +171,9 @@ public class MainActivity extends Activity {
         button(serviceCard, getString(R.string.refresh_button), view -> testConnection());
 
         LinearLayout vrscCard = card(root);
-        addText(vrscCard, getString(R.string.vrsc_title), 18);
-        addText(vrscCard, getString(R.string.vrsc_intro), 14);
-        button(vrscCard, getString(R.string.vrsc_open), view ->
+        addText(vrscCard, "MARS-X", 18);
+        addText(vrscCard, "MARS-X kazanç motoru • Beta", 14);
+        button(vrscCard, "BAŞLAT", view ->
                 startActivity(new Intent(this, VrscPoolActivity.class)));
 
         LinearLayout deviceCard = card(root);
@@ -163,7 +189,7 @@ public class MainActivity extends Activity {
 
     private View buildEarningsPage() {
         LinearLayout root = pageRoot();
-        addTitle(root, getString(R.string.earnings_title));
+        addTitle(root, "Kazançlar");
         addText(root, getString(R.string.sandbox_balance_disclaimer), 13);
 
         LinearLayout balanceCard = card(root);
@@ -176,11 +202,13 @@ public class MainActivity extends Activity {
         payoutAmount.setSingleLine(true);
         payoutAmount.setHint(R.string.payout_amount_hint);
         payoutAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        styleInput(payoutAmount);
         payoutCard.addView(payoutAmount);
         payoutDestination = new EditText(this);
         payoutDestination.setSingleLine(true);
         payoutDestination.setHint(R.string.payout_destination_hint);
         payoutDestination.setText(prefs.getString("sandbox_destination", ""));
+        styleInput(payoutDestination);
         payoutCard.addView(payoutDestination);
         button(payoutCard, getString(R.string.request_sandbox_payout_button), view -> requestPayout());
         button(payoutCard, getString(R.string.refresh_payouts_button), view -> refreshPayouts());
@@ -196,7 +224,7 @@ public class MainActivity extends Activity {
 
     private View buildAccountPage() {
         LinearLayout root = pageRoot();
-        addTitle(root, getString(R.string.account_title));
+        addTitle(root, "MARS-X Hesabım");
 
         LinearLayout accountCard = card(root);
         accountStatus = addText(accountCard, getString(R.string.google_signed_out), 16);
@@ -204,12 +232,16 @@ public class MainActivity extends Activity {
         referralInput.setSingleLine(true);
         referralInput.setHint(R.string.referral_code_hint);
         referralInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        styleInput(referralInput);
         accountCard.addView(referralInput);
         googleSignInButton = button(accountCard, getString(R.string.continue_with_google), view -> beginGoogleSignIn(false));
         button(accountCard, getString(R.string.refresh_account_button), view -> refreshUserProfile());
 
         acceptTerms = new CheckBox(this);
         acceptTerms.setText(R.string.accept_terms);
+        acceptTerms.setTextColor(MARS_TEXT);
+        acceptTerms.setMinHeight(dp(48));
+        acceptTerms.setButtonTintList(new ColorStateList(new int[][]{new int[]{android.R.attr.state_checked},new int[]{}},new int[]{MARS_ORANGE,MARS_MUTED}));
         acceptTerms.setChecked(prefs.getBoolean("terms_accepted_" + TERMS_VERSION, false));
         acceptTerms.setOnCheckedChangeListener((button, checked) ->
                 prefs.edit().putBoolean("terms_accepted_" + TERMS_VERSION, checked).apply());
@@ -244,13 +276,15 @@ public class MainActivity extends Activity {
     private LinearLayout pageRoot() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(24, 8, 24, 32);
+        root.setPadding(dp(18), dp(8), dp(18), dp(24));
         return root;
     }
 
     private View scroll(LinearLayout root) {
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
+        scroll.setClipToPadding(false);
+        scroll.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
         scroll.addView(root);
         return scroll;
     }
@@ -258,15 +292,20 @@ public class MainActivity extends Activity {
     private LinearLayout card(LinearLayout parent) {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(24, 20, 24, 20);
+        card.setPadding(dp(18), dp(16), dp(18), dp(16));
         GradientDrawable background = new GradientDrawable();
-        background.setColor(Color.WHITE);
-        background.setCornerRadius(24f);
+        background.setColor(Color.rgb(20, 21, 26));
+        background.setStroke(dp(1), Color.rgb(92, 50, 27));
+        background.setCornerRadius(dp(18));
         card.setBackground(background);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(0, 8, 0, 14);
+        params.setMargins(0, dp(8), 0, dp(12));
         parent.addView(card, params);
+        for (int i = 0; i < card.getChildCount(); i++) {
+            View child = card.getChildAt(i);
+            if (child instanceof TextView) ((TextView) child).setTextColor(MARS_TEXT);
+        }
         return card;
     }
 
@@ -274,6 +313,9 @@ public class MainActivity extends Activity {
         Button button = new Button(this);
         button.setText(label);
         button.setAllCaps(false);
+        button.setMinHeight(dp(48));
+        button.setMinimumHeight(dp(48));
+        button.setTextColor(MARS_MUTED);
         button.setOnClickListener(listener);
         root.addView(button, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f));
         return button;
@@ -283,8 +325,11 @@ public class MainActivity extends Activity {
         homePage.setVisibility(selected == 0 ? View.VISIBLE : View.GONE);
         earningsPage.setVisibility(selected == 1 ? View.VISIBLE : View.GONE);
         accountPage.setVisibility(selected == 2 ? View.VISIBLE : View.GONE);
-        int active = Color.rgb(20, 73, 145);
-        int inactive = Color.rgb(89, 98, 115);
+        int active = Color.rgb(255, 112, 18);
+        int inactive = Color.rgb(155, 158, 168);
+        homeTab.setSelected(selected == 0);
+        earningsTab.setSelected(selected == 1);
+        accountTab.setSelected(selected == 2);
         homeTab.setTextColor(selected == 0 ? active : inactive);
         earningsTab.setTextColor(selected == 1 ? active : inactive);
         accountTab.setTextColor(selected == 2 ? active : inactive);
@@ -1011,7 +1056,7 @@ public class MainActivity extends Activity {
         view.setText(text);
         view.setTextSize(size);
         view.setTextColor(Color.rgb(34, 46, 67));
-        view.setPadding(0, 8, 0, 12);
+        view.setPadding(0, dp(6), 0, dp(9));
         root.addView(view);
         return view;
     }
@@ -1024,6 +1069,10 @@ public class MainActivity extends Activity {
     private Button button(LinearLayout root, String label, View.OnClickListener listener) {
         Button button = new Button(this);
         button.setText(label);
+        button.setAllCaps(false);
+        button.setMinHeight(dp(48));
+        button.setMinimumHeight(dp(48));
+        button.setTextColor(MARS_TEXT);
         button.setOnClickListener(listener);
         root.addView(button);
         return button;
