@@ -168,13 +168,17 @@ test("licensed registration and heartbeat work while admin listing stays separat
     const heartbeat = await fetch(`${baseUrl}/heartbeat`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ node_id: "node-001", install_id: "install_1234567890", cpu_percent: 12.5, miner_state: "running", hashrate_sols: 1234.5, battery_percent: 81, temperature_c: 39.5 }),
+      body: JSON.stringify({ node_id: "node-001", install_id: "install_1234567890", cpu_percent: 12.5, miner_state: "running", hashrate_sols: 1234.5, pool_connected: true, accepted_shares: 7, rejected_shares: 1, last_share_at: timestamp - 5000, battery_percent: 81, temperature_c: 39.5 }),
     });
     assert.equal(heartbeat.status, 200);
     const heartbeatWorker = (await heartbeat.json()).worker;
     assert.equal(heartbeatWorker.cpuPercent, 12.5);
     assert.equal(heartbeatWorker.minerState, "running");
     assert.equal(heartbeatWorker.hashrateSols, 1234.5);
+    assert.equal(heartbeatWorker.poolConnected, true);
+    assert.equal(heartbeatWorker.acceptedShares, 7);
+    assert.equal(heartbeatWorker.rejectedShares, 1);
+    assert.equal(heartbeatWorker.lastShareAt, new Date(timestamp - 5000).toISOString());
     assert.equal(heartbeatWorker.batteryPercent, 81);
     assert.equal(heartbeatWorker.temperatureC, 39.5);
     assert.deepEqual(heartbeatWorker.safety, { batteryMinPercent: 15, thermalMaxC: 43, batteryRule: "active", thermalRule: "active" });
