@@ -36,7 +36,11 @@ export function createApi(engine=buildEngine()){
       if(req.method==="GET" && url.pathname==="/markets") return res.end(JSON.stringify({mode:"READ_ONLY",liveExecution:false,markets:marketCapabilities()}));
       if(req.method==="GET" && url.pathname==="/macro/sources") return res.end(JSON.stringify({mode:"REFERENCE_ONLY",sources:[
         {id:"UST_YIELD_CURVE",provider:"U.S. Treasury",frequency:"DAILY",status:"AVAILABLE",series:["1M","3M","6M","1Y","2Y","5Y","10Y","20Y","30Y"],executionReady:false},
-        {id:"FED_H15",provider:"Federal Reserve Board",frequency:"DAILY",status:"AVAILABLE",series:["FED_FUNDS","TREASURY_CONSTANT_MATURITY"],executionReady:false}
+        {id:"FED_H15",provider:"Federal Reserve Board",frequency:"DAILY",status:"AVAILABLE",series:["FED_FUNDS","TREASURY_CONSTANT_MATURITY"],executionReady:false},
+        {id:"ECB_DATA",provider:"European Central Bank",frequency:"MIXED",status:"AVAILABLE",series:["POLICY_RATES","FX_REFERENCE_RATES","YIELD_CURVES","MONETARY_AGGREGATES"],executionReady:false},
+        {id:"EUROSTAT",provider:"Eurostat",frequency:"MIXED",status:"AVAILABLE",series:["HICP","GDP","UNEMPLOYMENT","INDUSTRIAL_PRODUCTION"],executionReady:false},
+        {id:"CBOE_VIX",provider:"Cboe",frequency:"DAILY",status:"AVAILABLE_REFERENCE",series:["VIX_HISTORY"],executionReady:false},
+        {id:"EIA",provider:"U.S. Energy Information Administration",frequency:"MIXED",status:"CREDENTIAL_REQUIRED",series:["WTI","BRENT","NATURAL_GAS","PETROLEUM"],requires:"EIA_API_KEY",executionReady:false}
       ]}));
       if(req.method==="GET" && ["/quote","/route"].includes(url.pathname)){
         const i=instrument({symbol:url.searchParams.get("symbol"),assetClass:url.searchParams.get("assetClass"),quoteCurrency:url.searchParams.get("quoteCurrency")||"USD"});
