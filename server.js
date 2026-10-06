@@ -1048,6 +1048,9 @@ export function createServer({
           workers,
           summary: { total: workers.length, online: workers.filter(w=>w.status==="online").length,
             running: workers.filter(w=>w.status==="online"&&w.minerState==="running").length,
+            poolConnected: workers.filter(w=>w.status==="online"&&w.poolConnected===true).length,
+            acceptedShares: workers.filter(w=>w.status==="online").reduce((n,w)=>n+Number(w.acceptedShares||0),0),
+            rejectedShares: workers.filter(w=>w.status==="online").reduce((n,w)=>n+Number(w.rejectedShares||0),0),
             totalHashrateSols: workers.filter(w=>w.status==="online").reduce((n,w)=>n+Number(w.hashrateSols||0),0) }
         });
       }
