@@ -14,7 +14,8 @@ export class MarsXGlobalEngine {
   register(adapter){ this.adapters.push(adapter); return this; }
 
   async quotes(order){
-    const eligible=this.adapters.filter(v=>v.supports(order.instrument));
+    const eligible=this.adapters.filter(v=>v.supports(order.instrument) && this.health.get(v.name).failures < this.policy.maxVenueFailures);
+    if(!eligible.length) throw new Error("no healthy eligible venues");
     const settled=await Promise.allSettled(eligible.map(async v=>{
       const start=Date.now();
       try { const q=await v.getQuote(order); this.health.success(v.name,Date.now()-start); return q; }
