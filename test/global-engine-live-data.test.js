@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { order, quote } from "../global-engine/core.js";
-import { PublicCryptoAdapter } from "../global-engine/adapters/public-crypto.js";
+import { PublicCryptoAdapter, coinbaseCryptoUsd, krakenCryptoUsd } from "../global-engine/adapters/public-crypto.js";
 import { filterFreshQuotes } from "../global-engine/quality.js";
 
 test("public crypto adapter uses ask for BUY and scales fee by notional",async()=>{
@@ -24,6 +24,18 @@ test("public crypto adapter uses bid for SELL",async()=>{
   const o=order({instrument:{symbol:"BTC-USD",assetClass:"CRYPTO"},side:"SELL",amount:1000});
   assert.equal((await a.getQuote(o)).price,123.4);
  }finally{global.fetch=oldFetch;}
+});
+
+test("Coinbase and Kraken public adapters support ETH-USD",()=>{
+ const eth={symbol:"ETH-USD",assetClass:"CRYPTO"};
+ assert.equal(coinbaseCryptoUsd().supports(eth),true);
+ assert.equal(krakenCryptoUsd().supports(eth),true);
+});
+
+test("unsupported crypto symbols fail closed",()=>{
+ const sol={symbol:"SOL-USD",assetClass:"CRYPTO"};
+ assert.equal(coinbaseCryptoUsd().supports(sol),false);
+ assert.equal(krakenCryptoUsd().supports(sol),false);
 });
 
 test("stale quotes are rejected before routing",()=>{
