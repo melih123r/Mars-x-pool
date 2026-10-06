@@ -175,17 +175,5 @@
     <string name="account_delete_failed">The account could not be deleted. Try again.</string>
     <string name="save_server_button">Save server</string>
     <string name="sandbox_payout_created_with_fee">Net test amount: %1$s USDT_TEST • fee: %2$s • status: %3$s. This is not a real payment.</string>
-    <string name="premium_pool_beta">POOL BETA</string>
-    <string name="premium_pool_title">MARS-X POOL</string>
-    <string name="premium_pool_subtitle">Doğrulanmış havuz oturumunu tek dokunuşla yönet</string>
-    <string name="premium_session_active">● OTURUM AKTİF</string>
-    <string name="premium_session_ready">● HAZIR</string>
-    <string name="premium_start">BAŞLAT</string>
-    <string name="premium_stop">DURDUR</string>
-    <string name="premium_earned">KAZANILAN MARS-X</string>
-    <string name="premium_verified_earnings_waiting">Doğrulanmış kazanç verisi bekleniyor</string>
-    <string name="premium_runtime">ÇALIŞMA SÜRESİ</string>
-    <string name="premium_device_pool">CİHAZ VE HAVUZ</string>
-    <string name="premium_statistics">İSTATİSTİKLER</string>
-    <string name="premium_statistics_subtitle">Havuz ve cihaz performansını doğrulanmış telemetriyle incele</string>
+
 </resources>
