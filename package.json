@@ -11,7 +11,8 @@
     "cf:check": "wrangler deploy --dry-run --config cloudflare/wrangler.toml --outdir .wrangler-dist",
     "cf:db:local": "wrangler d1 migrations apply marsx-pool --local --config cloudflare/wrangler.toml",
     "global-engine:start": "node global-engine/api.js",
-    "global-engine:test": "node --test test/global-engine*.test.js"
+    "global-engine:test": "node --test test/global-engine*.test.js",
+    "global-engine:alpaca-sandbox:certify": "node global-engine/run-alpaca-sandbox-certification.js"
   },
   "engines": {
     "node": "22.x"

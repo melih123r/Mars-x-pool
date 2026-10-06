@@ -40,12 +40,16 @@ export class BrokerOrderStore {
 }
 
 export class BrokerReconciler {
-  compare({internalCash,providerCash,internalPositions={},providerPositions={},tolerance=0.01}){
+  compare({internalCash,providerCash,internalPositions={},providerPositions={},tolerance=0.01,positionTolerance=1e-9}){
+    const finite=(value)=>["string","number"].includes(typeof value)&&String(value).trim()!==""&&Number.isFinite(Number(value));
+    if(!finite(internalCash)||!finite(providerCash)||!finite(tolerance)||Number(tolerance)<0||!finite(positionTolerance)||Number(positionTolerance)<0) throw new Error("invalid reconciliation values");
+    if(!internalPositions||!providerPositions||typeof internalPositions!=="object"||typeof providerPositions!=="object"||Array.isArray(internalPositions)||Array.isArray(providerPositions)) throw new Error("invalid reconciliation positions");
     const mismatches=[];
     if(Math.abs(Number(internalCash)-Number(providerCash))>tolerance) mismatches.push({type:"CASH",internal:internalCash,provider:providerCash});
     for(const symbol of new Set([...Object.keys(internalPositions),...Object.keys(providerPositions)])){
       const a=Number(internalPositions[symbol]||0),b=Number(providerPositions[symbol]||0);
-      if(Math.abs(a-b)>tolerance) mismatches.push({type:"POSITION",symbol,internal:a,provider:b});
+      if((Object.hasOwn(internalPositions,symbol)&&!finite(internalPositions[symbol]))||(Object.hasOwn(providerPositions,symbol)&&!finite(providerPositions[symbol]))) throw new Error("invalid reconciliation position quantity");
+      if(Math.abs(a-b)>positionTolerance) mismatches.push({type:"POSITION",symbol,internal:a,provider:b});
     }
     return {ok:mismatches.length===0,mismatches,autoCorrected:false};
   }
