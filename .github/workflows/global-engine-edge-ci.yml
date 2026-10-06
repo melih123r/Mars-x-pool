@@ -1,0 +1,25 @@
+name: Global Engine Edge CI
+on:
+  push:
+    branches: ["marsx-global-engine-v01"]
+    paths:
+      - "global-engine/**"
+      - "cloudflare/global-engine-worker.js"
+      - "cloudflare/wrangler.global-engine.toml"
+      - "test/global-engine*.test.js"
+      - ".github/workflows/global-engine-edge-ci.yml"
+  pull_request:
+    paths:
+      - "global-engine/**"
+      - "cloudflare/global-engine-worker.js"
+      - "cloudflare/wrangler.global-engine.toml"
+      - "test/global-engine*.test.js"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm run global-engine:test
