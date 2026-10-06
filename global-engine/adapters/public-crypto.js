@@ -5,7 +5,9 @@ export class PublicCryptoAdapter extends VenueAdapter {
   constructor({name,urlFor,parse,feeBps=0}) {
     super(name,["CRYPTO"]); this.urlFor=urlFor; this.parse=parse; this.feeBps=feeBps;
   }
+  supports(instrument) { return super.supports(instrument) && String(instrument.symbol).toUpperCase()==="BTC-USD"; }
   async getQuote(order) {
+    if(!this.supports(order.instrument)) throw new Error(`${this.name} unsupported instrument`);
     const res=await fetch(this.urlFor(order.instrument),{headers:{accept:"application/json"},signal:AbortSignal.timeout(5000)});
     if(!res.ok) throw new Error(`${this.name} quote HTTP ${res.status}`);
     const payload=await res.json();
