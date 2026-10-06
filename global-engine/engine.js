@@ -1,6 +1,6 @@
 import { selectBest } from "./router.js";
 import { filterFreshQuotes, normalizeQuotes } from "./quality.js";
-import { filterOutliers } from "./consensus.js";
+import { filterOutliers, consensusState } from "./consensus.js";
 import { VenueHealth } from "./health.js";
 import { DEFAULT_RISK_POLICY, validateQuoteRisk } from "./risk.js";
 
@@ -23,7 +23,10 @@ export class MarsXGlobalEngine {
     const raw=settled.filter(x=>x.status==="fulfilled").map(x=>x.value);
     const fresh=filterFreshQuotes(normalizeQuotes(raw),{maxAgeMs:this.maxQuoteAgeMs});
     const sane=filterOutliers(fresh);
-    return sane.filter(q=>validateQuoteRisk(q,this.policy).ok);
+    const riskOk=sane.filter(q=>validateQuoteRisk(q,this.policy).ok);
+    const consensus=consensusState(riskOk);
+    if(!consensus.ok) throw new Error(consensus.reason);
+    return riskOk;
   }
 
   async route(order){
