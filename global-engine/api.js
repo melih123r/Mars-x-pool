@@ -6,6 +6,18 @@ import { PublicFxAdapter } from "./adapters/public-fx.js";
 import { AlpacaMarketDataAdapter } from "./adapters/alpaca.js";
 import { MetalsDevGoldAdapter } from "./adapters/metals-dev.js";
 
+export function marketCapabilities(env=process.env){
+  const alpaca=Boolean(env.ALPACA_API_KEY&&env.ALPACA_API_SECRET), metals=Boolean(env.METALS_DEV_API_KEY);
+  return [
+    {symbol:"BTC-USD",assetClass:"CRYPTO",status:"AVAILABLE",venues:["coinbase-public","kraken-public"]},
+    {symbol:"ETH-USD",assetClass:"CRYPTO",status:"AVAILABLE",venues:["coinbase-public","kraken-public"]},
+    {symbol:"EUR-USD",assetClass:"FX",status:"AVAILABLE_REFERENCE",venues:["frankfurter-public"],executionReady:false},
+    {symbol:"XAU-USD",assetClass:"COMMODITY",status:metals?"AVAILABLE_REFERENCE":"CREDENTIAL_REQUIRED",venues:metals?["metals-dev-gold"]:[],requires:"METALS_DEV_API_KEY",executionReady:false},
+    {symbol:"AAPL",assetClass:"EQUITY",status:alpaca?"AVAILABLE":"CREDENTIAL_REQUIRED",venues:alpaca?["alpaca-market-data"]:[],requires:"ALPACA_API_KEY + ALPACA_API_SECRET",executionReady:false},
+    {symbol:"SPY",assetClass:"ETF",status:alpaca?"AVAILABLE":"CREDENTIAL_REQUIRED",venues:alpaca?["alpaca-market-data"]:[],requires:"ALPACA_API_KEY + ALPACA_API_SECRET",executionReady:false}
+  ];
+}
+
 export function buildEngine(){
   const adapters=[coinbaseBtcUsd(),krakenBtcUsd(),new PublicFxAdapter()];
   if(process.env.ALPACA_API_KEY && process.env.ALPACA_API_SECRET) adapters.push(new AlpacaMarketDataAdapter());
@@ -15,22 +27,19 @@ export function buildEngine(){
 
 export function createApi(engine=buildEngine()){
   return http.createServer(async(req,res)=>{
-    res.setHeader("content-type","application/json");
-    res.setHeader("cache-control","no-store");
-    res.setHeader("x-content-type-options","nosniff");
+    res.setHeader("content-type","application/json"); res.setHeader("cache-control","no-store"); res.setHeader("x-content-type-options","nosniff");
     try{
       const url=new URL(req.url,"http://localhost");
       if(req.method==="GET" && url.pathname==="/health") return res.end(JSON.stringify({ok:true,mode:"READ_ONLY",liveExecution:false,venues:engine.health.snapshot()}));
+      if(req.method==="GET" && url.pathname==="/markets") return res.end(JSON.stringify({mode:"READ_ONLY",liveExecution:false,markets:marketCapabilities()}));
       if(req.method==="GET" && ["/quote","/route"].includes(url.pathname)){
         const i=instrument({symbol:url.searchParams.get("symbol"),assetClass:url.searchParams.get("assetClass"),quoteCurrency:url.searchParams.get("quoteCurrency")||"USD"});
         const o=order({instrument:i,side:url.searchParams.get("side")||"BUY",amount:Number(url.searchParams.get("amount")||1)});
-        const routed=await engine.route(o);
-        const result={...routed,mode:"READ_ONLY",executionReady:false};
+        const routed=await engine.route(o), result={...routed,mode:"READ_ONLY",executionReady:false};
         return res.end(JSON.stringify(url.pathname==="/quote"?result.quotes:result));
       }
       res.statusCode=404; return res.end(JSON.stringify({error:"NOT_FOUND"}));
     }catch(e){ res.statusCode=400; return res.end(JSON.stringify({error:String(e.message||e)})); }
   });
 }
-
 if(import.meta.url===`file://${process.argv[1]}`) createApi().listen(Number(process.env.PORT||8080));
