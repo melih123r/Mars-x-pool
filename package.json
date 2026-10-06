@@ -14,7 +14,7 @@
     "global-engine:test": "node --test test/global-engine*.test.js"
   },
   "engines": {
-    "node": ">=22"
+    "node": "22.x"
   },
   "dependencies": {
     "redis": "6.2.0"
