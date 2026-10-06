@@ -1004,7 +1004,7 @@ export function createServer({
         const timestamp = now();
         const own = (await store.all()).filter((worker) => worker.licenseId === session.lic);
         const workers = own.map((worker) => ({
-          workerId: worker.workerId, label: worker.label, platform: worker.platform, arch: worker.arch,
+          workerId: worker.workerId, label: worker.label, platform: worker.platform, arch: worker.arch,\n          desiredMinerState: worker.desiredMinerState || "stopped", desiredCpuPercent: worker.desiredCpuPercent ?? 50,
           deviceClass: worker.deviceClass, capabilities: worker.capabilities || [], minerState: worker.minerState,
           hashrateSols: worker.hashrateSols || 0, batteryPercent: worker.batteryPercent,
           temperatureC: worker.temperatureC, lastSeen: worker.lastSeen,
