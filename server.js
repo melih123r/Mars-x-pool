@@ -1003,6 +1003,28 @@ export function createServer({
         return sendJson(res, 200, { ok:true, commandSeq:worker.commandSeq, desiredMinerState:worker.desiredMinerState, desiredCpuPercent:worker.desiredCpuPercent });
       }
 
+      if (req.method === "POST" && pathname === "/my/workers-command") {
+        if (!licenseReady) return sendJson(res, 503, { error: "licensing_not_configured" });
+        const data = await readJson(req);
+        const installId = String(data.install_id || req.headers["x-install-id"] || "");
+        const session = currentLicense(req, installId);
+        if (!session) return sendJson(res, 401, { error: "valid_license_required" });
+        const command = String(data.command || "");
+        if (!["start","stop"].includes(command)) return sendJson(res, 400, { error: "invalid_command" });
+        const timestamp = now();
+        const own = (await store.all()).filter((worker) => worker.licenseId === session.lic);
+        let targeted = 0;
+        for (const worker of own) {
+          if (timestamp - Date.parse(worker.lastSeen) >= ONLINE_WINDOW_MS) continue;
+          worker.desiredMinerState = command === "start" ? "running" : "stopped";
+          worker.commandSeq = Number(worker.commandSeq || 0) + 1;
+          worker.commandUpdatedAt = new Date(timestamp).toISOString();
+          await store.set(worker);
+          targeted++;
+        }
+        return sendJson(res, 200, { ok:true, command, targeted, total:own.length });
+      }
+
       if (req.method === "GET" && pathname === "/my/workers") {
         if (!licenseReady) return sendJson(res, 503, { error: "licensing_not_configured" });
         const installId = String(req.headers["x-install-id"] || "");
