@@ -3,9 +3,9 @@ import android.app.*;import android.content.*;import android.os.*;import android
 public final class WorkerService extends Service {
  static final String CHANNEL="marsx_worker"; static final int ID=4101; static final Pattern RATE=Pattern.compile("(?i)([0-9]+(?:\\.[0-9]+)?)\\s*([kmg]?)h?/?s");
  Handler h; Runnable safety; Process miner; volatile double hashrate;
- public void onCreate(){super.onCreate();NotificationManager nm=getSystemService(NotificationManager.class);nm.createNotificationChannel(new NotificationChannel(CHANNEL,"MARS-X Worker",NotificationManager.IMPORTANCE_LOW));h=new Handler(Looper.getMainLooper());safety=()->{if(!safe())stopCompute();h.postDelayed(safety,15000);};}
+ public void onCreate(){super.onCreate();NotificationManager nm=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);if(Build.VERSION.SDK_INT>=26)nm.createNotificationChannel(new NotificationChannel(CHANNEL,"MARS-X Worker",NotificationManager.IMPORTANCE_LOW));h=new Handler(Looper.getMainLooper());safety=()->{if(!safe())stopCompute();h.postDelayed(safety,15000);};}
  public int onStartCommand(Intent i,int f,int id){if(i!=null&&"STOP".equals(i.getAction())){stopCompute();stopSelf();return START_NOT_STICKY;}startForeground(ID,note("Worker güvenlik denetimi aktif"));h.removeCallbacks(safety);h.post(safety);if(safe())startComputeIfAvailable();return START_STICKY;}
- Notification note(String s){return new Notification.Builder(this,CHANNEL).setContentTitle("MARS-X Worker").setContentText(s).setSmallIcon(android.R.drawable.stat_notify_sync).build();}
+ Notification note(String s){Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);return b.setContentTitle("MARS-X Worker").setContentText(s).setSmallIcon(android.R.drawable.stat_notify_sync).setOngoing(true).build();}
  boolean safe(){BatteryManager b=getSystemService(BatteryManager.class);int pct=b.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);return pct>=15&&readBatteryTemp()<43f;}
  float readBatteryTemp(){Intent x=registerReceiver(null,new IntentFilter(Intent.ACTION_BATTERY_CHANGED));return x==null?0f:x.getIntExtra(BatteryManager.EXTRA_TEMPERATURE,0)/10f;}
  synchronized void startComputeIfAvailable(){
