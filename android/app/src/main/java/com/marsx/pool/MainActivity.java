@@ -93,14 +93,14 @@ public class MainActivity extends Activity {
         googleSignIn = new GoogleSignInManager(this);
         LinearLayout screen = new LinearLayout(this);
         screen.setOrientation(LinearLayout.VERTICAL);
-        screen.setBackgroundColor(Color.rgb(246, 248, 252));
+        screen.setBackgroundColor(Color.rgb(5, 10, 18));
 
         LinearLayout header = new LinearLayout(this);
         header.setOrientation(LinearLayout.VERTICAL);
         header.setPadding(28, 28, 28, 14);
-        addTitle(header, getString(R.string.app_title));
+        addTitle(header, "MARS-X");
         TextView beta = addText(header, getString(R.string.simple_beta_label), 13);
-        beta.setTextColor(Color.rgb(103, 111, 128));
+        beta.setTextColor(Color.rgb(245, 174, 70));
         screen.addView(header);
 
         contentFrame = new FrameLayout(this);
@@ -116,10 +116,10 @@ public class MainActivity extends Activity {
         LinearLayout tabs = new LinearLayout(this);
         tabs.setOrientation(LinearLayout.HORIZONTAL);
         tabs.setPadding(12, 6, 12, 10);
-        tabs.setBackgroundColor(Color.WHITE);
-        homeTab = tabButton(tabs, getString(R.string.tab_home), view -> showTab(0));
-        earningsTab = tabButton(tabs, getString(R.string.tab_earnings), view -> showTab(1));
-        accountTab = tabButton(tabs, getString(R.string.tab_account), view -> showTab(2));
+        tabs.setBackgroundColor(Color.rgb(7, 14, 24));
+        homeTab = tabButton(tabs, "Ana Sayfa", view -> showTab(0));
+        earningsTab = tabButton(tabs, "Kazanç", view -> showTab(1));
+        accountTab = tabButton(tabs, "Ayarlar", view -> showTab(2));
         screen.addView(tabs);
         setContentView(screen);
         showTab(0);
@@ -136,8 +136,8 @@ public class MainActivity extends Activity {
 
     private View buildHomePage() {
         LinearLayout root = pageRoot();
-        addTitle(root, getString(R.string.home_title));
-        addText(root, getString(R.string.home_subtitle), 15);
+        addTitle(root, "Madencilik Seninle Daha Güçlü");
+        addText(root, "Daha temiz, daha adil, daha şeffaf bir gelecek.", 15);
 
         LinearLayout serviceCard = card(root);
         addText(serviceCard, getString(R.string.service_status_title), 14);
@@ -168,7 +168,7 @@ public class MainActivity extends Activity {
 
     private View buildEarningsPage() {
         LinearLayout root = pageRoot();
-        addTitle(root, getString(R.string.earnings_title));
+        addTitle(root, "Kazanç");
         addText(root, getString(R.string.sandbox_balance_disclaimer), 13);
 
         LinearLayout balanceCard = card(root);
@@ -201,7 +201,7 @@ public class MainActivity extends Activity {
 
     private View buildAccountPage() {
         LinearLayout root = pageRoot();
-        addTitle(root, getString(R.string.account_title));
+        addTitle(root, "Ayarlar");
 
         LinearLayout accountCard = card(root);
         accountStatus = addText(accountCard, getString(R.string.google_signed_out), 16);
@@ -265,7 +265,7 @@ public class MainActivity extends Activity {
         card.setOrientation(LinearLayout.VERTICAL);
         card.setPadding(24, 20, 24, 20);
         GradientDrawable background = new GradientDrawable();
-        background.setColor(Color.WHITE);
+        background.setColor(Color.rgb(12, 23, 35));
         background.setCornerRadius(24f);
         card.setBackground(background);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -288,8 +288,8 @@ public class MainActivity extends Activity {
         homePage.setVisibility(selected == 0 ? View.VISIBLE : View.GONE);
         earningsPage.setVisibility(selected == 1 ? View.VISIBLE : View.GONE);
         accountPage.setVisibility(selected == 2 ? View.VISIBLE : View.GONE);
-        int active = Color.rgb(20, 73, 145);
-        int inactive = Color.rgb(89, 98, 115);
+        int active = Color.rgb(245, 174, 70);
+        int inactive = Color.rgb(132, 145, 160);
         homeTab.setTextColor(selected == 0 ? active : inactive);
         earningsTab.setTextColor(selected == 1 ? active : inactive);
         accountTab.setTextColor(selected == 2 ? active : inactive);
@@ -1015,7 +1015,7 @@ public class MainActivity extends Activity {
         TextView view = new TextView(this);
         view.setText(text);
         view.setTextSize(size);
-        view.setTextColor(Color.rgb(34, 46, 67));
+        view.setTextColor(Color.rgb(235, 240, 246));
         view.setPadding(0, 8, 0, 12);
         root.addView(view);
         return view;
@@ -1023,7 +1023,7 @@ public class MainActivity extends Activity {
 
     private void addTitle(LinearLayout root, String text) {
         TextView view = addText(root, text, 23);
-        view.setTextColor(Color.rgb(20, 73, 145));
+        view.setTextColor(Color.rgb(245, 174, 70));
     }
 
     private Button button(LinearLayout root, String label, View.OnClickListener listener) {
