@@ -29,8 +29,8 @@ android {
         applicationId "com.marsx.pool"
         minSdk 26
         targetSdk 36
-        versionCode 12
-        versionName "0.8.4-beta"
+        versionCode 13
+        versionName "0.9.0-finance-beta"
         buildConfigField "String", "QONVERSION_PROJECT_KEY", "\"${escapedQonversionProjectKey}\""
         buildConfigField "String", "QONVERSION_PRODUCT_PRO", "\"pro_monthly\""
         buildConfigField "String", "QONVERSION_PRODUCT_FARM", "\"farm_monthly\""
