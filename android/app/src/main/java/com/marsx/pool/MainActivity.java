@@ -144,6 +144,11 @@ public class MainActivity extends Activity {
         status = addText(serviceCard, getString(R.string.connecting), 18);
         button(serviceCard, getString(R.string.refresh_button), view -> testConnection());
 
+        LinearLayout financeCard = card(root);
+        addText(financeCard, "MARS-X Finance", 18);
+        addText(financeCard, "Partner-backed market conversion preview. Read-only beta; trading and withdrawals are locked.", 14);
+        button(financeCard, "Open Finance", view -> startActivity(new Intent(this, FinanceActivity.class)));
+
         LinearLayout vrscCard = card(root);
         addText(vrscCard, getString(R.string.vrsc_title), 18);
         addText(vrscCard, getString(R.string.vrsc_intro), 14);
