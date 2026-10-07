@@ -1,0 +1,5 @@
+import test from "node:test";import assert from "node:assert/strict";import {changeNowUiState} from "./changenow-ui-state.js";
+test("credential pending stays fail closed",()=>{const v=changeNowUiState({health:{configured:false}});assert.equal(v.state,"CONNECTION_PENDING");assert.equal(v.canExecute,false);});
+test("valid quote is preview only",()=>{const v=changeNowUiState({health:{configured:true},quote:{toAmount:"2",rate:"4"}});assert.equal(v.quoteAvailable,true);assert.equal(v.primaryAction,"PREVIEW_QUOTE");assert.equal(v.canExecute,false);});
+test("expired quote is invalidated",()=>{const v=changeNowUiState({health:{configured:true},quote:{toAmount:"2",validUntil:"2020-01-01T00:00:00Z"},now:Date.parse("2021-01-01T00:00:00Z")});assert.equal(v.state,"EXPIRED");assert.equal(v.quoteAvailable,false);});
+test("provider errors are sanitized",()=>{const v=changeNowUiState({health:{configured:true},error:{code:"HTTP_500",message:"secret upstream body"}});assert.equal(v.error.message,"Quote is temporarily unavailable");assert.equal(JSON.stringify(v).includes("secret upstream"),false);});
