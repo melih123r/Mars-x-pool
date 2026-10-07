@@ -1,0 +1,4 @@
+import test from "node:test";import assert from "node:assert/strict";import {ChangeNowAdapter} from "../global-engine/adapters/changenow.js";
+test("ChangeNOW execution remains fail closed",()=>{const a=new ChangeNowAdapter({apiKey:"test"});assert.equal(a.capabilities().quotes,true);assert.equal(a.capabilities().createTransaction,false);assert.throws(()=>a.createTransaction(),/disabled/);});
+test("ChangeNOW quote methods validate required inputs",async()=>{const a=new ChangeNowAdapter({apiKey:"test"});await assert.rejects(()=>a.estimate({toCurrency:"sol",fromAmount:1}),/fromCurrency required/);await assert.rejects(()=>a.minAmount({fromCurrency:"vrsc"}),/toCurrency required/);await assert.rejects(()=>a.status(),/transactionId required/);});
+test("ChangeNOW reports unconfigured credentials",()=>{const a=new ChangeNowAdapter({apiKey:""});assert.equal(a.configured(),false);});
