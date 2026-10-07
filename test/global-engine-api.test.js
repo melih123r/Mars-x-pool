@@ -16,3 +16,17 @@ test("read-only API exposes health and route",async()=>{
   assert.equal(route.best.venue,"paper");
  } finally { await new Promise(r=>server.close(r)); }
 });
+
+test("ChangeNOW HTTP surface is read-only and fail-closed",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const health=await (await fetch(base+"/changenow/health")).json();
+  assert.equal(health.provider,"ChangeNOW");assert.equal(health.mode,"READ_ONLY");assert.equal(health.executionReady,false);assert.equal(health.capabilities.createTransaction,false);
+  const bad=await fetch(base+"/changenow/quote?fromCurrency=btc&toCurrency=sol&fromAmount=0");
+  assert.equal(bad.status,400);const body=await bad.json();assert.equal(JSON.stringify(body).includes("CHANGENOW_API_KEY"),false);
+  const post=await fetch(base+"/changenow/quote",{method:"POST"});assert.equal(post.status,404);
+  const create=await fetch(base+"/changenow/transaction",{method:"POST"});assert.equal(create.status,404);
+ } finally { await new Promise(r=>server.close(r)); }
+});
