@@ -56,18 +56,18 @@ if 'android.permission.INTERNET' not in manifest:
     raise SystemExit("INTERNET permission is required")
 if not re.search(r"targetSdk\s+36", gradle):
     raise SystemExit("targetSdk 36 is required")
-if 'versionName "0.8.4-beta"' not in gradle or 'versionCode 12' not in gradle:
-    raise SystemExit("Beta 0.8.4 Android version is required")
-if '"version": "0.8.4"' not in package:
-    raise SystemExit("Package version must match Beta 0.8.4")
-if 'APP_VERSION = "0.8.4-beta"' not in main_activity:
-    raise SystemExit("Android runtime version must match Beta 0.8.4")
+if 'versionName "0.9.0-beta"' not in gradle or 'versionCode 13' not in gradle:
+    raise SystemExit("Beta 0.9.0 Android version is required")
+if '"version": "0.9.0"' not in package:
+    raise SystemExit("Package version must match Beta 0.9.0")
+if 'APP_VERSION = "0.9.0-beta"' not in main_activity:
+    raise SystemExit("Android runtime version must match Beta 0.9.0")
 for runtime in (
     ROOT / "server.js",
     ROOT / "cloudflare/src/worker.js",
     ROOT / "supabase/functions/marsx-pool-api/worker.js",
 ):
-    if 'const VERSION = "0.8.4"' not in runtime.read_text(encoding="utf-8"):
+    if 'const VERSION = "0.9.0"' not in runtime.read_text(encoding="utf-8"):
         raise SystemExit(f"Runtime version is stale: {runtime.relative_to(ROOT)}")
 if "MARSX_API_BASE_URL" not in gradle:
     raise SystemExit("API build-time endpoint is required")
