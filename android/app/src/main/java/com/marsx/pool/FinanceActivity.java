@@ -1,37 +1,30 @@
 package com.marsx.pool;
 
-import android.app.Activity;
-import android.graphics.Color;
-import android.os.Bundle;
-import android.widget.*;
-import org.json.JSONObject;
-import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
+import android.app.*;import android.graphics.*;import android.graphics.drawable.*;import android.os.*;import android.view.*;import android.widget.*;import org.json.*;import java.io.*;import java.net.*;import java.nio.charset.StandardCharsets;import java.util.Locale;
 
-public final class FinanceActivity extends Activity {
-  private EditText from,to,amount; private TextView result;
-  @Override public void onCreate(Bundle state){super.onCreate(state);
-    LinearLayout root=new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setPadding(28,28,28,28); root.setBackgroundColor(Color.rgb(8,12,23));
-    title(root,"MARS-X FINANCE",26); text(root,"ChangeNOW partner integration preview · READ ONLY",15);
-    text(root,"Quotes only. Trading, deposits, withdrawals and custody are disabled in this beta.",14);
-    from=input(root,"From asset (e.g. btc)","btc"); to=input(root,"To asset (e.g. sol)","sol"); amount=input(root,"Amount","0.01");
-    Button q=new Button(this);q.setText("Get quote preview");q.setOnClickListener(v->quote());root.addView(q);
-    result=text(root,"No quote loaded.",16); Button back=new Button(this);back.setText("Back");back.setOnClickListener(v->finish());root.addView(back);
-    ScrollView s=new ScrollView(this);s.addView(root);setContentView(s);
-  }
-  private void quote(){String f=clean(from.getText().toString()),t=clean(to.getText().toString()),a=amount.getText().toString().trim();
-    if(!f.matches("[a-z0-9]{2,16}")||!t.matches("[a-z0-9]{2,16}")||!a.matches("[0-9]+(\\.[0-9]{1,12})?")){result.setText("Invalid quote input.");return;}
-    result.setText("Loading read-only quote…");new Thread(()->{HttpURLConnection c=null;try{
-      String u=BuildConfig.MARSX_FINANCE_API_BASE_URL+"/changenow/quote?fromCurrency="+URLEncoder.encode(f,"UTF-8")+"&toCurrency="+URLEncoder.encode(t,"UTF-8")+"&fromAmount="+URLEncoder.encode(a,"UTF-8");
-      c=(HttpURLConnection)new URL(u).openConnection();c.setConnectTimeout(7000);c.setReadTimeout(7000);c.setInstanceFollowRedirects(false);c.setRequestProperty("Accept","application/json");
-      int code=c.getResponseCode();InputStream in=code>=400?c.getErrorStream():c.getInputStream();String body=read(in);JSONObject j=new JSONObject(body);
-      String shown=code==200?"Quote received (read-only):\n"+j.optJSONObject("data"):"Quote unavailable (HTTP "+code+").\nNo transaction was created.";
-      runOnUiThread(()->result.setText(shown));
-    }catch(Exception e){runOnUiThread(()->result.setText("Quote service unavailable. No transaction was created."));}finally{if(c!=null)c.disconnect();}}).start();}
-  private String read(InputStream in)throws Exception{if(in==null)return "{}";BufferedReader r=new BufferedReader(new InputStreamReader(in,StandardCharsets.UTF_8));StringBuilder b=new StringBuilder();String l;while((l=r.readLine())!=null&&b.length()<8192)b.append(l);return b.toString();}
-  private String clean(String s){return s.trim().toLowerCase(java.util.Locale.ROOT);}
-  private EditText input(LinearLayout r,String hint,String value){EditText e=new EditText(this);e.setHint(hint);e.setText(value);e.setTextColor(Color.WHITE);e.setHintTextColor(Color.LTGRAY);r.addView(e);return e;}
-  private TextView text(LinearLayout r,String s,int z){TextView v=new TextView(this);v.setText(s);v.setTextSize(z);v.setTextColor(Color.WHITE);v.setPadding(0,10,0,14);r.addView(v);return v;}
-  private void title(LinearLayout r,String s,int z){TextView v=text(r,s,z);v.setTextColor(Color.rgb(255,140,40));}
+public final class FinanceActivity extends Activity{
+ LinearLayout root; TextView result,status; EditText amount; Spinner from,to,fromNet,toNet; final int ORANGE=Color.rgb(255,112,0),BG=Color.rgb(5,9,15),CARD=Color.rgb(12,18,27);
+ @Override public void onCreate(Bundle b){super.onCreate(b);build();}
+ void build(){ScrollView s=new ScrollView(this);root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(30,28,30,34);root.setBackgroundColor(BG);
+  rowTitle(); title("Kripto Dönüştür",30); muted("Varlıklarını MARS-X üzerinden hızlı ve şeffaf şekilde önizle.");
+  cardHeader(); selectors(); quoteInfo(); marketCard(); nav(); s.addView(root);setContentView(s); health();
+ }
+ void rowTitle(){LinearLayout r=row();TextView logo=t("MARS-X",25,Color.WHITE);logo.setTypeface(null,Typeface.BOLD);r.addView(logo,new LinearLayout.LayoutParams(0,-2,1));status=t("● Bağlanıyor",13,Color.LTGRAY);r.addView(status);root.addView(r);}
+ void cardHeader(){LinearLayout c=card();TextView h=t("DÖNÜŞÜM",13,ORANGE);h.setTypeface(null,Typeface.BOLD);c.addView(h);c.addView(t("Gönder",12,Color.GRAY));root.addView(c);}
+ void selectors(){LinearLayout c=(LinearLayout)root.getChildAt(root.getChildCount()-1);String[] assets={"BTC · Bitcoin","ETH · Ethereum","USDT · Tether","SOL · Solana","BNB · BNB","DOGE · Dogecoin"};from=spin(assets,0);to=spin(assets,1);c.addView(from);amount=new EditText(this);amount.setText("0.01");amount.setTextColor(Color.WHITE);amount.setTextSize(25);amount.setInputType(2|8192);amount.setBackground(box());amount.setPadding(22,20,22,20);c.addView(amount,mp(12));c.addView(t("Ağ",12,Color.GRAY));fromNet=spin(new String[]{"Bitcoin (BTC)","Ethereum (ERC20)","Solana","BNB Smart Chain"},0);c.addView(fromNet);TextView swap=t("⇅",30,ORANGE);swap.setGravity(Gravity.CENTER);c.addView(swap);c.addView(t("Al",12,Color.GRAY));c.addView(to);c.addView(t("Ağ",12,Color.GRAY));toNet=spin(new String[]{"Ethereum (ERC20)","Bitcoin (BTC)","Solana","BNB Smart Chain"},0);c.addView(toNet);
+  Button q=new Button(this);q.setText("Önizleme Al");q.setTextSize(17);q.setTextColor(Color.BLACK);q.setBackground(round(ORANGE,18));q.setOnClickListener(v->quote());c.addView(q,mp(18));result=t("Henüz fiyat önizlemesi alınmadı.",15,Color.LTGRAY);c.addView(result);
+ }
+ void quoteInfo(){LinearLayout c=card();c.addView(t("Piyasa Oranı     •     Min. Tutar     •     Ağ Ücreti",13,Color.LTGRAY));c.addView(t("Gerçek işlem şu anda kapalıdır. Gösterilen değerler yalnız fiyat önizlemesidir.",12,Color.GRAY));root.addView(c,mp(12));}
+ void marketCard(){LinearLayout c=card();c.addView(t("PİYASA",13,ORANGE));TextView p=t("BTC / EUR     64,520.30     +1.96%",20,Color.WHITE);p.setTypeface(null,Typeface.BOLD);c.addView(p);c.addView(t("1m    5m    15m    1h    4h    1D    1W    1M",13,Color.LTGRAY));c.addView(new ChartView(this),new LinearLayout.LayoutParams(-1,420));c.addView(t("BTC     ETH     BNB     SOL     DOGE",14,Color.LTGRAY));root.addView(c,mp(12));}
+ void nav(){TextView n=t("⌂ Ana Sayfa     ◈ Piyasalar     ⇄ Dönüştür     ◇ Portföy     ≡ Analiz",12,Color.LTGRAY);n.setGravity(Gravity.CENTER);root.addView(n,mp(20));}
+ void health(){new Thread(()->{try{JSONObject j=get("/changenow/health");boolean ok=j.optBoolean("configured",false);runOnUiThread(()->{status.setText(ok?"● Hizmet Aktif":"● Bağlantı Bekleniyor");status.setTextColor(ok?Color.rgb(0,220,160):Color.LTGRAY);});}catch(Exception e){runOnUiThread(()->status.setText("● Hizmet Bekleniyor"));}}).start();}
+ void quote(){String f=asset(from),tt=asset(to),a=amount.getText().toString().trim();if(!a.matches("[0-9]+(\\.[0-9]{1,12})?")){result.setText("Geçerli bir miktar gir.");return;}result.setText("Fiyat hesaplanıyor…");new Thread(()->{try{String path="/changenow/quote?fromCurrency="+enc(f)+"&toCurrency="+enc(tt)+"&fromAmount="+enc(a);JSONObject j=get(path);JSONObject d=j.optJSONObject("data");String out=d==null?"Fiyat şu anda alınamadı.":("Tahmini alacağın miktar\n"+d.optString("toAmount",d.optString("estimatedAmount","—"))+" "+tt.toUpperCase(Locale.ROOT)+"\nİşlem oluşturulmadı.");runOnUiThread(()->result.setText(out));}catch(Exception e){runOnUiThread(()->result.setText("Fiyat servisi şu anda kullanılamıyor. İşlem oluşturulmadı."));}}).start();}
+ JSONObject get(String p)throws Exception{HttpURLConnection c=(HttpURLConnection)new URL(BuildConfig.MARSX_FINANCE_API_BASE_URL+p).openConnection();c.setConnectTimeout(7000);c.setReadTimeout(7000);c.setRequestProperty("Accept","application/json");int code=c.getResponseCode();InputStream in=code>=400?c.getErrorStream():c.getInputStream();String body=read(in);c.disconnect();if(code>=400)throw new IOException("HTTP "+code);return new JSONObject(body);}
+ String read(InputStream in)throws Exception{BufferedReader r=new BufferedReader(new InputStreamReader(in,StandardCharsets.UTF_8));StringBuilder b=new StringBuilder();String l;while((l=r.readLine())!=null&&b.length()<8192)b.append(l);return b.toString();}
+ String enc(String s)throws Exception{return URLEncoder.encode(s,"UTF-8");}String asset(Spinner s){return s.getSelectedItem().toString().split(" ")[0].toLowerCase(Locale.ROOT);}
+ Spinner spin(String[] a,int i){Spinner s=new Spinner(this);ArrayAdapter<String>d=new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,a){public View getView(int p,View v,android.view.ViewGroup g){TextView x=(TextView)super.getView(p,v,g);x.setTextColor(Color.WHITE);x.setTextSize(17);x.setPadding(18,18,18,18);x.setBackgroundColor(CARD);return x;}};s.setAdapter(d);s.setSelection(i);return s;}
+ LinearLayout card(){LinearLayout c=new LinearLayout(this);c.setOrientation(LinearLayout.VERTICAL);c.setPadding(22,20,22,22);c.setBackground(round(CARD,22));return c;}LinearLayout row(){LinearLayout r=new LinearLayout(this);r.setOrientation(LinearLayout.HORIZONTAL);r.setGravity(Gravity.CENTER_VERTICAL);return r;}
+ TextView t(String x,int z,int col){TextView v=new TextView(this);v.setText(x);v.setTextSize(z);v.setTextColor(col);v.setPadding(0,8,0,8);return v;}void title(String x,int z){TextView v=t(x,z,Color.WHITE);v.setTypeface(null,Typeface.BOLD);root.addView(v);}void muted(String x){root.addView(t(x,14,Color.LTGRAY));}
+ LinearLayout.LayoutParams mp(int top){LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=top;return p;}GradientDrawable round(int col,int rad){GradientDrawable g=new GradientDrawable();g.setColor(col);g.setCornerRadius(rad);return g;}GradientDrawable box(){GradientDrawable g=round(Color.rgb(16,23,34),16);g.setStroke(1,Color.rgb(45,55,68));return g;}
+ static final class ChartView extends View{Paint p=new Paint(1);ChartView(android.content.Context c){super(c);setBackgroundColor(Color.rgb(7,12,19));}protected void onDraw(Canvas c){super.onDraw(c);int w=getWidth(),h=getHeight();p.setStrokeWidth(2);p.setColor(Color.rgb(30,40,50));for(int i=1;i<5;i++)c.drawLine(0,h*i/5f,w,h*i/5f,p);p.setColor(Color.rgb(255,112,0));p.setStrokeWidth(5);Path q=new Path();q.moveTo(0,h*.7f);for(int x=0;x<=w;x+=Math.max(20,w/16)){double y=h*(.58+.15*Math.sin(x*.035)+.06*Math.cos(x*.013));q.lineTo(x,(float)y);}c.drawPath(q,p);}}
 }
