@@ -12,6 +12,8 @@ def marsxApiBaseUrl = providers.gradleProperty("MARSX_API_BASE_URL")
 def escapedMarsxApiBaseUrl = marsxApiBaseUrl
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
+def financeApiBaseUrl = providers.gradleProperty("MARSX_FINANCE_API_BASE_URL").orElse(providers.environmentVariable("MARSX_FINANCE_API_BASE_URL")).getOrElse("https://marsx-global-engine.onrender.com")
+def escapedFinanceApiBaseUrl = financeApiBaseUrl.replace("\\", "\\\\").replace("\"", "\\\"")
 def googleWebClientId = providers.gradleProperty("GOOGLE_WEB_CLIENT_ID")
         .orElse(providers.environmentVariable("GOOGLE_WEB_CLIENT_ID"))
         .getOrElse("")
@@ -33,6 +35,7 @@ android {
         buildConfigField "String", "QONVERSION_PRODUCT_PRO", "\"pro_monthly\""
         buildConfigField "String", "QONVERSION_PRODUCT_FARM", "\"farm_monthly\""
         buildConfigField "String", "MARSX_API_BASE_URL", "\"${escapedMarsxApiBaseUrl}\""
+        buildConfigField "String", "MARSX_FINANCE_API_BASE_URL", "\"${escapedFinanceApiBaseUrl}\""
         buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${escapedGoogleWebClientId}\""
     }
 
