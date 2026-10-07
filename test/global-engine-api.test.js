@@ -30,3 +30,15 @@ test("ChangeNOW HTTP surface is read-only and fail-closed",async()=>{
   const create=await fetch(base+"/changenow/transaction",{method:"POST"});assert.equal(create.status,404);
  } finally { await new Promise(r=>server.close(r)); }
 });
+
+test("Pool ChangeNOW bridge remains quote-only",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const invalid=await fetch(base+"/pool/changenow/quote?toCurrency=sol&fromAmount=0");
+  assert.equal(invalid.status,400);
+  const create=await fetch(base+"/pool/changenow/transaction",{method:"POST"});
+  assert.equal(create.status,404);
+ } finally { await new Promise(r=>server.close(r)); }
+});
