@@ -1,0 +1,4 @@
+import test from "node:test";import assert from "node:assert/strict";import {changeNowHealth,changeNowErrorView} from "../global-engine/changenow-health.js";
+test("ChangeNOW health separates read-only readiness from execution",()=>{const h=changeNowHealth({configured:true,currencies:[{ticker:"sol"}],quote:{timestamp:1000,estimatedAmount:2},now:1100});assert.equal(h.readyReadOnly,true);assert.equal(h.readyExecution,false);assert.equal(h.executionBlockers.length,3);});
+test("ChangeNOW health rejects stale quote",()=>{assert.equal(changeNowHealth({configured:true,currencies:[{}],quote:{timestamp:0,estimatedAmount:2},now:40000,maxQuoteAgeMs:1000}).readyReadOnly,false);});
+test("ChangeNOW errors are sanitized and classified",()=>{const e=new Error("HTTP 429 secret-body");e.status=429;const v=changeNowErrorView(e);assert.equal(v.kind,"rate_limited");assert.equal(v.retryable,true);assert.equal(v.message.includes("secret"),false);});
