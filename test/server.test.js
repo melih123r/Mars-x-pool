@@ -33,7 +33,7 @@ async function activate(baseUrl, installId = "install_1234567890", key = LICENSE
       install_id: installId,
       terms_accepted: true,
       terms_version: "2026-09-27-v3",
-      app_version: "0.8-beta",
+      app_version: "0.9.0-beta",
     }),
   });
 }
@@ -82,7 +82,7 @@ test("health and privacy are public", async () => {
     assert.deepEqual(await health.json(), {
       ok: true,
       service: "marsx-pool-worker-api",
-      version: "0.8.4",
+      version: "0.9.0",
       storage: "memory",
       persistent: false,
       licensing: "ready",
@@ -340,7 +340,7 @@ test("Qonversion entitlement is exchanged for a short device-bound session", asy
         install_id: "node-qonversion12345",
         terms_accepted: true,
         terms_version: "2026-09-27-v3",
-        app_version: "0.8-beta",
+        app_version: "0.9.0-beta",
       }),
     });
     assert.equal(exchange.status, 200);

@@ -36,7 +36,7 @@ import java.util.UUID;
 public class MainActivity extends Activity {
     private static final String DEFAULT_URL = BuildConfig.MARSX_API_BASE_URL;
     private static final String TERMS_VERSION = "2026-09-27-v3";
-    private static final String APP_VERSION = "0.8.4-beta";
+    private static final String APP_VERSION = "0.9.0-beta";
     private static final String TESTER_URL = "https://play.google.com/apps/testing/com.marsx.pool";
     private static final int[] TASKS = {
             R.string.task_app_opens,

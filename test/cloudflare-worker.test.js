@@ -69,7 +69,7 @@ async function activate(app, env, installId = "node-cloudflare12345") {
       install_id: installId,
       terms_accepted: true,
       terms_version: "2026-09-27-v3",
-      app_version: "0.8-beta",
+      app_version: "0.9.0-beta",
     }),
   }), env);
   assert.equal(response.status, 200);
@@ -81,7 +81,7 @@ test("Cloudflare health exposes the serverless runtime contract", async () => {
   const response = await app.fetch(request("/health"), environment());
   assert.equal(response.status, 200);
   const body = await response.json();
-  assert.equal(body.version, "0.8.4");
+  assert.equal(body.version, "0.9.0");
   assert.equal(body.licensing, "ready");
   assert.equal(body.google_auth, "ready");
   assert.equal(body.payoutMode, "sandbox");
@@ -270,7 +270,7 @@ test("Cloudflare exchanges active Qonversion entitlement for a 24-hour session",
       install_id: "node-cloudflare12345",
       terms_accepted: true,
       terms_version: "2026-09-27-v3",
-      app_version: "0.8-beta",
+      app_version: "0.9.0-beta",
     }),
   }), env);
   assert.equal(response.status, 200);
