@@ -23,7 +23,7 @@ public final class FinanceActivity extends Activity {
   private void quote(){String f=clean(from.getText().toString()),t=clean(to.getText().toString()),a=amount.getText().toString().trim();
     if(!f.matches("[a-z0-9]{2,16}")||!t.matches("[a-z0-9]{2,16}")||!a.matches("[0-9]+(\\.[0-9]{1,12})?")){result.setText("Invalid quote input.");return;}
     result.setText("Loading read-only quote…");new Thread(()->{HttpURLConnection c=null;try{
-      String u=BuildConfig.MARSX_FINANCE_API_BASE_URL+"/changenow/quote?fromCurrency="+URLEncoder.encode(f,StandardCharsets.UTF_8)+"&toCurrency="+URLEncoder.encode(t,StandardCharsets.UTF_8)+"&fromAmount="+URLEncoder.encode(a,StandardCharsets.UTF_8);
+      String u=BuildConfig.MARSX_FINANCE_API_BASE_URL+"/changenow/quote?fromCurrency="+URLEncoder.encode(f,"UTF-8")+"&toCurrency="+URLEncoder.encode(t,"UTF-8")+"&fromAmount="+URLEncoder.encode(a,"UTF-8");
       c=(HttpURLConnection)new URL(u).openConnection();c.setConnectTimeout(7000);c.setReadTimeout(7000);c.setInstanceFollowRedirects(false);c.setRequestProperty("Accept","application/json");
       int code=c.getResponseCode();InputStream in=code>=400?c.getErrorStream():c.getInputStream();String body=read(in);JSONObject j=new JSONObject(body);
       String shown=code==200?"Quote received (read-only):\n"+j.optJSONObject("data"):"Quote unavailable (HTTP "+code+").\nNo transaction was created.";
