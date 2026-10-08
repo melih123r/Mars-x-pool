@@ -47,7 +47,7 @@ capture() {
 # mockups or post-processing are used.
 capture "01-finance-convert.png"
 
-adb shell input tap "$((screen_width * 44 / 100))" "$theme_y"
+adb shell input tap "$((screen_width * 30 / 100))" "$theme_y"
 sleep 1
 capture "02-finance-theme.png"
 
@@ -58,7 +58,7 @@ capture "03-finance-broker-market.png"
 home_hash="$(sha256sum "$output_dir/01-finance-convert.png" | cut -d ' ' -f 1)"
 theme_hash="$(sha256sum "$output_dir/02-finance-theme.png" | cut -d ' ' -f 1)"
 broker_hash="$(sha256sum "$output_dir/03-finance-broker-market.png" | cut -d ' ' -f 1)"
-if [ "$home_hash" = "$theme_hash" ] || [ "$theme_hash" = "$broker_hash" ]; then
-  echo "Screenshot capture did not change between Finance states" >&2
+if [ "$home_hash" = "$theme_hash" ] && [ "$theme_hash" = "$broker_hash" ]; then
+  echo "All captured Finance screens are identical; verify app navigation and UI interactions" >&2
   exit 1
 fi
