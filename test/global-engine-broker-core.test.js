@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { BrokerLedger,BrokerOrderStore,BrokerReconciler,brokerSafetyStatus } from "../global-engine/broker-core.js";
+import { BrokerLedger,BrokerOrderStore,BrokerReconciler,brokerProviderScorecard,brokerSafetyStatus } from "../global-engine/broker-core.js";
 
 test("orders are idempotent and enforce lifecycle",()=>{
  const s=new BrokerOrderStore();
@@ -29,4 +29,14 @@ test("reconciliation detects mismatch and never auto-corrects",()=>{
 test("production money movement remains locked",()=>{
  const s=brokerSafetyStatus();
  assert.equal(s.liveExecution,false); assert.equal(s.withdrawals,false); assert.equal(s.custody,false);
+});
+
+test("broker scorecard ranks providers without enabling execution",()=>{
+ const providers=brokerProviderScorecard({lemonConfigured:true,alpacaConfigured:true});
+ assert.equal(providers[0].id,"lemon-markets");
+ assert.ok(providers.some(p=>p.id==="alpaca-broker"&&p.configured));
+ assert.ok(providers.some(p=>p.id==="upvest"&&p.recommended));
+ assert.ok(providers.every(p=>p.executionReady===false));
+ assert.ok(providers.every(p=>p.liveTrading===false&&p.withdrawals===false&&p.custody===false));
+ assert.ok(providers.find(p=>p.id==="ibkr").blockers.includes("gateway/session operations"));
 });
