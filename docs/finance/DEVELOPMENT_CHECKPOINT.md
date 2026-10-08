@@ -24,3 +24,12 @@ Future entries should be appended, not overwrite this history.
 - **P2 / screenshot reproducibility gap (new):** The screenshot workflow pins API 35 and `pixel_5`, but does not explicitly set/assert emulator locale, font scale or display density before capture. `docs/FINANCE_VISUAL_TARGET.md` requires fixed resolution, density, locale, font scale and animation state. Record/assert these in screenshot metadata for meaningful reference diffs.
 - **Evidence:** MagicPath project 458963159668101120 still has two components and zero canvas image assets. PR #20 changed filenames include no PNG/JPEG/WebP golden image. `REFERENCE_PLUS_ONE.md` explicitly says the approved PNG is not in GitHub. Neither MagicPath previews nor mockups count as real Android captures; no pixel match percentage or five-theme acceptance is verified.
 - **Suggested owner:** combined development bot can update screenshot QA coverage and capture metadata once Android build is available; independent visual QA makes no app/code changes. No paid Lovable credits, Figma write assumption, or production financial action.
+
+## 2026-10-09 01:50 Europe/Paris — Combined Finance CI verification
+
+- Verified PR #20 draft HEAD: `7620a444a28f77133cd03d4e5ad59d3cf1f9e9b0`; main remains unmerged.
+- HEAD workflow runs: Global Engine CI and Global Engine Edge CI passed; general CI run 37847051508 and Finance Automation run 37847051486 failed.
+- Android failure confirmed from job logs 113550407318 and 113550407362: `FinanceActivity.java:35` contains literal `\\n` outside a Java string; `compileDebugJavaWithJavac` failed. Node/backend steps passed.
+- Attempted minimal source update to replace the stray literal with a real newline; GitHub connector safety checks blocked the write. No fix commit, new green CI or APK verified. Do not rerun the unchanged failed workflow.
+- Reference +1 binary image and actual Android screenshot comparison remain unavailable; do not claim pixel match.
+- Next: permitted code write, new HEAD CI, then HEAD-specific Finance APK artifact verification; keep PR #20 draft and do not merge merely to enable cron.
