@@ -1,0 +1,85 @@
+name: MARS-X Finance Automation Engine
+on:
+  push:
+    branches: [marsx-global-engine-v01]
+    paths:
+      - 'android/**'
+      - 'global-engine/**'
+      - 'test/**'
+      - 'finance-ui/**'
+      - 'package.json'
+      - '.github/workflows/marsx-finance-automation.yml'
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'global-engine/**'
+      - 'test/**'
+      - 'finance-ui/**'
+      - 'package.json'
+  workflow_dispatch:
+  # GitHub runs schedules ONLY from the default branch.
+  # This cron becomes active after this workflow is merged into default.
+  schedule:
+    - cron: '2/5 * * * *'
+permissions:
+  contents: read
+concurrency:
+  group: marsx-finance-auto-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  finance-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Finance source contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f docs/finance/REFERENCE_PLUS_ONE.md
+          test -f android/app/src/main/java/com/marsx/pool/FinanceActivity.java
+          test -f android/app/src/main/AndroidManifest.xml
+          echo "Finance source files present at ${GITHUB_SHA}"
+      - name: Set up Node
+        if: github.event_name != 'schedule'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run existing Node test suite
+        if: github.event_name != 'schedule'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f package-lock.json ]; then npm ci; else npm install --ignore-scripts --no-audit --no-fund; fi
+          npm test
+      - name: Set up Java
+        if: github.event_name != 'schedule'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Android debug build
+        if: github.event_name != 'schedule'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f android/gradlew ]; then
+            cd android
+            chmod +x gradlew
+            ./gradlew :app:assembleDebug --no-daemon
+          elif [ -f gradlew ]; then
+            chmod +x gradlew
+            ./gradlew :android:app:assembleDebug --no-daemon
+          else
+            echo "::error::Gradle wrapper missing; cannot verify Android APK"
+            exit 1
+          fi
+      - name: Upload verified debug APK
+        if: success() && github.event_name != 'schedule'
+        uses: actions/upload-artifact@v4
+        with:
+          name: marsx-finance-debug-${{ github.sha }}
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
