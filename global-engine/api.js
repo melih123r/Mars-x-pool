@@ -1,7 +1,7 @@
 import http from "node:http";
 import { instrument, order } from "./core.js";
 import { MarsXGlobalEngine } from "./engine.js";
-import { coinbaseBtcUsd, krakenBtcUsd } from "./adapters/public-crypto.js";
+import { bybitCryptoUsd, coinbaseBtcUsd, krakenBtcUsd } from "./adapters/public-crypto.js";
 import { PublicFxAdapter } from "./adapters/public-fx.js";
 import { AlpacaMarketDataAdapter } from "./adapters/alpaca.js";
 import { MetalsDevGoldAdapter } from "./adapters/metals-dev.js";
@@ -18,8 +18,9 @@ import { buildChartView } from "./chart-view.js";
 export function marketCapabilities(env=process.env){
   const alpaca=Boolean(env.ALPACA_API_KEY&&env.ALPACA_API_SECRET), metals=Boolean(env.METALS_DEV_API_KEY);
   return [
-    {symbol:"BTC-USD",assetClass:"CRYPTO",status:"AVAILABLE",venues:["coinbase-public","kraken-public"]},
-    {symbol:"ETH-USD",assetClass:"CRYPTO",status:"AVAILABLE",venues:["coinbase-public","kraken-public"]},
+    {symbol:"BTC-USD",assetClass:"CRYPTO",status:"AVAILABLE",venues:["coinbase-public","kraken-public","bybit-public"]},
+    {symbol:"ETH-USD",assetClass:"CRYPTO",status:"AVAILABLE",venues:["coinbase-public","kraken-public","bybit-public"]},
+    ...["SOL-USD","BNB-USD","DOGE-USD"].map(symbol=>({symbol,assetClass:"CRYPTO",status:"AVAILABLE_REFERENCE",venues:["bybit-public"],executionReady:false})),
     ...["EUR-USD","GBP-USD","USD-JPY","USD-CHF","EUR-GBP","USD-TRY"].map(symbol=>({symbol,assetClass:"FX",status:"AVAILABLE_REFERENCE",venues:["frankfurter-fx"],executionReady:false})),
     {symbol:"XAU-USD",assetClass:"COMMODITY",status:"AVAILABLE_REFERENCE",venues:metals?["gold-api-public","metals-dev-gold"]:["gold-api-public"],requires:metals?undefined:"METALS_DEV_API_KEY optional for second source",executionReady:false},
     ...["XAG-USD","XPT-USD","XPD-USD","HG-USD"].map(symbol=>({symbol,assetClass:"COMMODITY",status:"AVAILABLE_REFERENCE",venues:["gold-api-public"],executionReady:false})),
@@ -29,7 +30,7 @@ export function marketCapabilities(env=process.env){
 }
 
 export function buildEngine(){
-  const adapters=[coinbaseBtcUsd(),krakenBtcUsd(),new PublicFxAdapter(),new GoldApiAdapter()];
+  const adapters=[coinbaseBtcUsd(),krakenBtcUsd(),bybitCryptoUsd(),new PublicFxAdapter(),new GoldApiAdapter()];
   if(process.env.ALPACA_API_KEY && process.env.ALPACA_API_SECRET) adapters.push(new AlpacaMarketDataAdapter());
   if(process.env.METALS_DEV_API_KEY) adapters.push(new MetalsDevGoldAdapter());
   return new MarsXGlobalEngine(adapters,{maxStaleMs:Number(process.env.MARSX_MAX_STALE_MS||15000),maxSpreadBps:Number(process.env.MARSX_MAX_SPREAD_BPS||50),minConsensus:Number(process.env.MARSX_MIN_CONSENSUS||1)});
@@ -87,6 +88,11 @@ export function createApi(engine=buildEngine()){
       if(req.method==="GET" && url.pathname==="/pool/changenow/quote"){try{return res.end(JSON.stringify({provider:"ChangeNOW",consumer:"MARS-X Pool",mode:"READ_ONLY",executionReady:false,data:await changeNow.estimate({fromCurrency:url.searchParams.get("fromCurrency")||"vrsc",toCurrency:url.searchParams.get("toCurrency"),fromAmount:url.searchParams.get("fromAmount"),fromNetwork:url.searchParams.get("fromNetwork"),toNetwork:url.searchParams.get("toNetwork"),flow:url.searchParams.get("flow")||"standard"})}));}catch(e){res.statusCode=e.status||400;return res.end(JSON.stringify(changeNowErrorView(e)));}}
       if(req.method==="GET" && url.pathname==="/health") return res.end(JSON.stringify({ok:true,mode:"READ_ONLY",liveExecution:false,venues:engine.health.snapshot()}));
       if(req.method==="GET" && url.pathname==="/markets") return res.end(JSON.stringify({mode:"READ_ONLY",liveExecution:false,markets:marketCapabilities()}));
+      if(req.method==="GET" && url.pathname==="/market/providers") return res.end(JSON.stringify({mode:"READ_ONLY",executionReady:false,providers:[
+        {id:"bybit-public",type:"crypto-market-data",assetClasses:["CRYPTO"],symbols:["BTC-USD","ETH-USD","SOL-USD","BNB-USD","DOGE-USD"],capabilities:["ticker","orderbook","instrument_rules"],accountAccess:false,trading:false,custody:false,withdrawals:false,status:"DATA_READY"},
+        {id:"coinbase-public",type:"crypto-market-data",assetClasses:["CRYPTO"],symbols:["BTC-USD","ETH-USD"],capabilities:["ticker"],accountAccess:false,trading:false,custody:false,withdrawals:false,status:"DATA_READY"},
+        {id:"kraken-public",type:"crypto-market-data",assetClasses:["CRYPTO"],symbols:["BTC-USD","ETH-USD"],capabilities:["ticker"],accountAccess:false,trading:false,custody:false,withdrawals:false,status:"DATA_READY"}
+      ]}));
       if(req.method==="GET" && url.pathname==="/terminal/config") return res.end(JSON.stringify({
         version:"0.1",mode:"READ_ONLY",liveExecution:false,
         charts:["CANDLESTICK","LINE","AREA","HEIKIN_ASHI"],
