@@ -80,7 +80,7 @@ jobs:
         uses: r0adkll/upload-google-play@v1.1.3
         with:
           serviceAccountJson: ${{ runner.temp }}/google-play.json
-          packageName: com.marsx.pool
+          packageName: com.marsx.finance
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
           track: alpha
           status: completed

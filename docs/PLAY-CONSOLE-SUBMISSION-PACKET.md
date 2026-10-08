@@ -4,8 +4,8 @@ Use this document to minimize time spent in Play Console. It is a factual prepar
 
 ## App identity
 
-- App name: MARS-X Pool Beta
-- Package: `com.marsx.pool`
+- App name: MARS-X Finance
+- Package: `com.marsx.finance`
 - App/game: App
 - Price: Free for the closed beta
 - Default language: English (United States)
@@ -17,7 +17,7 @@ Use this document to minimize time spent in Play Console. It is a factual prepar
 
 Select that some functionality is restricted. Explain:
 
-> MARS-X Pool Beta is an authorised remote node/pool management sandbox. Review access requires a private beta licence supplied in the Play Console access instructions. Google sign-in may be used after licence activation. USDT_TEST balances and payout requests are simulations and cannot transfer money or cryptocurrency. The Android app does not mine on the device or run hidden background compute.
+> MARS-X Finance is an authorised remote node/pool management and finance-preview sandbox. Review access requires a private beta licence supplied in the Play Console access instructions. Google sign-in may be used after licence activation. USDT_TEST balances and payout requests are simulations and cannot transfer money or cryptocurrency. Conversion, broker and chart screens are read-only previews; the Android app does not mine on the device or run hidden background compute.
 
 Supply one private review licence only in Play Console. Never commit it to GitHub or place it in screenshots.
 
@@ -28,6 +28,7 @@ Supply one private review licence only in Play Console. Never commit it to GitHu
 - Cryptocurrency wallet/custody: No.
 - Exchange, purchase or sale of cryptocurrency: No.
 - Cryptocurrency transfer or withdrawal: No.
+- Trading/chart execution: No; charts and quotes are read-only previews.
 - Staking, lending or investment product: No.
 - Real-money rewards in this beta: No.
 - `USDT_TEST`: simulated, non-withdrawable test accounting only.

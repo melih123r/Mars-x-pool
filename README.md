@@ -43,7 +43,7 @@ Create the Cloudflare project, copy the D1 database ID into `cloudflare/wrangler
 Build the Android application with either deployed URL:
 
 ```bash
-gradle -p android :app:bundleRelease \
+scripts/build-android.sh :app:bundleRelease \
   -PMARSX_API_BASE_URL=https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-pool-api \
   -PQONVERSION_PROJECT_KEY=project_key_from_qonversion \
   -PGOOGLE_WEB_CLIENT_ID=web_oauth_client_id.apps.googleusercontent.com
@@ -94,10 +94,12 @@ npm start
 
 The Android project is under `android/`. Release builds enable R8 minification. The app never stores a raw beta key after activation; licence and Google account sessions are encrypted through Android Keystore. Returning authorised Google accounts can use Credential Manager auto-select; a new account must tap the visible Google button so an optional referral code can be applied only once.
 
+MARS-X Finance is the current launcher experience under Android package `com.marsx.finance`. It uses the backend-only ChangeNOW connection for read-only conversion previews, exposes broker production readiness through the server, and renders a read-only candlestick/volume chart from `/chart/snapshot`. No chart trading, swap creation, withdrawal or custody flow is enabled by the Android client.
+
 To activate the subscription UI in a build, provide the public Qonversion SDK Project Key:
 
 ```bash
-gradle -p android :app:bundleRelease -PQONVERSION_PROJECT_KEY=project_key_from_qonversion
+scripts/build-android.sh :app:bundleRelease -PQONVERSION_PROJECT_KEY=project_key_from_qonversion
 ```
 
 Without that key, the purchase controls remain disabled. The planned mappings are Qonversion products `pro_monthly` and `farm_monthly`, Google Play products `marsx_pro_monthly` and `marsx_farm_monthly`, and entitlements `pro` and `farm`. Follow `docs/QONVERSION-SETUP.md` before producing a payment-enabled build.
