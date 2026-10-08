@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { order, quote } from "../global-engine/core.js";
-import { PublicCryptoAdapter, coinbaseCryptoUsd, krakenCryptoUsd } from "../global-engine/adapters/public-crypto.js";
+import { PublicCryptoAdapter, bybitCryptoUsd, coinbaseCryptoUsd, krakenCryptoUsd } from "../global-engine/adapters/public-crypto.js";
 import { filterFreshQuotes } from "../global-engine/quality.js";
 
 test("public crypto adapter uses ask for BUY and scales fee by notional",async()=>{
@@ -26,16 +26,35 @@ test("public crypto adapter uses bid for SELL",async()=>{
  }finally{global.fetch=oldFetch;}
 });
 
-test("Coinbase and Kraken public adapters support ETH-USD",()=>{
+test("Coinbase, Kraken and Bybit public adapters support ETH-USD",()=>{
  const eth={symbol:"ETH-USD",assetClass:"CRYPTO"};
  assert.equal(coinbaseCryptoUsd().supports(eth),true);
  assert.equal(krakenCryptoUsd().supports(eth),true);
+ assert.equal(bybitCryptoUsd().supports(eth),true);
 });
 
 test("unsupported crypto symbols fail closed",()=>{
- const sol={symbol:"SOL-USD",assetClass:"CRYPTO"};
+ const sol={symbol:"ADA-USD",assetClass:"CRYPTO"};
  assert.equal(coinbaseCryptoUsd().supports(sol),false);
  assert.equal(krakenCryptoUsd().supports(sol),false);
+ assert.equal(bybitCryptoUsd().supports(sol),false);
+});
+
+test("Bybit adapter parses V5 ticker bid and ask without enabling execution",async()=>{
+ const oldFetch=global.fetch;
+ global.fetch=async url=>{
+  assert.equal(String(url),"https://api.bybit.com/v5/market/tickers?category=spot&symbol=SOLUSDT");
+  return {ok:true,json:async()=>({retCode:0,result:{list:[{bid1Price:"100.10",ask1Price:"100.20",ts:"1700000000000"}]}})};
+ };
+ try{
+  const a=bybitCryptoUsd();
+  const o=order({instrument:{symbol:"SOL-USD",assetClass:"CRYPTO"},side:"BUY",amount:1000});
+  const q=await a.getQuote(o);
+  assert.equal(q.venue,"bybit-public");
+  assert.equal(q.price,100.2);
+  assert.equal(q.metadata.executable,false);
+  await assert.rejects(()=>a.placeOrder(o),/disabled/);
+ }finally{global.fetch=oldFetch;}
 });
 
 test("stale quotes are rejected before routing",()=>{
