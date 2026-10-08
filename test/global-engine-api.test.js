@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createApi } from "../global-engine/api.js";
+import { createApi, demoChartRows } from "../global-engine/api.js";
 import { MarsXGlobalEngine } from "../global-engine/engine.js";
 import { PaperVenue } from "../global-engine/venue.js";
 import { quote } from "../global-engine/core.js";
@@ -114,5 +114,30 @@ test("broker production readiness requires every explicit gate",async()=>{
  } finally {
   await new Promise(r=>server.close(r));
   for(const [key,value] of Object.entries(previous)) value===undefined?delete process.env[key]:process.env[key]=value;
+ }
+});
+
+test("chart snapshot exposes candles and indicators without enabling execution",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const chart=await (await fetch(base+"/chart/snapshot?symbol=BTC-USD&timeframe=1m")).json();
+  assert.equal(chart.mode,"READ_ONLY");
+  assert.equal(chart.executionReady,false);
+  assert.equal(chart.symbol,"BTC-USD");
+  assert.ok(chart.series.candles.length>=90);
+  assert.equal(chart.series.indicators.sma20.length,chart.series.candles.length);
+  assert.equal(chart.interaction.timeframeSelector,true);
+ } finally { await new Promise(r=>server.close(r)); }
+});
+
+test("demo chart rows are deterministic and valid OHLC",()=>{
+ const rows=demoChartRows({now:1_800_000_000_000,limit:8,base:100});
+ assert.equal(rows.length,8);
+ assert.deepEqual(rows,demoChartRows({now:1_800_000_000_000,limit:8,base:100}));
+ for(const row of rows){
+  assert.ok(row.high>=Math.max(row.open,row.close));
+  assert.ok(row.low<=Math.min(row.open,row.close));
  }
 });

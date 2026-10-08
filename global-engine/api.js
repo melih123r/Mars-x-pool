@@ -13,6 +13,7 @@ import { ChangeNowAdapter } from "./adapters/changenow.js";
 import { changeNowErrorView } from "./changenow-health.js";
 import { LemonBrokerAdapter } from "./adapters/lemon-markets.js";
 import { brokerProductionReadiness, brokerSafetyStatus } from "./broker-core.js";
+import { buildChartView } from "./chart-view.js";
 
 export function marketCapabilities(env=process.env){
   const alpaca=Boolean(env.ALPACA_API_KEY&&env.ALPACA_API_SECRET), metals=Boolean(env.METALS_DEV_API_KEY);
@@ -32,6 +33,15 @@ export function buildEngine(){
   if(process.env.ALPACA_API_KEY && process.env.ALPACA_API_SECRET) adapters.push(new AlpacaMarketDataAdapter());
   if(process.env.METALS_DEV_API_KEY) adapters.push(new MetalsDevGoldAdapter());
   return new MarsXGlobalEngine(adapters,{maxStaleMs:Number(process.env.MARSX_MAX_STALE_MS||15000),maxSpreadBps:Number(process.env.MARSX_MAX_SPREAD_BPS||50),minConsensus:Number(process.env.MARSX_MIN_CONSENSUS||1)});
+}
+
+export function demoChartRows({now=Date.now(),limit=96,base=64000}={}){
+  const start=Math.floor((now-limit*60_000)/60_000)*60_000;
+  return Array.from({length:limit},(_,i)=>{
+    const time=start+i*60_000, drift=i*8, wave=Math.sin(i/5)*420+Math.cos(i/11)*180, close=base+drift+wave, open=base+(i-1)*8+Math.sin((i-1)/5)*420+Math.cos((i-1)/11)*180;
+    const high=Math.max(open,close)+90+(i%7)*12, low=Math.min(open,close)-90-(i%5)*10;
+    return {time,open:Number(open.toFixed(2)),high:Number(high.toFixed(2)),low:Number(low.toFixed(2)),close:Number(close.toFixed(2)),volume:120+i*3+(i%9)*17};
+  });
 }
 
 export function createApi(engine=buildEngine()){
@@ -60,6 +70,11 @@ export function createApi(engine=buildEngine()){
       if(req.method==="GET" && url.pathname==="/broker/health") return res.end(JSON.stringify(brokerHealth()));
       if(req.method==="GET" && url.pathname==="/broker/providers") return res.end(JSON.stringify({mode:"PAPER_AND_ONBOARDING_READY",providers:brokerHealth().providers}));
       if(req.method==="GET" && url.pathname==="/broker/readiness") return res.end(JSON.stringify({mode:"BROKER_PRODUCTION_READINESS",provider:lemonProvider()}));
+      if(req.method==="GET" && url.pathname==="/chart/snapshot"){
+        const symbol=(url.searchParams.get("symbol")||"BTC-USD").toUpperCase(), timeframe=url.searchParams.get("timeframe")||"1m";
+        const view=buildChartView({symbol,timeframe,rows:demoChartRows({limit:120}),maxStaleMs:10*60_000,signals:[{time:Date.now()-20*60_000,price:64250,direction:"BUY",confidence:.72,label:"MARS-X"}]});
+        return res.end(JSON.stringify({...view,mode:"READ_ONLY",executionReady:false,source:"deterministic-preview"}));
+      }
       if(req.method==="GET" && url.pathname==="/changenow/health") return res.end(JSON.stringify({provider:"ChangeNOW",mode:"READ_ONLY",configured:changeNow.configured(),executionReady:false,capabilities:changeNow.capabilities()}));
       if(req.method==="GET" && url.pathname==="/changenow/currencies"){try{return res.end(JSON.stringify({provider:"ChangeNOW",mode:"READ_ONLY",data:await changeNow.currencies({active:url.searchParams.get("active")!=="false",flow:url.searchParams.get("flow")||"standard"})}));}catch(e){res.statusCode=e.status||503;return res.end(JSON.stringify(changeNowErrorView(e)));}}
       if(req.method==="GET" && url.pathname==="/changenow/min-amount"){try{return res.end(JSON.stringify({provider:"ChangeNOW",mode:"READ_ONLY",data:await changeNow.minAmount({fromCurrency:url.searchParams.get("fromCurrency"),toCurrency:url.searchParams.get("toCurrency"),fromNetwork:url.searchParams.get("fromNetwork"),toNetwork:url.searchParams.get("toNetwork"),flow:url.searchParams.get("flow")||"standard"})}));}catch(e){res.statusCode=e.status||400;return res.end(JSON.stringify(changeNowErrorView(e)));}}
