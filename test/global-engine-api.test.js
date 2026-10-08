@@ -69,6 +69,9 @@ test("broker gateway exposes lemon readiness without enabling live trading",asyn
   assert.equal(health.primaryBroker,"lemon.markets");
   assert.equal(health.production.liveTrading,false);
   assert.equal(health.production.withdrawals,false);
+  assert.ok(health.candidates.some(p=>p.id==="upvest"));
+  assert.ok(health.candidates.every(p=>p.executionReady===false));
+  assert.ok(health.selectionPolicy.blocked.includes("KYC bypass"));
   assert.equal(health.providers[0].kycRequired,true);
   assert.equal(health.providers[0].executionReady,false);
   assert.equal(health.providers[0].ordersEnabled,false);
@@ -104,8 +107,8 @@ test("broker production readiness requires every explicit gate",async()=>{
   const base=`http://127.0.0.1:${server.address().port}`;
   const health=await (await fetch(base+"/broker/health")).json();
   assert.equal(health.mode,"PRODUCTION_REVIEW_READY");
-  assert.equal(health.production.liveTrading,true);
-  assert.equal(health.production.withdrawals,true);
+  assert.equal(health.production.liveTrading,false);
+  assert.equal(health.production.withdrawals,false);
   assert.equal(health.production.custody,false);
   assert.equal(health.providers[0].executionReady,true);
   assert.deepEqual(health.providers[0].readiness.missing,[]);
