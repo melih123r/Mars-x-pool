@@ -22,6 +22,17 @@ Provider references used for this snapshot:
 - Upvest describes an Investment API covering brokerage, settlement and custody, with sandbox/testing and API documentation.
 - IBKR documents Web/Client Portal API access for trading, portfolio information, market data and paper trading.
 
+## Crypto exchange/data agents
+
+Bybit, Binance, OKX, Kraken and Coinbase are useful for market-data coverage, liquidity checks, orderbook/spread display and instrument-rule validation. MARS-X treats these as data agents first, not regulated embedded broker partners. The app can show public tickers, candles, orderbook depth and minimum-size rules while keeping account access, trading, custody and withdrawals disabled.
+
+| Provider | MARS-X role | Enabled surface | Disabled surface |
+| --- | --- | --- | --- |
+| Bybit | Crypto market-data venue | Public spot ticker adapter; provider endpoint lists ticker/orderbook/instrument-rule capability | API-key trading, account access, custody, withdrawals |
+| Coinbase | Crypto market-data venue | Public BTC/ETH ticker route | Account trading, custody, withdrawals |
+| Kraken | Crypto market-data venue | Public BTC/ETH ticker route | Account trading, custody, withdrawals |
+| Binance/OKX | Research candidates | API docs reviewed; not yet wired as adapters | Account trading, custody, withdrawals |
+
 MARS-X selection rule: prefer a regulated embedded brokerage provider with sandbox lifecycle, KYC/SCA support, webhook/reconciliation coverage and backend-only credentials. Do not use a provider merely because it has a public trading API.
 
 ## Provider certification checklist
