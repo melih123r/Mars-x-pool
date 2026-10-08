@@ -505,3 +505,40 @@ test("ChangeNOW provider key stays backend-only while read-only quote works", as
     else process.env.CHANGENOW_API_KEY = previousKey;
   }
 });
+
+
+test("conversion readiness remains locked even when all execution env gates are set", async () => {
+  const previous = {
+    CHANGENOW_API_KEY: process.env.CHANGENOW_API_KEY,
+    VRSC_TREASURY_SIGNER_URL: process.env.VRSC_TREASURY_SIGNER_URL,
+    VRSC_TREASURY_SIGNER_TOKEN: process.env.VRSC_TREASURY_SIGNER_TOKEN,
+    REAL_WITHDRAWALS_ENABLED: process.env.REAL_WITHDRAWALS_ENABLED,
+  };
+  Object.assign(process.env, {
+    CHANGENOW_API_KEY: "test_changenow_secret",
+    VRSC_TREASURY_SIGNER_URL: "https://signer.example.invalid",
+    VRSC_TREASURY_SIGNER_TOKEN: "test_signer_token",
+    REAL_WITHDRAWALS_ENABLED: "true",
+  });
+
+  const { server, baseUrl } = await runServer({ store: new MemoryStore() });
+  try {
+    const readiness = await fetch(`${baseUrl}/conversion/readiness`);
+    assert.equal(readiness.status, 200);
+    const readyBody = await readiness.json();
+    assert.equal(readyBody.changeNowConfigured, true);
+    assert.equal(readyBody.treasurySignerConfigured, true);
+    assert.equal(readyBody.executionEnabled, false);
+    assert.ok(readyBody.executionBlockers.includes("LIVE_ROUTE_NOT_IMPLEMENTED"));
+
+    const execute = await fetch(`${baseUrl}/conversion/execute`, { method: "POST" });
+    assert.equal(execute.status, 501);
+    assert.equal((await execute.json()).error, "live_route_not_implemented");
+  } finally {
+    await close(server);
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});
