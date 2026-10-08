@@ -50,30 +50,29 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f package-lock.json ]; then npm ci; else npm install --ignore-scripts --no-audit --no-fund; fi
-          npm test
+          npm ci
+          npm run global-engine:test
       - name: Set up Java
         if: github.event_name != 'schedule'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+      - name: Install Android SDK
+        if: github.event_name != 'schedule'
+        run: |
+          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        if: github.event_name != 'schedule'
+        with:
+          gradle-version: '8.11.1'
       - name: Android debug build
         if: github.event_name != 'schedule'
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f android/gradlew ]; then
-            cd android
-            chmod +x gradlew
-            ./gradlew :app:assembleDebug --no-daemon
-          elif [ -f gradlew ]; then
-            chmod +x gradlew
-            ./gradlew :android:app:assembleDebug --no-daemon
-          else
-            echo "::error::Gradle wrapper missing; cannot verify Android APK"
-            exit 1
-          fi
+          gradle -p android :app:testDebugUnitTest :app:assembleDebug --no-daemon
       - name: Upload verified debug APK
         if: success() && github.event_name != 'schedule'
         uses: actions/upload-artifact@v4
