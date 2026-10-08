@@ -434,3 +434,74 @@ test("conversion endpoints fail closed without provider credentials", async () =
     await close(server);
   }
 });
+
+
+test("ChangeNOW provider key stays backend-only while read-only quote works", async () => {
+  const previousKey = process.env.CHANGENOW_API_KEY;
+  const previousFetch = globalThis.fetch;
+  const secret = "test_changenow_secret_backend_only";
+  const calls = [];
+  process.env.CHANGENOW_API_KEY = secret;
+  globalThis.fetch = async (url, options = {}) => {
+    if (!String(url).startsWith("https://api.changenow.io/")) {
+      return previousFetch(url, options);
+    }
+    calls.push({ url: String(url), headers: options.headers || {} });
+    if (String(url).includes("/v2/exchange/currencies")) {
+      return new Response(JSON.stringify([{ ticker: "btc" }, { ticker: "sol" }]), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    if (String(url).includes("/v2/exchange/estimated-amount")) {
+      return new Response(JSON.stringify({
+        fromCurrency: "btc",
+        toCurrency: "sol",
+        fromAmount: "0.001",
+        toAmount: "0.42",
+        validUntil: "2026-10-08T03:00:00Z",
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response(JSON.stringify({ error: "unexpected" }), { status: 404 });
+  };
+
+  const { server, baseUrl } = await runServer({ store: new MemoryStore() });
+  try {
+    const status = await fetch(`${baseUrl}/conversion/changenow-status`);
+    assert.equal(status.status, 200);
+    const statusBody = await status.json();
+    assert.equal(statusBody.configured, true);
+    assert.equal(statusBody.reachable, true);
+    assert.equal(statusBody.executionEnabled, false);
+    assert.equal(JSON.stringify(statusBody).includes(secret), false);
+
+    const quote = await fetch(`${baseUrl}/conversion/changenow-quote`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fromCurrency: "btc",
+        toCurrency: "sol",
+        fromNetwork: "btc",
+        toNetwork: "sol",
+        amount: "0.001",
+      }),
+    });
+    assert.equal(quote.status, 200);
+    const quoteBody = await quote.json();
+    assert.equal(quoteBody.provider, "ChangeNOW");
+    assert.equal(quoteBody.executionEnabled, false);
+    assert.equal(quoteBody.marsxServiceFeeBps, 200);
+    assert.equal(JSON.stringify(quoteBody).includes(secret), false);
+
+    assert.equal(calls.length, 2);
+    assert.ok(calls.every((call) => call.headers["x-changenow-api-key"] === secret));
+  } finally {
+    await close(server);
+    globalThis.fetch = previousFetch;
+    if (previousKey === undefined) delete process.env.CHANGENOW_API_KEY;
+    else process.env.CHANGENOW_API_KEY = previousKey;
+  }
+});
