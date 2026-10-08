@@ -1164,7 +1164,13 @@ export function createServer({
           verusQuoteRequired: true,
           changeNowConfigured,
           treasurySignerConfigured,
-          executionEnabled: changeNowConfigured && treasurySignerConfigured && process.env.REAL_WITHDRAWALS_ENABLED === "true",
+          executionEnabled: false,
+          executionBlockers: [
+            ...(changeNowConfigured ? [] : ["CHANGENOW_API_KEY"]),
+            ...(treasurySignerConfigured ? [] : ["VRSC_TREASURY_SIGNER"]),
+            ...(process.env.REAL_WITHDRAWALS_ENABLED === "true" ? [] : ["REAL_WITHDRAWALS_ENABLED"]),
+            "LIVE_ROUTE_NOT_IMPLEMENTED"
+          ],
           safeguards: [
             "provider quote required before execution",
             "no balance from accepted shares; provider-confirmed settlement only",
