@@ -62,3 +62,25 @@ export const brokerSafetyStatus=()=>({
   custody:false,
   providerCredentialsRequiredForExternalCalls:true
 });
+
+export function brokerProductionReadiness({env=process.env,providerConfigured=false,sandbox=true,ordersEnabled=false,withdrawalsEnabled=false}={}){
+  const checks=[
+    {id:"PROVIDER_CREDENTIAL",ready:providerConfigured,required:"LEMON_MARKETS_API_KEY"},
+    {id:"PRODUCTION_PROVIDER_HOST",ready:sandbox!==true,required:"non-sandbox provider base URL"},
+    {id:"BUSINESS_APPROVAL",ready:env.MARSX_BROKER_PRODUCTION_APPROVED==="true",required:"signed broker/compliance approval"},
+    {id:"KYC_PROVIDER",ready:env.MARSX_KYC_PROVIDER_VERIFIED==="true",required:"KYC provider verified"},
+    {id:"SCA_PROVIDER",ready:env.MARSX_SCA_PROVIDER_ENABLED==="true",required:"SCA provider enabled"},
+    {id:"ORDER_GATE",ready:ordersEnabled===true,required:"MARSX_LEMON_ALLOW_ORDERS=true"},
+    {id:"WITHDRAWAL_GATE",ready:withdrawalsEnabled===true,required:"MARSX_LEMON_ALLOW_WITHDRAWALS=true"}
+  ];
+  const missing=checks.filter(x=>!x.ready).map(x=>x.id);
+  return Object.freeze({
+    mode:missing.length===0?"PRODUCTION_READY":"PRODUCTION_BLOCKED",
+    liveTradingReady:missing.length===0,
+    withdrawalsReady:missing.length===0,
+    custodyReady:false,
+    checks,
+    missing,
+    userFacingAction:missing.length===0?"REVIEW_AND_CONFIRM_ORDER":"COMPLETE_ONBOARDING_REQUIREMENTS"
+  });
+}

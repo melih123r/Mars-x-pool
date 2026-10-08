@@ -72,6 +72,47 @@ test("broker gateway exposes lemon readiness without enabling live trading",asyn
   assert.equal(health.providers[0].kycRequired,true);
   assert.equal(health.providers[0].executionReady,false);
   assert.equal(health.providers[0].ordersEnabled,false);
-  assert.ok(health.providers[0].gates.includes("SCA_REQUIRED"));
+  assert.ok(health.providers[0].gates.includes("PROVIDER_CREDENTIAL"));
+  const readiness=await (await fetch(base+"/broker/readiness")).json();
+  assert.equal(readiness.mode,"BROKER_PRODUCTION_READINESS");
+  assert.equal(readiness.provider.readiness.liveTradingReady,false);
  } finally { await new Promise(r=>server.close(r)); }
+});
+
+test("broker production readiness requires every explicit gate",async()=>{
+ const previous={
+  LEMON_MARKETS_API_KEY:process.env.LEMON_MARKETS_API_KEY,
+  LEMON_MARKETS_BASE_URL:process.env.LEMON_MARKETS_BASE_URL,
+  MARSX_LEMON_ALLOW_ORDERS:process.env.MARSX_LEMON_ALLOW_ORDERS,
+  MARSX_LEMON_ALLOW_WITHDRAWALS:process.env.MARSX_LEMON_ALLOW_WITHDRAWALS,
+  MARSX_BROKER_PRODUCTION_APPROVED:process.env.MARSX_BROKER_PRODUCTION_APPROVED,
+  MARSX_KYC_PROVIDER_VERIFIED:process.env.MARSX_KYC_PROVIDER_VERIFIED,
+  MARSX_SCA_PROVIDER_ENABLED:process.env.MARSX_SCA_PROVIDER_ENABLED
+ };
+ Object.assign(process.env,{
+  LEMON_MARKETS_API_KEY:"test-only",
+  LEMON_MARKETS_BASE_URL:"https://api.lemon.markets/v1",
+  MARSX_LEMON_ALLOW_ORDERS:"true",
+  MARSX_LEMON_ALLOW_WITHDRAWALS:"true",
+  MARSX_BROKER_PRODUCTION_APPROVED:"true",
+  MARSX_KYC_PROVIDER_VERIFIED:"true",
+  MARSX_SCA_PROVIDER_ENABLED:"true"
+ });
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const health=await (await fetch(base+"/broker/health")).json();
+  assert.equal(health.mode,"PRODUCTION_REVIEW_READY");
+  assert.equal(health.production.liveTrading,true);
+  assert.equal(health.production.withdrawals,true);
+  assert.equal(health.production.custody,false);
+  assert.equal(health.providers[0].executionReady,true);
+  assert.deepEqual(health.providers[0].readiness.missing,[]);
+  const order=await fetch(base+"/broker/order",{method:"POST"});
+  assert.equal(order.status,404);
+ } finally {
+  await new Promise(r=>server.close(r));
+  for(const [key,value] of Object.entries(previous)) value===undefined?delete process.env[key]:process.env[key]=value;
+ }
 });
