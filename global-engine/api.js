@@ -12,7 +12,7 @@ import { TrainingBuffer } from "./training-buffer.js";
 import { ChangeNowAdapter } from "./adapters/changenow.js";
 import { changeNowErrorView } from "./changenow-health.js";
 import { LemonBrokerAdapter } from "./adapters/lemon-markets.js";
-import { brokerProductionReadiness, brokerSafetyStatus } from "./broker-core.js";
+import { brokerProductionReadiness, brokerProviderScorecard, brokerSafetyStatus } from "./broker-core.js";
 import { buildChartView } from "./chart-view.js";
 
 export function marketCapabilities(env=process.env){
@@ -47,12 +47,17 @@ export function demoChartRows({now=Date.now(),limit=96,base=64000}={}){
 export function createApi(engine=buildEngine()){
   const buckets=new Map(), limit=Number(process.env.MARSX_RATE_LIMIT_PER_MIN||120), trainingBuffer=new TrainingBuffer({minCohort:Number(process.env.MARSX_TRAINING_MIN_COHORT||20)}), changeNow=new ChangeNowAdapter(), lemon=new LemonBrokerAdapter();
   const convertHealth=()=>({provider:"MARS-X Engine",mode:"READ_ONLY",configured:changeNow.configured(),executionReady:false,capabilities:changeNow.capabilities(),executionBlockers:["provider_execution_disabled","transaction_confirmation_required","compliance_gate_required"]});
+  const alpacaBrokerConfigured=()=>Boolean(
+    (process.env.ALPACA_BROKER_API_KEY&&process.env.ALPACA_BROKER_API_SECRET) ||
+    (process.env.ALPACA_BROKER_CLIENT_ID&&process.env.ALPACA_BROKER_CLIENT_SECRET)
+  );
   const lemonProvider=()=>{
     const sandbox=/sandbox/i.test(lemon.baseUrl);
     const readiness=brokerProductionReadiness({providerConfigured:lemon.configured(),sandbox,ordersEnabled:lemon.allowOrderSubmission===true,withdrawalsEnabled:lemon.allowWithdrawals===true});
     return {id:"lemon-markets",assetClasses:["EQUITY","ETF"],configured:lemon.configured(),sandbox,kycRequired:true,ordersEnabled:lemon.allowOrderSubmission===true,withdrawalsEnabled:lemon.allowWithdrawals===true,executionReady:readiness.liveTradingReady,requiredSecrets:lemon.configured()?[]:["LEMON_MARKETS_API_KEY"],gates:readiness.missing.length?readiness.missing:["USER_REVIEW_REQUIRED","SCA_CONFIRMATION_REQUIRED"],readiness};
   };
-  const brokerHealth=()=>{const provider=lemonProvider();return {provider:"MARS-X Broker Gateway",mode:provider.readiness.mode==="PRODUCTION_READY"?"PRODUCTION_REVIEW_READY":"PAPER_AND_ONBOARDING_READY",primaryBroker:"lemon.markets",configured:lemon.configured(),safety:brokerSafetyStatus(),providers:[provider],production:{liveTrading:provider.readiness.liveTradingReady,withdrawals:provider.readiness.withdrawalsReady,custody:false}};};
+  const brokerProviders=()=>brokerProviderScorecard({lemonConfigured:lemon.configured(),alpacaConfigured:alpacaBrokerConfigured()});
+  const brokerHealth=()=>{const provider=lemonProvider(), candidates=brokerProviders(), primary=candidates[0];return {provider:"MARS-X Broker Gateway",mode:provider.readiness.mode==="PRODUCTION_READY"?"PRODUCTION_REVIEW_READY":"PAPER_AND_ONBOARDING_READY",primaryBroker:primary?.label||"lemon.markets",primaryBrokerId:primary?.id||"lemon-markets",configured:lemon.configured()||alpacaBrokerConfigured(),safety:brokerSafetyStatus(),providers:[provider],candidates,selectionPolicy:{prefer:["regulated embedded brokerage","sandbox lifecycle","KYC/SCA support","webhooks/reconciliation","no client-side secrets"],blocked:["KYC bypass","custody without licensed provider","live orders before certification","withdrawals before approval"]},production:{liveTrading:false,withdrawals:false,custody:false}};};
   const quoteParams=url=>({fromCurrency:url.searchParams.get("fromCurrency"),toCurrency:url.searchParams.get("toCurrency"),fromAmount:url.searchParams.get("fromAmount"),fromNetwork:url.searchParams.get("fromNetwork"),toNetwork:url.searchParams.get("toNetwork"),flow:url.searchParams.get("flow")||"standard"});
   return http.createServer(async(req,res)=>{
     res.setHeader("content-type","application/json"); res.setHeader("cache-control","no-store"); res.setHeader("x-content-type-options","nosniff");
