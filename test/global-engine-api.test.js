@@ -135,6 +135,24 @@ test("chart snapshot exposes candles and indicators without enabling execution",
  } finally { await new Promise(r=>server.close(r)); }
 });
 
+test("market providers expose Bybit as read-only data agent",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const res=await fetch(base+"/market/providers");
+  assert.equal(res.status,200);
+  const body=await res.json();
+  const bybit=body.providers.find(p=>p.id==="bybit-public");
+  assert.equal(body.executionReady,false);
+  assert.ok(bybit);
+  assert.equal(bybit.accountAccess,false);
+  assert.equal(bybit.trading,false);
+  assert.equal(bybit.custody,false);
+  assert.ok(bybit.capabilities.includes("orderbook"));
+ } finally { await new Promise(r=>server.close(r)); }
+});
+
 test("demo chart rows are deterministic and valid OHLC",()=>{
  const rows=demoChartRows({now:1_800_000_000_000,limit:8,base:100});
  assert.equal(rows.length,8);
