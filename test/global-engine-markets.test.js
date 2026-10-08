@@ -3,11 +3,17 @@ import assert from "node:assert/strict";
 import { marketCapabilities } from "../global-engine/api.js";
 import { MetalsDevGoldAdapter } from "../global-engine/adapters/metals-dev.js";
 
-test("fifteen-market capability list fails closed without credentials",()=>{
+test("eighteen-market capability list fails closed without credentials",()=>{
  const m=marketCapabilities({});
- assert.equal(m.length,15);
+ assert.equal(m.length,18);
  assert.equal(m.find(x=>x.symbol==="BTC-USD").status,"AVAILABLE");
  assert.equal(m.find(x=>x.symbol==="ETH-USD").status,"AVAILABLE");
+ for(const s of ["SOL-USD","BNB-USD","DOGE-USD"]) {
+  const x=m.find(v=>v.symbol===s);
+  assert.equal(x.status,"AVAILABLE_REFERENCE");
+  assert.deepEqual(x.venues,["bybit-public"]);
+  assert.equal(x.executionReady,false);
+ }
  assert.equal(m.find(x=>x.symbol==="EUR-USD").status,"AVAILABLE_REFERENCE");
  for(const s of ["GBP-USD","USD-JPY","USD-CHF","EUR-GBP","USD-TRY"]) assert.equal(m.find(x=>x.symbol===s).status,"AVAILABLE_REFERENCE");
  assert.equal(m.find(x=>x.symbol==="XAU-USD").status,"AVAILABLE_REFERENCE");
