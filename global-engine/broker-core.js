@@ -63,6 +63,93 @@ export const brokerSafetyStatus=()=>({
   providerCredentialsRequiredForExternalCalls:true
 });
 
+export const BROKER_PROVIDER_CANDIDATES=Object.freeze([
+  {
+    id:"lemon-markets",
+    label:"lemon.markets",
+    region:"EU",
+    assetClasses:["EQUITY","ETF"],
+    model:"brokerage-api",
+    strengths:["EU brokerage focus","account onboarding primitives","SCA-aware order/withdrawal flow"],
+    blockers:["business approval","KYC/SCA production verification","production credentials"],
+    priority:92
+  },
+  {
+    id:"alpaca-broker",
+    label:"Alpaca Broker",
+    region:"US/EU sandbox",
+    assetClasses:["EQUITY","ETF"],
+    model:"broker-api-sandbox",
+    strengths:["sandbox lifecycle","account/KYC test fixtures","SSE trade/account events"],
+    blockers:["broker agreement","region-specific auth","production certification"],
+    priority:88
+  },
+  {
+    id:"upvest",
+    label:"Upvest Investment API",
+    region:"EU/UK",
+    assetClasses:["EQUITY","ETF","FUND"],
+    model:"embedded-investment-infrastructure",
+    strengths:["brokerage, settlement and custody through one Investment API","fractional investment support","sandbox and OpenAPI documentation"],
+    blockers:["commercial onboarding","operating model selection","licensed-provider contract"],
+    priority:86
+  },
+  {
+    id:"drivewealth",
+    label:"DriveWealth",
+    region:"Global partner",
+    assetClasses:["EQUITY","ETF"],
+    model:"brokerage-as-a-service",
+    strengths:["embedded investing model","fractional US equities focus","partner platform pattern"],
+    blockers:["partner approval","API credential review","country availability"],
+    priority:78
+  },
+  {
+    id:"ibkr",
+    label:"Interactive Brokers",
+    region:"Global",
+    assetClasses:["EQUITY","ETF","FX","OPTION","FUTURE"],
+    model:"client-broker-api",
+    strengths:["broad market coverage","paper trading","portfolio and market data APIs"],
+    blockers:["gateway/session operations","not ideal for embedded white-label onboarding","user brokerage account dependency"],
+    priority:70
+  }
+]);
+
+export function brokerProviderScorecard({env=process.env,lemonConfigured=false,alpacaConfigured=false}={}) {
+  return BROKER_PROVIDER_CANDIDATES.map((provider)=>{
+    const configured = provider.id==="lemon-markets"
+      ? lemonConfigured
+      : provider.id==="alpaca-broker"
+        ? alpacaConfigured
+        : false;
+    const status = configured ? "SANDBOX_OR_REVIEW_READY" : "PARTNER_OR_CREDENTIAL_REQUIRED";
+    return Object.freeze({
+      ...provider,
+      configured,
+      status,
+      executionReady:false,
+      liveTrading:false,
+      withdrawals:false,
+      custody:false,
+      gates:[
+        ...(configured?[]:["PROVIDER_CREDENTIAL_OR_PARTNER"]),
+        "BUSINESS_APPROVAL",
+        "KYC_PROVIDER",
+        "SCA_PROVIDER",
+        "ORDER_GATE",
+        "USER_CONFIRMATION"
+      ],
+      recommended:provider.priority>=85,
+      envHints:provider.id==="lemon-markets"
+        ? ["LEMON_MARKETS_API_KEY","LEMON_MARKETS_BASE_URL"]
+        : provider.id==="alpaca-broker"
+          ? ["ALPACA_BROKER_AUTH_MODE","ALPACA_BROKER_REGION","ALPACA_BROKER_API_KEY or OAuth client credentials"]
+          : []
+    });
+  }).sort((a,b)=>b.priority-a.priority);
+}
+
 export function brokerProductionReadiness({env=process.env,providerConfigured=false,sandbox=true,ordersEnabled=false,withdrawalsEnabled=false}={}){
   const checks=[
     {id:"PROVIDER_CREDENTIAL",ready:providerConfigured,required:"LEMON_MARKETS_API_KEY"},
