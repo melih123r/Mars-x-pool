@@ -7,6 +7,23 @@ MARS-X is provider-neutral. Production execution, custody and withdrawals remain
 - Alpaca Broker: US Sandbox Basic auth and US/EU Sandbox OAuth; credential gated; orders default OFF; only matching official Sandbox hosts are accepted.
 - Additional providers implement the same broker lifecycle without changing MARS-X OMS/ledger/reconciliation.
 
+## Provider comparison snapshot
+
+| Provider | Best use in MARS-X | Current code status | Keep blocked until |
+| --- | --- | --- | --- |
+| lemon.markets | EU-first brokerage onboarding for equities/ETFs | Adapter present; SCA-aware order/withdrawal methods; default OFF | Production contract, KYC/SCA verification, explicit order and withdrawal gates |
+| Alpaca Broker | Sandbox lifecycle and US/EU broker proof-of-concept | Sandbox adapter, account/KYC/order/event/reconciliation tests | Broker agreement, valid sandbox credentials, region certification |
+| Upvest | Strong EU/UK embedded investment infrastructure candidate | Scorecard candidate; no live adapter yet | Commercial onboarding, operating model choice, licensed-provider contract |
+| DriveWealth | Global embedded US equities/fractional investing candidate | Scorecard candidate; no live adapter yet | Partner approval, API docs/credentials, country coverage review |
+| IBKR | Broad-market pro/paper trading research path | Scorecard candidate; no embedded mobile onboarding adapter | Gateway/session design, user account dependency, compliance review |
+
+Provider references used for this snapshot:
+- Alpaca presents Trading API and Broker API products for building financial apps and embedded investing.
+- Upvest describes an Investment API covering brokerage, settlement and custody, with sandbox/testing and API documentation.
+- IBKR documents Web/Client Portal API access for trading, portfolio information, market data and paper trading.
+
+MARS-X selection rule: prefer a regulated embedded brokerage provider with sandbox lifecycle, KYC/SCA support, webhook/reconciliation coverage and backend-only credentials. Do not use a provider merely because it has a public trading API.
+
 ## Provider certification checklist
 1. Store credentials only in deployment secrets.
 2. Verify sandbox authentication.
