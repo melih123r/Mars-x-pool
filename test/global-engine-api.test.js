@@ -42,3 +42,36 @@ test("Pool ChangeNOW bridge remains quote-only",async()=>{
   assert.equal(create.status,404);
  } finally { await new Promise(r=>server.close(r)); }
 });
+
+test("provider-neutral Convert API is ready for users but execution stays locked",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const health=await (await fetch(base+"/convert/health")).json();
+  assert.equal(health.provider,"MARS-X Engine");assert.equal(health.mode,"READ_ONLY");assert.equal(health.executionReady,false);
+  assert.equal(health.capabilities.createTransaction,false);assert.equal(health.capabilities.withdrawals,false);
+  const badQuote=await fetch(base+"/convert/quote?fromCurrency=btc&toCurrency=sol&fromAmount=0");
+  assert.equal(badQuote.status,400);
+  const body=await badQuote.json();
+  assert.equal(JSON.stringify(body).includes("CHANGENOW_API_KEY"),false);
+  const create=await fetch(base+"/convert/transaction",{method:"POST"});
+  assert.equal(create.status,404);
+ } finally { await new Promise(r=>server.close(r)); }
+});
+
+test("broker gateway exposes lemon readiness without enabling live trading",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const health=await (await fetch(base+"/broker/health")).json();
+  assert.equal(health.primaryBroker,"lemon.markets");
+  assert.equal(health.production.liveTrading,false);
+  assert.equal(health.production.withdrawals,false);
+  assert.equal(health.providers[0].kycRequired,true);
+  assert.equal(health.providers[0].executionReady,false);
+  assert.equal(health.providers[0].ordersEnabled,false);
+  assert.ok(health.providers[0].gates.includes("SCA_REQUIRED"));
+ } finally { await new Promise(r=>server.close(r)); }
+});

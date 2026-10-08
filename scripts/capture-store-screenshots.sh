@@ -12,14 +12,14 @@ adb shell settings put global stay_on_while_plugged_in 3
 adb shell input keyevent KEYCODE_WAKEUP
 adb shell wm dismiss-keyguard
 adb shell input keyevent 82
-adb shell am force-stop com.marsx.pool
-adb shell am start -W -n com.marsx.pool/.MainActivity
+adb shell am force-stop com.marsx.finance
+adb shell am start -W -n com.marsx.finance/com.marsx.pool.FinanceActivity
 
 sleep 2
 adb exec-out screencap -p > "$output_dir/00-launch.png"
 adb shell uiautomator dump /sdcard/marsx-window.xml >/dev/null
 adb shell cat /sdcard/marsx-window.xml > "$output_dir/window.xml"
-if ! grep -q "MARS-X POOL" "$output_dir/window.xml"; then
+if ! grep -q "MARS-X" "$output_dir/window.xml"; then
   adb logcat -d > "$output_dir/logcat.txt"
   echo "MARS-X activity was not visible after launch" >&2
   exit 1
@@ -33,7 +33,9 @@ esac
 
 screen_width="${screen_size%x*}"
 screen_height="${screen_size#*x}"
-tab_y="$((screen_height * 94 / 100))"
+theme_y="$((screen_height * 16 / 100))"
+scroll_start_y="$((screen_height * 82 / 100))"
+scroll_end_y="$((screen_height * 32 / 100))"
 
 capture() {
   local file_name="$1"
@@ -43,20 +45,20 @@ capture() {
 
 # These are authentic screens rendered by the current Android build. No UI
 # mockups or post-processing are used.
-capture "01-home.png"
+capture "01-finance-convert.png"
 
-adb shell input tap "$((screen_width / 2))" "$tab_y"
+adb shell input tap "$((screen_width * 44 / 100))" "$theme_y"
 sleep 1
-capture "02-sandbox.png"
+capture "02-finance-theme.png"
 
-adb shell input tap "$((screen_width * 5 / 6))" "$tab_y"
+adb shell input swipe "$((screen_width / 2))" "$scroll_start_y" "$((screen_width / 2))" "$scroll_end_y" 500
 sleep 1
-capture "03-account-and-privacy.png"
+capture "03-finance-broker-market.png"
 
-home_hash="$(sha256sum "$output_dir/01-home.png" | cut -d ' ' -f 1)"
-sandbox_hash="$(sha256sum "$output_dir/02-sandbox.png" | cut -d ' ' -f 1)"
-account_hash="$(sha256sum "$output_dir/03-account-and-privacy.png" | cut -d ' ' -f 1)"
-if [ "$home_hash" = "$sandbox_hash" ] || [ "$sandbox_hash" = "$account_hash" ]; then
-  echo "Screenshot capture did not change between app tabs" >&2
+home_hash="$(sha256sum "$output_dir/01-finance-convert.png" | cut -d ' ' -f 1)"
+theme_hash="$(sha256sum "$output_dir/02-finance-theme.png" | cut -d ' ' -f 1)"
+broker_hash="$(sha256sum "$output_dir/03-finance-broker-market.png" | cut -d ' ' -f 1)"
+if [ "$home_hash" = "$theme_hash" ] || [ "$theme_hash" = "$broker_hash" ]; then
+  echo "Screenshot capture did not change between Finance states" >&2
   exit 1
 fi
