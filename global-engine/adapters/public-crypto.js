@@ -23,6 +23,13 @@ export class PublicCryptoAdapter extends VenueAdapter {
 }
 
 const krakenPair=i=>({"BTC-USD":"XBTUSD","ETH-USD":"ETHUSD"}[String(i.symbol).toUpperCase()]);
+const bybitPair=i=>({
+  "BTC-USD":"BTCUSDT",
+  "ETH-USD":"ETHUSDT",
+  "SOL-USD":"SOLUSDT",
+  "BNB-USD":"BNBUSDT",
+  "DOGE-USD":"DOGEUSDT"
+}[String(i.symbol).toUpperCase()]);
 
 export const coinbaseCryptoUsd=()=>new PublicCryptoAdapter({
   name:"coinbase-public", symbols:["BTC-USD","ETH-USD"],
@@ -34,6 +41,16 @@ export const krakenCryptoUsd=()=>new PublicCryptoAdapter({
   name:"kraken-public", symbols:["BTC-USD","ETH-USD"],
   urlFor:i=>`https://api.kraken.com/0/public/Ticker?pair=${encodeURIComponent(krakenPair(i))}`,
   parse:p=>{ const x=Object.values(p.result||{})[0]||{}; return {bid:x.b?.[0],ask:x.a?.[0]}; }
+});
+
+export const bybitCryptoUsd=()=>new PublicCryptoAdapter({
+  name:"bybit-public", symbols:["BTC-USD","ETH-USD","SOL-USD","BNB-USD","DOGE-USD"],
+  urlFor:i=>`https://api.bybit.com/v5/market/tickers?category=spot&symbol=${encodeURIComponent(bybitPair(i))}`,
+  parse:p=>{
+    if(p.retCode!==0) throw new Error("Bybit ticker rejected");
+    const x=p.result?.list?.[0]||{};
+    return {bid:x.bid1Price,ask:x.ask1Price,timestamp:x.ts?new Date(Number(x.ts)).toISOString():undefined};
+  }
 });
 
 export const coinbaseBtcUsd=coinbaseCryptoUsd;
