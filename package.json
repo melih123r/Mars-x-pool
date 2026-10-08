@@ -1,11 +1,11 @@
 {
   "name": "marsx-pool-worker-api",
-  "version": "0.8.4",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check cloudflare/src/worker.js",
+    "check": "node --check server.js && node --check postgres-store.mjs && node --check cloudflare/src/worker.js",
     "test": "node --test",
     "license:generate": "node license-tool.js",
     "cf:check": "wrangler deploy --dry-run --config cloudflare/wrangler.toml --outdir .wrangler-dist",
@@ -15,9 +15,10 @@
     "global-engine:alpaca-sandbox:certify": "node global-engine/run-alpaca-sandbox-certification.js"
   },
   "engines": {
-    "node": "22.x"
+    "node": ">=22"
   },
   "dependencies": {
+    "pg": "8.16.3",
     "redis": "6.2.0"
   },
   "devDependencies": {

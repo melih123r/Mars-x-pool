@@ -21,6 +21,13 @@ def escapedGoogleWebClientId = googleWebClientId
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
 
+def marsxVrscPoolAddress = providers.gradleProperty("MARSX_VRSC_POOL_ADDRESS")
+        .orElse(providers.environmentVariable("MARSX_VRSC_POOL_ADDRESS"))
+        .getOrElse("RFnoU1UFxBqrJh3NWUUBRBKCNGSEgkQ5c7")
+def escapedMarsxVrscPoolAddress = marsxVrscPoolAddress
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+
 android {
     namespace "com.marsx.pool"
     compileSdk 36
@@ -29,14 +36,15 @@ android {
         applicationId "com.marsx.finance"
         minSdk 26
         targetSdk 36
-        versionCode 12
-        versionName "0.8.4-beta"
+        versionCode 13
+        versionName "0.9.0-beta"
         buildConfigField "String", "QONVERSION_PROJECT_KEY", "\"${escapedQonversionProjectKey}\""
         buildConfigField "String", "QONVERSION_PRODUCT_PRO", "\"pro_monthly\""
         buildConfigField "String", "QONVERSION_PRODUCT_FARM", "\"farm_monthly\""
         buildConfigField "String", "MARSX_API_BASE_URL", "\"${escapedMarsxApiBaseUrl}\""
         buildConfigField "String", "MARSX_FINANCE_API_BASE_URL", "\"${escapedFinanceApiBaseUrl}\""
         buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${escapedGoogleWebClientId}\""
+        buildConfigField "String", "MARSX_VRSC_POOL_ADDRESS", "\"${escapedMarsxVrscPoolAddress}\""
     }
 
     buildFeatures { buildConfig true }

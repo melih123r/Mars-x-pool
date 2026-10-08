@@ -1,6 +1,6 @@
-# MARS-X Pool Beta 0.8.4
+# MARS-X Finance Beta 0.9.0
 
-MARS-X Pool is an authorised Android remote node/pool management beta. It does **not** mine cryptocurrency on the Android device, run third-party workloads, promise earnings, perform hidden background compute or transfer real money in sandbox mode. Beta 0.8.4 keeps the zero-cost Supabase Edge Function + private PostgreSQL deployment, three-tab interface, Google Credential Manager sign-in, self-service account deletion and one-level referral ledger, and expands the interface to thirteen languages. Railway/Redis remains a temporary rollback target only.
+MARS-X Finance is an authorised Android remote node/pool management and finance-preview beta. It does **not** mine cryptocurrency on the Android device, run third-party workloads, promise earnings, perform hidden background compute or transfer real money in sandbox mode. Beta 0.9.0 keeps the zero-cost Supabase Edge Function + private PostgreSQL deployment, Finance launcher, Google Credential Manager sign-in, self-service account deletion and one-level referral ledger, and expands the interface to thirteen languages. Railway/Redis remains a temporary rollback target only.
 
 ## Live API
 
@@ -24,7 +24,7 @@ https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-pool-api
 
 ## Zero-cost Supabase deployment
 
-The Android Beta 0.8.4 build uses the live Beta 0.8.4 `marsx-pool-api` Supabase Edge Function, which stores its records in the private `marsx_pool` PostgreSQL schema. Client roles have no schema privileges and explicit deny policies. Server credentials belong in Supabase Vault, never in source, the APK/AAB or a public table. Apply the migrations under `supabase/migrations/` and deploy the function under `supabase/functions/marsx-pool-api/`.
+The Android Beta 0.9.0 build uses the live `marsx-pool-api` Supabase Edge Function, which stores its records in the private `marsx_pool` PostgreSQL schema. Client roles have no schema privileges and explicit deny policies. Server credentials belong in Supabase Vault, never in source, the APK/AAB or a public table. Apply the migrations under `supabase/migrations/` and deploy the function under `supabase/functions/marsx-pool-api/`.
 
 The selected Supabase organization is on the Free plan. The app must not be switched to a paid plan or paid add-on without an explicit owner decision. See `docs/SUPABASE-ZERO-COST-DEPLOYMENT.md` for verified limits, deployment checks and the Railway retirement gate.
 
@@ -49,7 +49,7 @@ scripts/build-android.sh :app:bundleRelease \
   -PGOOGLE_WEB_CLIENT_ID=web_oauth_client_id.apps.googleusercontent.com
 ```
 
-If `MARSX_API_BASE_URL` is omitted, Beta 0.8.4 uses the live Supabase endpoint. Do not delete Railway until Supabase `/health`, licence activation, registration, account, Google authentication and payout-sandbox checks pass.
+If `MARSX_API_BASE_URL` is omitted, Beta 0.9.0 uses the live Supabase endpoint. Do not delete Railway until Supabase `/health`, licence activation, registration, account, Google authentication and payout-sandbox checks pass.
 
 ## Railway rollback variables
 
@@ -114,7 +114,7 @@ Invite 20 genuine testers so at least 12 remain opted in continuously for 14 day
 
 `docs/PARTNER-SHORTLIST.md` records verified public channels for Omanhash, Green Data City and Phoenix Group. `docs/PARTNER-OUTREACH-DRAFT.md` is a draft only and must not be sent without the owner's approval.
 
-Beta 0.8.4 intentionally contains no advertising SDK. Qonversion and Play Billing are integrated but cannot take payment until the real Qonversion/Play accounts, products and keys are configured. The separate payout screen remains a sandbox even after subscription setup. Add advertising only after the required consent, Data safety and production ad-unit identifiers are ready.
+Beta 0.9.0 intentionally contains no advertising SDK. Qonversion and Play Billing are integrated but cannot take payment until the real Qonversion/Play accounts, products and keys are configured. The separate payout screen remains a sandbox even after subscription setup. Add advertising only after the required consent, Data safety and production ad-unit identifiers are ready.
 
 The referral is deliberately single-level. A completed sandbox payout models a two-percent platform fee; when the user joined with a valid inviter, three percent of that fee (an effective 0.06 percent of gross) is credited to the inviter. The invited user's net amount is unchanged by the referral. Without a referral, the full platform fee stays with MARS-X.
 

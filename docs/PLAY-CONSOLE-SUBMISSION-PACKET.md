@@ -1,4 +1,4 @@
-# Play Console submission packet — Beta 0.8.4
+# Play Console submission packet — Beta 0.9.0
 
 Use this document to minimize time spent in Play Console. It is a factual preparation sheet, not a substitute for the account owner's legal certifications.
 
@@ -11,7 +11,7 @@ Use this document to minimize time spent in Play Console. It is a factual prepar
 - Default language: English (United States)
 - Category: Tools
 - Target audience: Adults (18+)
-- Contains ads in 0.8.4: No
+- Contains ads in 0.9.0: No
 
 ## App access
 
@@ -41,7 +41,7 @@ Reconcile these with the final dependency/SDK report before submission:
 - Payment-card or bank data collected by MARS-X: No.
 - Precise/approximate location, contacts, photos, camera, microphone, SMS, advertising ID: not requested by the app.
 - Data sold: No.
-- Advertising sharing: No; 0.8.4 contains no advertising SDK.
+- Advertising sharing: No; 0.9.0 contains no advertising SDK.
 - Encryption in transit: Yes, HTTPS.
 - Account deletion: available in the Account tab and through the backend deletion route.
 - Privacy policy: use the public `/privacy` URL from the live Supabase endpoint after inserting the approved support/privacy contact.
@@ -53,7 +53,7 @@ Google Play, Google Credential Manager, Qonversion and Supabase may process serv
 - The phone is a remote-management client, not a mining worker.
 - No hidden compute or third-party workload runs on the Android device.
 - No guaranteed earnings claim.
-- No real payout or withdrawal in Beta 0.8.4.
+- No real payout or withdrawal in Beta 0.9.0.
 - Pro/payment controls remain unavailable unless the matching Play/Qonversion products and server verification are configured.
 
 ## Closed-test release gate

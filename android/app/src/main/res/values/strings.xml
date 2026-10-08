@@ -175,4 +175,5 @@
     <string name="account_delete_failed">The account could not be deleted. Try again.</string>
     <string name="save_server_button">Save server</string>
     <string name="sandbox_payout_created_with_fee">Net test amount: %1$s USDT_TEST • fee: %2$s • status: %3$s. This is not a real payment.</string>
+
 </resources>

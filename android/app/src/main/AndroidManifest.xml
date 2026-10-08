@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="com.android.vending.BILLING" />
     <application
         android:allowBackup="false"
@@ -9,7 +10,7 @@
         android:label="MARS-X Finance"
         android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.Material.Light.NoActionBar"
+        android:theme="@style/Theme.MarsX"
         android:usesCleartextTraffic="false">
         <activity android:name=".VrscPoolActivity" android:exported="false" />
         <activity android:name=".FinanceActivity" android:exported="true">
@@ -18,6 +19,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
     </application>
 </manifest>
