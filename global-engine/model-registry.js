@@ -1,0 +1,3 @@
+import crypto from "node:crypto";
+export function loadPrivateModel(env=process.env){const raw=env.MARSX_MODEL_WEIGHTS_JSON;if(!raw)return{ready:false,version:env.MARSX_MODEL_VERSION||null,weights:null};const weights=JSON.parse(raw),version=env.MARSX_MODEL_VERSION||"unversioned";return{ready:true,version,weights};}
+export function publicModelInfo(model){if(!model?.ready)return{ready:false,version:model?.version||null};const digest=crypto.createHash("sha256").update(JSON.stringify(model.weights)).digest("hex").slice(0,12);return{ready:true,version:model.version,fingerprint:digest,internalsExposed:false};}

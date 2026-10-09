@@ -1028,7 +1028,7 @@ export function createServer({
         const target = conversionTarget(targetCode);
         const destination = String(data.destination || "").trim();
         const amount = String(data.amountVrsc || "").trim();
-        if (!/^(?:0|[1-9][0-9]{0,11})(?:\\.[0-9]{1,8})?$/.test(amount) || Number(amount) <= 0) {
+        if (!/^(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,8})?$/.test(amount) || Number(amount) <= 0) {
           return sendJson(res, 400, { error: "invalid_vrsc_amount" });
         }
         if (!target) return sendJson(res, 400, { error: "unsupported_target" });
@@ -1076,7 +1076,7 @@ export function createServer({
         const data = await readJson(req);
         const amount = String(data.amountVrsc || "").trim();
         const to = String(data.to || "").trim();
-        if (!/^(?:0|[1-9][0-9]{0,11})(?:\\.[0-9]{1,8})?$/.test(amount) || Number(amount) <= 0) {
+        if (!/^(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,8})?$/.test(amount) || Number(amount) <= 0) {
           return sendJson(res, 400, { error: "invalid_vrsc_amount" });
         }
         if (!/^[A-Za-z0-9@._-]{1,80}$/.test(to)) return sendJson(res, 400, { error: "invalid_target_currency" });
@@ -1097,7 +1097,7 @@ export function createServer({
         const amount = String(data.amount || "").trim();
         if (!/^[a-z0-9_-]{2,20}$/.test(fromCurrency) || !/^[a-z0-9_-]{2,20}$/.test(toCurrency) ||
             !/^[a-z0-9_-]{2,20}$/.test(fromNetwork) || !/^[a-z0-9_-]{2,20}$/.test(toNetwork) ||
-            !/^(?:0|[1-9][0-9]{0,11})(?:\\.[0-9]{1,8})?$/.test(amount) || Number(amount) <= 0) {
+            !/^(?:0|[1-9][0-9]{0,11})(?:\.[0-9]{1,8})?$/.test(amount) || Number(amount) <= 0) {
           return sendJson(res, 400, { error: "invalid_quote_request" });
         }
         const query = new URLSearchParams({
@@ -1164,7 +1164,13 @@ export function createServer({
           verusQuoteRequired: true,
           changeNowConfigured,
           treasurySignerConfigured,
-          executionEnabled: changeNowConfigured && treasurySignerConfigured && process.env.REAL_WITHDRAWALS_ENABLED === "true",
+          executionEnabled: false,
+          executionBlockers: [
+            ...(changeNowConfigured ? [] : ["CHANGENOW_API_KEY"]),
+            ...(treasurySignerConfigured ? [] : ["VRSC_TREASURY_SIGNER"]),
+            ...(process.env.REAL_WITHDRAWALS_ENABLED === "true" ? [] : ["REAL_WITHDRAWALS_ENABLED"]),
+            "LIVE_ROUTE_NOT_IMPLEMENTED"
+          ],
           safeguards: [
             "provider quote required before execution",
             "no balance from accepted shares; provider-confirmed settlement only",
