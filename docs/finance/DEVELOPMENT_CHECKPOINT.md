@@ -33,3 +33,15 @@ Future entries should be appended, not overwrite this history.
 - Attempted minimal source update to replace the stray literal with a real newline; GitHub connector safety checks blocked the write. No fix commit, new green CI or APK verified. Do not rerun the unchanged failed workflow.
 - Reference +1 binary image and actual Android screenshot comparison remain unavailable; do not claim pixel match.
 - Next: permitted code write, new HEAD CI, then HEAD-specific Finance APK artifact verification; keep PR #20 draft and do not merge merely to enable cron.
+
+## 2026-10-09 03:54 Europe/Paris — Combined QA verification
+
+- Branch and draft PR #20 HEAD verified: `37c57ce931e9284332e68409e67af0062e54f6e3`; no new code commit since prior report.
+- Commit checks: Global Engine CI `37861755900` passed; Global Engine Edge CI `37861755737` passed; general CI `37861755689` failed; Finance Automation `37861755765` failed.
+- Logs: Android job `113598901888` and finance-checks job `113598902158` both fail Java compilation at `android/app/src/main/java/com/marsx/pool/FinanceActivity.java:35` because of an escaped newline outside a string.
+- Artifacts: neither checked workflow run contains a Finance APK artifact. No build or screenshot acceptance claimed.
+- Gmail: three latest matching notifications correspond to the same failed HEAD, not a new independent regression.
+- Work/Cloud Browser not exposed in available tools; no claim of use.
+- Minimal Java fix attempted on current file blob but GitHub write blocked by safety checks. No new code commit and no CI rerun.
+- Reference +1 PNG and matching Android device screenshots not confirmed; five-theme pixel fidelity unverified.
+- Next: enable permitted single-line Java correction, verify new HEAD CI, check Finance APK artifact, then visual QA. Keep PR draft and financial operations disabled.
