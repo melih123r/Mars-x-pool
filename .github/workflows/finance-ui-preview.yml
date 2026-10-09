@@ -1,0 +1,32 @@
+name: MARS-X Finance UI Android CI
+on:
+  push:
+    branches: [marsx-finance-ui-first-ci, marsx-global-engine-v01]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android-ui-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Build UI preview APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew
+          ./gradlew :app:assembleDebug --stacktrace
+      - name: Upload preview APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: marsx-finance-ui-preview
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
