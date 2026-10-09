@@ -58,3 +58,13 @@ Future entries should be appended, not overwrite this history.
 - Work/Cloud Browser surface was directly available to this run and showed an empty Chrome session. This verifies per-run browser availability only; it does not grant or prove persistent access for other bots.
 - No Bot 1 source defect was established, so no speculative backend code change was made. This checkpoint append used the current file blob SHA as a concurrency guard.
 - Next safe Bot 1 action: re-verify backend/engine CI after the Android owner produces a new HEAD; inspect route/controller code only if a backend regression appears.
+
+## 2026-10-09 12:28 Europe/Paris — Work 5-bot coordination and local fix
+
+- Five hourly MARS-X Finance automations were re-scoped and enabled: Bot 1 GitHub/backend, Bot 2 Android APK/Gradle, Bot 3 Figma/MagicPath/design, Bot 4 API/security, Bot 5 QA/Gmail reporting. Immediate runs were requested for all five; completion is asynchronous.
+- Work/Cloud Browser access cannot be technically transferred or guaranteed to scheduled automations from this live Work session. Each bot prompt now requires checking access honestly and reporting if it is unavailable.
+- Branch `marsx-global-engine-v01` verified at `d128410b2a55c8cea14a753c97d3bb3a07c4db99`.
+- Applied the known Android CI blocker fix locally: replaced the literal `\n` token in `android/app/src/main/java/com/marsx/pool/FinanceActivity.java` with a real newline.
+- Verification: `npm test` passed 154/154 with elevated local-server permission. Initial sandbox run failed only because localhost listen was blocked (`EPERM`).
+- Android local verification remains blocked in this workspace because the repo has no Gradle wrapper and the system `gradle` command is unavailable. CI must verify `:app:assembleDebug` and APK artifact on the pushed commit.
+- Reference +1 binary PNG and real Android screenshot comparison are still not confirmed; no pixel-match percentage is verified.
