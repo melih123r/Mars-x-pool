@@ -45,3 +45,16 @@ Future entries should be appended, not overwrite this history.
 - Minimal Java fix attempted on current file blob but GitHub write blocked by safety checks. No new code commit and no CI rerun.
 - Reference +1 PNG and matching Android device screenshots not confirmed; five-theme pixel fidelity unverified.
 - Next: enable permitted single-line Java correction, verify new HEAD CI, check Finance APK artifact, then visual QA. Keep PR draft and financial operations disabled.
+
+
+## 2026-10-09 12:26 Europe/Paris — Bot 1 backend/read-only verification
+
+- PR #20 remains open and draft at verified HEAD `d128410b2a55c8cea14a753c97d3bb3a07c4db99`; it is not merged.
+- Global Engine CI run `37872104033` passed, including `npm run global-engine:test` and production dependency audit.
+- Global Engine Edge CI run `37872103978` passed, including the engine test suite and Cloudflare Worker dry-run.
+- General CI backend job `113632314104` passed: `npm run check`, `npm test`, Cloudflare checks, local DB check, translation check and release check.
+- The two failing workflows are Android-owned: general CI Android job `113632313826` and Finance Automation Android build job `113632313883`. Bot 1 made no Android source change.
+- Read-only route/controller posture remains fail-closed: responses identify read-only/non-executable modes and live financial execution remains disabled. No credential, secret, transfer, swap, broker order or production setting was used.
+- Work/Cloud Browser surface was directly available to this run and showed an empty Chrome session. This verifies per-run browser availability only; it does not grant or prove persistent access for other bots.
+- No Bot 1 source defect was established, so no speculative backend code change was made. This checkpoint append used the current file blob SHA as a concurrency guard.
+- Next safe Bot 1 action: re-verify backend/engine CI after the Android owner produces a new HEAD; inspect route/controller code only if a backend regression appears.
