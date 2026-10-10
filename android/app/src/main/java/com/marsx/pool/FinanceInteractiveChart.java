@@ -41,6 +41,14 @@ public final class FinanceInteractiveChart extends View {
    p.setStyle(Paint.Style.FILL);c.drawRect(x-step*.28f,Math.min(yo,yc),x+step*.28f,Math.max(yo,yc)+1,p);
    p.setColor(Color.rgb(80,95,110));c.drawRect(x-step*.28f,volBottom-(b.volume/mv)*(volBottom-volTop),x+step*.28f,volBottom,p);
   }
+  double[] closes=new double[data.size()];for(int i=0;i<data.size();i++)closes[i]=data.get(i).close;
+  double[] ema=FinanceIndicators.ema(closes,20);Path line=new Path();boolean started=false;
+  p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(2.5f);p.setColor(accent);
+  for(int i=start;i<end;i++){if(Double.isNaN(ema[i]))continue;
+   float x=(i-start+.5f)*step,y=(float)((hi-ema[i])/range*chartH);
+   if(!started){line.moveTo(x,y);started=true;}else line.lineTo(x,y);
+  }
+  if(started)c.drawPath(line,p);p.setStyle(Paint.Style.FILL);
   if(cross>=0){p.setColor(Color.LTGRAY);p.setStrokeWidth(1);c.drawLine(cross,0,cross,h,p);}
  }
 }
