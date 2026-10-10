@@ -3,6 +3,7 @@ import android.content.Context;
 import android.graphics.*;
 import android.view.*;
 import java.util.*;
+import org.json.*;
 /** Read-only chart; input must be verified OHLCV in ascending timestamp order. */
 public final class FinanceInteractiveChart extends View {
  public static final class Bar {
@@ -12,6 +13,7 @@ public final class FinanceInteractiveChart extends View {
    time=t;open=o;high=h;low=l;close=c;volume=v;
   }
  }
+ public int accent=Color.rgb(255,120,35);
  private final ArrayList<Bar> data=new ArrayList<>();
  private final Paint p=new Paint(3);
  private final ScaleGestureDetector pinch;
@@ -20,6 +22,7 @@ public final class FinanceInteractiveChart extends View {
   @Override public boolean onScale(ScaleGestureDetector d){count=Math.max(12,Math.min(180,count/d.getScaleFactor()));clamp();invalidate();return true;}
  });}
  public void setBars(List<Bar> bars){long prev=0;for(Bar b:bars){if(b.time<=prev)throw new IllegalArgumentException("Unsorted timestamps");prev=b.time;}data.clear();data.addAll(bars);offset=0;invalidate();}
+ public void setCandles(JSONArray rows){ArrayList<Bar> bars=new ArrayList<>();try{for(int i=0;i<rows.length();i++){JSONObject x=rows.getJSONObject(i);bars.add(new Bar(x.getLong("time"), (float)x.getDouble("open"),(float)x.getDouble("high"),(float)x.getDouble("low"),(float)x.getDouble("close"),(float)x.optDouble("volume",0)));}setBars(bars);}catch(Exception ex){clear();}}
  public void clear(){data.clear();invalidate();}
  private void clamp(){offset=Math.max(0,Math.min(offset,Math.max(0,data.size()-count)));}
  @Override public boolean onTouchEvent(MotionEvent e){pinch.onTouchEvent(e);switch(e.getActionMasked()){
