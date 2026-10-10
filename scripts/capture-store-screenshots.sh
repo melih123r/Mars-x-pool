@@ -12,10 +12,26 @@ adb shell settings put global stay_on_while_plugged_in 3
 adb shell input keyevent KEYCODE_WAKEUP
 adb shell wm dismiss-keyguard
 adb shell input keyevent 82
+
+screen_size="$(adb shell wm size | sed -n 's/.*Physical size: //p' | tail -n 1 | tr -d '\r')"
+case "$screen_size" in
+  *x*) ;;
+  *) echo "Could not determine emulator screen size" >&2; exit 1 ;;
+esac
+
+screen_width="${screen_size%x*}"
+screen_height="${screen_size#*x}"
+
 adb shell am force-stop com.marsx.finance
 adb shell am start -W -n com.marsx.finance/com.marsx.pool.FinanceActivity
 
 sleep 4
+adb shell dumpsys window > "$output_dir/focus.txt" || true
+if grep -q "Application Not Responding" "$output_dir/focus.txt"; then
+  adb shell input tap "$((screen_width * 29 / 100))" "$((screen_height * 59 / 100))"
+  sleep 2
+fi
+
 adb exec-out screencap -p > "$output_dir/00-launch.png"
 adb shell uiautomator dump /sdcard/marsx-window.xml >/dev/null
 adb shell cat /sdcard/marsx-window.xml > "$output_dir/window.xml"
@@ -26,14 +42,6 @@ if ! grep -q "MARS-X" "$output_dir/window.xml" && ! grep -q "com.marsx.finance" 
   exit 1
 fi
 
-screen_size="$(adb shell wm size | sed -n 's/.*Physical size: //p' | tail -n 1 | tr -d '\r')"
-case "$screen_size" in
-  *x*) ;;
-  *) echo "Could not determine emulator screen size" >&2; exit 1 ;;
-esac
-
-screen_width="${screen_size%x*}"
-screen_height="${screen_size#*x}"
 theme_y="$((screen_height * 16 / 100))"
 theme_x="$((screen_width * 52 / 100))"
 scroll_start_y="$((screen_height * 82 / 100))"
