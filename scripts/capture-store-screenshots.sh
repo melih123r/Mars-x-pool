@@ -34,6 +34,7 @@ esac
 screen_width="${screen_size%x*}"
 screen_height="${screen_size#*x}"
 theme_y="$((screen_height * 16 / 100))"
+theme_x="$((screen_width * 52 / 100))"
 scroll_start_y="$((screen_height * 82 / 100))"
 scroll_end_y="$((screen_height * 32 / 100))"
 
@@ -47,7 +48,9 @@ capture() {
 # mockups or post-processing are used.
 capture "01-finance-convert.png"
 
-adb shell input tap "$((screen_width * 30 / 100))" "$theme_y"
+# Tap the center theme chip instead of the first chip, otherwise the second
+# screenshot can remain visually identical to launch on fresh installs.
+adb shell input tap "$theme_x" "$theme_y"
 sleep 2
 capture "02-finance-theme.png"
 
