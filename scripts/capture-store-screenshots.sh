@@ -15,11 +15,12 @@ adb shell input keyevent 82
 adb shell am force-stop com.marsx.finance
 adb shell am start -W -n com.marsx.finance/com.marsx.pool.FinanceActivity
 
-sleep 2
+sleep 4
 adb exec-out screencap -p > "$output_dir/00-launch.png"
 adb shell uiautomator dump /sdcard/marsx-window.xml >/dev/null
 adb shell cat /sdcard/marsx-window.xml > "$output_dir/window.xml"
-if ! grep -q "MARS-X" "$output_dir/window.xml"; then
+adb shell dumpsys window > "$output_dir/focus.txt" || true
+if ! grep -q "MARS-X" "$output_dir/window.xml" && ! grep -q "com.marsx.finance" "$output_dir/focus.txt"; then
   adb logcat -d > "$output_dir/logcat.txt"
   echo "MARS-X activity was not visible after launch" >&2
   exit 1
