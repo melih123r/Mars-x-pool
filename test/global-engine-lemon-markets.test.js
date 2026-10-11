@@ -170,3 +170,44 @@ test("authenticator recovery code and list pagination are validated",async()=>{
     assert.equal(seen.opts.method,"GET");
   } finally { globalThis.fetch=original; }
 });
+
+
+test("portfolio read helpers validate bounds and filters",async()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only"});
+  assert.throws(()=>a.listOrders("acct-1",{limit:0}),/invalid order list limit/);
+  assert.throws(()=>a.listOrders("acct-1",{status:"unknown"}),/invalid order status/);
+  assert.throws(()=>a.listTransactions("acct-1",{limit:101}),/invalid transaction list limit/);
+  assert.throws(()=>a.listAccounts({status:"pending"}),/invalid account status/);
+  const original=globalThis.fetch;
+  const urls=[];
+  globalThis.fetch=async(url)=>{
+    urls.push(String(url));
+    return new Response(JSON.stringify({results:[],pagination:{next_cursor:null}}),{status:200,headers:{"content-type":"application/json"}});
+  };
+  try{
+    await a.listOrders("acct-1",{limit:25,status:"created",securitiesAccount:"seca-1"},{principal:"marsx-backend-test",justification:"portfolio.orders"});
+    await a.listTransactions("acct-1",{limit:10},{principal:"marsx-backend-test",justification:"portfolio.transactions"});
+    await a.listAccounts({limit:20,status:"opened",personCustomer:true},{principal:"marsx-backend-test",justification:"onboarding.account_list"});
+    assert.equal(urls[0],"https://sandbox.api.lemon.markets/v1/accounts/acct-1/orders?limit=25&status=created&securities_account=seca-1");
+    assert.equal(urls[1],"https://sandbox.api.lemon.markets/v1/accounts/acct-1/transactions?limit=10");
+    assert.equal(urls[2],"https://sandbox.api.lemon.markets/v1/accounts?limit=20&status=opened&person_customer=true");
+  } finally { globalThis.fetch=original; }
+});
+
+test("webhook registration rejects unsafe callback URLs and malformed events",async()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only"});
+  assert.throws(()=>a.createWebhook({url:"http://example.test/hook",events:["account.created"]}),/invalid webhook url/);
+  assert.throws(()=>a.createWebhook({url:"https://example.test/hook",events:["bad event"]}),/webhook events required/);
+  const original=globalThis.fetch;
+  let seen=null;
+  globalThis.fetch=async(url,opts)=>{
+    seen={url:String(url),opts};
+    return new Response(JSON.stringify({id:"wbh-1",signature_secret:"secret"}),{status:201,headers:{"content-type":"application/json"}});
+  };
+  try{
+    const result=await a.createWebhook({url:"https://marsx.example/webhooks/lemon",events:["account.created"]},{principal:"marsx-backend-test",justification:"webhook.configure"});
+    assert.equal(result.id,"wbh-1");
+    assert.equal(seen.url,"https://sandbox.api.lemon.markets/v1/webhooks");
+    assert.equal(seen.opts.method,"POST");
+  } finally { globalThis.fetch=original; }
+});
