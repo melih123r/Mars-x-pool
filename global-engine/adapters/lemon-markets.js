@@ -12,6 +12,10 @@ const validateBaseUrl=(value)=>{
   return normalized;
 };
 const enc=(v)=>encodeURIComponent(String(v));
+const validateIdempotencyKey=(value)=>{
+  if(typeof value!=="string"||value.length<1||value.length>100||/[\r\n]/.test(value)) throw new Error("invalid idempotency key");
+  return value;
+};
 const nonEmpty=(v,name)=>{ if(!v) throw new Error(`${name} required`); return v; };
 const validateRedirectUri=(value,name)=>{
   nonEmpty(value,name);
@@ -166,6 +170,7 @@ export class LemonBrokerAdapter extends VenueAdapter {
   async createOrder(accountId,payload,{confirm=false,sca,principal,justification="order.create",idempotencyKey}={}) {
     nonEmpty(accountId,"accountId"); nonEmpty(payload,"order payload");
     if(!this.allowOrderSubmission) throw new Error("lemon.markets order submission disabled");
+    validateIdempotencyKey(idempotencyKey);
     const created=await this.request(`/accounts/${enc(accountId)}/orders`,{
       method:"POST",body:payload,principal,justification,idempotencyKey
     });
