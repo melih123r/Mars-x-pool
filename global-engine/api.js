@@ -10,7 +10,7 @@ import { learningConsent } from "./learning-consent.js";
 import { sanitizeTrainingEvent } from "./training-sanitize.js";
 import { TrainingBuffer } from "./training-buffer.js";
 import { ChangeNowAdapter } from "./adapters/changenow.js";
-import { changeNowErrorView } from "./changenow-health.js";
+import { changeNowErrorView, changeNowHealth } from "./changenow-health.js";
 import { LemonBrokerAdapter } from "./adapters/lemon-markets.js";
 import { brokerProductionReadiness, brokerProviderScorecard, brokerSafetyStatus } from "./broker-core.js";
 import { buildChartView } from "./chart-view.js";
@@ -48,6 +48,15 @@ export function demoChartRows({now=Date.now(),limit=96,base=64000}={}){
 export function createApi(engine=buildEngine()){
   const buckets=new Map(), limit=Number(process.env.MARSX_RATE_LIMIT_PER_MIN||120), trainingBuffer=new TrainingBuffer({minCohort:Number(process.env.MARSX_TRAINING_MIN_COHORT||20)}), changeNow=new ChangeNowAdapter(), lemon=new LemonBrokerAdapter();
   const convertHealth=()=>({provider:"MARS-X Engine",mode:"READ_ONLY",configured:changeNow.configured(),executionReady:false,capabilities:changeNow.capabilities(),executionBlockers:["provider_execution_disabled","transaction_confirmation_required","compliance_gate_required"]});
+  const changeNowHealthView=async()=>{
+    let currencies=null, quote=null, lastStatus=null;
+    if(changeNow.configured()) try{
+      currencies=await changeNow.currencies({active:true,flow:"standard"});
+      quote=await changeNow.estimate({fromCurrency:"btc",toCurrency:"eth",fromAmount:"0.01",fromNetwork:"btc",toNetwork:"eth",flow:"standard"});
+    }catch(e){lastStatus=changeNowErrorView(e);}
+    const h=changeNowHealth({configured:changeNow.configured(),currencies,quote,lastStatus});
+    return {...h,mode:"READ_ONLY",configured:changeNow.configured(),executionReady:false,capabilities:changeNow.capabilities(),lastStatus};
+  };
   const alpacaBrokerConfigured=()=>Boolean(
     (process.env.ALPACA_BROKER_API_KEY&&process.env.ALPACA_BROKER_API_SECRET) ||
     (process.env.ALPACA_BROKER_CLIENT_ID&&process.env.ALPACA_BROKER_CLIENT_SECRET)
@@ -55,7 +64,7 @@ export function createApi(engine=buildEngine()){
   const lemonProvider=()=>{
     const sandbox=/sandbox/i.test(lemon.baseUrl);
     const readiness=brokerProductionReadiness({providerConfigured:lemon.configured(),sandbox,ordersEnabled:lemon.allowOrderSubmission===true,withdrawalsEnabled:lemon.allowWithdrawals===true});
-    return {id:"lemon-markets",assetClasses:["EQUITY","ETF"],configured:lemon.configured(),sandbox,kycRequired:true,ordersEnabled:lemon.allowOrderSubmission===true,withdrawalsEnabled:lemon.allowWithdrawals===true,executionReady:readiness.liveTradingReady,requiredSecrets:lemon.configured()?[]:["LEMON_MARKETS_API_KEY"],gates:readiness.missing.length?readiness.missing:["USER_REVIEW_REQUIRED","SCA_CONFIRMATION_REQUIRED"],readiness};
+    return {id:"lemon-markets",assetClasses:["EQUITY","ETF"],configured:lemon.configured(),sandbox,kycRequired:true,ordersEnabled:lemon.allowOrderSubmission===true,withdrawalsEnabled:lemon.allowWithdrawals===true,productionPrereqsReady:readiness.liveTradingReady,executionReady:false,requiredSecrets:lemon.configured()?[]:["LEMON_MARKETS_API_KEY"],gates:readiness.missing.length?readiness.missing:["USER_REVIEW_REQUIRED","SCA_CONFIRMATION_REQUIRED"],readiness};
   };
   const brokerProviders=()=>brokerProviderScorecard({lemonConfigured:lemon.configured(),alpacaConfigured:alpacaBrokerConfigured()});
   const brokerHealth=()=>{const provider=lemonProvider(), candidates=brokerProviders(), primary=candidates[0];return {provider:"MARS-X Broker Gateway",mode:provider.readiness.mode==="PRODUCTION_READY"?"PRODUCTION_REVIEW_READY":"PAPER_AND_ONBOARDING_READY",primaryBroker:primary?.label||"lemon.markets",primaryBrokerId:primary?.id||"lemon-markets",configured:lemon.configured()||alpacaBrokerConfigured(),safety:brokerSafetyStatus(),providers:[provider],candidates,selectionPolicy:{prefer:["regulated embedded brokerage","sandbox lifecycle","KYC/SCA support","webhooks/reconciliation","no client-side secrets"],blocked:["KYC bypass","custody without licensed provider","live orders before certification","withdrawals before approval"]},production:{liveTrading:false,withdrawals:false,custody:false}};};
@@ -74,14 +83,14 @@ export function createApi(engine=buildEngine()){
       if(req.method==="GET" && url.pathname==="/convert/min-amount"){try{return res.end(JSON.stringify({provider:"MARS-X Engine",mode:"READ_ONLY",executionReady:false,data:await changeNow.minAmount(quoteParams(url))}));}catch(e){res.statusCode=e.status||400;return res.end(JSON.stringify(changeNowErrorView(e)));}}
       if(req.method==="GET" && url.pathname==="/convert/quote"){try{return res.end(JSON.stringify({provider:"MARS-X Engine",mode:"READ_ONLY",executionReady:false,data:await changeNow.estimate(quoteParams(url))}));}catch(e){res.statusCode=e.status||400;return res.end(JSON.stringify(changeNowErrorView(e)));}}
       if(req.method==="GET" && url.pathname==="/broker/health") return res.end(JSON.stringify(brokerHealth()));
-      if(req.method==="GET" && url.pathname==="/broker/providers") return res.end(JSON.stringify({mode:"PAPER_AND_ONBOARDING_READY",providers:brokerHealth().providers}));
+      if(req.method==="GET" && url.pathname==="/broker/providers"){const h=brokerHealth();return res.end(JSON.stringify({mode:h.mode,providers:h.providers,candidates:h.candidates,selectionPolicy:h.selectionPolicy,production:h.production}));}
       if(req.method==="GET" && url.pathname==="/broker/readiness") return res.end(JSON.stringify({mode:"BROKER_PRODUCTION_READINESS",provider:lemonProvider()}));
       if(req.method==="GET" && url.pathname==="/chart/snapshot"){
         const symbol=(url.searchParams.get("symbol")||"BTC-USD").toUpperCase(), timeframe=url.searchParams.get("timeframe")||"1m";
         const view=buildChartView({symbol,timeframe,rows:demoChartRows({limit:120}),maxStaleMs:10*60_000,signals:[{time:Date.now()-20*60_000,price:64250,direction:"BUY",confidence:.72,label:"MARS-X"}]});
         return res.end(JSON.stringify({...view,mode:"READ_ONLY",executionReady:false,source:"deterministic-preview"}));
       }
-      if(req.method==="GET" && url.pathname==="/changenow/health") return res.end(JSON.stringify({provider:"ChangeNOW",mode:"READ_ONLY",configured:changeNow.configured(),executionReady:false,capabilities:changeNow.capabilities()}));
+      if(req.method==="GET" && url.pathname==="/changenow/health") return res.end(JSON.stringify(await changeNowHealthView()));
       if(req.method==="GET" && url.pathname==="/changenow/currencies"){try{return res.end(JSON.stringify({provider:"ChangeNOW",mode:"READ_ONLY",data:await changeNow.currencies({active:url.searchParams.get("active")!=="false",flow:url.searchParams.get("flow")||"standard"})}));}catch(e){res.statusCode=e.status||503;return res.end(JSON.stringify(changeNowErrorView(e)));}}
       if(req.method==="GET" && url.pathname==="/changenow/min-amount"){try{return res.end(JSON.stringify({provider:"ChangeNOW",mode:"READ_ONLY",data:await changeNow.minAmount({fromCurrency:url.searchParams.get("fromCurrency"),toCurrency:url.searchParams.get("toCurrency"),fromNetwork:url.searchParams.get("fromNetwork"),toNetwork:url.searchParams.get("toNetwork"),flow:url.searchParams.get("flow")||"standard"})}));}catch(e){res.statusCode=e.status||400;return res.end(JSON.stringify(changeNowErrorView(e)));}}
       if(req.method==="GET" && url.pathname==="/changenow/quote"){try{return res.end(JSON.stringify({provider:"ChangeNOW",mode:"READ_ONLY",executionReady:false,data:await changeNow.estimate({fromCurrency:url.searchParams.get("fromCurrency"),toCurrency:url.searchParams.get("toCurrency"),fromAmount:url.searchParams.get("fromAmount"),fromNetwork:url.searchParams.get("fromNetwork"),toNetwork:url.searchParams.get("toNetwork"),flow:url.searchParams.get("flow")||"standard"})}));}catch(e){res.statusCode=e.status||400;return res.end(JSON.stringify(changeNowErrorView(e)));}}
