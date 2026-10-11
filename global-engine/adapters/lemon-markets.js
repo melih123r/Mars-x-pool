@@ -84,6 +84,28 @@ export class LemonBrokerAdapter extends VenueAdapter {
       method:"POST",body:payload,...ctx,justification:ctx.justification||"onboarding.knowledge_and_experience"
     });
   }
+  createAuthenticator(accountId,payload,ctx={}) {
+    nonEmpty(accountId,"accountId"); nonEmpty(payload,"authenticator payload");
+    nonEmpty(payload.name,"authenticator name");
+    nonEmpty(payload.public_key,"authenticator public key");
+    nonEmpty(payload.client_credential_id,"client credential id");
+    nonEmpty(payload.verification,"authenticator verification");
+    return this.request(`/accounts/${enc(accountId)}/authenticators`,{
+      method:"POST",body:payload,...ctx,justification:ctx.justification||"sca.authenticator.enroll"
+    });
+  }
+  listInstruments({type,limit=100,cursor}={},ctx={}) {
+    if(type && !["stock","etf","fund"].includes(type)) throw new Error("invalid instrument type");
+    const n=Number(limit); if(!Number.isInteger(n)||n<1||n>100) throw new Error("invalid instrument limit");
+    const q=new URLSearchParams(); q.set("limit",String(n)); if(type) q.set("type",type); if(cursor) q.set("cursor",String(cursor));
+    return this.request(`/instruments?${q.toString()}`,{...ctx,justification:ctx.justification||"market.instruments"});
+  }
+  listProductContracts({type="brokerage",limit=100,cursor}={},ctx={}) {
+    if(!["brokerage","retirement"].includes(type)) throw new Error("invalid product contract type");
+    const n=Number(limit); if(!Number.isInteger(n)||n<1||n>100) throw new Error("invalid product contract limit");
+    const q=new URLSearchParams(); q.set("limit",String(n)); q.set("type",type); if(cursor) q.set("cursor",String(cursor));
+    return this.request(`/product_contracts?${q.toString()}`,{...ctx,justification:ctx.justification||"market.product_contracts"});
+  }
   createSecuritiesAccount(accountId,ctx={}) {
     nonEmpty(accountId,"accountId");
     return this.request(`/accounts/${enc(accountId)}/securities_accounts`,{
