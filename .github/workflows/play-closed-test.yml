@@ -71,9 +71,10 @@ jobs:
             -Pandroid.injected.signing.key.alias="$KEY_ALIAS" \
             -Pandroid.injected.signing.key.password="$KEY_PASSWORD"
           test -s android/app/build/outputs/bundle/release/app-release.aab
+          sha256sum android/app/build/outputs/bundle/release/app-release.aab
       - uses: actions/upload-artifact@v4
         with:
-          name: marsx-pool-signed-closed-test-aab
+          name: marsx-finance-signed-closed-test-aab
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 7
       - name: Upload to Google Play closed testing
