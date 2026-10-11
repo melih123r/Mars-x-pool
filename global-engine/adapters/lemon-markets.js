@@ -245,12 +245,13 @@ export class LemonBrokerAdapter extends VenueAdapter {
       },...ctx,justification:ctx.justification||"order.confirm"
     });
   }
-  createWithdrawal(accountId,{amount,currency="EUR"},ctx={}) {
+  createWithdrawal(accountId,{amount,currency="EUR"}={},ctx={}) {
     nonEmpty(accountId,"accountId");
     if(!this.allowWithdrawals) throw new Error("lemon.markets withdrawals disabled");
-    if(!amount) throw new Error("withdrawal amount required");
+    validatePositiveDecimal(amount,"withdrawal amount");
+    if(currency!=="EUR") throw new Error("withdrawal currency must be EUR");
     return this.request(`/accounts/${enc(accountId)}/withdrawals`,{
-      method:"POST",body:{amount:String(amount),currency},...ctx,justification:ctx.justification||"withdrawal.create"
+      method:"POST",body:{amount,currency},...ctx,justification:ctx.justification||"withdrawal.create"
     });
   }
   confirmWithdrawal(accountId,withdrawalId,sca,ctx={}) {
