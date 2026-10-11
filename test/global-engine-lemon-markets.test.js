@@ -44,3 +44,40 @@ test("generic live execution remains disabled", async()=>{
   const a=new LemonBrokerAdapter({apiKey:"test-only"});
   await assert.rejects(()=>a.placeOrder(),/generic live execution disabled/);
 });
+
+
+test("order submission requires an idempotency key before network access", async()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://example.invalid",allowOrderSubmission:true});
+  await assert.rejects(()=>a.createOrder("acct-1",{side:"buy",type:"market",instrument:"US0378331005",amount:"10",fees:{type:"fixed",amount:"0"},currency:"EUR"}),/idempotencyKey required/);
+});
+
+test("order confirmation forwards SCA, appropriateness consent and actor", async()=>{
+  const originalFetch=global.fetch;
+  let captured;
+  global.fetch=async(url,options)=>{
+    captured={url,options};
+    return {ok:true,status:200,text:async()=>JSON.stringify({id:"ord-1",status:"confirmed"})};
+  };
+  try{
+    const a=new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://sandbox.api.lemon.markets/v1",allowOrderSubmission:true});
+    const result=await a.confirmOrder(
+      "acct-1","ord-1",{challenge:"signed"},
+      {principal:"backend-acct-1",appropriatenessConsent:true,actor:{type:"customer",id:"acct-1"}}
+    );
+    assert.equal(result.status,"confirmed");
+    assert.equal(captured.url,"https://sandbox.api.lemon.markets/v1/accounts/acct-1/orders/ord-1/confirm");
+    const body=JSON.parse(captured.options.body);
+    assert.deepEqual(body.sca,{challenge:"signed"});
+    assert.equal(body.appropriateness_consent,true);
+    assert.deepEqual(body.actor,{type:"customer",id:"acct-1"});
+    assert.equal(captured.options.headers["LMG-Data-Privacy-Access-Principal"],"backend-acct-1");
+  } finally {
+    global.fetch=originalFetch;
+  }
+});
+
+test("order confirmation validates optional regulatory fields",()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://example.invalid",allowOrderSubmission:true});
+  assert.throws(()=>a.confirmOrder("acct-1","ord-1",{challenge:"x"},{appropriatenessConsent:"yes"}),/appropriateness consent must be boolean/);
+  assert.throws(()=>a.confirmOrder("acct-1","ord-1",{challenge:"x"},{actor:"customer"}),/actor must be an object/);
+});

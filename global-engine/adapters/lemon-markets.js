@@ -93,9 +93,11 @@ export class LemonBrokerAdapter extends VenueAdapter {
     if(!Array.isArray(events)||events.length===0) throw new Error("webhook events required");
     return this.request("/webhooks",{method:"POST",body:{url,events},...ctx,justification:ctx.justification||"webhook.configure"});
   }
-  async createOrder(accountId,payload,{confirm=false,sca,principal="backend-marsx",justification="order.create",idempotencyKey}={}) {
+  async createOrder(accountId,payload,{confirm=false,sca,appropriatenessConsent,actor,principal="backend-marsx",justification="order.create",idempotencyKey}={}) {
     nonEmpty(accountId,"accountId"); nonEmpty(payload,"order payload");
     if(!this.allowOrderSubmission) throw new Error("lemon.markets order submission disabled");
+    nonEmpty(idempotencyKey,"idempotencyKey");
+    if(String(idempotencyKey).length>100) throw new Error("idempotencyKey too long");
     const created=await this.request(`/accounts/${enc(accountId)}/orders`,{
       method:"POST",body:payload,principal,justification,idempotencyKey
     });
@@ -103,15 +105,23 @@ export class LemonBrokerAdapter extends VenueAdapter {
     const orderId=created?.data?.id??created?.results?.id??created?.id;
     if(!orderId) throw new Error("lemon.markets order id missing");
     if(!sca || typeof sca!=="object" || Array.isArray(sca)) throw new Error("SCA confirmation required");
-    const confirmed=await this.confirmOrder(accountId,orderId,sca,{principal});
+    const confirmed=await this.confirmOrder(accountId,orderId,sca,{principal,appropriatenessConsent,actor});
     return {created,confirmed};
   }
   confirmOrder(accountId,orderId,sca,ctx={}) {
     nonEmpty(accountId,"accountId"); nonEmpty(orderId,"orderId");
     if(!this.allowOrderSubmission) throw new Error("lemon.markets order submission disabled");
     if(!sca || typeof sca!=="object" || Array.isArray(sca)) throw new Error("SCA confirmation required");
+    const {appropriatenessConsent,actor,...requestCtx}=ctx;
+    if(appropriatenessConsent!==undefined && typeof appropriatenessConsent!=="boolean") throw new Error("appropriateness consent must be boolean");
+    if(actor!==undefined && (!actor || typeof actor!=="object" || Array.isArray(actor))) throw new Error("actor must be an object");
+    const body={
+      sca,
+      ...(appropriatenessConsent!==undefined?{appropriateness_consent:appropriatenessConsent}:{}),
+      ...(actor!==undefined?{actor}:{})
+    };
     return this.request(`/accounts/${enc(accountId)}/orders/${enc(orderId)}/confirm`,{
-      method:"POST",body:{sca},...ctx,justification:ctx.justification||"order.confirm"
+      method:"POST",body,...requestCtx,justification:requestCtx.justification||"order.confirm"
     });
   }
   createWithdrawal(accountId,{amount,currency="EUR"},ctx={}) {
