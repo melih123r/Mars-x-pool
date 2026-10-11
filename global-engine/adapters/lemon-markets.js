@@ -17,8 +17,29 @@ const validateIsin=(value)=>{
   if(!/^[A-Z]{2}[0-9A-Z]{9}[0-9]$/.test(isin)) throw new Error("invalid ISIN");
   return isin;
 };
-const validatePositiveDecimal=(value,name)=>{
-  if(typeof value!=="string"||!/^\d+(?:\.\d+)?$/.test(value)||Number(value)<=0) throw new Error(`${name} must be a positive decimal string`);
+const validatePositiveDecimal=(value,name,maxScale)=>{
+  if(!Number.isInteger(maxScale)||maxScale<0||maxScale>9) throw new Error("invalid decimal scale");
+  const pattern=new RegExp(`^\\d+(?:\\.\\d{1,${maxScale}})?import { VenueAdapter } from "../venue.js";
+
+const trimSlash=(s)=>String(s||"").replace(/\/+$/,"");
+const ALLOWED_LEMON_HOSTS=new Set(["sandbox.api.lemon.markets","dev-brokerage.lemon.markets"]);
+const validateBaseUrl=(value)=>{
+  const normalized=trimSlash(value);
+  const url=new URL(normalized);
+  if(url.protocol!=="https:" || !ALLOWED_LEMON_HOSTS.has(url.hostname) || url.username || url.password || url.search || url.hash) {
+    throw new Error("invalid lemon.markets base URL");
+  }
+  if(url.pathname!=="/v1") throw new Error("invalid lemon.markets API version path");
+  return normalized;
+};
+const enc=(v)=>encodeURIComponent(String(v));
+const validateIsin=(value)=>{
+  const isin=String(value||"").toUpperCase();
+  if(!/^[A-Z]{2}[0-9A-Z]{9}[0-9]$/.test(isin)) throw new Error("invalid ISIN");
+  return isin;
+};
+);
+  if(typeof value!=="string"||!pattern.test(value)||Number(value)<=0) throw new Error(`${name} must be a positive decimal string with at most ${maxScale} decimals`);
   return value;
 };
 const validateIdempotencyKey=(value)=>{
@@ -216,10 +237,10 @@ export class LemonBrokerAdapter extends VenueAdapter {
     if(payload.currency!=="EUR") throw new Error("order currency must be EUR");
     if(!payload.fees||typeof payload.fees!=="object"||Array.isArray(payload.fees)) throw new Error("order fees required");
     if(payload.side==="buy"){
-      validatePositiveDecimal(payload.amount,"order amount");
+      validatePositiveDecimal(payload.amount,"order amount",2);
       if(payload.quantity!==undefined&&payload.quantity!==null) throw new Error("buy order quantity is not supported");
     }else{
-      validatePositiveDecimal(payload.quantity,"order quantity");
+      validatePositiveDecimal(payload.quantity,"order quantity",5);
       if(payload.amount!==undefined&&payload.amount!==null) throw new Error("sell order amount is not supported");
     }
     validateIdempotencyKey(idempotencyKey);
@@ -252,7 +273,7 @@ export class LemonBrokerAdapter extends VenueAdapter {
   createWithdrawal(accountId,{amount,currency="EUR"}={},ctx={}) {
     nonEmpty(accountId,"accountId");
     if(!this.allowWithdrawals) throw new Error("lemon.markets withdrawals disabled");
-    validatePositiveDecimal(amount,"withdrawal amount");
+    validatePositiveDecimal(amount,"withdrawal amount",2);
     if(currency!=="EUR") throw new Error("withdrawal currency must be EUR");
     return this.request(`/accounts/${enc(accountId)}/withdrawals`,{
       method:"POST",body:{amount,currency},...ctx,justification:ctx.justification||"withdrawal.create"
