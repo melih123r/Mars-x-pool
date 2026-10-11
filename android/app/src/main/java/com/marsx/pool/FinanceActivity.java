@@ -6,7 +6,18 @@ public final class FinanceActivity extends Activity{
  LinearLayout root; TextView result,status,brokerStatus,lemonStatus,marketPrice,marketProviders; FinanceInteractiveChart chartView; LinearLayout orderBookPanel; Spinner marketAsset,marketTimeframe; EditText amount; Spinner from,to,fromNet,toNet; int ACCENT=Color.rgb(255,106,0),BG=Color.rgb(4,7,12),CARD=Color.rgb(10,14,22),RAISED=Color.rgb(15,20,31),MUTED=Color.rgb(158,169,188); final int[] THEMES={Color.rgb(0,194,255),Color.rgb(50,134,255),Color.rgb(185,60,255),Color.rgb(255,182,55),Color.rgb(42,207,129)}; int themeIndex=0; final Handler refreshHandler=new Handler(Looper.getMainLooper()); boolean screenActive=false; boolean tradingScreen=true; volatile int chartRequestId=0; volatile int orderBookRequestId=0; final Runnable refreshTick=new Runnable(){public void run(){if(screenActive&&tradingScreen){chartSnapshot();refreshHandler.postDelayed(this,60000);}}};
  @Override protected void onResume(){super.onResume();screenActive=true;refreshHandler.removeCallbacks(refreshTick);if(tradingScreen)refreshHandler.postDelayed(refreshTick,60000);}
  @Override protected void onPause(){screenActive=false;chartRequestId++;refreshHandler.removeCallbacks(refreshTick);super.onPause();}
- @Override public void onCreate(Bundle b){super.onCreate(b);requestWindowFeature(Window.FEATURE_NO_TITLE);getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);themeIndex=getPreferences(MODE_PRIVATE).getInt("theme",0);if(themeIndex<0||themeIndex>=THEMES.length)themeIndex=0;ACCENT=THEMES[themeIndex];build();}
+ @Override public void onCreate(Bundle b){super.onCreate(b);requestWindowFeature(Window.FEATURE_NO_TITLE);getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);themeIndex=getPreferences(MODE_PRIVATE).getInt("theme",0);if(themeIndex<0||themeIndex>=THEMES.length)themeIndex=0;ACCENT=THEMES[themeIndex];build();handleBrokerRedirect(getIntent());}
+ @Override protected void onNewIntent(Intent intent){super.onNewIntent(intent);setIntent(intent);handleBrokerRedirect(intent);}
+ void handleBrokerRedirect(Intent intent){
+  if(intent==null)return;android.net.Uri data=intent.getData();if(data==null)return;
+  if(!"marsx".equalsIgnoreCase(data.getScheme())||!"brokerage".equalsIgnoreCase(data.getHost()))return;
+  String path=data.getPath();if(path==null)return;
+  final boolean success="/success".equals(path),failure="/failure".equals(path);if(!success&&!failure)return;
+  String message=success?"Kimlik doğrulama dönüşü alındı • sonuç backend üzerinden doğrulanıyor":"Kimlik doğrulama tamamlanmadı • hesap durumu backend üzerinden yeniden kontrol edilecek";
+  if(lemonStatus!=null){lemonStatus.setText(message);lemonStatus.setTextColor(success?Color.rgb(255,190,90):Color.LTGRAY);}
+  Toast.makeText(this,message,Toast.LENGTH_LONG).show();
+  brokerHealth();lemonIntegrationHealth();
+ }
  void build(){tradingScreen=true;orderBookRequestId++;chartRequestId++;refreshHandler.removeCallbacks(refreshTick);if(root!=null)root=null;ScrollView s=new ScrollView(this);root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(28,24,28,34);root.setBackgroundColor(BG);
   rowTitle(); themePicker(); visualHero(); balanceCard(); cardHeader(); selectors(); quoteInfo(); popularPairs(); marketCard(); brokerCard(); nav(); s.addView(root);setContentView(s); health(); brokerHealth(); lemonIntegrationHealth(); marketProviders(); chartSnapshot();if(screenActive){refreshHandler.removeCallbacks(refreshTick);refreshHandler.postDelayed(refreshTick,60000);}
  }
