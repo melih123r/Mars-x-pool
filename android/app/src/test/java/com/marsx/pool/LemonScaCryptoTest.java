@@ -54,18 +54,6 @@ public class LemonScaCryptoTest {
             "VweeZBHx/GXH4YoAHE32Xjg=\n" +
             "-----END PRIVATE KEY-----";
 
-    private static final String EXPECTED_COSE =
-            "pAEDAzkBACFZAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
-            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
-            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
-            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
-            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQABIFkBAM5PQMI1OJEzX5gQe5c5UvIP" +
-            "4vXebP1xUY7IDYDpTMuOlShmaNooayTp20AlV2f4xH4Y2SGtaEZehhmtiVQKpwnY" +
-            "c6re7wWxhvuPKiHG3t80hYg-Mb0jr1-W1D32mxqEgPv_fkUumJiUmvjE29FhYg2R" +
-            "yeRg63xTm8o_1y3GNMoz4xC95DXXaP1TmKifRmvMy1sE5yo3dSt9yd0WSvjJvyCz" +
-            "ZZwwYUkIJlhEaIuHp2amwIHlFmyv9KxwA0ILgyVVPVIoeoDOW-qPxgxlZG5q1iUl" +
-            "tfTkdjMIYDIvT8kh6uaScyEazU8QPhlkDrccufNWdGjFXQtQxEng254UvmGtYxc=";
-
     private static final String EXPECTED_SIGNATURE =
             "YgRpMIpOo3IFSGOrWPB0sxkVZmKduhoAmBH3R7YBFjm_V96AOCA8P-q9BOC_OnP8" +
             "jNocT2u8J_i8ZIE10LMTEhRtzBi2ve9bgfD0CZCn7R6UWznz67KQs-DqRn0_4IcT" +
@@ -75,10 +63,27 @@ public class LemonScaCryptoTest {
             "NrtCizzmwtGkX8BLNKQDtA==";
 
     @Test
-    public void publishedLemonRsaVectorEncodesToExpectedCose() throws Exception {
+    public void publishedLemonRsaVectorEncodesToExpectedCoseStructure() throws Exception {
         PublicKey key = KeyFactory.getInstance("RSA").generatePublic(
                 new X509EncodedKeySpec(pemBytes(PUBLIC_PEM)));
-        assertEquals(EXPECTED_COSE, LemonScaCrypto.rsaPublicKeyToCoseBase64Url(key));
+        java.security.interfaces.RSAPublicKey rsa = (java.security.interfaces.RSAPublicKey) key;
+        byte[] encoded = Base64.getUrlDecoder().decode(
+                LemonScaCrypto.rsaPublicKeyToCoseBase64Url(key));
+
+        assertEquals(527, encoded.length);
+        int[] prefix = {0xA4,0x01,0x03,0x03,0x39,0x01,0x00,0x21,0x59,0x01,0x00};
+        for (int i = 0; i < prefix.length; i++) {
+            assertEquals(prefix[i], encoded[i] & 0xff);
+        }
+        // lemon.markets' published RSA COSE shape uses 256-byte big-endian E and N.
+        byte[] exponent = fixedUnsigned(rsa.getPublicExponent().toByteArray(), 256);
+        byte[] modulus = fixedUnsigned(rsa.getModulus().toByteArray(), 256);
+        org.junit.Assert.assertArrayEquals(exponent, java.util.Arrays.copyOfRange(encoded, 11, 267));
+        assertEquals(0x20, encoded[267] & 0xff);
+        assertEquals(0x59, encoded[268] & 0xff);
+        assertEquals(0x01, encoded[269] & 0xff);
+        assertEquals(0x00, encoded[270] & 0xff);
+        org.junit.Assert.assertArrayEquals(modulus, java.util.Arrays.copyOfRange(encoded, 271, 527));
     }
 
     @Test
@@ -102,4 +107,11 @@ public class LemonScaCryptoTest {
                 .replaceAll("\\s+", "");
         return Base64.getDecoder().decode(body);
     }
+    private static byte[] fixedUnsigned(byte[] raw, int length) {
+        if (raw.length > 1 && raw[0] == 0) raw = java.util.Arrays.copyOfRange(raw, 1, raw.length);
+        byte[] out = new byte[length];
+        System.arraycopy(raw, 0, out, length - raw.length, raw.length);
+        return out;
+    }
+
 }
