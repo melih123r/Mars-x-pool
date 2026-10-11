@@ -21,7 +21,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
-      - name: Build debug APK
+      - name: Build debug APK and AAB
         run: bash scripts/build-android.sh :app:testDebugUnitTest :app:assembleDebug :app:bundleDebug --stacktrace
       - name: Check APK limits and manifest
         shell: bash
@@ -46,12 +46,6 @@ jobs:
           test "$(stat -c%s "$aab")" -gt 0
           unzip -t "$aab" > /tmp/finance-aab-integrity.txt
           sha256sum "$aab" | tee /tmp/finance-aab-sha256.txt
-          aab=$(find android/app/build/outputs/bundle/debug -name '*.aab' -type f -print -quit)
-          test -n "$aab"
-          test "$(stat -c%s "$aab")" -gt 0
-          unzip -t "$aab" | tail -n 1
-          sha256sum "$aab" | tee /tmp/finance-aab-sha256.txt
-          echo "AAB_SHA256=$(cut -d' ' -f1 /tmp/finance-aab-sha256.txt)" >> "$GITHUB_STEP_SUMMARY"
           sha256sum "$apk" | tee /tmp/finance-apk-sha256.txt
           echo "APK_SHA256=$(cut -d' ' -f1 /tmp/finance-apk-sha256.txt)" >> "$GITHUB_STEP_SUMMARY"
           echo "AAB_SHA256=$(cut -d' ' -f1 /tmp/finance-aab-sha256.txt)" >> "$GITHUB_STEP_SUMMARY"
@@ -64,11 +58,9 @@ jobs:
           path: |
             android/app/build/outputs/apk/debug/*.apk
             android/app/build/outputs/bundle/debug/*.aab
-            android/app/build/outputs/bundle/debug/*.aab
             /tmp/finance-apk-signature.txt
             /tmp/finance-aab-integrity.txt
             /tmp/finance-aab-sha256.txt
             /tmp/finance-badging.txt
             /tmp/finance-apk-sha256.txt
-            /tmp/finance-aab-sha256.txt
           if-no-files-found: error
