@@ -35,6 +35,15 @@ public final class FinanceChartTransformsTest {
   assertArrayEquals(new double[]{0,0.25,1},FinanceChartTransforms.normalizedVolume(raw),0.000001);
  }
 
+ @Test public void validatesAllRendererChartModes(){
+  assertEquals("Candlestick",FinanceChartTransforms.requireChartType("Candlestick"));
+  assertEquals("Heikin Ashi",FinanceChartTransforms.requireChartType("Heikin Ashi"));
+  assertEquals("Line",FinanceChartTransforms.requireChartType("Line"));
+  assertEquals("Area",FinanceChartTransforms.requireChartType("Area"));
+  assertThrows(IllegalArgumentException.class,()->FinanceChartTransforms.requireChartType("Depth"));
+  assertThrows(IllegalArgumentException.class,()->FinanceChartTransforms.requireChartType(null));
+ }
+
  @Test public void rejectsInvalidOrUnorderedCandles(){
   assertThrows(IllegalArgumentException.class,()->c(0,10,11,9,10,1));
   assertThrows(IllegalArgumentException.class,()->c(1,10,9,8,10,1));
