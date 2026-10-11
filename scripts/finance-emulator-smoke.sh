@@ -6,7 +6,7 @@ printf '%s\n' "$sdk" | tee qa-evidence/sdk.txt
 test "$sdk" = "26"
 adb shell getprop ro.product.cpu.abi | tee qa-evidence/abi.txt
 adb shell cat /proc/meminfo | head -n 8 | tee qa-evidence/memory.txt
-mem_kb="$(adb shell awk '/MemTotal:/ {print $2}' /proc/meminfo | tr -d '\r')"
+mem_kb="$(adb shell cat /proc/meminfo | awk '/^MemTotal:/ {print $2}' | tr -d '\r')"
 test "$mem_kb" -ge 3000000
 apk="$(find android/app/build/outputs/apk/debug -name '*.apk' -print -quit)"
 test -n "$apk"
