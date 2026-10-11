@@ -135,10 +135,33 @@ export class LemonBrokerAdapter extends VenueAdapter {
     nonEmpty(accountId,"accountId");
     return this.request(`/accounts/${enc(accountId)}/trades`,{...ctx,justification:ctx.justification||"portfolio.trades"});
   }
+  listOrders(accountId,{limit=100,cursor,status,securitiesAccount}={},ctx={}) {
+    nonEmpty(accountId,"accountId");
+    const n=Number(limit); if(!Number.isInteger(n)||n<1||n>100) throw new Error("invalid order list limit");
+    const allowed=new Set(["accepted","canceled","canceling","confirmed","created","executed","rejected"]);
+    if(status && !allowed.has(status)) throw new Error("invalid order status");
+    const q=new URLSearchParams(); q.set("limit",String(n)); if(cursor) q.set("cursor",String(cursor)); if(status) q.set("status",status); if(securitiesAccount) q.set("securities_account",String(securitiesAccount));
+    return this.request(`/accounts/${enc(accountId)}/orders?${q.toString()}`,{...ctx,justification:ctx.justification||"portfolio.orders"});
+  }
+  listTransactions(accountId,{limit=100,cursor}={},ctx={}) {
+    nonEmpty(accountId,"accountId");
+    const n=Number(limit); if(!Number.isInteger(n)||n<1||n>100) throw new Error("invalid transaction list limit");
+    const q=new URLSearchParams(); q.set("limit",String(n)); if(cursor) q.set("cursor",String(cursor));
+    return this.request(`/accounts/${enc(accountId)}/transactions?${q.toString()}`,{...ctx,justification:ctx.justification||"portfolio.transactions"});
+  }
+  listAccounts({limit=100,cursor,status,personCustomer=true}={},ctx={}) {
+    const n=Number(limit); if(!Number.isInteger(n)||n<1||n>100) throw new Error("invalid account list limit");
+    const allowed=new Set(["closed","created","opened","rejected"]);
+    if(status && !allowed.has(status)) throw new Error("invalid account status");
+    const q=new URLSearchParams(); q.set("limit",String(n)); if(cursor) q.set("cursor",String(cursor)); if(status) q.set("status",status); q.set("person_customer",personCustomer?"true":"false");
+    return this.request(`/accounts?${q.toString()}`,{...ctx,justification:ctx.justification||"onboarding.account_list"});
+  }
   createWebhook({url,events},ctx={}) {
     nonEmpty(url,"webhook url");
-    if(!Array.isArray(events)||events.length===0) throw new Error("webhook events required");
-    return this.request("/webhooks",{method:"POST",body:{url,events},...ctx,justification:ctx.justification||"webhook.configure"});
+    const target=new URL(String(url));
+    if(target.protocol!=="https:"||target.username||target.password||target.hash) throw new Error("invalid webhook url");
+    if(!Array.isArray(events)||events.length===0||events.some(x=>typeof x!=="string"||!/^[a-z0-9_.-]+$/i.test(x))) throw new Error("webhook events required");
+    return this.request("/webhooks",{method:"POST",body:{url:String(url),events},...ctx,justification:ctx.justification||"webhook.configure"});
   }
   async createOrder(accountId,payload,{confirm=false,sca,principal="backend-marsx",justification="order.create",idempotencyKey}={}) {
     nonEmpty(accountId,"accountId"); nonEmpty(payload,"order payload");
