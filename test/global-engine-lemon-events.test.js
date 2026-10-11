@@ -37,5 +37,5 @@ test("Lemon webhook policy requires async verified persistent processing for pro
   assert.equal(lemonWebhookPolicy.validateSignatureBeforeQueue,true);
   assert.equal(lemonWebhookPolicy.processSynchronously,false);
   assert.equal(lemonWebhookPolicy.persistentQueueRequiredForProduction,true);
-  assert.equal(lemonWebhookPolicy.signatureVerificationImplemented,false);
+  assert.equal(lemonWebhookPolicy.signatureVerificationImplemented,true);
 });
