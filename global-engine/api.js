@@ -92,7 +92,7 @@ export function createApi(engine=buildEngine()){
         }
         const ageMs=state.updatedAt?Date.now()-state.updatedAt:null;
         const eventAgeMs=Number.isSafeInteger(state.snapshot?.exchangeEventTime)?Date.now()-state.snapshot.exchangeEventTime:null;
-        const eventFresh=eventAgeMs===null||(eventAgeMs>=0&&eventAgeMs<=1000);
+        const eventFresh=eventAgeMs!==null&&eventAgeMs>=0&&eventAgeMs<=1000;
         const fresh=state.status==="SYNCHRONIZED"&&ageMs!==null&&ageMs>=0&&ageMs<=1000&&eventFresh&&state.snapshot!==null;
         if(!fresh)res.statusCode=503;
         return res.end(JSON.stringify({mode:"READ_ONLY",executionReady:false,provider:"binance-public",symbol,status:fresh?"LIVE":state.status,ageMs,eventAgeMs,stale:!fresh,data:fresh?state.snapshot:null}));
