@@ -1,7 +1,7 @@
 import { VenueAdapter } from "../venue.js";
 
 const trimSlash=(s)=>String(s||"").replace(/\/+$/,"");
-const ALLOWED_LEMON_HOSTS=new Set(["sandbox.api.lemon.markets","api.lemon.markets"]);
+const ALLOWED_LEMON_HOSTS=new Set(["sandbox.api.lemon.markets","dev-brokerage.lemon.markets"]);
 const validateBaseUrl=(value)=>{
   const normalized=trimSlash(value);
   const url=new URL(normalized);
