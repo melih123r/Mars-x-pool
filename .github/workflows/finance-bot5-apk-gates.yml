@@ -1,6 +1,13 @@
 name: Finance Bot 5 APK gates
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - marsx-finance-bot5-apk-gates
+    paths:
+      - 'android/**'
+      - 'scripts/build-android.sh'
+      - '.github/workflows/finance-bot5-apk-gates.yml'
   pull_request:
     paths:
       - 'android/**'
