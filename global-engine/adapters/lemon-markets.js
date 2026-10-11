@@ -32,7 +32,8 @@ export class LemonBrokerAdapter extends VenueAdapter {
     baseUrl=process.env.LEMON_MARKETS_BASE_URL || "https://sandbox.api.lemon.markets/v1",
     allowOrderSubmission=process.env.MARSX_LEMON_ALLOW_ORDERS==="true",
     allowWithdrawals=process.env.MARSX_LEMON_ALLOW_WITHDRAWALS==="true",
-    timeoutMs=8000
+    timeoutMs=8000,
+    fetchImpl=globalThis.fetch
   }={}) {
     super("lemon-markets",["EQUITY","ETF"]);
     this.apiKey=apiKey; this.baseUrl=validateBaseUrl(baseUrl);
@@ -40,6 +41,8 @@ export class LemonBrokerAdapter extends VenueAdapter {
     this.allowWithdrawals=allowWithdrawals;
     this.timeoutMs=Number(timeoutMs);
     if(!Number.isFinite(this.timeoutMs)||this.timeoutMs<1||this.timeoutMs>30000) throw new Error("invalid lemon.markets timeout");
+    if(typeof fetchImpl!=="function") throw new Error("invalid lemon.markets fetch implementation");
+    this.fetchImpl=fetchImpl;
     this.mode="sandbox-gated";
   }
 
@@ -62,7 +65,7 @@ export class LemonBrokerAdapter extends VenueAdapter {
   async request(path,{method="GET",body,principal,justification,idempotencyKey}={}) {
     const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),this.timeoutMs);
     try {
-      const res=await fetch(`${this.baseUrl}${path}`,{
+      const res=await this.fetchImpl(`${this.baseUrl}${path}`,{
         method,headers:this.headers({principal,justification,idempotencyKey,body:body!==undefined}),
         body:body!==undefined?JSON.stringify(body):undefined,signal:controller.signal,redirect:"error"
       });
