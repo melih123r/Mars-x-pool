@@ -18,7 +18,7 @@ public final class FinanceInteractiveChart extends View {
  private final ArrayList<Bar> data=new ArrayList<>();
  private String chartType="Candlestick";
  private final Paint p=new Paint(3);
- private final Path emaPath=new Path(),smaPath=new Path(),rsiPath=new Path();
+ private final Path emaPath=new Path(),smaPath=new Path(),rsiPath=new Path(),pricePath=new Path(),areaPath=new Path();
  private double[] emaCache=new double[0],smaCache=new double[0],rsiCache=new double[0];
  private final ScaleGestureDetector pinch;
  private float count=48,offset=0,lastX,cross=-1;
@@ -27,7 +27,7 @@ public final class FinanceInteractiveChart extends View {
   @Override public boolean onScale(ScaleGestureDetector d){count=Math.max(12,Math.min(180,count/d.getScaleFactor()));clamp();invalidate();return true;}
  });}
  public void setBars(List<Bar> bars){if(bars==null)throw new IllegalArgumentException("Missing OHLCV data");long prev=0;for(Bar b:bars){if(b==null||b.time<=prev)throw new IllegalArgumentException("Invalid or unsorted OHLCV data");prev=b.time;}source.clear();source.addAll(bars);offset=0;rebuildDisplayData();invalidate();}
- public void setChartType(String type){if(!"Candlestick".equals(type)&&!"Heikin Ashi".equals(type))throw new IllegalArgumentException("Unsupported chart type");chartType=type;offset=0;rebuildDisplayData();invalidate();}
+ public void setChartType(String type){chartType=FinanceChartTransforms.requireChartType(type);offset=0;rebuildDisplayData();invalidate();}
  public String getChartType(){return chartType;}
  private void rebuildDisplayData(){
   data.clear();
@@ -62,10 +62,22 @@ public final class FinanceInteractiveChart extends View {
   int end=Math.max(0,data.size()-(int)offset),start=Math.max(0,end-(int)Math.ceil(count));if(start>=end)return;
   float hi=0,lo=Float.MAX_VALUE,mv=1;for(int i=start;i<end;i++){Bar b=data.get(i);hi=Math.max(hi,b.high);lo=Math.min(lo,b.low);mv=Math.max(mv,b.volume);}
   float range=Math.max(.00001f,hi-lo),step=w/count,chartH=h*(showRsi?.61f:.72f),volTop=h*(showRsi?.65f:.79f),volBottom=h*(showRsi?.76f:.96f);
-  for(int i=start;i<end;i++){Bar b=data.get(i);float x=(i-start+.5f)*step,yo=(hi-b.open)/range*chartH,yc=(hi-b.close)/range*chartH;
-   p.setColor(b.close>=b.open?Color.rgb(29,199,131):Color.rgb(230,65,81));p.setStrokeWidth(2);c.drawLine(x,(hi-b.high)/range*chartH,x,(hi-b.low)/range*chartH,p);
-   p.setStyle(Paint.Style.FILL);c.drawRect(x-step*.28f,Math.min(yo,yc),x+step*.28f,Math.max(yo,yc)+1,p);
-   p.setColor(Color.rgb(80,95,110));c.drawRect(x-step*.28f,volBottom-(b.volume/mv)*(volBottom-volTop),x+step*.28f,volBottom,p);
+  boolean lineMode="Line".equals(chartType)||"Area".equals(chartType),areaMode="Area".equals(chartType);
+  pricePath.reset();areaPath.reset();boolean priceStarted=false;float priceLastX=0;
+  for(int i=start;i<end;i++){Bar b=data.get(i);float x=(i-start+.5f)*step,yc=(hi-b.close)/range*chartH;
+   if(lineMode){
+    if(!priceStarted){pricePath.moveTo(x,yc);areaPath.moveTo(x,chartH);areaPath.lineTo(x,yc);priceStarted=true;}else{pricePath.lineTo(x,yc);areaPath.lineTo(x,yc);}
+    priceLastX=x;
+   }else{
+    float yo=(hi-b.open)/range*chartH;
+    p.setColor(b.close>=b.open?Color.rgb(29,199,131):Color.rgb(230,65,81));p.setStrokeWidth(2);c.drawLine(x,(hi-b.high)/range*chartH,x,(hi-b.low)/range*chartH,p);
+    p.setStyle(Paint.Style.FILL);c.drawRect(x-step*.28f,Math.min(yo,yc),x+step*.28f,Math.max(yo,yc)+1,p);
+   }
+   p.setStyle(Paint.Style.FILL);p.setColor(Color.rgb(80,95,110));c.drawRect(x-step*.28f,volBottom-(b.volume/mv)*(volBottom-volTop),x+step*.28f,volBottom,p);
+  }
+  if(priceStarted){
+   if(areaMode){areaPath.lineTo(priceLastX,chartH);areaPath.close();p.setStyle(Paint.Style.FILL);p.setShader(new LinearGradient(0,0,0,chartH,Color.argb(115,Color.red(accent),Color.green(accent),Color.blue(accent)),Color.TRANSPARENT,Shader.TileMode.CLAMP));c.drawPath(areaPath,p);p.setShader(null);}
+   p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(3.5f);p.setColor(accent);c.drawPath(pricePath,p);
   }
   double[] ema=emaCache,sma=smaCache;
   Path line=emaPath;line.reset();boolean started=false;
