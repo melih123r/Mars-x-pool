@@ -25,7 +25,7 @@ grep -q 'PNG image data' qa-evidence/screenshot-format.txt
 sha256sum qa-evidence/finance-start.png > qa-evidence/screenshot-sha256.txt
 # Capture the accessibility hierarchy to diagnose missing controls and blank screens.
 # UIAutomator can be unavailable on some images; keep evidence collection non-blocking.
-if adb shell uiautomator dump /sdcard/finance-hierarchy.xml > qa-evidence/uiautomator-status.txt 2>&1; then
+if timeout 30s adb shell uiautomator dump /sdcard/finance-hierarchy.xml > qa-evidence/uiautomator-status.txt 2>&1; then
   adb pull /sdcard/finance-hierarchy.xml qa-evidence/finance-hierarchy.xml || true
 fi
 if grep -E 'FATAL EXCEPTION|ANR in com.marsx.finance' qa-evidence/logcat.txt; then
