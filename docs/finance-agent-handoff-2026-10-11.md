@@ -26,3 +26,9 @@
 5. Deliver APK only after actual build artifact has been produced and verified.
 
 Do not present this handoff as a completed APK.
+
+## Follow-up — immediate chart refresh and CI verification
+- Android `FinanceActivity.onResume()` previously delayed initial market refresh by 60 seconds. Commit `5f6c8ee87098ff8500b8f9f13ceeee057b722bec` now calls `chartSnapshot()` immediately and preserves the 60-second periodic schedule.
+- Gmail was checked again for MARS-X Finance / GitHub CI notifications; several failures were found for previous commits `68f84ae` and `e846d68`.
+- GitHub official documentation confirms manual `workflow_dispatch` requires the workflow on the default branch; PR/push workflows remain the primary validation path for feature branches.
+- New build success has **not** been confirmed. No APK is asserted to exist.
