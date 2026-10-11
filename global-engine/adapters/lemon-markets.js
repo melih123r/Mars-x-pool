@@ -26,12 +26,12 @@ const validateIdempotencyKey=(value)=>{
   return value;
 };
 const nonEmpty=(v,name)=>{ if(!v) throw new Error(`${name} required`); return v; };
-const validateRedirectUri=(value,name)=>{
+const validateRedirectUri=(value,name,allowedHttpsHosts=new Set())=>{
   nonEmpty(value,name);
   const url=new URL(String(value));
   if(url.username||url.password||url.hash) throw new Error(`${name} invalid`);
-  if(url.protocol==="https:") return String(value);
-  if(url.protocol==="marsx:") return String(value);
+  if(url.protocol==="marsx:" && url.hostname==="brokerage" && ["/success","/failure"].includes(url.pathname) && !url.search) return String(value);
+  if(url.protocol==="https:" && allowedHttpsHosts.has(url.hostname) && !url.search) return String(value);
   throw new Error(`${name} invalid`);
 };
 
@@ -108,7 +108,7 @@ export class LemonBrokerAdapter extends VenueAdapter {
     return this.request(`/accounts/${enc(accountId)}/checks`,{...ctx,justification:ctx.justification||"onboarding.check_status"});
   }
   startIdentityVerification(accountId,{redirectSuccess,redirectFailure},ctx={}) {
-    nonEmpty(accountId,"accountId"); validateRedirectUri(redirectSuccess,"redirectSuccess"); validateRedirectUri(redirectFailure,"redirectFailure");
+    nonEmpty(accountId,"accountId"); validateRedirectUri(redirectSuccess,"redirectSuccess",this.kycRedirectHosts); validateRedirectUri(redirectFailure,"redirectFailure",this.kycRedirectHosts);
     return this.request(`/accounts/${enc(accountId)}/identity_verification`,{
       method:"POST",body:{redirect_success:redirectSuccess,redirect_failure:redirectFailure},...ctx,
       justification:ctx.justification||"onboarding.identity_verification"
