@@ -51,8 +51,8 @@ public final class FinanceActivity extends Activity{
    tab.setBackground(pill(selected?tabColor:RAISED,selected?tabColor:Color.rgb(36,43,57)));
    TextView symbol=t(symbols[i],19,selected?Color.BLACK:tabColor);symbol.setGravity(Gravity.CENTER);tab.addView(symbol);
    TextView label=t(item,9,selected?Color.BLACK:MUTED);label.setGravity(Gravity.CENTER);oneLine(label);tab.addView(label);
-   tab.setContentDescription(item+" sekmesini aç");tab.setClickable(true);tab.setFocusable(true);tab.setSelected(selected);
-   LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,60,1);p.setMargins(2,0,2,0);r.addView(tab,p);
+   tab.setContentDescription(item+(selected?" seçili sekme":" sekmesini aç"));tab.setClickable(true);tab.setFocusable(true);tab.setSelected(selected);
+   int tabHeight=(int)(60*getResources().getDisplayMetrics().density+0.5f);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,tabHeight,1);p.setMargins(2,0,2,0);r.addView(tab,p);
    tab.setOnClickListener(v->{if(!item.equals(currentScreen))openFinanceScreen(item);});
   }
   return r;
