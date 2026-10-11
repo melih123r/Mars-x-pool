@@ -47,10 +47,10 @@ public final class FinanceInteractiveChart extends View {
  public void clear(){source.clear();data.clear();emaCache=new double[0];smaCache=new double[0];rsiCache=new double[0];offset=0;cross=-1;invalidate();}
  private void clamp(){offset=Math.max(0,Math.min(offset,Math.max(0,data.size()-count)));}
  @Override public boolean onTouchEvent(MotionEvent e){pinch.onTouchEvent(e);switch(e.getActionMasked()){
-  case MotionEvent.ACTION_DOWN:lastX=e.getX();cross=lastX;invalidate();return true;
+  case MotionEvent.ACTION_DOWN:getParent().requestDisallowInterceptTouchEvent(true);lastX=e.getX();cross=lastX;invalidate();return true;
   case MotionEvent.ACTION_MOVE:if(!pinch.isInProgress()&&e.getPointerCount()==1){offset+=(lastX-e.getX())/Math.max(1,getWidth()/count);clamp();cross=e.getX();}lastX=e.getX();invalidate();return true;
   case MotionEvent.ACTION_POINTER_DOWN:cross=-1;invalidate();return true;
-  case MotionEvent.ACTION_POINTER_UP:lastX=e.getX(0);invalidate();return true;
+  case MotionEvent.ACTION_POINTER_UP:{int remaining=e.getActionIndex()==0?1:0;if(remaining<e.getPointerCount())lastX=e.getX(remaining);cross=-1;invalidate();return true;}
   case MotionEvent.ACTION_UP:cross=-1;invalidate();performClick();return true;
   case MotionEvent.ACTION_CANCEL:cross=-1;invalidate();return true;
   default:return true;
