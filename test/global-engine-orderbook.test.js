@@ -21,3 +21,11 @@ test("Binance depth: malformed levels rejected",()=>{
  const book=new BinanceDepthBook();
  assert.throws(()=>book.snapshot({lastUpdateId:1,bids:[["-1","2"]],asks:[]}),/INVALID_LEVEL/);
 });
+
+test("Binance depth: overlapping post-sync updates fail closed",()=>{
+ const book=new BinanceDepthBook();
+ book.snapshot({lastUpdateId:100,bids:[],asks:[]});
+ assert.equal(book.delta({U:101,u:102,b:[],a:[]}),"APPLIED");
+ assert.throws(()=>book.delta({U:102,u:104,b:[],a:[]}),/SEQUENCE_GAP_RESYNC_REQUIRED/);
+ assert.equal(book.ready,false);
+});
