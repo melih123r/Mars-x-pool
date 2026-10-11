@@ -36,6 +36,7 @@ public final class FinanceChartTransformsTest {
  }
 
  @Test public void rejectsInvalidOrUnorderedCandles(){
+  assertThrows(IllegalArgumentException.class,()->c(0,10,11,9,10,1));
   assertThrows(IllegalArgumentException.class,()->c(1,10,9,8,10,1));
   FinanceChartTransforms.Candle[] unordered={c(2,10,11,9,10,1),c(1,10,11,9,10,1)};
   assertThrows(IllegalArgumentException.class,()->FinanceChartTransforms.heikinAshi(unordered));
