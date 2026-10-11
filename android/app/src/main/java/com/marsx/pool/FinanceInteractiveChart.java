@@ -45,9 +45,11 @@ public final class FinanceInteractiveChart extends View {
   case MotionEvent.ACTION_MOVE:if(!pinch.isInProgress()&&e.getPointerCount()==1){offset+=(lastX-e.getX())/Math.max(1,getWidth()/count);clamp();cross=e.getX();}lastX=e.getX();invalidate();return true;
   case MotionEvent.ACTION_POINTER_DOWN:cross=-1;invalidate();return true;
   case MotionEvent.ACTION_POINTER_UP:lastX=e.getX(0);invalidate();return true;
-  case MotionEvent.ACTION_UP:case MotionEvent.ACTION_CANCEL:cross=-1;invalidate();return true;
+  case MotionEvent.ACTION_UP:cross=-1;invalidate();performClick();return true;
+  case MotionEvent.ACTION_CANCEL:cross=-1;invalidate();return true;
   default:return true;
  }}
+ @Override public boolean performClick(){super.performClick();return true;}
  @Override protected void onDraw(Canvas c){super.onDraw(c);float w=getWidth(),h=getHeight();if(w<=0||h<=0)return;
   p.setColor(Color.rgb(45,55,70));p.setStrokeWidth(1);for(int i=1;i<5;i++)c.drawLine(0,h*i/5,w,h*i/5,p);
   if(data.isEmpty()){p.setColor(Color.WHITE);p.setTextSize(26);c.drawText("VERİ BEKLENİYOR",16,h/2,p);return;}
