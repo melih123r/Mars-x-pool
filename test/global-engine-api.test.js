@@ -177,6 +177,8 @@ test("lemon integration endpoint is public-status only and keeps regulated actio
   assert.equal(body.clientSecurity.backendOnlyCredentials,true);
   assert.equal(body.implementation.realOrderEndpointExposed,false);
   assert.equal(body.implementation.withdrawalsEndpointExposed,false);
+  assert.equal(body.implementation.webhookSignatureVerification,true);
+  assert.equal(body.implementation.webhookReceiverEndpointExposed,false);
   assert.equal(body.liveExecution,false);
   assert.ok(body.nextActions.includes("SANDBOX_CREDENTIAL"));
   assert.ok(body.nextActions.includes("END_TO_END_SANDBOX_QA"));
