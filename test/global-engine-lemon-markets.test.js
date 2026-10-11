@@ -242,3 +242,24 @@ test("Lemon requests reject redirects and malformed successful JSON",async()=>{
   assert.throws(()=>new LemonBrokerAdapter({apiKey:"test-only",timeoutMs:0}),/invalid lemon.markets timeout/);
   assert.throws(()=>new LemonBrokerAdapter({apiKey:"test-only",timeoutMs:30001}),/invalid lemon.markets timeout/);
 });
+
+
+test("account creation validates agreements before sending personal data",async()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only"});
+  assert.throws(()=>a.createAccount({customer:{},accepted_agreements:[],declaration_of_acting_on_own_account:true}),/accepted agreements required/);
+  assert.throws(()=>a.createAccount({customer:{},accepted_agreements:[{agreement_id:"agr-1",accepted_at:"not-a-date"}],declaration_of_acting_on_own_account:true}),/invalid agreement acceptance timestamp/);
+  assert.throws(()=>a.createAccount({customer:{},accepted_agreements:[{agreement_id:"agr-1",accepted_at:"2026-10-11T00:00:00Z"}]}),/acting-on-own-account declaration required/);
+  const original=globalThis.fetch;
+  let seen=null;
+  globalThis.fetch=async(url,opts)=>{
+    seen={url:String(url),opts};
+    return new Response(JSON.stringify({id:"acct-1",status:"created"}),{status:201,headers:{"content-type":"application/json"}});
+  };
+  try{
+    const payload={customer:{firstname:"Test"},accepted_agreements:[{agreement_id:"agr-1",accepted_at:"2026-10-11T00:00:00Z"}],declaration_of_acting_on_own_account:true};
+    const result=await a.createAccount(payload,{principal:"marsx-user-1",justification:"open_account"});
+    assert.equal(result.id,"acct-1");
+    assert.equal(seen.url,"https://sandbox.api.lemon.markets/v1/accounts");
+    assert.deepEqual(JSON.parse(seen.opts.body),payload);
+  } finally { globalThis.fetch=original; }
+});
