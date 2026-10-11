@@ -1,0 +1,51 @@
+name: Lemon Sandbox Read-Only Certification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      LEMON_MARKETS_API_KEY: ${{ secrets.LEMON_MARKETS_API_KEY }}
+      LEMON_MARKETS_BASE_URL: ${{ secrets.LEMON_MARKETS_BASE_URL }}
+      MARSX_LEMON_SANDBOX_ACCOUNT_ID: ${{ secrets.MARSX_LEMON_SANDBOX_ACCOUNT_ID }}
+      MARSX_LEMON_ALLOW_ORDERS: "false"
+      MARSX_LEMON_ALLOW_WITHDRAWALS: "false"
+      MARSX_BROKER_PRODUCTION_APPROVED: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run read-only certification
+        id: certify
+        shell: bash
+        run: |
+          set +e
+          npm run global-engine:lemon-sandbox:certify > lemon-certification-report.json
+          code=$?
+          set -e
+          cat lemon-certification-report.json
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+      - name: Upload redacted certification report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lemon-sandbox-read-only-certification
+          path: lemon-certification-report.json
+          retention-days: 30
+      - name: Enforce certification result
+        shell: bash
+        run: |
+          code="${{ steps.certify.outputs.exit_code }}"
+          if [ "$code" != "0" ]; then
+            echo "::error::lemon.markets read-only sandbox certification did not pass (exit $code)."
+            exit 1
+          fi
