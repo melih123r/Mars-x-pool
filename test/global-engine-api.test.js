@@ -230,3 +230,21 @@ test("terminal data-quality reports synthetic data and missing L2 sequence safet
   assert.ok(data.checks.some(x=>x.id==="L2_SEQUENCE_VALIDATION"&&x.status==="NOT_IMPLEMENTED"));
  }finally{await new Promise(r=>server.close(r));}
 });
+
+
+test("market depth remains disabled unless explicitly configured",async()=>{
+ const previous=process.env.MARSX_PUBLIC_DEPTH_ENABLED;
+ delete process.env.MARSX_PUBLIC_DEPTH_ENABLED;
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine);await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const response=await fetch(base+"/market/depth?symbol=BTCUSDT");
+  assert.equal(response.status,503);
+  const data=await response.json();
+  assert.equal(data.executionReady,false);
+  assert.equal(data.status,"DISABLED");
+  const invalid=await fetch(base+"/market/depth?symbol=INVALID");
+  assert.equal(invalid.status,400);
+ }finally{await new Promise(r=>server.close(r));if(previous===undefined)delete process.env.MARSX_PUBLIC_DEPTH_ENABLED;else process.env.MARSX_PUBLIC_DEPTH_ENABLED=previous;}
+});
