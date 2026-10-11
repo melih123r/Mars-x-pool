@@ -10,7 +10,7 @@ public final class FinanceIndicatorsAdvancedTest {
   double[] wma=FinanceIndicators.wma(prices,3);
   assertTrue(Double.isNaN(wma[1]));
   assertEquals(68.0/6.0,wma[2],1e-9);
-  assertEquals(83.0/6.0,wma[3],1e-9);
+  assertEquals(80.0/6.0,wma[3],1e-9);
   double[] roc=FinanceIndicators.roc(prices,2);
   assertEquals(20.0,roc[2],1e-9);
   assertEquals((15.0/11.0-1.0)*100.0,roc[3],1e-9);
