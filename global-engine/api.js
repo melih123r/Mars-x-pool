@@ -53,7 +53,7 @@ export function createApi(engine=buildEngine()){
     (process.env.ALPACA_BROKER_CLIENT_ID&&process.env.ALPACA_BROKER_CLIENT_SECRET)
   );
   const lemonProvider=()=>{
-    const sandbox=/sandbox/i.test(lemon.baseUrl);
+    const sandbox=/sandbox\.api\.lemon\.markets|dev-brokerage\.lemon\.markets/i.test(lemon.baseUrl);
     const readiness=brokerProductionReadiness({providerConfigured:lemon.configured(),sandbox,ordersEnabled:lemon.allowOrderSubmission===true,withdrawalsEnabled:lemon.allowWithdrawals===true});
     return {id:"lemon-markets",assetClasses:["EQUITY","ETF"],configured:lemon.configured(),sandbox,kycRequired:true,ordersEnabled:lemon.allowOrderSubmission===true,withdrawalsEnabled:lemon.allowWithdrawals===true,executionReady:readiness.liveTradingReady,requiredSecrets:lemon.configured()?[]:["LEMON_MARKETS_API_KEY"],gates:readiness.missing.length?readiness.missing:["USER_REVIEW_REQUIRED","SCA_CONFIRMATION_REQUIRED"],readiness};
   };
@@ -76,6 +76,55 @@ export function createApi(engine=buildEngine()){
       if(req.method==="GET" && url.pathname==="/broker/health") return res.end(JSON.stringify(brokerHealth()));
       if(req.method==="GET" && url.pathname==="/broker/providers") return res.end(JSON.stringify({mode:"PAPER_AND_ONBOARDING_READY",providers:brokerHealth().providers}));
       if(req.method==="GET" && url.pathname==="/broker/readiness") return res.end(JSON.stringify({mode:"BROKER_PRODUCTION_READINESS",provider:lemonProvider()}));
+      if(req.method==="GET" && url.pathname==="/broker/lemon/integration") {
+        const provider=lemonProvider();
+        return res.end(JSON.stringify({
+          provider:"lemon.markets",
+          scope:["EQUITY","ETF"],
+          mode:provider.configured?"SANDBOX_CREDENTIAL_CONFIGURED":"PARTNER_ACCESS_REQUIRED",
+          legalModel:"PARTNER_APPROVAL_AND_REGISTRATION_REQUIRED",
+          publicDocumentation:"https://developer.lemon.markets/",
+          sandbox:{host:lemon.baseUrl,credentialConfigured:provider.configured,access:"PARTNER_ISSUED_CREDENTIAL_REQUIRED"},
+          clientSecurity:{apiSecretOnAndroid:false,backendOnlyCredentials:true,scaRequiredBeforeRegulatedActions:true},
+          implementation:{
+            adapter:true,
+            healthEndpoint:true,
+            onboardingPrimitives:true,
+            scaAuthenticatorEnrollmentHelper:true,
+            androidScaCryptoFoundation:true,
+            androidScaUserPrompt:false,
+            instrumentDiscoveryHelper:true,
+            instrumentPriceReadHelper:true,
+            productContractDiscoveryHelper:true,
+            portfolioReadHelpers:true,
+            webhookRegistrationHelper:true,
+            webhookEventDedupBuffer:true,
+            webhookSignatureVerification:true,
+            webhookIntakePipeline:true,
+            redisWebhookQueueAdapterAvailable:true,
+            persistentWebhookQueue:false,
+            webhookReceiverEndpointExposed:false,
+            readOnlySandboxCertificationHarness:true,
+            realOrderEndpointExposed:false,
+            withdrawalsEndpointExposed:false
+          },
+          nextActions:[
+            "LEMON_PARTNER_APPROVAL",
+            "SANDBOX_CREDENTIAL",
+            "KYC_FLOW_VERIFICATION",
+            "SCA_FLOW_VERIFICATION",
+            "ANDROID_SCA_USER_AUTH_FLOW",
+            "READ_ONLY_SANDBOX_CERTIFICATION",
+            "WEBHOOK_RECEIVER_WIRING",
+            "PERSISTENT_EVENT_QUEUE",
+            "END_TO_END_SANDBOX_QA",
+            "REGULATORY_AND_COMMERCIAL_SIGNOFF"
+          ],
+          liveExecution:false,
+          withdrawals:false,
+          custody:false
+        }));
+      }
       if(req.method==="GET" && url.pathname==="/chart/snapshot"){
         const symbol=(url.searchParams.get("symbol")||"BTC-USD").toUpperCase(), timeframe=url.searchParams.get("timeframe")||"1m";
         const view=buildChartView({symbol,timeframe,rows:demoChartRows({limit:120}),maxStaleMs:10*60_000,signals:[{time:Date.now()-20*60_000,price:64250,direction:"BUY",confidence:.72,label:"MARS-X"}]});

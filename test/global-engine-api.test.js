@@ -82,7 +82,7 @@ test("broker gateway exposes lemon readiness without enabling live trading",asyn
  } finally { await new Promise(r=>server.close(r)); }
 });
 
-test("broker production readiness requires every explicit gate",async()=>{
+test("documented Lemon development hosts never count as production-ready",async()=>{
  const previous={
   LEMON_MARKETS_API_KEY:process.env.LEMON_MARKETS_API_KEY,
   LEMON_MARKETS_BASE_URL:process.env.LEMON_MARKETS_BASE_URL,
@@ -94,7 +94,7 @@ test("broker production readiness requires every explicit gate",async()=>{
  };
  Object.assign(process.env,{
   LEMON_MARKETS_API_KEY:"test-only",
-  LEMON_MARKETS_BASE_URL:"https://api.lemon.markets/v1",
+  LEMON_MARKETS_BASE_URL:"https://dev-brokerage.lemon.markets/v1",
   MARSX_LEMON_ALLOW_ORDERS:"true",
   MARSX_LEMON_ALLOW_WITHDRAWALS:"true",
   MARSX_BROKER_PRODUCTION_APPROVED:"true",
@@ -106,12 +106,12 @@ test("broker production readiness requires every explicit gate",async()=>{
  try{
   const base=`http://127.0.0.1:${server.address().port}`;
   const health=await (await fetch(base+"/broker/health")).json();
-  assert.equal(health.mode,"PRODUCTION_REVIEW_READY");
+  assert.equal(health.mode,"PAPER_AND_ONBOARDING_READY");
   assert.equal(health.production.liveTrading,false);
   assert.equal(health.production.withdrawals,false);
   assert.equal(health.production.custody,false);
-  assert.equal(health.providers[0].executionReady,true);
-  assert.deepEqual(health.providers[0].readiness.missing,[]);
+  assert.equal(health.providers[0].executionReady,false);
+  assert.ok(health.providers[0].readiness.missing.includes("PRODUCTION_PROVIDER_HOST"));
   const order=await fetch(base+"/broker/order",{method:"POST"});
   assert.equal(order.status,404);
  } finally {
@@ -161,4 +161,28 @@ test("demo chart rows are deterministic and valid OHLC",()=>{
   assert.ok(row.high>=Math.max(row.open,row.close));
   assert.ok(row.low<=Math.min(row.open,row.close));
  }
+});
+
+
+test("lemon integration endpoint is public-status only and keeps regulated actions locked",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const res=await fetch(base+"/broker/lemon/integration");
+  assert.equal(res.status,200);
+  const body=await res.json();
+  assert.equal(body.provider,"lemon.markets");
+  assert.equal(body.clientSecurity.apiSecretOnAndroid,false);
+  assert.equal(body.clientSecurity.backendOnlyCredentials,true);
+  assert.equal(body.implementation.realOrderEndpointExposed,false);
+  assert.equal(body.implementation.withdrawalsEndpointExposed,false);
+  assert.equal(body.implementation.webhookSignatureVerification,true);
+  assert.equal(body.implementation.webhookReceiverEndpointExposed,false);
+  assert.equal(body.liveExecution,false);
+  assert.ok(body.nextActions.includes("SANDBOX_CREDENTIAL"));
+  assert.ok(body.nextActions.includes("END_TO_END_SANDBOX_QA"));
+  const order=await fetch(base+"/broker/lemon/order",{method:"POST"});
+  assert.equal(order.status,404);
+ } finally { await new Promise(r=>server.close(r)); }
 });
