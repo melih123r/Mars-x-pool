@@ -40,8 +40,13 @@ jobs:
           script: |
             set -e
             mkdir -p qa-evidence
-            adb shell getprop ro.build.version.sdk | tee qa-evidence/sdk.txt
+            sdk=$(adb shell getprop ro.build.version.sdk | tr -d '\r')
+            echo "$sdk" | tee qa-evidence/sdk.txt
+            test "$sdk" = 26
+            adb shell getprop ro.product.cpu.abi | tee qa-evidence/abi.txt
             adb shell cat /proc/meminfo | head -n 8 | tee qa-evidence/memory.txt
+            mem_kb=$(adb shell cat /proc/meminfo | awk '/MemTotal:/ {print $2}')
+            test "$mem_kb" -ge 3000000
             apk=$(find android/app/build/outputs/apk/debug -name '*.apk' | head -n 1)
             adb install -r "$apk"
             adb shell monkey -p com.marsx.finance -c android.intent.category.LAUNCHER 1
