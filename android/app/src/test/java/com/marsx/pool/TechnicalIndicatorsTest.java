@@ -25,4 +25,27 @@ public class TechnicalIndicatorsTest {
     public void rejectsInsufficientRsiData() {
         TechnicalIndicators.rsi(new double[]{1, 2}, 3);
     }
+    @Test public void atrConstantRange() {
+        double[] h = {11,11,11,11,11,11};
+        double[] l = {9,9,9,9,9,9};
+        double[] cl = {10,10,10,10,10,10};
+        assertEquals(2.0, TechnicalIndicators.atr(h,l,cl,3), 1e-10);
+    }
+
+    @Test public void macdConstantPrices() {
+        double[] prices = new double[40];
+        java.util.Arrays.fill(prices, 100);
+        assertEquals(0.0, TechnicalIndicators.macdHistogram(prices), 1e-10);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void macdRejectsInsufficientHistory() {
+        TechnicalIndicators.macdHistogram(new double[]{1,2,3});
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void atrRejectsInvalidHighLow() {
+        TechnicalIndicators.atr(new double[]{11,8,11,11},new double[]{9,9,9,9},new double[]{10,10,10,10},2);
+    }
+
 }
