@@ -23,7 +23,7 @@ test("ChangeNOW HTTP surface is read-only and fail-closed",async()=>{
  try{
   const base=`http://127.0.0.1:${server.address().port}`;
   const health=await (await fetch(base+"/changenow/health")).json();
-  assert.equal(health.provider,"ChangeNOW");assert.equal(health.mode,"READ_ONLY");assert.equal(health.executionReady,false);assert.equal(health.capabilities.createTransaction,false);
+  assert.equal(health.provider,"ChangeNOW");assert.equal(health.mode,"READ_ONLY");assert.equal(health.executionReady,false);assert.equal(health.readyExecution,false);assert.equal(health.checks.configured,false);assert.equal(health.capabilities.createTransaction,false);
   const bad=await fetch(base+"/changenow/quote?fromCurrency=btc&toCurrency=sol&fromAmount=0");
   assert.equal(bad.status,400);const body=await bad.json();assert.equal(JSON.stringify(body).includes("CHANGENOW_API_KEY"),false);
   const post=await fetch(base+"/changenow/quote",{method:"POST"});assert.equal(post.status,404);
@@ -110,7 +110,8 @@ test("broker production readiness requires every explicit gate",async()=>{
   assert.equal(health.production.liveTrading,false);
   assert.equal(health.production.withdrawals,false);
   assert.equal(health.production.custody,false);
-  assert.equal(health.providers[0].executionReady,true);
+  assert.equal(health.providers[0].productionPrereqsReady,true);
+  assert.equal(health.providers[0].executionReady,false);
   assert.deepEqual(health.providers[0].readiness.missing,[]);
   const order=await fetch(base+"/broker/order",{method:"POST"});
   assert.equal(order.status,404);
@@ -150,6 +151,22 @@ test("market providers expose Bybit as read-only data agent",async()=>{
   assert.equal(bybit.trading,false);
   assert.equal(bybit.custody,false);
   assert.ok(bybit.capabilities.includes("orderbook"));
+ } finally { await new Promise(r=>server.close(r)); }
+});
+
+test("broker providers expose regulated candidate comparison without enabling execution",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const res=await fetch(base+"/broker/providers");
+  assert.equal(res.status,200);
+  const body=await res.json();
+  assert.equal(body.production.liveTrading,false);
+  assert.ok(body.providers.every(p=>p.executionReady===false));
+  assert.ok(body.candidates.some(p=>p.id==="alpaca-broker"));
+  assert.ok(body.candidates.some(p=>p.id==="upvest"));
+  assert.ok(body.selectionPolicy.blocked.includes("KYC bypass"));
  } finally { await new Promise(r=>server.close(r)); }
 });
 
