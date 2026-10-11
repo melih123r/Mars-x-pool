@@ -76,6 +76,14 @@ export class LemonBrokerAdapter extends VenueAdapter {
   getAgreements(ctx={}) { return this.request("/agreements",{...ctx,justification:ctx.justification||"open_account"}); }
   createAccount(payload,ctx={}) {
     nonEmpty(payload,"account payload");
+    if(typeof payload!=="object"||Array.isArray(payload)) throw new Error("invalid account payload");
+    if(!payload.customer||typeof payload.customer!=="object"||Array.isArray(payload.customer)) throw new Error("customer required");
+    if(!Array.isArray(payload.accepted_agreements)||payload.accepted_agreements.length===0) throw new Error("accepted agreements required");
+    for(const item of payload.accepted_agreements){
+      if(!item||typeof item!=="object"||!item.agreement_id||!item.accepted_at) throw new Error("invalid accepted agreement");
+      if(Number.isNaN(Date.parse(String(item.accepted_at)))) throw new Error("invalid agreement acceptance timestamp");
+    }
+    if(typeof payload.declaration_of_acting_on_own_account!=="boolean") throw new Error("acting-on-own-account declaration required");
     return this.request("/accounts",{method:"POST",body:payload,...ctx,justification:ctx.justification||"open_account"});
   }
   getAccount(accountId,ctx={}) {
