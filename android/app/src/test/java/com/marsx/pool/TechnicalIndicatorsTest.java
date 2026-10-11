@@ -48,4 +48,23 @@ public class TechnicalIndicatorsTest {
         TechnicalIndicators.atr(new double[]{11,8,11,11},new double[]{9,9,9,9},new double[]{10,10,10,10},2);
     }
 
+    @Test public void atrConstantRangeAndGap() {
+        assertEquals(2.0, TechnicalIndicators.atr(
+                new double[]{11,11,11,11,11},
+                new double[]{9,9,9,9,9},
+                new double[]{10,10,10,10,10}, 3), 1e-10);
+        assertEquals(2.0, TechnicalIndicators.atr(
+                new double[]{11,12,13,14},
+                new double[]{9,10,11,12},
+                new double[]{10,11,12,13}, 1), 1e-10);
+    }
+    @Test public void macdFlatSeriesIsZero() {
+        double[] prices = new double[40];
+        java.util.Arrays.fill(prices, 100.0);
+        assertEquals(0.0, TechnicalIndicators.macdHistogram(prices), 1e-10);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void macdNeedsWarmup() {
+        TechnicalIndicators.macdHistogram(new double[]{1,2,3});
+    }
 }
