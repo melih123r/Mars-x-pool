@@ -19,3 +19,12 @@ test("Binance bootstrap rejects snapshot-to-stream sequence gaps",async()=>{
  const fetchImpl=async()=>({ok:true,json:async()=>({lastUpdateId:100,bids:[["100","1"]],asks:[["101","1"]]})});
  await assert.rejects(()=>bootstrapBinanceDepth({fetchImpl,events:[{U:103,u:104,E:Date.now(),b:[],a:[]}]}),/SEQUENCE_GAP_RESYNC_REQUIRED/);
 });
+
+test("Binance bootstrap accepts overlapping first update and preserves applied event time",async()=>{
+ const fetchImpl=async()=>({ok:true,json:async()=>({lastUpdateId:100,bids:[["100","1"]],asks:[["101","1"]]})});
+ const eventTime=1700000000000;
+ const result=await bootstrapBinanceDepth({fetchImpl,events:[{U:99,u:101,E:eventTime,b:[["100","2"]],a:[]}]});
+ assert.equal(result.status,"SYNCHRONIZED");
+ assert.equal(result.lastEventTime,eventTime);
+ assert.equal(result.book.top().bids[0].quantity,2);
+});
