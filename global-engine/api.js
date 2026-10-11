@@ -98,6 +98,8 @@ export function createApi(engine=buildEngine()){
             webhookRegistrationHelper:true,
             webhookEventDedupBuffer:true,
             webhookSignatureVerification:true,
+            webhookIntakePipeline:true,
+            persistentWebhookQueue:false,
             webhookReceiverEndpointExposed:false,
             readOnlySandboxCertificationHarness:true,
             realOrderEndpointExposed:false,
