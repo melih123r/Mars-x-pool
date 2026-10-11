@@ -95,6 +95,7 @@ export function createApi(engine=buildEngine()){
             productContractDiscoveryHelper:true,
             portfolioReadHelpers:true,
             webhookRegistrationHelper:true,
+            readOnlySandboxCertificationHarness:true,
             realOrderEndpointExposed:false,
             withdrawalsEndpointExposed:false
           },
@@ -103,6 +104,7 @@ export function createApi(engine=buildEngine()){
             "SANDBOX_CREDENTIAL",
             "KYC_FLOW_VERIFICATION",
             "SCA_FLOW_VERIFICATION",
+            "READ_ONLY_SANDBOX_CERTIFICATION",
             "END_TO_END_SANDBOX_QA",
             "REGULATORY_AND_COMMERCIAL_SIGNOFF"
           ],
