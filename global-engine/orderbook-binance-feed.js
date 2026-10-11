@@ -12,7 +12,7 @@ export class BinanceDepthFeed {
   if(this.active)return;this.active=true;const generation=++this.generation;
   const socket=new this.WebSocketImpl("wss://stream.binance.com:9443/ws/"+this.symbol.toLowerCase()+"@depth@100ms");this.socket=socket;
   socket.addEventListener("message",event=>{if(!this.active||generation!==this.generation)return;try{
-   const payload=JSON.parse(event.data);if(!Number.isSafeInteger(payload.U)||!Number.isSafeInteger(payload.u))return;
+   const payload=JSON.parse(event.data);if(payload.e!=="depthUpdate"||payload.s!==this.symbol)throw Error("INVALID_DEPTH_EVENT");if(!Number.isSafeInteger(payload.U)||!Number.isSafeInteger(payload.u))throw Error("INVALID_SEQUENCE");
    if(!this.book){this.buffer.push(payload);if(this.buffer.length>this.maxBuffered)throw Error("DEPTH_BUFFER_OVERFLOW");return;}
    if(!this.book.ready){const result=this.book.delta(payload);if(result==="APPLIED"){this.onStatus({state:"SYNCHRONIZED"});this.onUpdate({symbol:this.symbol,...this.book.top()});}return;}
    const result=this.book.delta(payload);if(result==="APPLIED")this.onUpdate({symbol:this.symbol,...this.book.top()});
