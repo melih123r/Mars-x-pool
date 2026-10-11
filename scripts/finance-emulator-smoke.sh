@@ -1,6 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 mkdir -p qa-evidence
+# Android prints the package on a separate "Process:" line after "FATAL EXCEPTION".
+# Inspect the following 12 lines so app crashes are not silently missed.
+finance_crash_in_log() {
+  awk '
+    /FATAL EXCEPTION/ { window=12 }
+    window > 0 && /Process: com[.]marsx[.]finance([,[:space:]]|$)/ { found=1 }
+    window > 0 { window-- }
+    /ANR in com[.]marsx[.]finance([[:space:]]|$)/ { found=1 }
+    END { exit(found ? 0 : 1) }
+  ' "$1"
+}
 sdk="$(adb shell getprop ro.build.version.sdk | tr -d '\r')"
 printf '%s\n' "$sdk" | tee qa-evidence/sdk.txt
 test "$sdk" = "26"
@@ -33,7 +44,7 @@ if timeout 30s adb shell uiautomator dump /sdcard/finance-hierarchy.xml > qa-evi
     fi
   fi
 fi
-if grep -E 'FATAL EXCEPTION.*com.marsx.finance|ANR in com.marsx.finance' qa-evidence/logcat.txt; then
+if finance_crash_in_log qa-evidence/logcat.txt; then
   echo 'Finance crash/ANR detected'; exit 1
 fi
 adb shell pidof com.marsx.finance | tee qa-evidence/pid.txt
@@ -64,7 +75,7 @@ file qa-evidence/finance-resume.png | tee qa-evidence/resume-screenshot-format.t
 grep -q 'PNG image data' qa-evidence/resume-screenshot-format.txt
 sha256sum qa-evidence/finance-resume.png > qa-evidence/resume-screenshot-sha256.txt
 adb logcat -d -t 4000 > qa-evidence/resume-logcat.txt
-if grep -E 'FATAL EXCEPTION.*com.marsx.finance|ANR in com.marsx.finance' qa-evidence/resume-logcat.txt; then
+if finance_crash_in_log qa-evidence/resume-logcat.txt; then
   echo 'Finance lifecycle crash/ANR detected'; exit 1
 fi
 
