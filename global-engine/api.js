@@ -53,7 +53,7 @@ export function createApi(engine=buildEngine()){
     (process.env.ALPACA_BROKER_CLIENT_ID&&process.env.ALPACA_BROKER_CLIENT_SECRET)
   );
   const lemonProvider=()=>{
-    const sandbox=/sandbox/i.test(lemon.baseUrl);
+    const sandbox=/sandbox\.api\.lemon\.markets|dev-brokerage\.lemon\.markets/i.test(lemon.baseUrl);
     const readiness=brokerProductionReadiness({providerConfigured:lemon.configured(),sandbox,ordersEnabled:lemon.allowOrderSubmission===true,withdrawalsEnabled:lemon.allowWithdrawals===true});
     return {id:"lemon-markets",assetClasses:["EQUITY","ETF"],configured:lemon.configured(),sandbox,kycRequired:true,ordersEnabled:lemon.allowOrderSubmission===true,withdrawalsEnabled:lemon.allowWithdrawals===true,executionReady:readiness.liveTradingReady,requiredSecrets:lemon.configured()?[]:["LEMON_MARKETS_API_KEY"],gates:readiness.missing.length?readiness.missing:["USER_REVIEW_REQUIRED","SCA_CONFIRMATION_REQUIRED"],readiness};
   };
