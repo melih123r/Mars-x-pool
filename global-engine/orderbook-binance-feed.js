@@ -12,7 +12,7 @@ export class BinanceDepthFeed {
   if(this.active)return;this.active=true;const generation=++this.generation;
   const socket=new this.WebSocketImpl("wss://stream.binance.com:9443/ws/"+this.symbol.toLowerCase()+"@depth@100ms");this.socket=socket;
   socket.addEventListener("message",event=>{if(!this.active||generation!==this.generation)return;try{
-   const payload=JSON.parse(event.data);if(payload.e!=="depthUpdate"||payload.s!==this.symbol)throw Error("INVALID_DEPTH_EVENT");if(!Number.isSafeInteger(payload.U)||!Number.isSafeInteger(payload.u))throw Error("INVALID_SEQUENCE");
+   const payload=JSON.parse(event.data);if(payload.e!=="depthUpdate"||payload.s!==this.symbol||!Number.isSafeInteger(payload.E))throw Error("INVALID_DEPTH_EVENT");if(!Number.isSafeInteger(payload.U)||!Number.isSafeInteger(payload.u))throw Error("INVALID_SEQUENCE");
    if(!this.book){this.buffer.push(payload);if(this.buffer.length>this.maxBuffered)throw Error("DEPTH_BUFFER_OVERFLOW");return;}
    if(!this.book.ready){const result=this.book.delta(payload);if(result==="APPLIED"){this.onStatus({state:"SYNCHRONIZED"});this.onUpdate({symbol:this.symbol,exchangeEventTime:Number.isSafeInteger(payload.E)?payload.E:null,...this.book.top()});}return;}
    const result=this.book.delta(payload);if(result==="APPLIED")this.onUpdate({symbol:this.symbol,exchangeEventTime:Number.isSafeInteger(payload.E)?payload.E:null,...this.book.top()});
@@ -22,8 +22,9 @@ export class BinanceDepthFeed {
    if(!this.active||generation!==this.generation)return;
    this.book=result.book;
    const pending=this.buffer.splice(0);
-   for(const event of pending){if(event.u>this.book.lastUpdateId){this.book.delta(event);}}
-   this.onStatus({state:this.book.ready?"SYNCHRONIZED":"AWAITING_BRIDGE"});if(this.book.ready)this.onUpdate({symbol:this.symbol,...this.book.top()});
+   let latestEventTime=null;
+   for(const event of pending){if(event.u>this.book.lastUpdateId){this.book.delta(event);latestEventTime=event.E;}}
+   this.onStatus({state:this.book.ready?"SYNCHRONIZED":"AWAITING_BRIDGE"});if(this.book.ready&&Number.isSafeInteger(latestEventTime))this.onUpdate({symbol:this.symbol,exchangeEventTime:latestEventTime,...this.book.top()});
   }catch(e){if(this.active&&generation===this.generation){this.onStatus({state:"RESYNC_REQUIRED",reason:e.message});this.stop();}}});
   socket.addEventListener("close",()=>{if(this.active&&generation===this.generation){this.onStatus({state:"DISCONNECTED"});this.stop();}});
   socket.addEventListener("error",()=>{if(this.active&&generation===this.generation){this.onStatus({state:"WEBSOCKET_ERROR"});this.stop();}});
