@@ -263,3 +263,22 @@ test("account creation validates agreements before sending personal data",async(
     assert.deepEqual(JSON.parse(seen.opts.body),payload);
   } finally { globalThis.fetch=original; }
 });
+
+
+test("instrument detail and prices validate ISIN and price type",async()=>{
+  const calls=[];
+  const a=new LemonBrokerAdapter({
+    apiKey:"test-only",
+    fetchImpl:async(url,opts)=>{
+      calls.push({url:String(url),opts});
+      return Response.json({ok:true},{status:200});
+    }
+  });
+  assert.throws(()=>a.getInstrument("bad"),/invalid ISIN/);
+  assert.throws(()=>a.getPrices("US0378331005",{type:"last"}),/invalid price type/);
+  await a.getInstrument("us0378331005",{principal:"marsx-user-1",justification:"market.instrument"});
+  await a.getPrices("US0378331005",{type:"quote"},{principal:"marsx-user-1",justification:"market.prices"});
+  assert.equal(calls[0].url,"https://sandbox.api.lemon.markets/v1/instruments/US0378331005");
+  assert.equal(calls[1].url,"https://sandbox.api.lemon.markets/v1/instruments/US0378331005/prices?type=quote");
+  assert.ok(calls.every(x=>x.opts.method==="GET"));
+});
