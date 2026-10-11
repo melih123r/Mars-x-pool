@@ -12,5 +12,5 @@ export async function bootstrapBinanceDepth({symbol="BTCUSDT",events=[],fetchImp
  if(!buffered.length)return {status:"AWAITING_BRIDGE",book};
  if(buffered[0].U>snapshot.lastUpdateId+1){book.reset();throw Error("SEQUENCE_GAP_RESYNC_REQUIRED");}
  for(const event of buffered){try{book.delta(event);}catch(error){book.reset();throw error;}}
- return {status:book.ready?"SYNCHRONIZED":"AWAITING_BRIDGE",book};
+ return {status:book.ready?"SYNCHRONIZED":"AWAITING_BRIDGE",book,lastEventTime:book.ready?buffered.at(-1)?.E:null};
 }
