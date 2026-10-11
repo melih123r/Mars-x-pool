@@ -22,6 +22,11 @@ jobs:
           gradle-version: '8.11.1'
       - name: Build
         run: bash scripts/build-android.sh :app:assembleDebug --stacktrace
+      - name: Enable KVM acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
       - name: Boot and launch with 4 GB RAM
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -48,6 +53,12 @@ jobs:
             adb pull /sdcard/finance-start.png qa-evidence/finance-start.png
             if grep -E 'FATAL EXCEPTION|ANR in com.marsx.finance' qa-evidence/logcat.txt; then
               echo 'Finance crash/ANR detected'; exit 1
+            fi
+            adb shell pidof com.marsx.finance | tee qa-evidence/pid.txt
+            test -s qa-evidence/pid.txt
+            adb shell dumpsys window windows > qa-evidence/windows.txt
+            if grep -E 'Application Not Responding|isn.t responding|has stopped' qa-evidence/windows.txt; then
+              echo 'System error dialog detected'; exit 1
             fi
             grep -q 'com.marsx.finance' qa-evidence/activities.txt
       - name: Upload emulator evidence
