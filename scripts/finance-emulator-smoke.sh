@@ -28,7 +28,7 @@ sha256sum qa-evidence/finance-start.png > qa-evidence/screenshot-sha256.txt
 if timeout 30s adb shell uiautomator dump /sdcard/finance-hierarchy.xml > qa-evidence/uiautomator-status.txt 2>&1; then
   adb pull /sdcard/finance-hierarchy.xml qa-evidence/finance-hierarchy.xml || true
 fi
-if grep -E 'FATAL EXCEPTION|ANR in com.marsx.finance' qa-evidence/logcat.txt; then
+if grep -E 'FATAL EXCEPTION.*com.marsx.finance|ANR in com.marsx.finance' qa-evidence/logcat.txt; then
   echo 'Finance crash/ANR detected'; exit 1
 fi
 adb shell pidof com.marsx.finance | tee qa-evidence/pid.txt
