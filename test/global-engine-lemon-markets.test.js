@@ -62,7 +62,7 @@ test("identity verification request uses backend auth and privacy headers",async
     return new Response(JSON.stringify({id:"verification-1"}),{status:200,headers:{"content-type":"application/json"}});
   };
   try{
-    const a=new LemonBrokerAdapter({apiKey:"sandbox-secret"});
+    const a=new LemonBrokerAdapter({apiKey:"sandbox-secret",kycRedirectHosts:["marsx.example"]});
     const result=await a.startIdentityVerification("acct/1",{
       redirectSuccess:"https://marsx.example/kyc/success",
       redirectFailure:"https://marsx.example/kyc/failure"
@@ -137,12 +137,20 @@ test("identity verification rejects unsafe redirect schemes and permits MARS-X d
     redirectSuccess:"javascript:alert(1)",
     redirectFailure:"https://example.test/fail"
   }),/redirectSuccess invalid/);
+  assert.throws(()=>a.startIdentityVerification("acct-1",{
+    redirectSuccess:"marsx://other/success",
+    redirectFailure:"marsx://brokerage/failure"
+  }),/redirectSuccess invalid/);
+  assert.throws(()=>a.startIdentityVerification("acct-1",{
+    redirectSuccess:"https://untrusted.example/success",
+    redirectFailure:"https://untrusted.example/failure"
+  }),/redirectSuccess invalid/);
   const original=globalThis.fetch;
   globalThis.fetch=async()=>new Response(JSON.stringify({ok:true}),{status:200,headers:{"content-type":"application/json"}});
   try{
     const result=await a.startIdentityVerification("acct-1",{
-      redirectSuccess:"marsx:/brokerage/success",
-      redirectFailure:"marsx:/brokerage/failure"
+      redirectSuccess:"marsx://brokerage/success",
+      redirectFailure:"marsx://brokerage/failure"
     },{principal:"marsx-backend-test",justification:"onboarding.identity_verification"});
     assert.equal(result.ok,true);
   } finally { globalThis.fetch=original; }
