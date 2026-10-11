@@ -19,27 +19,8 @@ const validateIsin=(value)=>{
 };
 const validatePositiveDecimal=(value,name,maxScale)=>{
   if(!Number.isInteger(maxScale)||maxScale<0||maxScale>9) throw new Error("invalid decimal scale");
-  const pattern=new RegExp(`^\\d+(?:\\.\\d{1,${maxScale}})?import { VenueAdapter } from "../venue.js";
-
-const trimSlash=(s)=>String(s||"").replace(/\/+$/,"");
-const ALLOWED_LEMON_HOSTS=new Set(["sandbox.api.lemon.markets","dev-brokerage.lemon.markets"]);
-const validateBaseUrl=(value)=>{
-  const normalized=trimSlash(value);
-  const url=new URL(normalized);
-  if(url.protocol!=="https:" || !ALLOWED_LEMON_HOSTS.has(url.hostname) || url.username || url.password || url.search || url.hash) {
-    throw new Error("invalid lemon.markets base URL");
-  }
-  if(url.pathname!=="/v1") throw new Error("invalid lemon.markets API version path");
-  return normalized;
-};
-const enc=(v)=>encodeURIComponent(String(v));
-const validateIsin=(value)=>{
-  const isin=String(value||"").toUpperCase();
-  if(!/^[A-Z]{2}[0-9A-Z]{9}[0-9]$/.test(isin)) throw new Error("invalid ISIN");
-  return isin;
-};
-);
-  if(typeof value!=="string"||!pattern.test(value)||Number(value)<=0) throw new Error(`${name} must be a positive decimal string with at most ${maxScale} decimals`);
+  const pattern=new RegExp("^\\d+(?:\\.\\d{1,"+String(maxScale)+"})?$");
+  if(typeof value!=="string"||!pattern.test(value)||Number(value)<=0) throw new Error(name+" must be a positive decimal string with at most "+maxScale+" decimals");
   return value;
 };
 const validateIdempotencyKey=(value)=>{
