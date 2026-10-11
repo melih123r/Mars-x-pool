@@ -127,7 +127,7 @@ test("instrument and product contract discovery remain bounded and read-only",as
 });
 
 
-test("identity verification rejects unsafe redirect schemes",()=>{
+test("identity verification rejects unsafe redirect schemes and permits MARS-X deep links",async()=>{
   const a=new LemonBrokerAdapter({apiKey:"test-only"});
   assert.throws(()=>a.startIdentityVerification("acct-1",{
     redirectSuccess:"http://example.test/ok",
@@ -137,10 +137,15 @@ test("identity verification rejects unsafe redirect schemes",()=>{
     redirectSuccess:"javascript:alert(1)",
     redirectFailure:"https://example.test/fail"
   }),/redirectSuccess invalid/);
-  assert.doesNotThrow(()=>a.startIdentityVerification("acct-1",{
-    redirectSuccess:"marsx:/brokerage/success",
-    redirectFailure:"marsx:/brokerage/failure"
-  }));
+  const original=globalThis.fetch;
+  globalThis.fetch=async()=>new Response(JSON.stringify({ok:true}),{status:200,headers:{"content-type":"application/json"}});
+  try{
+    const result=await a.startIdentityVerification("acct-1",{
+      redirectSuccess:"marsx:/brokerage/success",
+      redirectFailure:"marsx:/brokerage/failure"
+    },{principal:"marsx-backend-test",justification:"onboarding.identity_verification"});
+    assert.equal(result.ok,true);
+  } finally { globalThis.fetch=original; }
 });
 
 test("authenticator recovery code and list pagination are validated",async()=>{
