@@ -33,7 +33,7 @@ export class LemonBrokerAdapter extends VenueAdapter {
     allowOrderSubmission=process.env.MARSX_LEMON_ALLOW_ORDERS==="true",
     allowWithdrawals=process.env.MARSX_LEMON_ALLOW_WITHDRAWALS==="true",
     timeoutMs=8000,
-    fetchImpl=globalThis.fetch
+    fetchImpl
   }={}) {
     super("lemon-markets",["EQUITY","ETF"]);
     this.apiKey=apiKey; this.baseUrl=validateBaseUrl(baseUrl);
@@ -41,8 +41,8 @@ export class LemonBrokerAdapter extends VenueAdapter {
     this.allowWithdrawals=allowWithdrawals;
     this.timeoutMs=Number(timeoutMs);
     if(!Number.isFinite(this.timeoutMs)||this.timeoutMs<1||this.timeoutMs>30000) throw new Error("invalid lemon.markets timeout");
-    if(typeof fetchImpl!=="function") throw new Error("invalid lemon.markets fetch implementation");
-    this.fetchImpl=fetchImpl;
+    if(fetchImpl!==undefined&&typeof fetchImpl!=="function") throw new Error("invalid lemon.markets fetch implementation");
+    this.fetchImpl=fetchImpl||((...args)=>globalThis.fetch(...args));
     this.mode="sandbox-gated";
   }
 
