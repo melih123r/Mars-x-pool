@@ -43,3 +43,19 @@ if grep -E 'Application Not Responding|isn.t responding|has stopped' qa-evidence
   echo 'System error dialog detected'; exit 1
 fi
 grep -q 'com.marsx.finance' qa-evidence/activities.txt
+# Exercise a normal background/resume lifecycle, then verify the app survives.
+adb shell input keyevent KEYCODE_HOME
+sleep 2
+adb shell monkey -p com.marsx.finance -c android.intent.category.LAUNCHER 1
+sleep 5
+adb shell pidof com.marsx.finance | tee qa-evidence/resume-pid.txt
+test -s qa-evidence/resume-pid.txt
+adb shell dumpsys activity activities | grep -E 'mResumedActivity|ResumedActivity' > qa-evidence/resume-activity.txt || true
+grep -q 'com.marsx.finance' qa-evidence/resume-activity.txt
+adb shell screencap -p /sdcard/finance-resume.png
+adb pull /sdcard/finance-resume.png qa-evidence/finance-resume.png
+test "$(stat -c %s qa-evidence/finance-resume.png)" -gt 5000
+adb logcat -d -t 4000 > qa-evidence/resume-logcat.txt
+if grep -E 'FATAL EXCEPTION.*com.marsx.finance|ANR in com.marsx.finance' qa-evidence/resume-logcat.txt; then
+  echo 'Finance lifecycle crash/ANR detected'; exit 1
+fi
