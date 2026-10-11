@@ -97,7 +97,8 @@ export function createApi(engine=buildEngine()){
             portfolioReadHelpers:true,
             webhookRegistrationHelper:true,
             webhookEventDedupBuffer:true,
-            webhookSignatureVerification:false,
+            webhookSignatureVerification:true,
+            webhookReceiverEndpointExposed:false,
             readOnlySandboxCertificationHarness:true,
             realOrderEndpointExposed:false,
             withdrawalsEndpointExposed:false
@@ -108,7 +109,7 @@ export function createApi(engine=buildEngine()){
             "KYC_FLOW_VERIFICATION",
             "SCA_FLOW_VERIFICATION",
             "READ_ONLY_SANDBOX_CERTIFICATION",
-            "WEBHOOK_SIGNATURE_VERIFICATION",
+            "WEBHOOK_RECEIVER_WIRING",
             "PERSISTENT_EVENT_QUEUE",
             "END_TO_END_SANDBOX_QA",
             "REGULATORY_AND_COMMERCIAL_SIGNOFF"
