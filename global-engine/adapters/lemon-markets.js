@@ -228,8 +228,10 @@ export class LemonBrokerAdapter extends VenueAdapter {
     const confirmed=await this.confirmOrder(accountId,orderId,confirmation,{principal});
     return {created,confirmed};
   }
-  confirmOrder(accountId,orderId,{sca,appropriatenessConsent,actor}={},ctx={}) {
+  confirmOrder(accountId,orderId,confirmation={},ctx={}) {
     nonEmpty(accountId,"accountId"); nonEmpty(orderId,"orderId");
+    if(confirmation!==undefined&&confirmation!==null&&(typeof confirmation!=="object"||Array.isArray(confirmation))) throw new Error("invalid order confirmation");
+    const {sca,appropriatenessConsent,actor}=confirmation||{};
     if(!this.allowOrderSubmission) throw new Error("lemon.markets order submission disabled");
     if(sca!==undefined && (!sca||typeof sca!=="object"||Array.isArray(sca))) throw new Error("invalid SCA confirmation");
     if(appropriatenessConsent!==undefined && typeof appropriatenessConsent!=="boolean") throw new Error("invalid appropriateness consent");
