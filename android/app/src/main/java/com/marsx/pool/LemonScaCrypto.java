@@ -40,13 +40,27 @@ public final class LemonScaCrypto {
 
     public static String signChallengeBase64Url(PrivateKey privateKey, String challengeBase64Url) {
         if (privateKey == null) throw new IllegalArgumentException("private key required");
-        if (challengeBase64Url == null || challengeBase64Url.isBlank()) {
+        try {
+            Signature signature = Signature.getInstance("SHA256withRSA");
+            signature.initSign(privateKey);
+            return signChallengeBase64Url(signature, challengeBase64Url);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException("RSA signing failed", e);
+        }
+    }
+
+    public static String signChallengeBase64Url(Signature signature, String challengeBase64Url) {
+        if (signature == null) throw new IllegalArgumentException("signature required");
+        if (challengeBase64Url == null || challengeBase64Url.isBlank() || challengeBase64Url.length() > 4096) {
             throw new IllegalArgumentException("challenge required");
         }
         try {
             byte[] challenge = Base64.getUrlDecoder().decode(challengeBase64Url);
-            Signature signature = Signature.getInstance("SHA256withRSA");
-            signature.initSign(privateKey);
+            if (challenge.length < 1 || challenge.length > 3072) {
+                throw new IllegalArgumentException("invalid base64url challenge");
+            }
             signature.update(challenge);
             return Base64.getUrlEncoder().encodeToString(signature.sign());
         } catch (IllegalArgumentException e) {
