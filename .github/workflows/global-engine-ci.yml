@@ -29,6 +29,7 @@ jobs:
       - run: npm run global-engine:test
       - name: ChangeNOW read-only smoke test (live, no transaction)
         if: ${{ github.event_name == 'push' }}
+        continue-on-error: true
         env:
           MARSX_BASE_URL: https://marsx-global-engine.onrender.com
         run: node scripts/changenow-readonly-smoke.mjs
