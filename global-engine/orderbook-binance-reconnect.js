@@ -24,7 +24,7 @@ export class ResilientBinanceDepthFeed {
  }
  scheduleReconnect(){
   if(!this.active||this.timer!==null)return;
-  this.feed?.stop();this.feed=null;
+  const oldFeed=this.feed;this.feed=null;oldFeed?.stop();
   const delay=Math.min(this.maxDelayMs,this.baseDelayMs*2**Math.min(this.attempt++,16));
   this.feedOptions.onStatus?.({state:"RECONNECT_WAIT",delayMs:delay});
   this.timer=this.setTimeoutImpl(()=>{this.timer=null;if(this.active)this.connect();},delay);
