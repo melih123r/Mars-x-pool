@@ -7,11 +7,30 @@ output_dir="${2:-store-screenshots}"
 test -s "$apk_path"
 mkdir -p "$output_dir"
 
+adb wait-for-device
+for _ in $(seq 1 60); do
+  [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ] && break
+  sleep 1
+done
+[ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1" ] || {
+  echo "Android emulator did not finish booting" >&2
+  exit 1
+}
+
 adb install -r "$apk_path"
 adb shell settings put global stay_on_while_plugged_in 3
 adb shell input keyevent KEYCODE_WAKEUP
 adb shell wm dismiss-keyguard
-adb shell input keyevent 82
+
+{
+  adb shell getprop ro.build.version.sdk
+  adb shell cat /proc/meminfo | sed -n '1,5p'
+} > "$output_dir/device-info.txt"
+memory_kb="$(adb shell cat /proc/meminfo | awk '/MemTotal/{print $2}' | tr -d '\r')"
+if [ -z "$memory_kb" ] || [ "$memory_kb" -lt 3400000 ]; then
+  echo "Expected a 4 GB emulator profile, got MemTotal=${memory_kb:-unknown} kB" >&2
+  exit 1
+fi
 
 screen_size="$(adb shell wm size | sed -n 's/.*Physical size: //p' | tail -n 1 | tr -d '\r')"
 case "$screen_size" in
@@ -23,24 +42,35 @@ screen_width="${screen_size%x*}"
 screen_height="${screen_size#*x}"
 
 adb shell am force-stop com.marsx.finance
-adb shell am start -W -n com.marsx.finance/com.marsx.pool.FinanceActivity
+adb shell am start -W -n com.marsx.finance/com.marsx.pool.FinanceActivity > "$output_dir/activity-start.txt"
 
 sleep 4
-adb shell dumpsys window > "$output_dir/focus.txt" || true
-if grep -q "Application Not Responding" "$output_dir/focus.txt"; then
-  adb shell input tap "$((screen_width * 29 / 100))" "$((screen_height * 59 / 100))"
-  sleep 2
-fi
 
+assert_finance_visible() {
+  local label="$1"
+  adb shell uiautomator dump /sdcard/marsx-window.xml >/dev/null || true
+  adb shell cat /sdcard/marsx-window.xml > "$output_dir/$label-window.xml" || true
+  adb shell dumpsys window > "$output_dir/$label-focus.txt" || true
+
+  if grep -Eiq "Application Not Responding|isn't responding|is not responding|aerr_application" \
+      "$output_dir/$label-window.xml" "$output_dir/$label-focus.txt"; then
+    adb exec-out screencap -p > "$output_dir/$label-blocked.png" || true
+    adb logcat -d > "$output_dir/logcat.txt" || true
+    echo "A system or application-not-responding dialog blocked $label" >&2
+    exit 1
+  fi
+
+  if ! grep -q "MARS-X" "$output_dir/$label-window.xml" && \
+      ! grep -q "com.marsx.finance" "$output_dir/$label-focus.txt"; then
+    adb exec-out screencap -p > "$output_dir/$label-not-visible.png" || true
+    adb logcat -d > "$output_dir/logcat.txt" || true
+    echo "MARS-X activity was not visible during $label" >&2
+    exit 1
+  fi
+}
+
+assert_finance_visible "launch"
 adb exec-out screencap -p > "$output_dir/00-launch.png"
-adb shell uiautomator dump /sdcard/marsx-window.xml >/dev/null
-adb shell cat /sdcard/marsx-window.xml > "$output_dir/window.xml"
-adb shell dumpsys window > "$output_dir/focus.txt" || true
-if ! grep -q "MARS-X" "$output_dir/window.xml" && ! grep -q "com.marsx.finance" "$output_dir/focus.txt"; then
-  adb logcat -d > "$output_dir/logcat.txt"
-  echo "MARS-X activity was not visible after launch" >&2
-  exit 1
-fi
 
 theme_y="$((screen_height * 16 / 100))"
 theme_x="$((screen_width * 52 / 100))"
@@ -49,6 +79,7 @@ scroll_end_y="$((screen_height * 32 / 100))"
 
 capture() {
   local file_name="$1"
+  assert_finance_visible "${file_name%.png}"
   adb exec-out screencap -p > "$output_dir/$file_name"
   test -s "$output_dir/$file_name"
 }
