@@ -101,3 +101,23 @@ Until every production gate is independently verified:
 - KYC bypass = prohibited
 - production credential assumptions = prohibited
 - API secrets in Android = prohibited
+
+
+## Public-doc SCA payload discrepancy to verify in sandbox
+
+The current public lemon.markets documentation is not fully consistent about the
+authenticator proof field name:
+
+- the Create Authenticator API reference exposes a `verification` object;
+- the Strong Customer Authentication guide's registration example calls the
+  same proof object `verifier` and shows `nonce` + `signature`.
+
+MARS-X currently follows the API reference contract (`verification`) and does
+not silently rename or duplicate this field. Before real sandbox enrollment we
+must confirm the currently accepted schema with lemon.markets (or their issued
+OpenAPI schema) and run an actual authenticator registration test.
+
+- [ ] Confirm current VerificationRequest schema from partner-issued API/OpenAPI
+- [ ] Run real sandbox authenticator enrollment
+- [ ] Run a fresh SCA challenge signature/confirmation
+- [ ] Do not enable real order/withdrawal confirmation until these pass
