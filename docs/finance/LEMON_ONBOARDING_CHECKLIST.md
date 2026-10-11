@@ -8,6 +8,8 @@ Status: technical preparation only. The Brokerage API is invite-only and MARS-X 
 - Data protection tracing headers:
   - `LMG-Data-Privacy-Access-Principal`
   - `LMG-Data-Privacy-Access-Justification`
+- Partner authentication check:
+  - `GET /company`
 - Development hosts used by the adapter:
   - `https://sandbox.api.lemon.markets/v1`
   - `https://dev-brokerage.lemon.markets/v1`
