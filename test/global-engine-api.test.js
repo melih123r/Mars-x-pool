@@ -162,3 +162,25 @@ test("demo chart rows are deterministic and valid OHLC",()=>{
   assert.ok(row.low<=Math.min(row.open,row.close));
  }
 });
+
+
+test("lemon integration endpoint is public-status only and keeps regulated actions locked",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const res=await fetch(base+"/broker/lemon/integration");
+  assert.equal(res.status,200);
+  const body=await res.json();
+  assert.equal(body.provider,"lemon.markets");
+  assert.equal(body.clientSecurity.apiSecretOnAndroid,false);
+  assert.equal(body.clientSecurity.backendOnlyCredentials,true);
+  assert.equal(body.implementation.realOrderEndpointExposed,false);
+  assert.equal(body.implementation.withdrawalsEndpointExposed,false);
+  assert.equal(body.liveExecution,false);
+  assert.ok(body.nextActions.includes("SANDBOX_CREDENTIAL"));
+  assert.ok(body.nextActions.includes("END_TO_END_SANDBOX_QA"));
+  const order=await fetch(base+"/broker/lemon/order",{method:"POST"});
+  assert.equal(order.status,404);
+ } finally { await new Promise(r=>server.close(r)); }
+});
