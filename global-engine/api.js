@@ -90,6 +90,9 @@ export function createApi(engine=buildEngine()){
             adapter:true,
             healthEndpoint:true,
             onboardingPrimitives:true,
+            scaAuthenticatorEnrollmentHelper:true,
+            instrumentDiscoveryHelper:true,
+            productContractDiscoveryHelper:true,
             realOrderEndpointExposed:false,
             withdrawalsEndpointExposed:false
           },
