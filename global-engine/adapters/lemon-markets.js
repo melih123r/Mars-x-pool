@@ -13,6 +13,14 @@ const validateBaseUrl=(value)=>{
 };
 const enc=(v)=>encodeURIComponent(String(v));
 const nonEmpty=(v,name)=>{ if(!v) throw new Error(`${name} required`); return v; };
+const validateRedirectUri=(value,name)=>{
+  nonEmpty(value,name);
+  const url=new URL(String(value));
+  if(url.username||url.password||url.hash) throw new Error(`${name} invalid`);
+  if(url.protocol==="https:") return String(value);
+  if(url.protocol==="marsx:" && !url.host) return String(value);
+  throw new Error(`${name} invalid`);
+};
 
 export class LemonBrokerAdapter extends VenueAdapter {
   constructor({
@@ -72,7 +80,7 @@ export class LemonBrokerAdapter extends VenueAdapter {
     return this.request(`/accounts/${enc(accountId)}/checks`,{...ctx,justification:ctx.justification||"onboarding.check_status"});
   }
   startIdentityVerification(accountId,{redirectSuccess,redirectFailure},ctx={}) {
-    nonEmpty(accountId,"accountId"); nonEmpty(redirectSuccess,"redirectSuccess"); nonEmpty(redirectFailure,"redirectFailure");
+    nonEmpty(accountId,"accountId"); validateRedirectUri(redirectSuccess,"redirectSuccess"); validateRedirectUri(redirectFailure,"redirectFailure");
     return this.request(`/accounts/${enc(accountId)}/identity_verification`,{
       method:"POST",body:{redirect_success:redirectSuccess,redirect_failure:redirectFailure},...ctx,
       justification:ctx.justification||"onboarding.identity_verification"
@@ -90,9 +98,16 @@ export class LemonBrokerAdapter extends VenueAdapter {
     nonEmpty(payload.public_key,"authenticator public key");
     nonEmpty(payload.client_credential_id,"client credential id");
     nonEmpty(payload.verification,"authenticator verification");
+    if(payload.recovery_code!==undefined && !/^\d{6}$/.test(String(payload.recovery_code))) throw new Error("invalid recovery code");
     return this.request(`/accounts/${enc(accountId)}/authenticators`,{
       method:"POST",body:payload,...ctx,justification:ctx.justification||"sca.authenticator.enroll"
     });
+  }
+  listAuthenticators(accountId,{limit=100,cursor}={},ctx={}) {
+    nonEmpty(accountId,"accountId");
+    const n=Number(limit); if(!Number.isInteger(n)||n<1||n>100) throw new Error("invalid authenticator limit");
+    const q=new URLSearchParams(); q.set("limit",String(n)); if(cursor) q.set("cursor",String(cursor));
+    return this.request(`/accounts/${enc(accountId)}/authenticators?${q.toString()}`,{...ctx,justification:ctx.justification||"sca.authenticator.list"});
   }
   listInstruments({type,limit=100,cursor}={},ctx={}) {
     if(type && !["stock","etf","fund"].includes(type)) throw new Error("invalid instrument type");
