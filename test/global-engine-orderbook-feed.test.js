@@ -13,10 +13,10 @@ test("feed bridges events received while REST snapshot is pending",async()=>{
  const fetchImpl=()=>new Promise(resolve=>{resolveSnapshot=()=>resolve({ok:true,json:async()=>({lastUpdateId:100,bids:[["100","1"]],asks:[["101","1"]]})});});
  const feed=new BinanceDepthFeed({fetchImpl,WebSocketImpl:FakeSocket,onUpdate:x=>updates.push(x),onStatus:x=>statuses.push(x.state)});
  feed.start();FakeSocket.instance.emit("open");
- FakeSocket.instance.emit("message",{U:101,u:101,b:[["100","2"]],a:[]});
+ FakeSocket.instance.emit("message",{e:"depthUpdate",s:"BTCUSDT",U:101,u:101,b:[["100","2"]],a:[]});
  resolveSnapshot();await flush();await flush();
  assert.equal(updates.at(-1).bids[0].quantity,2);
- FakeSocket.instance.emit("message",{U:102,u:102,b:[["100","3"]],a:[]});
+ FakeSocket.instance.emit("message",{e:"depthUpdate",s:"BTCUSDT",U:102,u:102,b:[["100","3"]],a:[]});
  assert.equal(updates.at(-1).bids[0].quantity,3);
  feed.stop();
 });
@@ -25,7 +25,7 @@ test("feed synchronizes on first event after empty snapshot buffer",async()=>{
  const feed=new BinanceDepthFeed({fetchImpl:async()=>({ok:true,json:async()=>({lastUpdateId:100,bids:[["100","1"]],asks:[["101","1"]]})}),WebSocketImpl:FakeSocket,onUpdate:x=>updates.push(x)});
  feed.start();FakeSocket.instance.emit("open");await flush();await flush();
  assert.equal(feed.book.ready,false);
- FakeSocket.instance.emit("message",{U:101,u:101,b:[["100","2"]],a:[]});
+ FakeSocket.instance.emit("message",{e:"depthUpdate",s:"BTCUSDT",U:101,u:101,b:[["100","2"]],a:[]});
  assert.equal(updates.at(-1).bids[0].quantity,2);
  feed.stop();
 });
