@@ -52,6 +52,9 @@ Official docs:
 - [x] No Lemon secret in Android
 - [x] Public integration-readiness endpoint exposes status only
 - [x] Unsafe KYC redirect schemes rejected
+- [x] Webhook signature verification helper
+- [x] Webhook verify → queue → acknowledge intake pipeline helper
+- [x] Duplicate event rejection and per-entity partition key generation
 
 ### Still required from lemon.markets / commercial onboarding
 - [ ] Partner acceptance / operating-model confirmation
@@ -61,6 +64,7 @@ Official docs:
 - [ ] KYC / AML responsibility matrix
 - [ ] Production host and production credential details
 - [ ] Webhook event catalogue and signing / verification requirements
+- [ ] Durable/persistent webhook queue and dead-letter processing
 - [ ] Commercial pricing / revenue-share terms
 - [ ] Production certification and go-live approval
 
