@@ -218,3 +218,10 @@ test("external Lemon requests require an explicit end-user principal",async()=>{
   await assert.rejects(()=>a.getAccount("acct-1"),/privacy principal required/);
   await assert.rejects(()=>a.listInstruments({limit:10}),/privacy principal required/);
 });
+
+
+test("order submission requires a bounded idempotency key before any network call",async()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only",allowOrderSubmission:true});
+  await assert.rejects(()=>a.createOrder("acct-1",{side:"buy"},{principal:"marsx-user-1",justification:"order.create"}),/invalid idempotency key/);
+  await assert.rejects(()=>a.createOrder("acct-1",{side:"buy"},{principal:"marsx-user-1",justification:"order.create",idempotencyKey:"x".repeat(101)}),/invalid idempotency key/);
+});
