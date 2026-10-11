@@ -14,7 +14,9 @@ public final class FinanceInteractiveChart extends View {
   }
  }
  public int accent=Color.rgb(255,120,35);
+ private final ArrayList<Bar> source=new ArrayList<>();
  private final ArrayList<Bar> data=new ArrayList<>();
+ private String chartType="Candlestick";
  private final Paint p=new Paint(3);
  private final ScaleGestureDetector pinch;
  private float count=48,offset=0,lastX,cross=-1;
@@ -22,10 +24,21 @@ public final class FinanceInteractiveChart extends View {
  public FinanceInteractiveChart(Context c){super(c);setBackgroundColor(Color.rgb(7,12,19));pinch=new ScaleGestureDetector(c,new ScaleGestureDetector.SimpleOnScaleGestureListener(){
   @Override public boolean onScale(ScaleGestureDetector d){count=Math.max(12,Math.min(180,count/d.getScaleFactor()));clamp();invalidate();return true;}
  });}
- public void setBars(List<Bar> bars){long prev=0;for(Bar b:bars){if(b.time<=prev)throw new IllegalArgumentException("Unsorted timestamps");prev=b.time;}data.clear();data.addAll(bars);offset=0;invalidate();}
+ public void setBars(List<Bar> bars){long prev=0;for(Bar b:bars){if(b.time<=prev)throw new IllegalArgumentException("Unsorted timestamps");prev=b.time;}source.clear();source.addAll(bars);offset=0;rebuildDisplayData();invalidate();}
+ public void setChartType(String type){if(!"Candlestick".equals(type)&&!"Heikin Ashi".equals(type))throw new IllegalArgumentException("Unsupported chart type");chartType=type;offset=0;rebuildDisplayData();invalidate();}
+ public String getChartType(){return chartType;}
+ private void rebuildDisplayData(){
+  data.clear();
+  if(!"Heikin Ashi".equals(chartType)){data.addAll(source);clamp();return;}
+  FinanceChartTransforms.Candle[] raw=new FinanceChartTransforms.Candle[source.size()];
+  for(int i=0;i<source.size();i++){Bar b=source.get(i);raw[i]=new FinanceChartTransforms.Candle(b.time,b.open,b.high,b.low,b.close,b.volume);}
+  FinanceChartTransforms.Candle[] transformed=FinanceChartTransforms.heikinAshi(raw);
+  for(FinanceChartTransforms.Candle b:transformed)data.add(new Bar(b.timestamp,(float)b.open,(float)b.high,(float)b.low,(float)b.close,(float)b.volume));
+  clamp();
+ }
  public void setCandles(JSONArray rows){ArrayList<Bar> bars=new ArrayList<>();try{for(int i=0;i<rows.length();i++){JSONObject x=rows.getJSONObject(i);bars.add(new Bar(x.getLong("time"), (float)x.getDouble("open"),(float)x.getDouble("high"),(float)x.getDouble("low"),(float)x.getDouble("close"),(float)x.optDouble("volume",0)));}setBars(bars);}catch(Exception ex){clear();}}
  public void setIndicators(boolean ema,boolean sma,boolean rsi){showEma=ema;showSma=sma;showRsi=rsi;invalidate();}
- public void clear(){data.clear();invalidate();}
+ public void clear(){source.clear();data.clear();invalidate();}
  private void clamp(){offset=Math.max(0,Math.min(offset,Math.max(0,data.size()-count)));}
  @Override public boolean onTouchEvent(MotionEvent e){pinch.onTouchEvent(e);switch(e.getActionMasked()){
   case MotionEvent.ACTION_DOWN:lastX=e.getX();cross=lastX;invalidate();return true;
