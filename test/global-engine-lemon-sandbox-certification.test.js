@@ -66,6 +66,7 @@ test("Lemon certification redacts provider failures",async()=>{
   const {adapter}=fixtureAdapter({failPath:"/agreements"});
   const report=await certifyLemonSandboxReadOnly({adapter,accountId:"fixture-account"});
   assert.equal(report.certified,false);
-  assert.equal(report.phases.authentication.reason,"PROVIDER_HTTP_401");
+  assert.equal(report.phases.authentication.status,"PASS");
+  assert.equal(report.phases.agreements.reason,"PROVIDER_HTTP_401");
   assert.equal(JSON.stringify(report).includes("sensitive-provider-body"),false);
 });
