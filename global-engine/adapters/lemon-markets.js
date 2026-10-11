@@ -22,7 +22,7 @@ const validateRedirectUri=(value,name)=>{
   const url=new URL(String(value));
   if(url.username||url.password||url.hash) throw new Error(`${name} invalid`);
   if(url.protocol==="https:") return String(value);
-  if(url.protocol==="marsx:" && !url.host) return String(value);
+  if(url.protocol==="marsx:") return String(value);
   throw new Error(`${name} invalid`);
 };
 
