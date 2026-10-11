@@ -211,3 +211,10 @@ test("webhook registration rejects unsafe callback URLs and malformed events",as
     assert.equal(seen.opts.method,"POST");
   } finally { globalThis.fetch=original; }
 });
+
+
+test("external Lemon requests require an explicit end-user principal",async()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only"});
+  await assert.rejects(()=>a.getAccount("acct-1"),/privacy principal required/);
+  await assert.rejects(()=>a.listInstruments({limit:10}),/privacy principal required/);
+});
