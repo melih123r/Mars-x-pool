@@ -49,4 +49,5 @@ jobs:
         with:
           name: finance-bot5-api26-4gb-smoke
           path: qa-evidence/
+          retention-days: 14
           if-no-files-found: warn
