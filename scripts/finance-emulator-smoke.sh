@@ -33,6 +33,11 @@ if grep -E 'FATAL EXCEPTION|ANR in com.marsx.finance' qa-evidence/logcat.txt; th
 fi
 adb shell pidof com.marsx.finance | tee qa-evidence/pid.txt
 test -s qa-evidence/pid.txt
+# Ensure Android's resumed foreground activity belongs to the Finance package.
+adb shell dumpsys activity activities | grep -E 'mResumedActivity|ResumedActivity' > qa-evidence/resumed-activity.txt || true
+if ! grep -q 'com.marsx.finance' qa-evidence/resumed-activity.txt; then
+  echo 'Finance is not the resumed foreground activity'; cat qa-evidence/resumed-activity.txt; exit 1
+fi
 adb shell dumpsys window windows > qa-evidence/windows.txt
 if grep -E 'Application Not Responding|isn.t responding|has stopped' qa-evidence/windows.txt; then
   echo 'System error dialog detected'; exit 1
