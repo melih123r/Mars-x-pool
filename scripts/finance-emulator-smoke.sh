@@ -18,6 +18,11 @@ adb shell dumpsys meminfo com.marsx.finance > qa-evidence/app-memory.txt
 adb logcat -d -t 4000 > qa-evidence/logcat.txt
 adb shell screencap -p /sdcard/finance-start.png
 adb pull /sdcard/finance-start.png qa-evidence/finance-start.png
+# Fail if screenshot capture silently produced an empty or corrupt image.
+test "$(stat -c %s qa-evidence/finance-start.png)" -gt 5000
+file qa-evidence/finance-start.png | tee qa-evidence/screenshot-format.txt
+grep -q 'PNG image data' qa-evidence/screenshot-format.txt
+sha256sum qa-evidence/finance-start.png > qa-evidence/screenshot-sha256.txt
 if grep -E 'FATAL EXCEPTION|ANR in com.marsx.finance' qa-evidence/logcat.txt; then
   echo 'Finance crash/ANR detected'; exit 1
 fi
