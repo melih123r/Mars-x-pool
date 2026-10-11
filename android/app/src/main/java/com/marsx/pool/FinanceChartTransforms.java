@@ -81,6 +81,15 @@ public final class FinanceChartTransforms {
   return out;
  }
 
+ /** Validates chart modes shared by the selector and Canvas renderer. */
+ public static String requireChartType(String type){
+  if(!"Candlestick".equals(type)&&!"Heikin Ashi".equals(type)&&
+     !"Line".equals(type)&&!"Area".equals(type)){
+   throw new IllegalArgumentException("Unsupported chart type");
+  }
+  return type;
+ }
+
  public static Candle[] copy(Candle[] candles){
   validate(candles);
   return Arrays.copyOf(candles,candles.length);
