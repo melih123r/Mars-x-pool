@@ -313,3 +313,19 @@ test("instrument detail and prices validate ISIN and price type",async()=>{
   assert.equal(calls[1].url,"https://sandbox.api.lemon.markets/v1/instruments/US0378331005/prices?type=quote");
   assert.ok(calls.every(x=>x.opts.method==="GET"));
 });
+
+
+test("withdrawal creation validates positive EUR amount before network calls",async()=>{
+  let calls=0;
+  const a=new LemonBrokerAdapter({
+    apiKey:"test-only",
+    allowWithdrawals:true,
+    fetchImpl:async()=>{calls++;return Response.json({id:"wd-1"},{status:201});}
+  });
+  assert.throws(()=>a.createWithdrawal("acct-1",{amount:"0",currency:"EUR"},{principal:"marsx-user-1"}),/withdrawal amount must be a positive decimal string/);
+  assert.throws(()=>a.createWithdrawal("acct-1",{amount:"10.00",currency:"USD"},{principal:"marsx-user-1"}),/withdrawal currency must be EUR/);
+  assert.equal(calls,0);
+  const result=await a.createWithdrawal("acct-1",{amount:"10.00",currency:"EUR"},{principal:"marsx-user-1",justification:"withdrawal.create"});
+  assert.equal(result.id,"wd-1");
+  assert.equal(calls,1);
+});
