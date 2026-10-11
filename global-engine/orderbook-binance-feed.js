@@ -13,13 +13,16 @@ export class BinanceDepthFeed {
   const socket=new this.WebSocketImpl("wss://stream.binance.com:9443/ws/"+this.symbol.toLowerCase()+"@depth@100ms");this.socket=socket;
   socket.addEventListener("message",event=>{if(!this.active||generation!==this.generation)return;try{
    const payload=JSON.parse(event.data);if(!Number.isSafeInteger(payload.U)||!Number.isSafeInteger(payload.u))return;
-   if(!this.book||!this.book.ready){this.buffer.push(payload);if(this.buffer.length>this.maxBuffered)throw Error("DEPTH_BUFFER_OVERFLOW");return;}
+   if(!this.book){this.buffer.push(payload);if(this.buffer.length>this.maxBuffered)throw Error("DEPTH_BUFFER_OVERFLOW");return;}
+   if(!this.book.ready){const result=this.book.delta(payload);if(result==="APPLIED"){this.onStatus({state:"SYNCHRONIZED"});this.onUpdate({symbol:this.symbol,...this.book.top()});}return;}
    const result=this.book.delta(payload);if(result==="APPLIED")this.onUpdate({symbol:this.symbol,...this.book.top()});
   }catch(e){this.onStatus({state:"RESYNC_REQUIRED",reason:e.message});this.stop();}});
   socket.addEventListener("open",async()=>{if(!this.active||generation!==this.generation)return;this.onStatus({state:"BOOTSTRAPPING"});try{
    const result=await bootstrapBinanceDepth({symbol:this.symbol,events:this.buffer,fetchImpl:this.fetchImpl});
    if(!this.active||generation!==this.generation)return;
-   this.book=result.book;this.buffer=[];
+   this.book=result.book;
+   const pending=this.buffer.splice(0);
+   for(const event of pending){if(event.u>this.book.lastUpdateId){this.book.delta(event);}}
    this.onStatus({state:result.status});if(result.book.ready)this.onUpdate({symbol:this.symbol,...result.book.top()});
   }catch(e){if(this.active&&generation===this.generation){this.onStatus({state:"RESYNC_REQUIRED",reason:e.message});this.stop();}}});
   socket.addEventListener("close",()=>{if(this.active&&generation===this.generation){this.onStatus({state:"DISCONNECTED"});this.stop();}});
