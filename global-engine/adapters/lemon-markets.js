@@ -42,7 +42,8 @@ export class LemonBrokerAdapter extends VenueAdapter {
     allowOrderSubmission=process.env.MARSX_LEMON_ALLOW_ORDERS==="true",
     allowWithdrawals=process.env.MARSX_LEMON_ALLOW_WITHDRAWALS==="true",
     timeoutMs=8000,
-    fetchImpl
+    fetchImpl,
+    kycRedirectHosts=String(process.env.MARSX_LEMON_KYC_REDIRECT_HOSTS||"").split(",").map(x=>x.trim()).filter(Boolean)
   }={}) {
     super("lemon-markets",["EQUITY","ETF"]);
     this.apiKey=apiKey; this.baseUrl=validateBaseUrl(baseUrl);
@@ -51,7 +52,9 @@ export class LemonBrokerAdapter extends VenueAdapter {
     this.timeoutMs=Number(timeoutMs);
     if(!Number.isFinite(this.timeoutMs)||this.timeoutMs<1||this.timeoutMs>30000) throw new Error("invalid lemon.markets timeout");
     if(fetchImpl!==undefined&&typeof fetchImpl!=="function") throw new Error("invalid lemon.markets fetch implementation");
+    if(!Array.isArray(kycRedirectHosts)||kycRedirectHosts.some(x=>!/^[A-Za-z0-9.-]+$/.test(x))) throw new Error("invalid Lemon KYC redirect host allowlist");
     this.fetchImpl=fetchImpl||((...args)=>globalThis.fetch(...args));
+    this.kycRedirectHosts=new Set(kycRedirectHosts);
     this.mode="sandbox-gated";
   }
 
@@ -107,8 +110,9 @@ export class LemonBrokerAdapter extends VenueAdapter {
     nonEmpty(accountId,"accountId");
     return this.request(`/accounts/${enc(accountId)}/checks`,{...ctx,justification:ctx.justification||"onboarding.check_status"});
   }
-  startIdentityVerification(accountId,{redirectSuccess,redirectFailure},ctx={}) {
-    nonEmpty(accountId,"accountId"); validateRedirectUri(redirectSuccess,"redirectSuccess",this.kycRedirectHosts); validateRedirectUri(redirectFailure,"redirectFailure",this.kycRedirectHosts);
+  startIdentityVerification(accountId,{redirectSuccess,redirectFailure}={},ctx={}) {
+    nonEmpty(accountId,"accountId"); nonEmpty(redirectSuccess,"redirectSuccess"); nonEmpty(redirectFailure,"redirectFailure");
+    validateRedirectUri(redirectSuccess,"redirectSuccess",this.kycRedirectHosts); validateRedirectUri(redirectFailure,"redirectFailure",this.kycRedirectHosts);
     return this.request(`/accounts/${enc(accountId)}/identity_verification`,{
       method:"POST",body:{redirect_success:redirectSuccess,redirect_failure:redirectFailure},...ctx,
       justification:ctx.justification||"onboarding.identity_verification"
