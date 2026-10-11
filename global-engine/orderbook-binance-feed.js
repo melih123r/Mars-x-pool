@@ -23,7 +23,7 @@ export class BinanceDepthFeed {
    this.book=result.book;
    const pending=this.buffer.splice(0);
    for(const event of pending){if(event.u>this.book.lastUpdateId){this.book.delta(event);}}
-   this.onStatus({state:result.status});if(result.book.ready)this.onUpdate({symbol:this.symbol,...result.book.top()});
+   this.onStatus({state:this.book.ready?"SYNCHRONIZED":"AWAITING_BRIDGE"});if(this.book.ready)this.onUpdate({symbol:this.symbol,...this.book.top()});
   }catch(e){if(this.active&&generation===this.generation){this.onStatus({state:"RESYNC_REQUIRED",reason:e.message});this.stop();}}});
   socket.addEventListener("close",()=>{if(this.active&&generation===this.generation){this.onStatus({state:"DISCONNECTED"});this.stop();}});
   socket.addEventListener("error",()=>{if(this.active&&generation===this.generation){this.onStatus({state:"WEBSOCKET_ERROR"});this.stop();}});
