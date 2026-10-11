@@ -1,0 +1,29 @@
+// Read-only Binance spot orderbook feed. Node 22+ native WebSocket.
+import { bootstrapBinanceDepth } from "./orderbook-binance-bootstrap.js";
+const PAIRS=new Set(["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","DOGEUSDT"]);
+export class BinanceDepthFeed {
+ constructor({symbol="BTCUSDT",fetchImpl=fetch,WebSocketImpl=globalThis.WebSocket,maxBuffered=3000,onUpdate=()=>{},onStatus=()=>{}}={}){
+  if(!PAIRS.has(symbol))throw Error("UNSUPPORTED_SYMBOL");
+  if(typeof WebSocketImpl!=="function")throw Error("WEBSOCKET_UNAVAILABLE");
+  this.symbol=symbol;this.fetchImpl=fetchImpl;this.WebSocketImpl=WebSocketImpl;this.maxBuffered=maxBuffered;this.onUpdate=onUpdate;this.onStatus=onStatus;
+  this.socket=null;this.book=null;this.buffer=[];this.active=false;this.generation=0;
+ }
+ start(){
+  if(this.active)return;this.active=true;const generation=++this.generation;
+  const socket=new this.WebSocketImpl("wss://stream.binance.com:9443/ws/"+this.symbol.toLowerCase()+"@depth@100ms");this.socket=socket;
+  socket.addEventListener("message",event=>{if(!this.active||generation!==this.generation)return;try{
+   const payload=JSON.parse(event.data);if(!Number.isSafeInteger(payload.U)||!Number.isSafeInteger(payload.u))return;
+   if(!this.book||!this.book.ready){this.buffer.push(payload);if(this.buffer.length>this.maxBuffered)throw Error("DEPTH_BUFFER_OVERFLOW");return;}
+   const result=this.book.delta(payload);if(result==="APPLIED")this.onUpdate({symbol:this.symbol,...this.book.top()});
+  }catch(e){this.onStatus({state:"RESYNC_REQUIRED",reason:e.message});this.stop();}});
+  socket.addEventListener("open",async()=>{if(!this.active||generation!==this.generation)return;this.onStatus({state:"BOOTSTRAPPING"});try{
+   const result=await bootstrapBinanceDepth({symbol:this.symbol,events:this.buffer,fetchImpl:this.fetchImpl});
+   if(!this.active||generation!==this.generation)return;
+   this.book=result.book;this.buffer=[];
+   this.onStatus({state:result.status});if(result.book.ready)this.onUpdate({symbol:this.symbol,...result.book.top()});
+  }catch(e){if(this.active&&generation===this.generation){this.onStatus({state:"RESYNC_REQUIRED",reason:e.message});this.stop();}}});
+  socket.addEventListener("close",()=>{if(this.active&&generation===this.generation){this.onStatus({state:"DISCONNECTED"});this.stop();}});
+  socket.addEventListener("error",()=>{if(this.active&&generation===this.generation){this.onStatus({state:"WEBSOCKET_ERROR"});this.stop();}});
+ }
+ stop(){this.active=false;this.generation++;this.buffer=[];this.book=null;const socket=this.socket;this.socket=null;if(socket&&typeof socket.close==="function")socket.close();}
+}
