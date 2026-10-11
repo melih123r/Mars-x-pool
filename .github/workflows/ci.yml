@@ -50,12 +50,22 @@ jobs:
       - name: Build debug APK
         run: gradle -p android :app:assembleDebug --no-daemon
       - name: Build release AAB
-        run: gradle -p android :app:bundleRelease --no-daemon
+        timeout-minutes: 12
+        run: gradle -p android :app:bundleRelease --no-daemon --stacktrace --info
+      - name: Capture Android build diagnostics
+        if: failure()
+        run: |
+          echo "Android build failure diagnostics"
+          find android/app/build/reports -maxdepth 4 -type f -print 2>/dev/null || true
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: marsx-pool-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: marsx-pool-release-aab-unsigned
           path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: warn
