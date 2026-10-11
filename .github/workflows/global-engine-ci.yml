@@ -28,7 +28,7 @@ jobs:
       - run: npm ci
       - run: npm run global-engine:test
       - name: Order book synchronization safety tests
-        run: node --test test/global-engine-orderbook.test.js
+        run: node --test test/global-engine-orderbook*.test.js
       - name: ChangeNOW read-only smoke test (live, no transaction)
         if: ${{ github.event_name == 'push' }}
         continue-on-error: true
