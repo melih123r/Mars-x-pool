@@ -14,6 +14,7 @@ import { changeNowErrorView, changeNowHealth } from "./changenow-health.js";
 import { LemonBrokerAdapter } from "./adapters/lemon-markets.js";
 import { brokerProductionReadiness, brokerProviderScorecard, brokerSafetyStatus } from "./broker-core.js";
 import { buildChartView } from "./chart-view.js";
+import { ResilientBinanceDepthFeed } from "./orderbook-binance-reconnect.js";
 
 export function marketCapabilities(env=process.env){
   const alpaca=Boolean(env.ALPACA_API_KEY&&env.ALPACA_API_SECRET), metals=Boolean(env.METALS_DEV_API_KEY);
@@ -68,6 +69,8 @@ export function createApi(engine=buildEngine()){
   };
   const brokerProviders=()=>brokerProviderScorecard({lemonConfigured:lemon.configured(),alpacaConfigured:alpacaBrokerConfigured()});
   const brokerHealth=()=>{const provider=lemonProvider(), candidates=brokerProviders(), primary=candidates[0];return {provider:"MARS-X Broker Gateway",mode:provider.readiness.mode==="PRODUCTION_READY"?"PRODUCTION_REVIEW_READY":"PAPER_AND_ONBOARDING_READY",primaryBroker:primary?.label||"lemon.markets",primaryBrokerId:primary?.id||"lemon-markets",configured:lemon.configured()||alpacaBrokerConfigured(),safety:brokerSafetyStatus(),providers:[provider],candidates,selectionPolicy:{prefer:["regulated embedded brokerage","sandbox lifecycle","KYC/SCA support","webhooks/reconciliation","no client-side secrets"],blocked:["KYC bypass","custody without licensed provider","live orders before certification","withdrawals before approval"]},production:{liveTrading:false,withdrawals:false,custody:false}};};
+  const depthFeeds=new Map();
+  const depthEnabled=process.env.MARSX_PUBLIC_DEPTH_ENABLED==="true";
   const quoteParams=url=>({fromCurrency:url.searchParams.get("fromCurrency"),toCurrency:url.searchParams.get("toCurrency"),fromAmount:url.searchParams.get("fromAmount"),fromNetwork:url.searchParams.get("fromNetwork"),toNetwork:url.searchParams.get("toNetwork"),flow:url.searchParams.get("flow")||"standard"});
   return http.createServer(async(req,res)=>{
     res.setHeader("content-type","application/json"); res.setHeader("cache-control","no-store"); res.setHeader("x-content-type-options","nosniff");
@@ -78,6 +81,20 @@ export function createApi(engine=buildEngine()){
     if(used>limit){res.statusCode=429; return res.end(JSON.stringify({error:"RATE_LIMITED"}));}
     try{
       const url=new URL(req.url,"http://localhost");
+      if(req.method==="GET" && url.pathname==="/market/depth"){
+        const symbol=url.searchParams.get("symbol")||"BTCUSDT";
+        if(!["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","DOGEUSDT"].includes(symbol)){res.statusCode=400;return res.end(JSON.stringify({error:"UNSUPPORTED_SYMBOL"}));}
+        if(!depthEnabled){res.statusCode=503;return res.end(JSON.stringify({mode:"READ_ONLY",status:"DISABLED",executionReady:false,reason:"MARSX_PUBLIC_DEPTH_ENABLED must be explicitly enabled"}));}
+        let state=depthFeeds.get(symbol);
+        if(!state){state={status:"CONNECTING",updatedAt:0,snapshot:null};depthFeeds.set(symbol,state);
+          state.feed=new ResilientBinanceDepthFeed({symbol,onUpdate:data=>{state.snapshot=data;state.updatedAt=Date.now();state.status="SYNCHRONIZED";},onStatus:status=>{state.status=status.state;if(status.state!=="SYNCHRONIZED")state.snapshot=null;}});
+          try{state.feed.start();}catch(e){state.status="ERROR";state.snapshot=null;}
+        }
+        const ageMs=state.updatedAt?Date.now()-state.updatedAt:null;
+        const fresh=state.status==="SYNCHRONIZED"&&ageMs!==null&&ageMs<=5000&&state.snapshot!==null;
+        if(!fresh)res.statusCode=503;
+        return res.end(JSON.stringify({mode:"READ_ONLY",executionReady:false,provider:"binance-public",symbol,status:fresh?"LIVE":state.status,ageMs,stale:!fresh,data:fresh?state.snapshot:null}));
+      }
       if(req.method==="GET" && url.pathname==="/terminal/competitor-gap") return res.end(JSON.stringify({mode:"READ_ONLY",asOf:"2026-10-12",benchmark:["Binance","Bybit","Kraken Pro","Coinbase Advanced","OKX","TradingView"],features:[{id:"LIVE_L2_ORDERBOOK",status:"NOT_VERIFIED",priority:"HIGH",requirement:"exchange websocket sequence checks and snapshot resync"},{id:"EUR_USDT_FIAT_CHECKOUT",status:"BLOCKED_PARTNER_APPROVAL",priority:"HIGH",requirement:"signed Guardarian widget URL and authorized partner agreement"},{id:"CANDLE_HISTORY",status:"PARTIAL",priority:"HIGH",requirement:"real OHLCV per symbol and timeframe, no synthetic production candles"},{id:"ORDER_ENTRY",status:"PAPER_ONLY",priority:"HIGH",requirement:"licensed provider, KYC, explicit confirmation and order audit"},{id:"PORTFOLIO_RECONCILIATION",status:"NOT_VERIFIED",priority:"HIGH",requirement:"provider ledger and webhook reconciliation"},{id:"ADVANCED_CHARTS",status:"PARTIAL",priority:"MEDIUM",requirement:"indicators, drawings, websocket streaming and accessible UI"},{id:"MARKET_DATA_QUALITY",status:"PARTIAL",priority:"HIGH",requirement:"stale timestamps, venue provenance and gap handling"}],liveTrading:false,providerCheckoutEnabled:false}));
       if(req.method==="GET" && url.pathname==="/fiat/integration") return res.end(JSON.stringify({provider:"UNCONFIRMED",pair:"EUR/USDT",mode:"DEMO_ONLY",checkoutEnabled:false,iframeEnabled:false,redirectEnabled:false,kycProvider:"NOT_VERIFIED",micaAuthorization:"NOT_VERIFIED",individualPartnerAgreement:"NOT_VERIFIED",commissionAgreement:"NOT_VERIFIED",custody:false,customerFundsHandled:false,customerOrdersHandled:false,providerCheckoutUrl:null,requiredApprovals:["WRITTEN_PARTNER_CONTRACT","PROVIDER_LEGAL_ENTITY_AND_AUTHORIZATION","FRANCE_EU_FIAT_PAIR_AVAILABILITY","APPROVED_CHECKOUT_METHOD","REFERRAL_COMPENSATION_AND_LOCAL_LEGAL_REVIEW"]}));
       if(req.method==="GET" && url.pathname==="/convert/health") return res.end(JSON.stringify(convertHealth()));
