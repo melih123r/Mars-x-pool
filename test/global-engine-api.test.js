@@ -179,3 +179,24 @@ test("demo chart rows are deterministic and valid OHLC",()=>{
   assert.ok(row.low<=Math.min(row.open,row.close));
  }
 });
+
+
+test("EUR/USDT fiat readiness fails closed without provider approval",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine); await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const base=`http://127.0.0.1:${server.address().port}`;
+  const response=await fetch(base+"/fiat/integration");
+  assert.equal(response.status,200);
+  const status=await response.json();
+  assert.equal(status.pair,"EUR/USDT");
+  assert.equal(status.mode,"DEMO_ONLY");
+  assert.equal(status.checkoutEnabled,false);
+  assert.equal(status.iframeEnabled,false);
+  assert.equal(status.redirectEnabled,false);
+  assert.equal(status.providerCheckoutUrl,null);
+  assert.equal(status.customerFundsHandled,false);
+  assert.equal(status.customerOrdersHandled,false);
+  assert.ok(status.requiredApprovals.includes("PROVIDER_LEGAL_ENTITY_AND_AUTHORIZATION"));
+ }finally{await new Promise(r=>server.close(r));}
+});
