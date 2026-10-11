@@ -200,3 +200,19 @@ test("EUR/USDT fiat readiness fails closed without provider approval",async()=>{
   assert.ok(status.requiredApprovals.includes("PROVIDER_LEGAL_ENTITY_AND_AUTHORIZATION"));
  }finally{await new Promise(r=>server.close(r));}
 });
+
+
+test("competitor gap report does not misrepresent live capabilities",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine);await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const response=await fetch(`http://127.0.0.1:${server.address().port}/terminal/competitor-gap`);
+  assert.equal(response.status,200);
+  const report=await response.json();
+  assert.equal(report.mode,"READ_ONLY");
+  assert.equal(report.liveTrading,false);
+  assert.equal(report.providerCheckoutEnabled,false);
+  assert.ok(report.features.some(x=>x.id==="LIVE_L2_ORDERBOOK"&&x.status==="NOT_VERIFIED"));
+  assert.ok(report.features.some(x=>x.id==="EUR_USDT_FIAT_CHECKOUT"&&x.status==="BLOCKED_PARTNER_APPROVAL"));
+ }finally{await new Promise(r=>server.close(r));}
+});
