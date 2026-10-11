@@ -76,6 +76,7 @@ export class LemonBrokerAdapter extends VenueAdapter {
     } finally { clearTimeout(timeout); }
   }
 
+  getCompany(ctx={}) { return this.request("/company",{...ctx,justification:ctx.justification||"partner.authentication"}); }
   getAgreements(ctx={}) { return this.request("/agreements",{...ctx,justification:ctx.justification||"open_account"}); }
   createAccount(payload,ctx={}) {
     nonEmpty(payload,"account payload");
