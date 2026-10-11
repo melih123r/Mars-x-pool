@@ -235,6 +235,8 @@ test("order submission validates the documented contract and bounded idempotency
   await assert.rejects(()=>a.createOrder("acct-1",valid,{principal:"marsx-user-1",justification:"order.create"}),/invalid idempotency key/);
   await assert.rejects(()=>a.createOrder("acct-1",{...valid,currency:"USD"},{principal:"marsx-user-1",justification:"order.create",idempotencyKey:"k1"}),/order currency must be EUR/);
   await assert.rejects(()=>a.createOrder("acct-1",{...valid,side:"sell",amount:undefined,quantity:"0"},{principal:"marsx-user-1",justification:"order.create",idempotencyKey:"k2"}),/order quantity must be a positive decimal string/);
+  await assert.rejects(()=>a.createOrder("acct-1",{...valid,amount:"100.001"},{principal:"marsx-user-1",justification:"order.create",idempotencyKey:"k3"}),/at most 2 decimals/);
+  await assert.rejects(()=>a.createOrder("acct-1",{...valid,side:"sell",amount:undefined,quantity:"1.123456"},{principal:"marsx-user-1",justification:"order.create",idempotencyKey:"k4"}),/at most 5 decimals/);
   await assert.rejects(()=>a.createOrder("acct-1",valid,{principal:"marsx-user-1",justification:"order.create",idempotencyKey:"x".repeat(101)}),/invalid idempotency key/);
   assert.equal(calls,0);
 });
@@ -332,6 +334,7 @@ test("withdrawal creation validates positive EUR amount before network calls",as
   });
   assert.throws(()=>a.createWithdrawal("acct-1",{amount:"0",currency:"EUR"},{principal:"marsx-user-1"}),/withdrawal amount must be a positive decimal string/);
   assert.throws(()=>a.createWithdrawal("acct-1",{amount:"10.00",currency:"USD"},{principal:"marsx-user-1"}),/withdrawal currency must be EUR/);
+  assert.throws(()=>a.createWithdrawal("acct-1",{amount:"10.001",currency:"EUR"},{principal:"marsx-user-1"}),/at most 2 decimals/);
   assert.equal(calls,0);
   const result=await a.createWithdrawal("acct-1",{amount:"10.00",currency:"EUR"},{principal:"marsx-user-1",justification:"withdrawal.create"});
   assert.equal(result.id,"wd-1");
