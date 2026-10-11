@@ -18,6 +18,8 @@ public final class FinanceInteractiveChart extends View {
  private final ArrayList<Bar> data=new ArrayList<>();
  private String chartType="Candlestick";
  private final Paint p=new Paint(3);
+ private final Path emaPath=new Path(),smaPath=new Path(),rsiPath=new Path();
+ private double[] emaCache=new double[0],smaCache=new double[0],rsiCache=new double[0];
  private final ScaleGestureDetector pinch;
  private float count=48,offset=0,lastX,cross=-1;
  private boolean showEma=true,showSma=false,showRsi=true;
@@ -29,16 +31,20 @@ public final class FinanceInteractiveChart extends View {
  public String getChartType(){return chartType;}
  private void rebuildDisplayData(){
   data.clear();
-  if(!"Heikin Ashi".equals(chartType)){data.addAll(source);clamp();return;}
+  if(!"Heikin Ashi".equals(chartType)){data.addAll(source);clamp();recalculateIndicators();return;}
   FinanceChartTransforms.Candle[] raw=new FinanceChartTransforms.Candle[source.size()];
   for(int i=0;i<source.size();i++){Bar b=source.get(i);raw[i]=new FinanceChartTransforms.Candle(b.time,b.open,b.high,b.low,b.close,b.volume);}
   FinanceChartTransforms.Candle[] transformed=FinanceChartTransforms.heikinAshi(raw);
   for(FinanceChartTransforms.Candle b:transformed)data.add(new Bar(b.timestamp,(float)b.open,(float)b.high,(float)b.low,(float)b.close,(float)b.volume));
-  clamp();
+  clamp();recalculateIndicators();
+ }
+ private void recalculateIndicators(){
+  double[] closes=new double[data.size()];for(int i=0;i<data.size();i++)closes[i]=data.get(i).close;
+  emaCache=FinanceIndicators.ema(closes,20);smaCache=FinanceIndicators.sma(closes,20);rsiCache=FinanceIndicators.rsi(closes,14);
  }
  public void setCandles(JSONArray rows){ArrayList<Bar> bars=new ArrayList<>();try{for(int i=0;i<rows.length();i++){JSONObject x=rows.getJSONObject(i);bars.add(new Bar(x.getLong("time"), (float)x.getDouble("open"),(float)x.getDouble("high"),(float)x.getDouble("low"),(float)x.getDouble("close"),(float)x.optDouble("volume",0)));}setBars(bars);}catch(Exception ex){clear();}}
  public void setIndicators(boolean ema,boolean sma,boolean rsi){showEma=ema;showSma=sma;showRsi=rsi;invalidate();}
- public void clear(){source.clear();data.clear();invalidate();}
+ public void clear(){source.clear();data.clear();emaCache=new double[0];smaCache=new double[0];rsiCache=new double[0];invalidate();}
  private void clamp(){offset=Math.max(0,Math.min(offset,Math.max(0,data.size()-count)));}
  @Override public boolean onTouchEvent(MotionEvent e){pinch.onTouchEvent(e);switch(e.getActionMasked()){
   case MotionEvent.ACTION_DOWN:lastX=e.getX();cross=lastX;invalidate();return true;
@@ -61,26 +67,24 @@ public final class FinanceInteractiveChart extends View {
    p.setStyle(Paint.Style.FILL);c.drawRect(x-step*.28f,Math.min(yo,yc),x+step*.28f,Math.max(yo,yc)+1,p);
    p.setColor(Color.rgb(80,95,110));c.drawRect(x-step*.28f,volBottom-(b.volume/mv)*(volBottom-volTop),x+step*.28f,volBottom,p);
   }
-  double[] closes=new double[data.size()];for(int i=0;i<data.size();i++)closes[i]=data.get(i).close;
-  double[] ema=showEma?FinanceIndicators.ema(closes,20):null;
-  double[] sma=showSma?FinanceIndicators.sma(closes,20):null;
-  Path line=new Path();boolean started=false;
+  double[] ema=emaCache,sma=smaCache;
+  Path line=emaPath;line.reset();boolean started=false;
   p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(2.5f);p.setColor(accent);
   for(int i=start;showEma&&i<end;i++){if(Double.isNaN(ema[i]))continue;
    float x=(i-start+.5f)*step,y=(float)((hi-ema[i])/range*chartH);
    if(!started){line.moveTo(x,y);started=true;}else line.lineTo(x,y);
   }
   if(started)c.drawPath(line,p);
-  if(showSma){Path smaline=new Path();boolean begun=false;p.setColor(Color.rgb(77,171,247));
+  if(showSma){Path smaline=smaPath;smaline.reset();boolean begun=false;p.setColor(Color.rgb(77,171,247));
    for(int i=start;i<end;i++){if(Double.isNaN(sma[i]))continue;float x=(i-start+.5f)*step,y=(float)((hi-sma[i])/range*chartH);
     if(!begun){smaline.moveTo(x,y);begun=true;}else smaline.lineTo(x,y);}
    if(begun)c.drawPath(smaline,p);
   }
-  if(showRsi){double[] rsi=FinanceIndicators.rsi(closes,14);float panelTop=h*.80f,panelHeight=h*.17f;
+  if(showRsi){double[] rsi=rsiCache;float panelTop=h*.80f,panelHeight=h*.17f;
    p.setColor(Color.rgb(50,64,78));p.setStrokeWidth(1);
    c.drawLine(0,panelTop+panelHeight*.3f,w,panelTop+panelHeight*.3f,p);
    c.drawLine(0,panelTop+panelHeight*.7f,w,panelTop+panelHeight*.7f,p);
-   Path rsipath=new Path();boolean begun=false;p.setColor(Color.rgb(192,145,255));p.setStrokeWidth(2);
+   Path rsipath=rsiPath;rsipath.reset();boolean begun=false;p.setColor(Color.rgb(192,145,255));p.setStrokeWidth(2);
    for(int i=start;i<end;i++){if(Double.isNaN(rsi[i]))continue;float x=(i-start+.5f)*step,y=panelTop+panelHeight*(float)(1-rsi[i]/100);
     if(!begun){rsipath.moveTo(x,y);begun=true;}else rsipath.lineTo(x,y);}
    if(begun)c.drawPath(rsipath,p);
