@@ -216,3 +216,17 @@ test("competitor gap report does not misrepresent live capabilities",async()=>{
   assert.ok(report.features.some(x=>x.id==="EUR_USDT_FIAT_CHECKOUT"&&x.status==="BLOCKED_PARTNER_APPROVAL"));
  }finally{await new Promise(r=>server.close(r));}
 });
+
+
+test("terminal data-quality reports synthetic data and missing L2 sequence safety",async()=>{
+ const engine=new MarsXGlobalEngine([new PaperVenue("paper",["CRYPTO"],async()=>quote({venue:"paper",price:100,fee:0}))]);
+ const server=createApi(engine);await new Promise(r=>server.listen(0,"127.0.0.1",r));
+ try{
+  const response=await fetch(`http://127.0.0.1:${server.address().port}/terminal/data-quality`);
+  assert.equal(response.status,200);
+  const data=await response.json();
+  assert.equal(data.liveTrading,false);
+  assert.equal(data.syntheticCandlesAreLive,false);
+  assert.ok(data.checks.some(x=>x.id==="L2_SEQUENCE_VALIDATION"&&x.status==="NOT_IMPLEMENTED"));
+ }finally{await new Promise(r=>server.close(r));}
+});
