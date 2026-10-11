@@ -52,7 +52,7 @@ export class LemonBrokerAdapter extends VenueAdapter {
     };
   }
 
-  async request(path,{method="GET",body,principal="backend-marsx",justification="service.operation",idempotencyKey}={}) {
+  async request(path,{method="GET",body,principal,justification,idempotencyKey}={}) {
     const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),8000);
     try {
       const res=await fetch(`${this.baseUrl}${path}`,{
@@ -163,7 +163,7 @@ export class LemonBrokerAdapter extends VenueAdapter {
     if(!Array.isArray(events)||events.length===0||events.some(x=>typeof x!=="string"||!/^[a-z0-9_.-]+$/i.test(x))) throw new Error("webhook events required");
     return this.request("/webhooks",{method:"POST",body:{url:String(url),events},...ctx,justification:ctx.justification||"webhook.configure"});
   }
-  async createOrder(accountId,payload,{confirm=false,sca,principal="backend-marsx",justification="order.create",idempotencyKey}={}) {
+  async createOrder(accountId,payload,{confirm=false,sca,principal,justification="order.create",idempotencyKey}={}) {
     nonEmpty(accountId,"accountId"); nonEmpty(payload,"order payload");
     if(!this.allowOrderSubmission) throw new Error("lemon.markets order submission disabled");
     const created=await this.request(`/accounts/${enc(accountId)}/orders`,{
