@@ -15,6 +15,7 @@ import { LemonBrokerAdapter } from "./adapters/lemon-markets.js";
 import { brokerProductionReadiness, brokerProviderScorecard, brokerSafetyStatus } from "./broker-core.js";
 import { buildChartView } from "./chart-view.js";
 import { ResilientBinanceDepthFeed } from "./orderbook-binance-reconnect.js";
+import { fetchBinanceCandles } from "./candles-binance.js";
 
 export function marketCapabilities(env=process.env){
   const alpaca=Boolean(env.ALPACA_API_KEY&&env.ALPACA_API_SECRET), metals=Boolean(env.METALS_DEV_API_KEY);
@@ -81,6 +82,13 @@ export function createApi(engine=buildEngine()){
     if(used>limit){res.statusCode=429; return res.end(JSON.stringify({error:"RATE_LIMITED"}));}
     try{
       const url=new URL(req.url,"http://localhost");
+      if(req.method==="GET" && url.pathname==="/market/candles"){
+        try{
+          const symbol=url.searchParams.get("symbol")||"BTCUSDT",interval=url.searchParams.get("interval")||"1m",limit=Number(url.searchParams.get("limit")||200);
+          const data=await fetchBinanceCandles({symbol,interval,limit,signal:AbortSignal.timeout(7000)});
+          return res.end(JSON.stringify(data));
+        }catch(e){const invalid=/^(UNSUPPORTED_|INVALID_|UNSORTED_)/.test(e.message);res.statusCode=invalid?400:503;return res.end(JSON.stringify({error:invalid?e.message:"CANDLE_SOURCE_UNAVAILABLE",mode:"READ_ONLY",executionReady:false}));}
+      }
       if(req.method==="GET" && url.pathname==="/market/depth"){
         const symbol=url.searchParams.get("symbol")||"BTCUSDT";
         if(!["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","DOGEUSDT"].includes(symbol)){res.statusCode=400;return res.end(JSON.stringify({error:"UNSUPPORTED_SYMBOL"}));}
