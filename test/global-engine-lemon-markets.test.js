@@ -48,7 +48,9 @@ test("generic live execution remains disabled", async()=>{
 
 test("rejects non-official lemon base URLs",()=>{
   assert.throws(()=>new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"http://sandbox.api.lemon.markets/v1"}),/invalid lemon.markets base URL/);
-  assert.throws(()=>new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://example.invalid/v1"}),/invalid lemon.markets base URL/);\n  assert.doesNotThrow(()=>new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://dev-brokerage.lemon.markets/v1"}));\n  assert.throws(()=>new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://api.lemon.markets/v1"}),/invalid lemon.markets base URL/);
+  assert.throws(()=>new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://example.invalid/v1"}),/invalid lemon.markets base URL/);
+  assert.doesNotThrow(()=>new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://dev-brokerage.lemon.markets/v1"}));
+  assert.throws(()=>new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://api.lemon.markets/v1"}),/invalid lemon.markets base URL/);
   assert.throws(()=>new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://sandbox.api.lemon.markets/v2"}),/invalid lemon.markets API version path/);
 });
 
