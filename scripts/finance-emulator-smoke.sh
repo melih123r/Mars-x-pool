@@ -55,6 +55,9 @@ grep -q 'com.marsx.finance' qa-evidence/resume-activity.txt
 adb shell screencap -p /sdcard/finance-resume.png
 adb pull /sdcard/finance-resume.png qa-evidence/finance-resume.png
 test "$(stat -c %s qa-evidence/finance-resume.png)" -gt 5000
+file qa-evidence/finance-resume.png | tee qa-evidence/resume-screenshot-format.txt
+grep -q 'PNG image data' qa-evidence/resume-screenshot-format.txt
+sha256sum qa-evidence/finance-resume.png > qa-evidence/resume-screenshot-sha256.txt
 adb logcat -d -t 4000 > qa-evidence/resume-logcat.txt
 if grep -E 'FATAL EXCEPTION.*com.marsx.finance|ANR in com.marsx.finance' qa-evidence/resume-logcat.txt; then
   echo 'Finance lifecycle crash/ANR detected'; exit 1
