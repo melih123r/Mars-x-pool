@@ -52,6 +52,8 @@ Official docs:
 - [x] No Lemon secret in Android
 - [x] Public integration-readiness endpoint exposes status only
 - [x] Unsafe KYC redirect schemes rejected
+- [x] Android KYC return deep link (`marsx://brokerage/success|failure`) registered
+- [x] KYC redirect is treated as non-authoritative; backend state must still be refreshed
 - [x] Webhook signature verification helper
 - [x] Webhook verify → queue → acknowledge intake pipeline helper
 - [x] Duplicate event rejection and per-entity partition key generation
