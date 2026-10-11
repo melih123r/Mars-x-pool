@@ -50,5 +50,5 @@ export const lemonWebhookPolicy=Object.freeze({
   orderPerEntity:true,
   sourceOfTruth:"lemon.markets API snapshot",
   persistentQueueRequiredForProduction:true,
-  signatureVerificationImplemented:false
+  signatureVerificationImplemented:true
 });
