@@ -94,6 +94,16 @@ public class LemonScaCryptoTest {
     }
 
     @Test
+    public void userAuthenticatedSignatureObjectProducesPublishedVector() throws Exception {
+        PrivateKey key = KeyFactory.getInstance("RSA").generatePrivate(
+                new PKCS8EncodedKeySpec(pemBytes(PRIVATE_PEM)));
+        java.security.Signature signature = java.security.Signature.getInstance("SHA256withRSA");
+        signature.initSign(key);
+        assertEquals(EXPECTED_SIGNATURE,
+                LemonScaCrypto.signChallengeBase64Url(signature, "dGVzdA=="));
+    }
+
+    @Test
     public void invalidChallengeFailsClosed() throws Exception {
         PrivateKey key = KeyFactory.getInstance("RSA").generatePrivate(
                 new PKCS8EncodedKeySpec(pemBytes(PRIVATE_PEM)));
