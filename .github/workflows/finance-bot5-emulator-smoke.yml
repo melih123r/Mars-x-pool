@@ -1,0 +1,59 @@
+name: Finance Bot 5 emulator smoke
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'android/**'
+      - '.github/workflows/finance-bot5-emulator-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  emulator-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Build
+        run: bash scripts/build-android.sh :app:assembleDebug --stacktrace
+      - name: Boot and launch with 4 GB RAM
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 26
+          arch: x86
+          profile: pixel_2
+          ram-size: 4096M
+          disk-size: 4096M
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: |
+            set -e
+            mkdir -p qa-evidence
+            adb shell getprop ro.build.version.sdk | tee qa-evidence/sdk.txt
+            adb shell cat /proc/meminfo | head -n 8 | tee qa-evidence/memory.txt
+            apk=$(find android/app/build/outputs/apk/debug -name '*.apk' | head -n 1)
+            adb install -r "$apk"
+            adb shell monkey -p com.marsx.finance -c android.intent.category.LAUNCHER 1
+            sleep 12
+            adb shell dumpsys activity activities > qa-evidence/activities.txt
+            adb shell dumpsys meminfo com.marsx.finance > qa-evidence/app-memory.txt
+            adb logcat -d -t 4000 > qa-evidence/logcat.txt
+            adb shell screencap -p /sdcard/finance-start.png
+            adb pull /sdcard/finance-start.png qa-evidence/finance-start.png
+            if grep -E 'FATAL EXCEPTION|ANR in com.marsx.finance' qa-evidence/logcat.txt; then
+              echo 'Finance crash/ANR detected'; exit 1
+            fi
+            grep -q 'com.marsx.finance' qa-evidence/activities.txt
+      - name: Upload emulator evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: finance-bot5-api26-4gb-smoke
+          path: qa-evidence/
+          if-no-files-found: warn
