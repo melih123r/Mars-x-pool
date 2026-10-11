@@ -12,6 +12,11 @@ const validateBaseUrl=(value)=>{
   return normalized;
 };
 const enc=(v)=>encodeURIComponent(String(v));
+const validateIsin=(value)=>{
+  const isin=String(value||"").toUpperCase();
+  if(!/^[A-Z]{2}[0-9A-Z]{9}[0-9]$/.test(isin)) throw new Error("invalid ISIN");
+  return isin;
+};
 const validateIdempotencyKey=(value)=>{
   if(typeof value!=="string"||value.length<1||value.length>100||/[\r\n]/.test(value)) throw new Error("invalid idempotency key");
   return value;
@@ -133,6 +138,17 @@ export class LemonBrokerAdapter extends VenueAdapter {
     const n=Number(limit); if(!Number.isInteger(n)||n<1||n>100) throw new Error("invalid instrument limit");
     const q=new URLSearchParams(); q.set("limit",String(n)); if(type) q.set("type",type); if(cursor) q.set("cursor",String(cursor));
     return this.request(`/instruments?${q.toString()}`,{...ctx,justification:ctx.justification||"market.instruments"});
+  }
+  getInstrument(isin,ctx={}) {
+    const value=validateIsin(isin);
+    return this.request(`/instruments/${value}`,{...ctx,justification:ctx.justification||"market.instrument"});
+  }
+  getPrices(isin,{type}={},ctx={}) {
+    const value=validateIsin(isin);
+    if(type && !["nav","quote"].includes(type)) throw new Error("invalid price type");
+    const q=new URLSearchParams(); if(type) q.set("type",type);
+    const suffix=q.size?`?${q.toString()}`:"";
+    return this.request(`/instruments/${value}/prices${suffix}`,{...ctx,justification:ctx.justification||"market.prices"});
   }
   listProductContracts({type="brokerage",limit=100,cursor}={},ctx={}) {
     if(!["brokerage","retirement"].includes(type)) throw new Error("invalid product contract type");
