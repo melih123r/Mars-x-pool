@@ -24,9 +24,9 @@ test("order submission and withdrawals are disabled by default", async()=>{
   assert.throws(()=>a.createWithdrawal("acct-1",{amount:"10.00"}),/withdrawals disabled/);
 });
 
-test("order and withdrawal confirmation require SCA",()=>{
+test("order confirmation requires provider-requested confirmation data and withdrawal confirmation requires SCA",()=>{
   const a=new LemonBrokerAdapter({apiKey:"test-only",baseUrl:"https://sandbox.api.lemon.markets/v1",allowOrderSubmission:true,allowWithdrawals:true});
-  assert.throws(()=>a.confirmOrder("acct-1","ord-1",null),/SCA confirmation required/);
+  assert.throws(()=>a.confirmOrder("acct-1","ord-1",null),/order confirmation data required/);
   assert.throws(()=>a.confirmWithdrawal("acct-1","wd-1",null),/SCA confirmation required/);
 });
 
