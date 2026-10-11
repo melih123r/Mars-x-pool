@@ -22,7 +22,7 @@ jobs:
         with:
           gradle-version: '8.11.1'
       - name: Build debug APK
-        run: bash scripts/build-android.sh :app:testDebugUnitTest :app:assembleDebug --stacktrace
+        run: bash scripts/build-android.sh :app:testDebugUnitTest :app:assembleDebug :app:bundleDebug --stacktrace
       - name: Check APK limits and manifest
         shell: bash
         run: |
@@ -38,16 +38,29 @@ jobs:
           "$aapt" dump badging "$apk" | tee /tmp/finance-badging.txt
           grep -q "package: name='com.marsx.finance'" /tmp/finance-badging.txt
           grep -q "sdkVersion:'26'" /tmp/finance-badging.txt
+          apksigner=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          test -x "$apksigner"
+          "$apksigner" verify --verbose --print-certs "$apk" | tee /tmp/finance-apk-signature.txt
+          aab=$(find android/app/build/outputs/bundle/debug -name '*.aab' -type f | head -n 1)
+          test -n "$aab"
+          test "$(stat -c%s "$aab")" -gt 0
+          unzip -t "$aab" > /tmp/finance-aab-integrity.txt
+          sha256sum "$aab" | tee /tmp/finance-aab-sha256.txt
           sha256sum "$apk" | tee /tmp/finance-apk-sha256.txt
           echo "APK_SHA256=$(cut -d' ' -f1 /tmp/finance-apk-sha256.txt)" >> "$GITHUB_STEP_SUMMARY"
+          echo "AAB_SHA256=$(cut -d' ' -f1 /tmp/finance-aab-sha256.txt)" >> "$GITHUB_STEP_SUMMARY"
           echo "Commit: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
       - name: Upload APK and evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: finance-bot5-apk-evidence
+          name: finance-bot5-apk-aab-evidence
           path: |
             android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/bundle/debug/*.aab
+            /tmp/finance-apk-signature.txt
+            /tmp/finance-aab-integrity.txt
+            /tmp/finance-aab-sha256.txt
             /tmp/finance-badging.txt
             /tmp/finance-apk-sha256.txt
-          if-no-files-found: warn
+          if-no-files-found: error
