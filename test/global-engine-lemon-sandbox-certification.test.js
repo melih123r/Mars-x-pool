@@ -10,7 +10,8 @@ function fixtureAdapter({failPath}={}){
   const fetchImpl=async(url,options)=>{
     const u=new URL(url); calls.push({path:u.pathname+u.search,method:options.method,headers:options.headers});
     if(failPath&&u.pathname.includes(failPath)) return new Response("sensitive-provider-body",{status:401});
-    if(u.pathname==="/v1/company") return json({id:"ten_fixture",name:"MARS-X Test Partner"});\n    if(u.pathname==="/v1/agreements") return json({results:[{id:"agr-1"}]});
+    if(u.pathname==="/v1/company") return json({id:"ten_fixture",name:"MARS-X Test Partner"});
+    if(u.pathname==="/v1/agreements") return json({results:[{id:"agr-1"}]});
     if(u.pathname==="/v1/instruments") return json({results:[{isin:"US0378331005"}],pagination:{next_cursor:null}});
     if(u.pathname==="/v1/product_contracts") return json({results:[{id:"pc-1"}],pagination:{next_cursor:null}});
     if(u.pathname==="/v1/accounts/fixture-account") return json({id:"fixture-account",status:"created"});
