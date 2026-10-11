@@ -4,6 +4,7 @@ const base = (process.env.MARSX_BASE_URL || 'http://127.0.0.1:10000').replace(/\
 const timeoutMs = 20000;
 const cases = [
   ['/health', 'backend'],
+  ['/fiat/integration', 'fiat-safety'],
   ['/convert/health', 'configuration'],
   ['/changenow/health', 'provider'],
   ['/changenow/currencies', 'currencies'],
@@ -17,7 +18,8 @@ for (const [path, name] of cases) {
     const payload = await response.json();
     const configured = typeof payload.configured === 'boolean' ? payload.configured : undefined;
     const executionReady = typeof payload.executionReady === 'boolean' ? payload.executionReady : undefined;
-    const ok = response.ok && !(name === 'provider' && payload.lastStatus) && !(name === 'provider' && configured === false);
+    const fiatSafe = name !== 'fiat-safety' || (payload.mode === 'DEMO_ONLY' && payload.checkoutEnabled === false && payload.iframeEnabled === false && payload.redirectEnabled === false && payload.providerCheckoutUrl === null);
+    const ok = response.ok && fiatSafe && !(name === 'provider' && payload.lastStatus) && !(name === 'provider' && configured === false);
     if (!ok) failed = true;
     console.log(JSON.stringify({ check: name, status: response.status, ok, ...(configured === undefined ? {} : { configured }), ...(executionReady === undefined ? {} : { executionReady }), errorCode: ok ? undefined : (payload.error?.code || payload.lastStatus?.code || 'CHECK_FAILED') }));
   } catch (e) {
