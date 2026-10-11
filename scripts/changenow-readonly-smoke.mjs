@@ -1,6 +1,6 @@
 // MARS-X read-only ChangeNOW smoke test. Never creates transactions or prints credentials.
 // Usage: MARSX_BASE_URL=https://marsx-global-engine.onrender.com node scripts/changenow-readonly-smoke.mjs
-const base = (process.env.MARSX_BASE_URL || 'http://127.0.0.1:10000').replace(/\\/$/, '');
+const base = (process.env.MARSX_BASE_URL || 'http://127.0.0.1:10000').replace(/\/$/, '');
 const timeoutMs = 20000;
 const cases = [
   ['/health', 'backend'],
