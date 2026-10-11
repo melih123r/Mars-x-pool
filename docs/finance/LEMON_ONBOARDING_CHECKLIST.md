@@ -49,6 +49,7 @@ Official docs:
 - [x] RSA PKCS#1 v1.5 SHA-256 challenge signing verified against lemon.markets' published vector
 - [x] Android Keystore SCA key foundation with user-authentication requirement
 - [x] Instrument discovery helper
+- [x] Order/withdrawal amount precision limited to 2 decimals; share quantity limited to 5 decimals
 - [x] Product-contract discovery helper
 - [x] Order submission disabled by default
 - [x] Withdrawal submission disabled by default
