@@ -18,7 +18,7 @@ export class BinanceDepthFeed {
    const result=this.book.delta(payload);if(result==="APPLIED")this.onUpdate({symbol:this.symbol,exchangeEventTime:Number.isSafeInteger(payload.E)?payload.E:null,...this.book.top()});
   }catch(e){this.onStatus({state:"RESYNC_REQUIRED",reason:e.message});this.stop();}});
   socket.addEventListener("open",async()=>{if(!this.active||generation!==this.generation)return;this.onStatus({state:"BOOTSTRAPPING"});try{
-   const result=await bootstrapBinanceDepth({symbol:this.symbol,events:this.buffer,fetchImpl:this.fetchImpl});
+   const result=await bootstrapBinanceDepth({symbol:this.symbol,events:this.buffer.slice(),fetchImpl:this.fetchImpl});
    if(!this.active||generation!==this.generation)return;
    this.book=result.book;
    const pending=this.buffer.splice(0);
