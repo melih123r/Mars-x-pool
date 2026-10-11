@@ -14,7 +14,7 @@ public final class FinanceChartTransforms {
   public final double open, high, low, close, volume;
 
   public Candle(long timestamp,double open,double high,double low,double close,double volume){
-   if(timestamp<0||!finitePositive(open)||!finitePositive(high)||!finitePositive(low)||
+   if(timestamp<=0||!finitePositive(open)||!finitePositive(high)||!finitePositive(low)||
       !finitePositive(close)||!Double.isFinite(volume)||volume<0||
       high<Math.max(open,close)||low>Math.min(open,close)||high<low){
     throw new IllegalArgumentException("Invalid candle");
