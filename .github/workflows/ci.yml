@@ -50,12 +50,27 @@ jobs:
       - name: Build debug APK
         run: gradle -p android :app:assembleDebug --no-daemon
       - name: Build release AAB
-        run: gradle -p android :app:bundleRelease --no-daemon
+        timeout-minutes: 12
+        run: gradle -p android :app:bundleRelease --no-daemon --stacktrace
+      - name: Upload Android test and lint reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: marsx-android-validation-reports
+          path: |
+            android/app/build/reports/
+            android/app/build/test-results/
+          if-no-files-found: warn
+          retention-days: 7
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: marsx-pool-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: marsx-pool-release-aab-unsigned
           path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: warn
