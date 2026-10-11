@@ -32,6 +32,28 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+      # Cache a clean API 26 AVD so subsequent runs can boot from a snapshot.
+      - name: Cache Android 8 AVD
+        id: avd-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: finance-api26-x86-pixel2-4gb-avd-v1
+      - name: Generate clean Android 8 snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 26
+          arch: x86
+          profile: pixel_2
+          ram-size: 4096M
+          disk-size: 4096M
+          force-avd-creation: false
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: echo 'Clean API 26 snapshot generated'
       - name: Boot and launch with 4 GB RAM
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -40,8 +62,9 @@ jobs:
           profile: pixel_2
           ram-size: 4096M
           disk-size: 4096M
+          force-avd-creation: false
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: bash scripts/finance-emulator-smoke.sh
       - name: Upload emulator evidence
         if: always()
