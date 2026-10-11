@@ -93,6 +93,8 @@ export function createApi(engine=buildEngine()){
             scaAuthenticatorEnrollmentHelper:true,
             instrumentDiscoveryHelper:true,
             productContractDiscoveryHelper:true,
+            portfolioReadHelpers:true,
+            webhookRegistrationHelper:true,
             realOrderEndpointExposed:false,
             withdrawalsEndpointExposed:false
           },
