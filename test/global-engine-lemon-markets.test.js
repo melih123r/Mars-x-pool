@@ -125,3 +125,43 @@ test("instrument and product contract discovery remain bounded and read-only",as
     assert.equal(urls[1],"https://sandbox.api.lemon.markets/v1/product_contracts?limit=25&type=brokerage");
   } finally { globalThis.fetch=original; }
 });
+
+
+test("identity verification rejects unsafe redirect schemes",()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only"});
+  assert.throws(()=>a.startIdentityVerification("acct-1",{
+    redirectSuccess:"http://example.test/ok",
+    redirectFailure:"https://example.test/fail"
+  }),/redirectSuccess invalid/);
+  assert.throws(()=>a.startIdentityVerification("acct-1",{
+    redirectSuccess:"javascript:alert(1)",
+    redirectFailure:"https://example.test/fail"
+  }),/redirectSuccess invalid/);
+  assert.doesNotThrow(()=>a.startIdentityVerification("acct-1",{
+    redirectSuccess:"marsx:/brokerage/success",
+    redirectFailure:"marsx:/brokerage/failure"
+  }));
+});
+
+test("authenticator recovery code and list pagination are validated",async()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only"});
+  assert.throws(()=>a.createAuthenticator("acct-1",{
+    name:"Android device",
+    public_key:"pk",
+    client_credential_id:"cred-1",
+    verification:{signature:"sig"},
+    recovery_code:"12345"
+  }),/invalid recovery code/);
+  assert.throws(()=>a.listAuthenticators("acct-1",{limit:101}),/invalid authenticator limit/);
+  const original=globalThis.fetch;
+  let seen=null;
+  globalThis.fetch=async(url,opts)=>{
+    seen={url:String(url),opts};
+    return new Response(JSON.stringify({results:[],pagination:{next_cursor:null}}),{status:200,headers:{"content-type":"application/json"}});
+  };
+  try{
+    await a.listAuthenticators("acct-1",{limit:25},{principal:"marsx-backend-test",justification:"sca.authenticator.list"});
+    assert.equal(seen.url,"https://sandbox.api.lemon.markets/v1/accounts/acct-1/authenticators?limit=25");
+    assert.equal(seen.opts.method,"GET");
+  } finally { globalThis.fetch=original; }
+});
