@@ -26,7 +26,12 @@ sha256sum qa-evidence/finance-start.png > qa-evidence/screenshot-sha256.txt
 # Capture the accessibility hierarchy to diagnose missing controls and blank screens.
 # UIAutomator can be unavailable on some images; keep evidence collection non-blocking.
 if timeout 30s adb shell uiautomator dump /sdcard/finance-hierarchy.xml > qa-evidence/uiautomator-status.txt 2>&1; then
-  adb pull /sdcard/finance-hierarchy.xml qa-evidence/finance-hierarchy.xml || true
+  if adb pull /sdcard/finance-hierarchy.xml qa-evidence/finance-hierarchy.xml; then
+    # A captured hierarchy must include our package; an unrelated system screen is not a valid smoke pass.
+    if ! grep -q 'package="com.marsx.finance"' qa-evidence/finance-hierarchy.xml; then
+      echo 'Finance UI not present in captured accessibility hierarchy'; exit 1
+    fi
+  fi
 fi
 if grep -E 'FATAL EXCEPTION.*com.marsx.finance|ANR in com.marsx.finance' qa-evidence/logcat.txt; then
   echo 'Finance crash/ANR detected'; exit 1
