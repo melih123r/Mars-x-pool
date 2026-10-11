@@ -65,7 +65,7 @@ public final class TechnicalIndicators {
         double[] slow = emaSeries(closes, 26);
         double[] macd = new double[closes.length - 25];
         for (int i = 25; i < closes.length; i++) macd[i - 25] = fast[i] - slow[i];
-        double signal = macd[0];
+        double signal = 0;\n        for (int i = 0; i < 9; i++) signal += macd[i];\n        signal /= 9;
         double alpha = 2.0 / 10.0;
         for (int i = 1; i < 9; i++) signal += alpha * (macd[i] - signal);
         for (int i = 9; i < macd.length; i++) signal += alpha * (macd[i] - signal);
@@ -106,7 +106,7 @@ public final class TechnicalIndicators {
             if (i <= period) atr += tr;
             else atr = (atr * (period - 1) + tr) / period;
         }
-        return atr / period;
+        return atr;
     }
 
 }
