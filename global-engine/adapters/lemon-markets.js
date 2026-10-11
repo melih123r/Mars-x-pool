@@ -31,12 +31,15 @@ export class LemonBrokerAdapter extends VenueAdapter {
     apiKey=process.env.LEMON_MARKETS_API_KEY,
     baseUrl=process.env.LEMON_MARKETS_BASE_URL || "https://sandbox.api.lemon.markets/v1",
     allowOrderSubmission=process.env.MARSX_LEMON_ALLOW_ORDERS==="true",
-    allowWithdrawals=process.env.MARSX_LEMON_ALLOW_WITHDRAWALS==="true"
+    allowWithdrawals=process.env.MARSX_LEMON_ALLOW_WITHDRAWALS==="true",
+    timeoutMs=8000
   }={}) {
     super("lemon-markets",["EQUITY","ETF"]);
     this.apiKey=apiKey; this.baseUrl=validateBaseUrl(baseUrl);
     this.allowOrderSubmission=allowOrderSubmission;
     this.allowWithdrawals=allowWithdrawals;
+    this.timeoutMs=Number(timeoutMs);
+    if(!Number.isFinite(this.timeoutMs)||this.timeoutMs<1||this.timeoutMs>30000) throw new Error("invalid lemon.markets timeout");
     this.mode="sandbox-gated";
   }
 
@@ -57,14 +60,14 @@ export class LemonBrokerAdapter extends VenueAdapter {
   }
 
   async request(path,{method="GET",body,principal,justification,idempotencyKey}={}) {
-    const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),8000);
+    const controller=new AbortController(), timeout=setTimeout(()=>controller.abort(),this.timeoutMs);
     try {
       const res=await fetch(`${this.baseUrl}${path}`,{
         method,headers:this.headers({principal,justification,idempotencyKey,body:body!==undefined}),
-        body:body!==undefined?JSON.stringify(body):undefined,signal:controller.signal
+        body:body!==undefined?JSON.stringify(body):undefined,signal:controller.signal,redirect:"error"
       });
       const text=await res.text(); let payload={};
-      if(text){ try{ payload=JSON.parse(text); }catch{ payload={raw:text.slice(0,500)}; } }
+      if(text){ try{ payload=JSON.parse(text); }catch{ if(res.ok) throw new Error("lemon.markets invalid JSON response"); } }
       if(!res.ok) throw new Error(`lemon.markets HTTP ${res.status}`);
       return payload;
     } finally { clearTimeout(timeout); }
