@@ -9,7 +9,7 @@ public final class FinanceInteractiveChart extends View {
  public static final class Bar {
   public final long time;public final float open,high,low,close,volume;
   public Bar(long t,float o,float h,float l,float c,float v){
-   if(t<=0||!Float.isFinite(o)||!Float.isFinite(h)||!Float.isFinite(l)||!Float.isFinite(c)||!Float.isFinite(v)||l<=0||v<0||h<Math.max(o,c)||l>Math.min(o,c))throw new IllegalArgumentException("Invalid OHLCV");
+   if(t<=0||!Float.isFinite(o)||!Float.isFinite(h)||!Float.isFinite(l)||!Float.isFinite(c)||!Float.isFinite(v)||l<=0||v<0||h<l||h<Math.max(o,c)||l>Math.min(o,c))throw new IllegalArgumentException("Invalid OHLCV");
    time=t;open=o;high=h;low=l;close=c;volume=v;
   }
  }
@@ -42,7 +42,10 @@ public final class FinanceInteractiveChart extends View {
  private void clamp(){offset=Math.max(0,Math.min(offset,Math.max(0,data.size()-count)));}
  @Override public boolean onTouchEvent(MotionEvent e){pinch.onTouchEvent(e);switch(e.getActionMasked()){
   case MotionEvent.ACTION_DOWN:lastX=e.getX();cross=lastX;invalidate();return true;
-  case MotionEvent.ACTION_MOVE:if(!pinch.isInProgress()){offset+=(lastX-e.getX())/Math.max(1,getWidth()/count);clamp();}lastX=e.getX();cross=lastX;invalidate();return true;
+  case MotionEvent.ACTION_MOVE:if(!pinch.isInProgress()&&e.getPointerCount()==1){offset+=(lastX-e.getX())/Math.max(1,getWidth()/count);clamp();cross=e.getX();}lastX=e.getX();invalidate();return true;
+  case MotionEvent.ACTION_POINTER_DOWN:cross=-1;invalidate();return true;
+  case MotionEvent.ACTION_POINTER_UP:lastX=e.getX(0);invalidate();return true;
+  case MotionEvent.ACTION_UP:case MotionEvent.ACTION_CANCEL:cross=-1;invalidate();return true;
   default:return true;
  }}
  @Override protected void onDraw(Canvas c){super.onDraw(c);float w=getWidth(),h=getHeight();if(w<=0||h<=0)return;
