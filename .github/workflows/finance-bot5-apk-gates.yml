@@ -1,0 +1,53 @@
+name: Finance Bot 5 APK gates
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'scripts/build-android.sh'
+      - '.github/workflows/finance-bot5-apk-gates.yml'
+permissions:
+  contents: read
+jobs:
+  apk-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Build debug APK
+        run: bash scripts/build-android.sh :app:testDebugUnitTest :app:assembleDebug --stacktrace
+      - name: Check APK limits and manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=$(find android/app/build/outputs/apk/debug -name '*.apk' -type f | head -n 1)
+          test -n "$apk"
+          bytes=$(stat -c%s "$apk")
+          echo "APK_BYTES=$bytes" >> "$GITHUB_STEP_SUMMARY"
+          test "$bytes" -gt 0
+          test "$bytes" -le 1000000000
+          aapt=$(find "${ANDROID_HOME:-$ANDROID_SDK_ROOT}/build-tools" -name aapt -type f | sort -V | tail -n 1)
+          test -x "$aapt"
+          "$aapt" dump badging "$apk" | tee /tmp/finance-badging.txt
+          grep -q "package: name='com.marsx.finance'" /tmp/finance-badging.txt
+          grep -q "sdkVersion:'26'" /tmp/finance-badging.txt
+          sha256sum "$apk" | tee /tmp/finance-apk-sha256.txt
+          echo "APK_SHA256=$(cut -d' ' -f1 /tmp/finance-apk-sha256.txt)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload APK and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: finance-bot5-apk-evidence
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            /tmp/finance-badging.txt
+            /tmp/finance-apk-sha256.txt
+          if-no-files-found: warn
