@@ -81,3 +81,47 @@ test("identity verification request uses backend auth and privacy headers",async
     globalThis.fetch=original;
   }
 });
+
+
+test("authenticator enrollment requires all SCA enrollment fields",async()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only"});
+  assert.throws(()=>a.createAuthenticator("acct-1",{name:"Pixel"}),/authenticator public key required/);
+  const original=globalThis.fetch;
+  let seen=null;
+  globalThis.fetch=async(url,opts)=>{
+    seen={url:String(url),opts};
+    return new Response(JSON.stringify({id:"auth-1"}),{status:201,headers:{"content-type":"application/json"}});
+  };
+  try{
+    const payload={
+      name:"Android device",
+      public_key:"base64url-public-key",
+      client_credential_id:"cred-1",
+      verification:{signature:"test-signature"}
+    };
+    const result=await a.createAuthenticator("acct-1",payload,{principal:"marsx-backend-test",justification:"sca.authenticator.enroll"});
+    assert.equal(result.id,"auth-1");
+    assert.equal(seen.url,"https://sandbox.api.lemon.markets/v1/accounts/acct-1/authenticators");
+    assert.equal(seen.opts.method,"POST");
+    assert.deepEqual(JSON.parse(seen.opts.body),payload);
+  } finally { globalThis.fetch=original; }
+});
+
+test("instrument and product contract discovery remain bounded and read-only",async()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only"});
+  assert.throws(()=>a.listInstruments({limit:101}),/invalid instrument limit/);
+  assert.throws(()=>a.listInstruments({type:"crypto"}),/invalid instrument type/);
+  assert.throws(()=>a.listProductContracts({type:"unknown"}),/invalid product contract type/);
+  const original=globalThis.fetch;
+  const urls=[];
+  globalThis.fetch=async(url)=>{
+    urls.push(String(url));
+    return new Response(JSON.stringify({results:[],pagination:{next_cursor:null}}),{status:200,headers:{"content-type":"application/json"}});
+  };
+  try{
+    await a.listInstruments({type:"etf",limit:50},{principal:"marsx-backend-test",justification:"market.instruments"});
+    await a.listProductContracts({type:"brokerage",limit:25},{principal:"marsx-backend-test",justification:"market.product_contracts"});
+    assert.equal(urls[0],"https://sandbox.api.lemon.markets/v1/instruments?limit=50&type=etf");
+    assert.equal(urls[1],"https://sandbox.api.lemon.markets/v1/product_contracts?limit=25&type=brokerage");
+  } finally { globalThis.fetch=original; }
+});
