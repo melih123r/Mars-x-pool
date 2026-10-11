@@ -1,10 +1,33 @@
 const trimSlash=s=>String(s||"").replace(/\/+$/,"");
 const enc=v=>encodeURIComponent(String(v));
 const required=(v,n)=>{if(v===undefined||v===null||v==="")throw new Error(n+" required");return v;};
+const DEFAULT_MAX_RESPONSE_BYTES=2*1024*1024;
+const HARD_MAX_RESPONSE_BYTES=8*1024*1024;
+const responseTooLarge=()=>{const e=new Error("ChangeNOW response exceeds safe size limit");e.code="RESPONSE_TOO_LARGE";e.status=502;return e;};
+async function boundedText(response,maxBytes){
+ const declared=Number(response.headers?.get?.("content-length"));
+ if(Number.isFinite(declared)&&declared>maxBytes)throw responseTooLarge();
+ if(!response.body?.getReader){
+  const text=await response.text();
+  if(new TextEncoder().encode(text).byteLength>maxBytes)throw responseTooLarge();
+  return text;
+ }
+ const reader=response.body.getReader(),decoder=new TextDecoder();let total=0,text="";
+ try{
+  while(true){
+   const {done,value}=await reader.read();if(done)break;
+   total+=value.byteLength;
+   if(total>maxBytes){await reader.cancel();throw responseTooLarge();}
+   text+=decoder.decode(value,{stream:true});
+  }
+  return text+decoder.decode();
+ }finally{reader.releaseLock();}
+}
 export class ChangeNowAdapter{
- constructor({apiKey=process.env.CHANGENOW_API_KEY,baseUrl=process.env.CHANGENOW_API_BASE_URL||"https://api.changenow.io/v2",allowTransactions=false,timeoutMs=8000}={}){
-  this.apiKey=apiKey;this.baseUrl=trimSlash(baseUrl);this.allowTransactions=allowTransactions===true;this.timeoutMs=Number(timeoutMs);this.mode="quote-only";
+ constructor({apiKey=process.env.CHANGENOW_API_KEY,baseUrl=process.env.CHANGENOW_API_BASE_URL||"https://api.changenow.io/v2",allowTransactions=false,timeoutMs=8000,maxResponseBytes=process.env.CHANGENOW_MAX_RESPONSE_BYTES||DEFAULT_MAX_RESPONSE_BYTES}={}){
+  this.apiKey=apiKey;this.baseUrl=trimSlash(baseUrl);this.allowTransactions=allowTransactions===true;this.timeoutMs=Number(timeoutMs);this.maxResponseBytes=Number(maxResponseBytes);this.mode="quote-only";
   if(!Number.isFinite(this.timeoutMs)||this.timeoutMs<1)throw new Error("timeoutMs must be positive");
+  if(!Number.isInteger(this.maxResponseBytes)||this.maxResponseBytes<1||this.maxResponseBytes>HARD_MAX_RESPONSE_BYTES)throw new Error("maxResponseBytes must be an integer between 1 and 8388608");
  }
  configured(){return Boolean(this.apiKey);}
  async request(path,{method="GET",body,auth=true}={}){
@@ -13,7 +36,7 @@ export class ChangeNowAdapter{
   try{
    const headers={Accept:"application/json",...(body!==undefined?{"Content-Type":"application/json"}:{}),...(auth?{"x-changenow-api-key":this.apiKey}:{})};
    const r=await fetch(this.baseUrl+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),signal:c.signal,redirect:"error"});
-   const text=await r.text();let data={};
+   const text=await boundedText(r,this.maxResponseBytes);let data={};
    if(text){try{data=JSON.parse(text)}catch{if(r.ok)throw new Error("ChangeNOW invalid JSON response");}}
    if(!r.ok){const e=new Error("ChangeNOW HTTP "+r.status);e.status=r.status;throw e;}
    return data;
