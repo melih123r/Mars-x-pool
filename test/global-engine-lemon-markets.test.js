@@ -254,7 +254,7 @@ test("order creation and confirmation map Lemon fields without exposing a public
   assert.equal(result.confirmed.status,"confirmed");
   assert.equal(calls[0].opts.headers["Idempotency-Key"],"marsx-test-order-1");
   assert.deepEqual(JSON.parse(calls[1].opts.body),{appropriateness_consent:true,sca:{signature:"fixture"}});
-  await assert.rejects(()=>a.confirmOrder("acct-1","ord-1",{}, {principal:"marsx-user-1"}),/order confirmation data required/);
+  assert.throws(()=>a.confirmOrder("acct-1","ord-1",{}, {principal:"marsx-user-1"}),/order confirmation data required/);
 });
 
 
