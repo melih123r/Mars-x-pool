@@ -225,3 +225,20 @@ test("order submission requires a bounded idempotency key before any network cal
   await assert.rejects(()=>a.createOrder("acct-1",{side:"buy"},{principal:"marsx-user-1",justification:"order.create"}),/invalid idempotency key/);
   await assert.rejects(()=>a.createOrder("acct-1",{side:"buy"},{principal:"marsx-user-1",justification:"order.create",idempotencyKey:"x".repeat(101)}),/invalid idempotency key/);
 });
+
+
+test("Lemon requests reject redirects and malformed successful JSON",async()=>{
+  const a=new LemonBrokerAdapter({apiKey:"test-only",timeoutMs:5000});
+  const original=globalThis.fetch;
+  let options=null;
+  globalThis.fetch=async(url,opts)=>{
+    options=opts;
+    return new Response("not-json",{status:200,headers:{"content-type":"text/plain"}});
+  };
+  try{
+    await assert.rejects(()=>a.listInstruments({limit:10},{principal:"marsx-user-1",justification:"market.instruments"}),/invalid JSON response/);
+    assert.equal(options.redirect,"error");
+  } finally { globalThis.fetch=original; }
+  assert.throws(()=>new LemonBrokerAdapter({apiKey:"test-only",timeoutMs:0}),/invalid lemon.markets timeout/);
+  assert.throws(()=>new LemonBrokerAdapter({apiKey:"test-only",timeoutMs:30001}),/invalid lemon.markets timeout/);
+});
