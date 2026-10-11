@@ -1,6 +1,16 @@
 import { VenueAdapter } from "../venue.js";
 
 const trimSlash=(s)=>String(s||"").replace(/\/+$/,"");
+const ALLOWED_LEMON_HOSTS=new Set(["sandbox.api.lemon.markets","api.lemon.markets"]);
+const validateBaseUrl=(value)=>{
+  const normalized=trimSlash(value);
+  const url=new URL(normalized);
+  if(url.protocol!=="https:" || !ALLOWED_LEMON_HOSTS.has(url.hostname) || url.username || url.password || url.search || url.hash) {
+    throw new Error("invalid lemon.markets base URL");
+  }
+  if(url.pathname!=="/v1") throw new Error("invalid lemon.markets API version path");
+  return normalized;
+};
 const enc=(v)=>encodeURIComponent(String(v));
 const nonEmpty=(v,name)=>{ if(!v) throw new Error(`${name} required`); return v; };
 
@@ -12,7 +22,7 @@ export class LemonBrokerAdapter extends VenueAdapter {
     allowWithdrawals=process.env.MARSX_LEMON_ALLOW_WITHDRAWALS==="true"
   }={}) {
     super("lemon-markets",["EQUITY","ETF"]);
-    this.apiKey=apiKey; this.baseUrl=trimSlash(baseUrl);
+    this.apiKey=apiKey; this.baseUrl=validateBaseUrl(baseUrl);
     this.allowOrderSubmission=allowOrderSubmission;
     this.allowWithdrawals=allowWithdrawals;
     this.mode="sandbox-gated";
