@@ -31,11 +31,13 @@ export async function certifyLemonSandboxReadOnly({
   const ctx={principal,justification:"sandbox.certification"};
   let phase="authentication";
   try{
-    // First request proves the credential can reach a documented read endpoint.
-    const agreements=await adapter.getAgreements(ctx);
+    // First request proves the credential can reach the documented partner/company endpoint.
+    const company=await adapter.getCompany(ctx);
+    if(!nonEmptyObject(company)) throw new Error("Invalid company response");
     mark(report,"authentication","PASS");
 
     phase="agreements";
+    const agreements=await adapter.getAgreements(ctx);
     if(!listShape(agreements)&&!nonEmptyObject(agreements)) throw new Error("Invalid agreements response");
     mark(report,phase,"PASS");
 
