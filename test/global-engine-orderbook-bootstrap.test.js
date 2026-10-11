@@ -14,3 +14,8 @@ test("Binance bootstrap replays buffered events and rejects unsupported pairs",a
  assert.equal(result.book.top().bids[0].quantity,2);
  await assert.rejects(()=>bootstrapBinanceDepth({symbol:"UNLISTED",fetchImpl}),/UNSUPPORTED_SYMBOL/);
 });
+
+test("Binance bootstrap rejects snapshot-to-stream sequence gaps",async()=>{
+ const fetchImpl=async()=>({ok:true,json:async()=>({lastUpdateId:100,bids:[["100","1"]],asks:[["101","1"]]})});
+ await assert.rejects(()=>bootstrapBinanceDepth({fetchImpl,events:[{U:103,u:104,E:Date.now(),b:[],a:[]}]}),/SEQUENCE_GAP_RESYNC_REQUIRED/);
+});
