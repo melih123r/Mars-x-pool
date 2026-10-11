@@ -22,9 +22,9 @@ export class BinanceDepthFeed {
    if(!this.active||generation!==this.generation)return;
    this.book=result.book;
    const pending=this.buffer.splice(0);
-   let latestEventTime=null;
-   for(const event of pending){if(event.u>this.book.lastUpdateId){this.book.delta(event);latestEventTime=event.E;}}
-   this.onStatus({state:this.book.ready?"SYNCHRONIZED":"AWAITING_BRIDGE"});if(this.book.ready)this.onUpdate({symbol:this.symbol,exchangeEventTime:Number.isSafeInteger(latestEventTime)?latestEventTime:(Number.isSafeInteger(pending.at(-1)?.E)?pending.at(-1).E:null),...this.book.top()});
+   let latestEventTime=result.lastEventTime??null;
+   for(const event of pending){if(event.u>this.book.lastUpdateId){const applied=this.book.delta(event);if(applied==="APPLIED")latestEventTime=event.E;}}
+   this.onStatus({state:this.book.ready?"SYNCHRONIZED":"AWAITING_BRIDGE"});if(this.book.ready)this.onUpdate({symbol:this.symbol,exchangeEventTime:Number.isSafeInteger(latestEventTime)?latestEventTime:null,...this.book.top()});
   }catch(e){if(this.active&&generation===this.generation){this.onStatus({state:"RESYNC_REQUIRED",reason:e.message});this.stop();}}});
   socket.addEventListener("close",()=>{if(this.active&&generation===this.generation){this.onStatus({state:"DISCONNECTED"});this.stop();}});
   socket.addEventListener("error",()=>{if(this.active&&generation===this.generation){this.onStatus({state:"WEBSOCKET_ERROR"});this.stop();}});
