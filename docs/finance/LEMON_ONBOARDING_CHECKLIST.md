@@ -54,6 +54,8 @@ Official docs:
 - [x] Unsafe KYC redirect schemes rejected
 - [x] Android KYC return deep link (`marsx://brokerage/success|failure`) registered
 - [x] KYC redirect is treated as non-authoritative; backend state must still be refreshed
+- [x] Custom-scheme KYC redirect restricted to `marsx://brokerage/success|failure`
+- [x] HTTPS KYC redirects require explicit `MARSX_LEMON_KYC_REDIRECT_HOSTS` allowlist
 - [x] Webhook signature verification helper
 - [x] Webhook verify → queue → acknowledge intake pipeline helper
 - [x] Duplicate event rejection and per-entity partition key generation
