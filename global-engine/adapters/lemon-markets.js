@@ -17,6 +17,10 @@ const validateIsin=(value)=>{
   if(!/^[A-Z]{2}[0-9A-Z]{9}[0-9]$/.test(isin)) throw new Error("invalid ISIN");
   return isin;
 };
+const validatePositiveDecimal=(value,name)=>{
+  if(typeof value!=="string"||!/^\d+(?:\.\d+)?$/.test(value)||Number(value)<=0) throw new Error(`${name} must be a positive decimal string`);
+  return value;
+};
 const validateIdempotencyKey=(value)=>{
   if(typeof value!=="string"||value.length<1||value.length>100||/[\r\n]/.test(value)) throw new Error("invalid idempotency key");
   return value;
@@ -198,26 +202,45 @@ export class LemonBrokerAdapter extends VenueAdapter {
     if(!Array.isArray(events)||events.length===0||events.some(x=>typeof x!=="string"||!/^[a-z0-9_.-]+$/i.test(x))) throw new Error("webhook events required");
     return this.request("/webhooks",{method:"POST",body:{url:String(url),events},...ctx,justification:ctx.justification||"webhook.configure"});
   }
-  async createOrder(accountId,payload,{confirm=false,sca,principal,justification="order.create",idempotencyKey}={}) {
+  async createOrder(accountId,payload,{confirm=false,confirmation,principal,justification="order.create",idempotencyKey}={}) {
     nonEmpty(accountId,"accountId"); nonEmpty(payload,"order payload");
     if(!this.allowOrderSubmission) throw new Error("lemon.markets order submission disabled");
+    if(typeof payload!=="object"||Array.isArray(payload)) throw new Error("invalid order payload");
+    if(!["buy","sell"].includes(payload.side)) throw new Error("invalid order side");
+    if(!["batch","market"].includes(payload.type)) throw new Error("invalid order type");
+    validateIsin(payload.instrument);
+    if(payload.currency!=="EUR") throw new Error("order currency must be EUR");
+    if(!payload.fees||typeof payload.fees!=="object"||Array.isArray(payload.fees)) throw new Error("order fees required");
+    if(payload.side==="buy"){
+      validatePositiveDecimal(payload.amount,"order amount");
+      if(payload.quantity!==undefined&&payload.quantity!==null) throw new Error("buy order quantity is not supported");
+    }else{
+      validatePositiveDecimal(payload.quantity,"order quantity");
+      if(payload.amount!==undefined&&payload.amount!==null) throw new Error("sell order amount is not supported");
+    }
     validateIdempotencyKey(idempotencyKey);
     const created=await this.request(`/accounts/${enc(accountId)}/orders`,{
-      method:"POST",body:payload,principal,justification,idempotencyKey
+      method:"POST",body:{...payload,instrument:validateIsin(payload.instrument)},principal,justification,idempotencyKey
     });
     if(!confirm) return {created,confirmed:false};
     const orderId=created?.data?.id??created?.results?.id??created?.id;
     if(!orderId) throw new Error("lemon.markets order id missing");
-    if(!sca || typeof sca!=="object" || Array.isArray(sca)) throw new Error("SCA confirmation required");
-    const confirmed=await this.confirmOrder(accountId,orderId,sca,{principal});
+    const confirmed=await this.confirmOrder(accountId,orderId,confirmation,{principal});
     return {created,confirmed};
   }
-  confirmOrder(accountId,orderId,sca,ctx={}) {
+  confirmOrder(accountId,orderId,{sca,appropriatenessConsent,actor}={},ctx={}) {
     nonEmpty(accountId,"accountId"); nonEmpty(orderId,"orderId");
     if(!this.allowOrderSubmission) throw new Error("lemon.markets order submission disabled");
-    if(!sca || typeof sca!=="object" || Array.isArray(sca)) throw new Error("SCA confirmation required");
+    if(sca!==undefined && (!sca||typeof sca!=="object"||Array.isArray(sca))) throw new Error("invalid SCA confirmation");
+    if(appropriatenessConsent!==undefined && typeof appropriatenessConsent!=="boolean") throw new Error("invalid appropriateness consent");
+    if(actor!==undefined && (!actor||typeof actor!=="object"||Array.isArray(actor))) throw new Error("invalid confirmation actor");
+    if(sca===undefined&&appropriatenessConsent===undefined&&actor===undefined) throw new Error("order confirmation data required");
     return this.request(`/accounts/${enc(accountId)}/orders/${enc(orderId)}/confirm`,{
-      method:"POST",body:{sca},...ctx,justification:ctx.justification||"order.confirm"
+      method:"POST",body:{
+        ...(actor!==undefined?{actor}:{}),
+        ...(appropriatenessConsent!==undefined?{appropriateness_consent:appropriatenessConsent}:{}),
+        ...(sca!==undefined?{sca}:{})
+      },...ctx,justification:ctx.justification||"order.confirm"
     });
   }
   createWithdrawal(accountId,{amount,currency="EUR"},ctx={}) {
