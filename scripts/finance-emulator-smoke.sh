@@ -62,3 +62,15 @@ adb logcat -d -t 4000 > qa-evidence/resume-logcat.txt
 if grep -E 'FATAL EXCEPTION.*com.marsx.finance|ANR in com.marsx.finance' qa-evidence/resume-logcat.txt; then
   echo 'Finance lifecycle crash/ANR detected'; exit 1
 fi
+
+# Publish a concise machine-readable result for CI review.
+printf 'sdk=%s\npackage=com.marsx.finance\nlaunch=pass\nresume=pass\n' "$sdk" > qa-evidence/smoke-result.txt
+if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+  {
+    echo '### MARS-X Finance Android 8 smoke test'
+    echo '- API level: 26 (Android 8)'
+    echo '- Package: com.marsx.finance'
+    echo '- Install, launch, foreground, HOME/relaunch: PASS'
+    echo '- Initial and resumed PNG screenshots: verified; SHA-256 recorded'
+  } >> "$GITHUB_STEP_SUMMARY"
+fi
