@@ -15,7 +15,7 @@ export class BinanceDepthFeed {
    const payload=JSON.parse(event.data);if(payload.e!=="depthUpdate"||payload.s!==this.symbol)throw Error("INVALID_DEPTH_EVENT");if(!Number.isSafeInteger(payload.U)||!Number.isSafeInteger(payload.u))throw Error("INVALID_SEQUENCE");
    if(!this.book){this.buffer.push(payload);if(this.buffer.length>this.maxBuffered)throw Error("DEPTH_BUFFER_OVERFLOW");return;}
    if(!this.book.ready){const result=this.book.delta(payload);if(result==="APPLIED"){this.onStatus({state:"SYNCHRONIZED"});this.onUpdate({symbol:this.symbol,exchangeEventTime:Number.isSafeInteger(payload.E)?payload.E:null,...this.book.top()});}return;}
-   const result=this.book.delta(payload);if(result==="APPLIED")this.onUpdate({symbol:this.symbol,...this.book.top()});
+   const result=this.book.delta(payload);if(result==="APPLIED")this.onUpdate({symbol:this.symbol,exchangeEventTime:Number.isSafeInteger(payload.E)?payload.E:null,...this.book.top()});
   }catch(e){this.onStatus({state:"RESYNC_REQUIRED",reason:e.message});this.stop();}});
   socket.addEventListener("open",async()=>{if(!this.active||generation!==this.generation)return;this.onStatus({state:"BOOTSTRAPPING"});try{
    const result=await bootstrapBinanceDepth({symbol:this.symbol,events:this.buffer,fetchImpl:this.fetchImpl});
