@@ -220,10 +220,41 @@ test("external Lemon requests require an explicit end-user principal",async()=>{
 });
 
 
-test("order submission requires a bounded idempotency key before any network call",async()=>{
-  const a=new LemonBrokerAdapter({apiKey:"test-only",allowOrderSubmission:true});
-  await assert.rejects(()=>a.createOrder("acct-1",{side:"buy"},{principal:"marsx-user-1",justification:"order.create"}),/invalid idempotency key/);
-  await assert.rejects(()=>a.createOrder("acct-1",{side:"buy"},{principal:"marsx-user-1",justification:"order.create",idempotencyKey:"x".repeat(101)}),/invalid idempotency key/);
+test("order submission validates the documented contract and bounded idempotency key before network calls",async()=>{
+  let calls=0;
+  const a=new LemonBrokerAdapter({apiKey:"test-only",allowOrderSubmission:true,fetchImpl:async()=>{calls++;return Response.json({id:"ord-1"},{status:201});}});
+  const valid={side:"buy",type:"market",instrument:"US0378331005",amount:"100.00",fees:{type:"fixed",amount:"0"},currency:"EUR"};
+  await assert.rejects(()=>a.createOrder("acct-1",valid,{principal:"marsx-user-1",justification:"order.create"}),/invalid idempotency key/);
+  await assert.rejects(()=>a.createOrder("acct-1",{...valid,currency:"USD"},{principal:"marsx-user-1",justification:"order.create",idempotencyKey:"k1"}),/order currency must be EUR/);
+  await assert.rejects(()=>a.createOrder("acct-1",{...valid,side:"sell",amount:undefined,quantity:"0"},{principal:"marsx-user-1",justification:"order.create",idempotencyKey:"k2"}),/order quantity must be a positive decimal string/);
+  await assert.rejects(()=>a.createOrder("acct-1",valid,{principal:"marsx-user-1",justification:"order.create",idempotencyKey:"x".repeat(101)}),/invalid idempotency key/);
+  assert.equal(calls,0);
+});
+
+test("order creation and confirmation map Lemon fields without exposing a public execution route",async()=>{
+  const calls=[];
+  const a=new LemonBrokerAdapter({
+    apiKey:"test-only",
+    allowOrderSubmission:true,
+    fetchImpl:async(url,opts)=>{
+      calls.push({url:String(url),opts});
+      if(calls.length===1) return Response.json({id:"ord-1"},{status:201});
+      return Response.json({id:"ord-1",status:"confirmed"},{status:200});
+    }
+  });
+  const payload={side:"buy",type:"market",instrument:"US0378331005",amount:"100.00",fees:{type:"fixed",amount:"0"},currency:"EUR"};
+  const result=await a.createOrder("acct-1",payload,{
+    confirm:true,
+    confirmation:{appropriatenessConsent:true,sca:{signature:"fixture"}},
+    principal:"marsx-user-1",
+    justification:"order.create",
+    idempotencyKey:"marsx-test-order-1"
+  });
+  assert.equal(result.created.id,"ord-1");
+  assert.equal(result.confirmed.status,"confirmed");
+  assert.equal(calls[0].opts.headers["Idempotency-Key"],"marsx-test-order-1");
+  assert.deepEqual(JSON.parse(calls[1].opts.body),{appropriateness_consent:true,sca:{signature:"fixture"}});
+  await assert.rejects(()=>a.confirmOrder("acct-1","ord-1",{}, {principal:"marsx-user-1"}),/order confirmation data required/);
 });
 
 
