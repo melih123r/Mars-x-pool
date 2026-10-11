@@ -8,6 +8,10 @@ on:
       - '.github/workflows/finance-bot5-emulator-smoke.yml'
 permissions:
   contents: read
+# Cancel superseded emulator builds for the same pull request/branch.
+concurrency:
+  group: finance-bot5-emulator-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   emulator-smoke:
     runs-on: ubuntu-latest
