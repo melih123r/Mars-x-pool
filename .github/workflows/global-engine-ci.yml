@@ -34,3 +34,15 @@ jobs:
         run: node scripts/changenow-readonly-smoke.mjs
       - name: Audit production dependencies
         run: npm audit --omit=dev --audit-level=high
+      - name: Audit development dependencies (report, no unsafe auto-fix)
+        if: always()
+        run: |
+          npm audit --include=dev --audit-level=high --json > npm-audit-full.json || true
+          node -e 'const a=require("./npm-audit-full.json"); const v=a.vulnerabilities||{}; for(const [name,x] of Object.entries(v)) if(["high","critical"].includes(x.severity)) console.log(`${name}: ${x.severity}; direct=${x.isDirect}; fixAvailable=${JSON.stringify(x.fixAvailable)}`); console.log("full-audit",JSON.stringify(a.metadata?.vulnerabilities||{}))'
+      - name: Upload full audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-full
+          path: npm-audit-full.json
+          retention-days: 7
