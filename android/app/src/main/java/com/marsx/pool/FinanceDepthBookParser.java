@@ -45,7 +45,7 @@ public final class FinanceDepthBookParser {
   }
  }
 
- private static FinanceDepthBook.Level[] levels(JSONArray rows){
+ private static FinanceDepthBook.Level[] levels(JSONArray rows) throws Exception {
   int count=rows.length();
   if(count<1||count>FinanceDepthBook.MAX_LEVELS_PER_SIDE)
    throw new IllegalArgumentException("Depth levels missing or oversized");
