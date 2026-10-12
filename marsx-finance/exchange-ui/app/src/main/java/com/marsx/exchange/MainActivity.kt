@@ -3,6 +3,11 @@ package com.marsx.exchange
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +33,9 @@ class MainActivity : ComponentActivity() {
 private fun ExchangeApp() {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var market by remember { mutableStateOf<MarketSnapshot?>(null) }
+    var interval by rememberSaveable { mutableStateOf("1m") }
+    var candles by remember { mutableStateOf<List<Candle>>(emptyList()) }
+    var candleError by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var demoCashText by rememberSaveable { mutableStateOf("10000.00") }
     val demoCash = demoCashText.toBigDecimalOrNull() ?: BigDecimal.ZERO
@@ -40,6 +48,13 @@ private fun ExchangeApp() {
             try { market = repository.btcSnapshot(); error = null }
             catch (e: Exception) { error = "Market data unavailable"; }
             delay(10000)
+        }
+    }
+    LaunchedEffect(interval) {
+        while (true) {
+            try { candles = repository.btcCandles(interval); candleError = null }
+            catch (e: Exception) { candleError = "Candle data unavailable" }
+            delay(15000)
         }
     }
     MaterialTheme(colorScheme = darkColorScheme(primary = accents[tab], background = bg)) {
@@ -60,9 +75,11 @@ private fun ExchangeApp() {
                         }
                         1 -> {
                             item { Panel("Markets") { Text("BTC/USDT • Binance public feed") } }
+                            item { Panel("BTC/USDT candles • $interval") { CandleControls(interval, { interval = it }); CandleChart(candles); if (candleError != null) Text(candleError!!, color = Color.Red) } }
                             item { Panel("Market status") { Text(if (market == null) "Waiting for snapshot" else "10-second refresh enabled") } }
                         }
                         2 -> {
+                            item { Panel("BTC/USDT candles • $interval") { CandleControls(interval, { interval = it }); CandleChart(candles); if (candleError != null) Text(candleError!!, color = Color.Red) } }
                             item { Panel("Order book — public snapshot") {
                                 Text("ASKS", color = Color(0xFFFF6677))
                                 market?.asks?.forEach { Text("${it.first}  •  ${it.second}", color = Color.White) }
@@ -128,6 +145,37 @@ private fun ExchangeApp() {
                 Spacer(Modifier.height(8.dp))
                 content()
             }
+        }
+    }
+}
+
+@Composable
+private fun CandleControls(selected: String, onSelect: (String) -> Unit) {
+    Row(Modifier.horizontalScroll(rememberScrollState())) {
+        listOf("1m", "5m", "15m", "1h", "4h", "1d").forEach { value ->
+            TextButton(onClick = { onSelect(value) }) {
+                Text(value, color = if (selected == value) Color(0xFFFF9C39) else Color.LightGray)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CandleChart(candles: List<Candle>) {
+    if (candles.isEmpty()) { Text("Waiting for candle data…"); return }
+    Canvas(Modifier.fillMaxWidth().height(250.dp).background(Color(0xFF121A2B))) {
+        val lowest = candles.minOf { it.low }
+        val highest = candles.maxOf { it.high }
+        val range = (highest - lowest).takeIf { it > 0.0 } ?: 1.0
+        val candleWidth = size.width / candles.size
+        fun y(price: Double): Float = ((highest - price) / range * (size.height - 16f) + 8f).toFloat()
+        candles.forEachIndexed { index, candle ->
+            val x = (index + 0.5f) * candleWidth
+            val color = if (candle.close >= candle.open) Color(0xFF17C3A4) else Color(0xFFFF6677)
+            drawLine(color, Offset(x, y(candle.high)), Offset(x, y(candle.low)), strokeWidth = 1.dp.toPx())
+            val top = minOf(y(candle.open), y(candle.close))
+            val bottom = maxOf(y(candle.open), y(candle.close))
+            drawRect(color, Offset(x - candleWidth * 0.32f, top), Size(candleWidth * 0.64f, maxOf(1.dp.toPx(), bottom - top)))
         }
     }
 }
