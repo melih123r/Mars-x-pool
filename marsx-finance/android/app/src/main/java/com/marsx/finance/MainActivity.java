@@ -37,7 +37,7 @@ public class MainActivity extends Activity {
         root.addView(status);
         TextView attribution = new TextView(this);
         SpannableString credit = new SpannableString("Charts powered by TradingView");
-        credit.setSpan(new URLSpan("https://www.tradingview.com/"), 18, 29, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        credit.setSpan(new URLSpan("https://www.tradingview.com/"), credit.toString().indexOf("TradingView"), credit.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         attribution.setText(credit);
         attribution.setMovementMethod(LinkMovementMethod.getInstance());
         attribution.setPadding(24, 8, 24, 20);
