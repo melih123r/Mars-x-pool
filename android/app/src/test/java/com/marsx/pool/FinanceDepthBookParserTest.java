@@ -8,7 +8,7 @@ import org.junit.Test;
 public final class FinanceDepthBookParserTest {
  private static final long NOW=1791780000000L;
 
- @Test public void parsesFreshReadOnlySnapshot(){
+ @Test public void parsesFreshReadOnlySnapshot() throws Exception {
   FinanceDepthBookParser.Snapshot result=FinanceDepthBookParser.parse(
     payload(false,"2026-10-12T04:39:59Z"),NOW,60_000);
   assertEquals("BTCUSDT",result.symbol);
@@ -18,14 +18,14 @@ public final class FinanceDepthBookParserTest {
   assertEquals(101.0,result.book.bestAsk(),0.0);
  }
 
- @Test public void rejectsExecutableAndStaleSnapshots(){
+ @Test public void rejectsExecutableAndStaleSnapshots() throws Exception {
   assertThrows(IllegalArgumentException.class,()->FinanceDepthBookParser.parse(
     payload(true,"2026-10-12T04:39:59Z"),NOW,60_000));
   assertThrows(IllegalArgumentException.class,()->FinanceDepthBookParser.parse(
     payload(false,"2026-10-12T04:00:00Z"),NOW,60_000));
  }
 
- @Test public void rejectsOversizedAndUnorderedBooks(){
+ @Test public void rejectsOversizedAndUnorderedBooks() throws Exception {
   JSONObject oversized=payload(false,"2026-10-12T04:39:59Z");
   JSONArray bids=new JSONArray();
   for(int i=0;i<=FinanceDepthBook.MAX_LEVELS_PER_SIDE;i++)
@@ -42,7 +42,7 @@ public final class FinanceDepthBookParserTest {
     unordered,NOW,60_000));
  }
 
- private static JSONObject payload(boolean executable,String receivedAt){
+ private static JSONObject payload(boolean executable,String receivedAt) throws Exception {
   return new JSONObject()
     .put("provider","Binance Spot public data")
     .put("symbol","BTCUSDT")
