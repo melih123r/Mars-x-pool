@@ -21,7 +21,7 @@ class PublicMarketStream(private val onPrice: (String) -> Unit, private val onSt
     fun start() {
         closed = false
         val request = Request.Builder()
-            .url("wss://stream.binance.com:9443/ws/btcusdt@miniTicker")
+            .url("wss://data-stream.binance.vision:443/ws/btcusdt@miniTicker")
             .build()
         socket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
