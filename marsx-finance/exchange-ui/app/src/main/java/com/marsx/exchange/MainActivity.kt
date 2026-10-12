@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -25,12 +26,14 @@ class MainActivity : ComponentActivity() {
 }
 @Composable
 private fun ExchangeApp() {
-    var tab by remember { mutableIntStateOf(0) }
-    var theme by remember { mutableIntStateOf(0) }
+    var tab by rememberSaveable { mutableIntStateOf(0) }
+    var theme by rememberSaveable { mutableIntStateOf(0) }
     var market by remember { mutableStateOf<MarketSnapshot?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
-    var demoCash by remember { mutableStateOf(BigDecimal("10000.00")) }
-    var demoBtc by remember { mutableStateOf(BigDecimal.ZERO) }
+    var demoCashText by rememberSaveable { mutableStateOf("10000.00") }
+    val demoCash = demoCashText.toBigDecimalOrNull() ?: BigDecimal.ZERO
+    var demoBtcText by rememberSaveable { mutableStateOf("0") }
+    val demoBtc = demoBtcText.toBigDecimalOrNull() ?: BigDecimal.ZERO
     var demoMessage by remember { mutableStateOf("Simulated trades only • no real orders") }
     val repository = remember { PublicMarketRepository() }
     LaunchedEffect(Unit) {
@@ -77,8 +80,8 @@ private fun ExchangeApp() {
                                         if (p == null || p <= BigDecimal.ZERO) demoMessage = "No valid live price"
                                         else if (demoCash < BigDecimal("100")) demoMessage = "Insufficient demo USDT"
                                         else {
-                                            demoCash -= BigDecimal("100")
-                                            demoBtc += BigDecimal("100").divide(p, 8, RoundingMode.DOWN)
+                                            demoCashText = (demoCash - BigDecimal("100")).toPlainString()
+                                            demoBtcText = (demoBtc + BigDecimal("100").divide(p, 8, RoundingMode.DOWN)).toPlainString()
                                             demoMessage = "Paper BUY filled at $p"
                                         }
                                     }) { Text("Demo Buy") }
@@ -90,8 +93,8 @@ private fun ExchangeApp() {
                                             val qty = BigDecimal("100").divide(p, 8, RoundingMode.UP)
                                             if (demoBtc < qty) demoMessage = "Insufficient demo BTC"
                                             else {
-                                                demoBtc -= qty
-                                                demoCash += qty.multiply(p)
+                                                demoBtcText = (demoBtc - qty).toPlainString()
+                                                demoCashText = (demoCash + qty.multiply(p)).toPlainString()
                                                 demoMessage = "Paper SELL filled at $p"
                                             }
                                         }
