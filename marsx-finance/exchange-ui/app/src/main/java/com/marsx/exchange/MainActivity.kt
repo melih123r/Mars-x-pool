@@ -120,7 +120,8 @@ private fun ExchangeApp() {
                                     Spacer(Modifier.width(8.dp))
                                     Button(onClick = {
                                         val p = latestPrice
-                                        if (p == null || p <= BigDecimal.ZERO) demoMessage = "No valid live price"
+                                        if (lastPriceAt == 0L || System.currentTimeMillis() - lastPriceAt > 30000L) demoMessage = "Market price stale; paper order blocked"
+                                        else if (p == null || p <= BigDecimal.ZERO) demoMessage = "No valid live price"
                                         else {
                                             val qty = BigDecimal("100").divide(p, 8, RoundingMode.DOWN)
                                             if (demoBtc < qty) demoMessage = "Insufficient demo BTC"
@@ -139,7 +140,7 @@ private fun ExchangeApp() {
                         3 -> item { Panel("Wallet") { Text("No real wallet, custody or withdrawals connected.") } }
                         else -> {
                             item { Panel("Security") { Text("KYC, MFA and production permissions not configured.") } }
-                            item { Panel("Chart engine") { Text("Native Jetpack Compose Canvas candlestick renderer. No TradingView library bundled in this build.") } }
+                            item { Panel("Chart engine") { Text("Native Jetpack Compose Canvas candlestick renderer. TradingView dependency declared; chart view migration pending.") } }
                         }
                     }
                 }
