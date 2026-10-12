@@ -45,7 +45,7 @@ private fun ExchangeApp() {
     MaterialTheme(colorScheme = darkColorScheme(primary = accents[tab], background = bg)) {
         Column(Modifier.fillMaxSize().background(bg)) {
             Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("MARS-X EXCHANGE • DEMO", color = accents[theme])
+                Text("MARS-X EXCHANGE • DEMO", color = accents[tab])
                 Text("PAPER MODE", color = Color.LightGray)
             }
             Text(if (market != null) "BTC/USDT  ${market!!.price} USDT  (${market!!.change})" else "BTC/USDT loading…",
