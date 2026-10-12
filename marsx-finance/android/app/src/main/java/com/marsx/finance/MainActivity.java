@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.text.method.LinkMovementMethod;
+import android.text.SpannableString;
+import android.text.style.URLSpan;
+import android.text.Spanned;
 import com.tradingview.lightweightcharts.view.ChartsView;
 
 /** Public market terminal; no trading credentials or order submission. */
@@ -31,6 +35,13 @@ public class MainActivity extends Activity {
         status.setText("Public market feed • Chart candle series not connected");
         status.setPadding(24, 12, 24, 24);
         root.addView(status);
+        TextView attribution = new TextView(this);
+        SpannableString credit = new SpannableString("Charts powered by TradingView");
+        credit.setSpan(new URLSpan("https://www.tradingview.com/"), 18, 29, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        attribution.setText(credit);
+        attribution.setMovementMethod(LinkMovementMethod.getInstance());
+        attribution.setPadding(24, 8, 24, 20);
+        root.addView(attribution);
         setContentView(root);
     }
 
