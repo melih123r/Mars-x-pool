@@ -29,7 +29,7 @@ jobs:
           gradle-version: '8.14.3'
       - name: Install Android SDK
         run: |
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;35.0.0"
       - name: Build unified MARS-X Finance APK
         working-directory: marsx-finance/exchange-ui
         run: gradle --no-daemon :app:assembleDebug
