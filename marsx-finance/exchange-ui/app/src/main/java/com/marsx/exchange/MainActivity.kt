@@ -187,6 +187,9 @@ private fun CandleControls(selected: String, onSelect: (String) -> Unit) {
 @Composable
 private fun CandleChart(candles: List<Candle>) {
     if (candles.isEmpty()) { Text("Waiting for candle data…"); return }
+    val visibleLow = candles.minOf { it.low }
+    val visibleHigh = candles.maxOf { it.high }
+    Text("OHLC range: %.2f – %.2f USDT (%d bars)".format(java.util.Locale.US, visibleLow, visibleHigh, candles.size), color = Color.LightGray)
     Canvas(Modifier.fillMaxWidth().height(250.dp).background(Color(0xFF121A2B))) {
         val lowest = candles.minOf { it.low }
         val highest = candles.maxOf { it.high }
