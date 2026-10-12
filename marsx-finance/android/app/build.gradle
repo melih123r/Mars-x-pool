@@ -17,4 +17,5 @@ android {
 }
 dependencies {
     implementation 'com.tradingview:lightweightcharts:5.2.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 }
