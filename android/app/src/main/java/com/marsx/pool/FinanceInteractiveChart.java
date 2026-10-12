@@ -9,60 +9,94 @@ public final class FinanceInteractiveChart extends View {
  public static final class Bar {
   public final long time;public final float open,high,low,close,volume;
   public Bar(long t,float o,float h,float l,float c,float v){
-   if(t<=0||!Float.isFinite(o)||!Float.isFinite(h)||!Float.isFinite(l)||!Float.isFinite(c)||!Float.isFinite(v)||l<=0||v<0||h<Math.max(o,c)||l>Math.min(o,c))throw new IllegalArgumentException("Invalid OHLCV");
+   if(t<=0||!Float.isFinite(o)||!Float.isFinite(h)||!Float.isFinite(l)||!Float.isFinite(c)||!Float.isFinite(v)||l<=0||v<0||h<l||h<Math.max(o,c)||l>Math.min(o,c))throw new IllegalArgumentException("Invalid OHLCV");
    time=t;open=o;high=h;low=l;close=c;volume=v;
   }
  }
  public int accent=Color.rgb(255,120,35);
+ private final ArrayList<Bar> source=new ArrayList<>();
  private final ArrayList<Bar> data=new ArrayList<>();
+ private String chartType="Candlestick";
  private final Paint p=new Paint(3);
+ private final Path emaPath=new Path(),smaPath=new Path(),rsiPath=new Path(),pricePath=new Path(),areaPath=new Path();
+ private double[] emaCache=new double[0],smaCache=new double[0],rsiCache=new double[0];
  private final ScaleGestureDetector pinch;
  private float count=48,offset=0,lastX,cross=-1;
  private boolean showEma=true,showSma=false,showRsi=true;
  public FinanceInteractiveChart(Context c){super(c);setBackgroundColor(Color.rgb(7,12,19));pinch=new ScaleGestureDetector(c,new ScaleGestureDetector.SimpleOnScaleGestureListener(){
   @Override public boolean onScale(ScaleGestureDetector d){count=Math.max(12,Math.min(180,count/d.getScaleFactor()));clamp();invalidate();return true;}
  });}
- public void setBars(List<Bar> bars){long prev=0;for(Bar b:bars){if(b.time<=prev)throw new IllegalArgumentException("Unsorted timestamps");prev=b.time;}data.clear();data.addAll(bars);offset=0;invalidate();}
+ public void setBars(List<Bar> bars){if(bars==null)throw new IllegalArgumentException("Missing OHLCV data");long prev=0;for(Bar b:bars){if(b==null||b.time<=prev)throw new IllegalArgumentException("Invalid or unsorted OHLCV data");prev=b.time;}source.clear();source.addAll(bars);offset=0;rebuildDisplayData();invalidate();}
+ public void setChartType(String type){chartType=FinanceChartTransforms.requireChartType(type);offset=0;rebuildDisplayData();invalidate();}
+ public String getChartType(){return chartType;}
+ private void rebuildDisplayData(){
+  data.clear();
+  if(!"Heikin Ashi".equals(chartType)){data.addAll(source);clamp();recalculateIndicators();return;}
+  FinanceChartTransforms.Candle[] raw=new FinanceChartTransforms.Candle[source.size()];
+  for(int i=0;i<source.size();i++){Bar b=source.get(i);raw[i]=new FinanceChartTransforms.Candle(b.time,b.open,b.high,b.low,b.close,b.volume);}
+  FinanceChartTransforms.Candle[] transformed=FinanceChartTransforms.heikinAshi(raw);
+  for(FinanceChartTransforms.Candle b:transformed)data.add(new Bar(b.timestamp,(float)b.open,(float)b.high,(float)b.low,(float)b.close,(float)b.volume));
+  clamp();recalculateIndicators();
+ }
+ private void recalculateIndicators(){
+  double[] closes=new double[data.size()];for(int i=0;i<data.size();i++)closes[i]=data.get(i).close;
+  emaCache=FinanceIndicators.ema(closes,20);smaCache=FinanceIndicators.sma(closes,20);rsiCache=FinanceIndicators.rsi(closes,14);
+ }
  public void setCandles(JSONArray rows){ArrayList<Bar> bars=new ArrayList<>();try{for(int i=0;i<rows.length();i++){JSONObject x=rows.getJSONObject(i);bars.add(new Bar(x.getLong("time"), (float)x.getDouble("open"),(float)x.getDouble("high"),(float)x.getDouble("low"),(float)x.getDouble("close"),(float)x.optDouble("volume",0)));}setBars(bars);}catch(Exception ex){clear();}}
  public void setIndicators(boolean ema,boolean sma,boolean rsi){showEma=ema;showSma=sma;showRsi=rsi;invalidate();}
- public void clear(){data.clear();invalidate();}
+ public void clear(){source.clear();data.clear();emaCache=new double[0];smaCache=new double[0];rsiCache=new double[0];offset=0;cross=-1;invalidate();}
  private void clamp(){offset=Math.max(0,Math.min(offset,Math.max(0,data.size()-count)));}
  @Override public boolean onTouchEvent(MotionEvent e){pinch.onTouchEvent(e);switch(e.getActionMasked()){
-  case MotionEvent.ACTION_DOWN:lastX=e.getX();cross=lastX;invalidate();return true;
-  case MotionEvent.ACTION_MOVE:if(!pinch.isInProgress()){offset+=(lastX-e.getX())/Math.max(1,getWidth()/count);clamp();}lastX=e.getX();cross=lastX;invalidate();return true;
+  case MotionEvent.ACTION_DOWN:getParent().requestDisallowInterceptTouchEvent(true);lastX=e.getX();cross=lastX;invalidate();return true;
+  case MotionEvent.ACTION_MOVE:if(!pinch.isInProgress()&&e.getPointerCount()==1){offset+=(lastX-e.getX())/Math.max(1,getWidth()/count);clamp();cross=e.getX();}lastX=e.getX();invalidate();return true;
+  case MotionEvent.ACTION_POINTER_DOWN:cross=-1;invalidate();return true;
+  case MotionEvent.ACTION_POINTER_UP:{int remaining=e.getActionIndex()==0?1:0;if(remaining<e.getPointerCount())lastX=e.getX(remaining);cross=-1;invalidate();return true;}
+  case MotionEvent.ACTION_UP:cross=-1;invalidate();performClick();return true;
+  case MotionEvent.ACTION_CANCEL:cross=-1;invalidate();return true;
   default:return true;
  }}
+ @Override public boolean performClick(){super.performClick();return true;}
  @Override protected void onDraw(Canvas c){super.onDraw(c);float w=getWidth(),h=getHeight();if(w<=0||h<=0)return;
   p.setColor(Color.rgb(45,55,70));p.setStrokeWidth(1);for(int i=1;i<5;i++)c.drawLine(0,h*i/5,w,h*i/5,p);
   if(data.isEmpty()){p.setColor(Color.WHITE);p.setTextSize(26);c.drawText("VERİ BEKLENİYOR",16,h/2,p);return;}
   int end=Math.max(0,data.size()-(int)offset),start=Math.max(0,end-(int)Math.ceil(count));if(start>=end)return;
   float hi=0,lo=Float.MAX_VALUE,mv=1;for(int i=start;i<end;i++){Bar b=data.get(i);hi=Math.max(hi,b.high);lo=Math.min(lo,b.low);mv=Math.max(mv,b.volume);}
   float range=Math.max(.00001f,hi-lo),step=w/count,chartH=h*(showRsi?.61f:.72f),volTop=h*(showRsi?.65f:.79f),volBottom=h*(showRsi?.76f:.96f);
-  for(int i=start;i<end;i++){Bar b=data.get(i);float x=(i-start+.5f)*step,yo=(hi-b.open)/range*chartH,yc=(hi-b.close)/range*chartH;
-   p.setColor(b.close>=b.open?Color.rgb(29,199,131):Color.rgb(230,65,81));p.setStrokeWidth(2);c.drawLine(x,(hi-b.high)/range*chartH,x,(hi-b.low)/range*chartH,p);
-   p.setStyle(Paint.Style.FILL);c.drawRect(x-step*.28f,Math.min(yo,yc),x+step*.28f,Math.max(yo,yc)+1,p);
-   p.setColor(Color.rgb(80,95,110));c.drawRect(x-step*.28f,volBottom-(b.volume/mv)*(volBottom-volTop),x+step*.28f,volBottom,p);
+  boolean lineMode="Line".equals(chartType)||"Area".equals(chartType),areaMode="Area".equals(chartType);
+  pricePath.reset();areaPath.reset();boolean priceStarted=false;float priceLastX=0;
+  for(int i=start;i<end;i++){Bar b=data.get(i);float x=(i-start+.5f)*step,yc=(hi-b.close)/range*chartH;
+   if(lineMode){
+    if(!priceStarted){pricePath.moveTo(x,yc);areaPath.moveTo(x,chartH);areaPath.lineTo(x,yc);priceStarted=true;}else{pricePath.lineTo(x,yc);areaPath.lineTo(x,yc);}
+    priceLastX=x;
+   }else{
+    float yo=(hi-b.open)/range*chartH;
+    p.setColor(b.close>=b.open?Color.rgb(29,199,131):Color.rgb(230,65,81));p.setStrokeWidth(2);c.drawLine(x,(hi-b.high)/range*chartH,x,(hi-b.low)/range*chartH,p);
+    p.setStyle(Paint.Style.FILL);c.drawRect(x-step*.28f,Math.min(yo,yc),x+step*.28f,Math.max(yo,yc)+1,p);
+   }
+   p.setStyle(Paint.Style.FILL);p.setColor(Color.rgb(80,95,110));c.drawRect(x-step*.28f,volBottom-(b.volume/mv)*(volBottom-volTop),x+step*.28f,volBottom,p);
   }
-  double[] closes=new double[data.size()];for(int i=0;i<data.size();i++)closes[i]=data.get(i).close;
-  double[] ema=showEma?FinanceIndicators.ema(closes,20):null;
-  double[] sma=showSma?FinanceIndicators.sma(closes,20):null;
-  Path line=new Path();boolean started=false;
+  if(priceStarted){
+   if(areaMode){areaPath.lineTo(priceLastX,chartH);areaPath.close();p.setStyle(Paint.Style.FILL);p.setShader(new LinearGradient(0,0,0,chartH,Color.argb(115,Color.red(accent),Color.green(accent),Color.blue(accent)),Color.TRANSPARENT,Shader.TileMode.CLAMP));c.drawPath(areaPath,p);p.setShader(null);}
+   p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(3.5f);p.setColor(accent);c.drawPath(pricePath,p);
+  }
+  double[] ema=emaCache,sma=smaCache;
+  Path line=emaPath;line.reset();boolean started=false;
   p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(2.5f);p.setColor(accent);
   for(int i=start;showEma&&i<end;i++){if(Double.isNaN(ema[i]))continue;
    float x=(i-start+.5f)*step,y=(float)((hi-ema[i])/range*chartH);
    if(!started){line.moveTo(x,y);started=true;}else line.lineTo(x,y);
   }
   if(started)c.drawPath(line,p);
-  if(showSma){Path smaline=new Path();boolean begun=false;p.setColor(Color.rgb(77,171,247));
+  if(showSma){Path smaline=smaPath;smaline.reset();boolean begun=false;p.setColor(Color.rgb(77,171,247));
    for(int i=start;i<end;i++){if(Double.isNaN(sma[i]))continue;float x=(i-start+.5f)*step,y=(float)((hi-sma[i])/range*chartH);
     if(!begun){smaline.moveTo(x,y);begun=true;}else smaline.lineTo(x,y);}
    if(begun)c.drawPath(smaline,p);
   }
-  if(showRsi){double[] rsi=FinanceIndicators.rsi(closes,14);float panelTop=h*.80f,panelHeight=h*.17f;
+  if(showRsi){double[] rsi=rsiCache;float panelTop=h*.80f,panelHeight=h*.17f;
    p.setColor(Color.rgb(50,64,78));p.setStrokeWidth(1);
    c.drawLine(0,panelTop+panelHeight*.3f,w,panelTop+panelHeight*.3f,p);
    c.drawLine(0,panelTop+panelHeight*.7f,w,panelTop+panelHeight*.7f,p);
-   Path rsipath=new Path();boolean begun=false;p.setColor(Color.rgb(192,145,255));p.setStrokeWidth(2);
+   Path rsipath=rsiPath;rsipath.reset();boolean begun=false;p.setColor(Color.rgb(192,145,255));p.setStrokeWidth(2);
    for(int i=start;i<end;i++){if(Double.isNaN(rsi[i]))continue;float x=(i-start+.5f)*step,y=panelTop+panelHeight*(float)(1-rsi[i]/100);
     if(!begun){rsipath.moveTo(x,y);begun=true;}else rsipath.lineTo(x,y);}
    if(begun)c.drawPath(rsipath,p);
