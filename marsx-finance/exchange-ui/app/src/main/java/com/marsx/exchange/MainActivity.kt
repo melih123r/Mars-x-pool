@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -33,6 +34,8 @@ class MainActivity : ComponentActivity() {
 private fun ExchangeApp() {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var market by remember { mutableStateOf<MarketSnapshot?>(null) }
+    var streamPrice by remember { mutableStateOf<String?>(null) }
+    var streamStatus by remember { mutableStateOf("Connecting live ticker…") }
     var interval by rememberSaveable { mutableStateOf("1m") }
     var candles by remember { mutableStateOf<List<Candle>>(emptyList()) }
     var candleError by remember { mutableStateOf<String?>(null) }
@@ -43,6 +46,14 @@ private fun ExchangeApp() {
     val demoBtc = demoBtcText.toBigDecimalOrNull() ?: BigDecimal.ZERO
     var demoMessage by remember { mutableStateOf("Simulated trades only • no real orders") }
     val repository = remember { PublicMarketRepository() }
+    DisposableEffect(Unit) {
+        val stream = PublicMarketStream(
+            onPrice = { streamPrice = it },
+            onStatus = { streamStatus = it }
+        )
+        stream.start()
+        onDispose { stream.close() }
+    }
     LaunchedEffect(Unit) {
         while (true) {
             try { market = repository.btcSnapshot(); error = null }
@@ -63,7 +74,7 @@ private fun ExchangeApp() {
                 Text("MARS-X EXCHANGE • DEMO", color = accents[tab])
                 Text("PAPER MODE", color = Color.LightGray)
             }
-            Text(if (market != null) "BTC/USDT  ${market!!.price} USDT  (${market!!.change})" else "BTC/USDT loading…",
+            Text(if (streamPrice != null || market != null) "BTC/USDT  ${streamPrice ?: market!!.price} USDT  (${market?.change ?: "—"})" else "BTC/USDT loading…",
                 color = Color.White, modifier = Modifier.padding(12.dp))
             if (error != null) Text(error!!, color = Color(0xFFFF6677), modifier = Modifier.padding(12.dp))
             Box(Modifier.weight(1f)) {
@@ -76,7 +87,7 @@ private fun ExchangeApp() {
                         1 -> {
                             item { Panel("Markets") { Text("BTC/USDT • Binance public feed") } }
                             item { Panel("BTC/USDT candles • $interval") { CandleControls(interval, { interval = it }); CandleChart(candles); if (candleError != null) Text(candleError!!, color = Color.Red) } }
-                            item { Panel("Market status") { Text(if (market == null) "Waiting for snapshot" else "10-second refresh enabled") } }
+                            item { Panel("Market status") { Text(streamStatus); Text(if (market == null) "Waiting for REST snapshot" else "REST order book refresh: 10 seconds") } }
                         }
                         2 -> {
                             item { Panel("BTC/USDT candles • $interval") { CandleControls(interval, { interval = it }); CandleChart(candles); if (candleError != null) Text(candleError!!, color = Color.Red) } }
