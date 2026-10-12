@@ -27,7 +27,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun ExchangeApp() {
     var tab by rememberSaveable { mutableIntStateOf(0) }
-    var theme by rememberSaveable { mutableIntStateOf(0) }
     var market by remember { mutableStateOf<MarketSnapshot?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var demoCashText by rememberSaveable { mutableStateOf("10000.00") }
@@ -43,11 +42,11 @@ private fun ExchangeApp() {
             delay(10000)
         }
     }
-    MaterialTheme(colorScheme = darkColorScheme(primary = accents[theme], background = bg)) {
+    MaterialTheme(colorScheme = darkColorScheme(primary = accents[tab], background = bg)) {
         Column(Modifier.fillMaxSize().background(bg)) {
             Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("MARS-X EXCHANGE • DEMO", color = accents[theme])
-                TextButton(onClick = { theme = (theme + 1) % accents.size }) { Text("Theme ${theme + 1}") }
+                Text("PAPER MODE", color = Color.LightGray)
             }
             Text(if (market != null) "BTC/USDT  ${market!!.price} USDT  (${market!!.change})" else "BTC/USDT loading…",
                 color = Color.White, modifier = Modifier.padding(12.dp))
@@ -57,7 +56,7 @@ private fun ExchangeApp() {
                     when (tab) {
                         0 -> {
                             item { Panel("Overview") { Text("Public BTC market data • not an account balance") } }
-                            item { Panel("Paper portfolio") { Text("Demo USDT: $demoCash"); Text("Demo BTC: $demoBtc"); Text("No real funds or account connected.") } }
+                            item { Panel("Paper portfolio") { Text("Demo USDT: $demoCash"); Text("Demo BTC: $demoBtc"); Text("No real funds or account connected."); TextButton(onClick = { demoCashText = "10000.00"; demoBtcText = "0"; demoMessage = "Paper balance reset" }) { Text("Reset paper account") } } }
                         }
                         1 -> {
                             item { Panel("Markets") { Text("BTC/USDT • Binance public feed") } }
