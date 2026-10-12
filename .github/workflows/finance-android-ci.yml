@@ -32,7 +32,7 @@ jobs:
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;35.0.0"
       - name: Build unified MARS-X Finance APK
         working-directory: marsx-finance/exchange-ui
-        run: gradle --no-daemon :app:assembleDebug
+        run: gradle --no-daemon :app:assembleDebug --stacktrace --warning-mode summary
       - name: Verify unified APK exists
         run: test -s marsx-finance/exchange-ui/app/build/outputs/apk/debug/app-debug.apk
       - uses: actions/upload-artifact@v4
