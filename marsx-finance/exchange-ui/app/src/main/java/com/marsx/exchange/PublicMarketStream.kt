@@ -16,10 +16,16 @@ class PublicMarketStream(private val onPrice: (String) -> Unit, private val onSt
     private val client = OkHttpClient()
     private val handler = Handler(Looper.getMainLooper())
     private var socket: WebSocket? = null
+    private val retry = Runnable { if (!closed) connect() }
     @Volatile private var closed = false
 
     fun start() {
         closed = false
+        connect()
+    }
+
+    private fun connect() {
+        if (closed) return
         val request = Request.Builder()
             .url("wss://data-stream.binance.vision:443/ws/btcusdt@miniTicker")
             .build()
@@ -36,13 +42,23 @@ class PublicMarketStream(private val onPrice: (String) -> Unit, private val onSt
                 }
             }
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                handler.post { if (!closed) onStatus("Live stream unavailable; REST fallback active") }
+                handler.post {
+                    if (!closed) {
+                        onStatus("Live stream unavailable; REST fallback active")
+                        handler.removeCallbacks(retry)
+                        handler.postDelayed(retry, 5000)
+                    }
+                }
+            }
+            override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                handler.post { if (!closed) { onStatus("Stream closed; reconnecting"); handler.postDelayed(retry, 5000) } }
             }
         })
     }
 
     fun close() {
         closed = true
+        handler.removeCallbacks(retry)
         socket?.close(1000, "closed")
         client.dispatcher.executorService.shutdown()
     }
