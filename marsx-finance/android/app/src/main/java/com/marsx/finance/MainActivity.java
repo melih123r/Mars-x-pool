@@ -29,7 +29,7 @@ public class MainActivity extends Activity {
         ticker.setText("BTC/USDT: waiting for live feed…");
         ticker.setPadding(24, 8, 24, 8);
         root.addView(ticker);
-        ChartsView chart = new ChartsView(this);
+        ChartsView chart = new ChartsView(this, null);
         root.addView(chart, new LinearLayout.LayoutParams(-1, 0, 1f));
         status = new TextView(this);
         status.setText("Public market feed • Chart candle series not connected");
