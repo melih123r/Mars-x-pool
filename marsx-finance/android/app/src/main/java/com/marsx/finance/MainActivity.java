@@ -14,6 +14,8 @@ import com.tradingview.lightweightcharts.view.ChartsView;
 /** Public market terminal; no trading credentials or order submission. */
 public class MainActivity extends Activity {
     private PublicMarketStream stream;
+    private PublicOrderBookClient orderBook;
+    private TextView spread;
     private TextView ticker;
     private TextView status;
 
@@ -30,6 +32,10 @@ public class MainActivity extends Activity {
         ticker.setText("BTC/USDT: waiting for live feed…");
         ticker.setPadding(24, 8, 24, 8);
         root.addView(ticker);
+        spread = new TextView(this);
+        spread.setText("Best bid / ask: loading…");
+        spread.setPadding(24, 8, 24, 8);
+        root.addView(spread);
         ChartsView chart = new ChartsView(this, null);
         root.addView(chart, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
 
@@ -58,6 +64,15 @@ public class MainActivity extends Activity {
             }
         });
         stream.start();
+        orderBook = new PublicOrderBookClient();
+        orderBook.fetchBtcUsdt(new PublicOrderBookClient.Listener() {
+            @Override public void onSnapshot(String bid, String ask) {
+                if (!isFinishing() && !isDestroyed()) spread.setText("Best bid: " + bid + " | Best ask: " + ask);
+            }
+            @Override public void onError(String message) {
+                if (!isFinishing() && !isDestroyed()) spread.setText(message);
+            }
+        });
     }
 
     @Override protected void onStop() {
@@ -65,6 +80,7 @@ public class MainActivity extends Activity {
             stream.close();
             stream = null;
         }
+        if (orderBook != null) { orderBook.close(); orderBook = null; }
         super.onStop();
     }
 }
