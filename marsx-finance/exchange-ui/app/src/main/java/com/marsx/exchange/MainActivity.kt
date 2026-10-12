@@ -147,7 +147,7 @@ private fun ExchangeApp() {
                         3 -> item { Panel("Wallet") { Text("No real wallet, custody or withdrawals connected.") } }
                         else -> {
                             item { Panel("Security") { Text("KYC, MFA and production permissions not configured.") } }
-                            item { Panel("Chart engine") { Text("Native Jetpack Compose Canvas candlestick renderer. TradingView dependency declared; chart view migration pending.") } }
+                            item { Panel("Chart engine") { Text("Candlestick renderer: Jetpack Compose Canvas. TradingView Lightweight Charts 5.2.0 is a declared dependency, but ChartsView is not yet mounted. Demo market data only.") } }
                         }
                     }
                 }
