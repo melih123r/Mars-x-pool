@@ -37,7 +37,6 @@ public final class PublicMarketStream extends WebSocketListener {
         }
     }
     @Override public void onFailure(WebSocket socket, Throwable error, Response response) {
-        connected = false;
         if (!closed) main.post(() -> { if (!closed) listener.onStatus("Market stream disconnected"); });
     }
     public void close() {
