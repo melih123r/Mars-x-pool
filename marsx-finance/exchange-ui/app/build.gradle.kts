@@ -25,6 +25,5 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
-    implementation("com.tradingview:lightweightcharts:5.2.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
