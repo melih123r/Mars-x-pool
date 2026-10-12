@@ -17,13 +17,16 @@ public final class PublicMarketStream extends WebSocketListener {
     private final OkHttpClient client = new OkHttpClient();
     private WebSocket socket;
     private volatile boolean closed;
+    private volatile boolean connected;
     public PublicMarketStream(Listener listener) { this.listener = listener; }
     public void start() {
         closed = false;
+        connected = false;
         Request request = new Request.Builder().url("wss://stream.binance.com:9443/ws/btcusdt@miniTicker").build();
         socket = client.newWebSocket(request, this);
     }
     @Override public void onOpen(WebSocket socket, Response response) {
+        connected = true;
         if (!closed) main.post(() -> { if (!closed) listener.onStatus("Live public ticker connected"); });
     }
     @Override public void onMessage(WebSocket socket, String message) {
@@ -37,10 +40,12 @@ public final class PublicMarketStream extends WebSocketListener {
         }
     }
     @Override public void onFailure(WebSocket socket, Throwable error, Response response) {
+        connected = false;
         if (!closed) main.post(() -> { if (!closed) listener.onStatus("Market stream disconnected"); });
     }
     public void close() {
         closed = true;
+        connected = false;
         if (socket != null) socket.close(1000, "closed");
         client.dispatcher().executorService().shutdown();
     }
