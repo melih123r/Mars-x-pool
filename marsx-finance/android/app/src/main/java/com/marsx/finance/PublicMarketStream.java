@@ -24,7 +24,7 @@ public final class PublicMarketStream extends WebSocketListener {
         socket = client.newWebSocket(request, this);
     }
     @Override public void onOpen(WebSocket socket, Response response) {
-        main.post(() -> listener.onStatus("Live public ticker connected"));
+        if (!closed) main.post(() -> { if (!closed) listener.onStatus("Live public ticker connected"); });
     }
     @Override public void onMessage(WebSocket socket, String message) {
         try {
@@ -33,7 +33,7 @@ public final class PublicMarketStream extends WebSocketListener {
             String price = json.getString("c");
             if (!closed) main.post(() -> { if (!closed) listener.onPrice(symbol, price); });
         } catch (Exception error) {
-            main.post(() -> listener.onStatus("Malformed market update"));
+            if (!closed) main.post(() -> { if (!closed) listener.onStatus("Malformed market update"); });
         }
     }
     @Override public void onFailure(WebSocket socket, Throwable error, Response response) {
