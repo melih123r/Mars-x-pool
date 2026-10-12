@@ -28,3 +28,16 @@ P2: localization, onboarding, privacy/legal screens, release signing, Play polic
 - Never copy proprietary broker UIs/code; integrate only licensed components and keep notices.
 - Each feature must have code commit, CI success, and Android device smoke test before calling it done.
 - No financial live execution before explicit partner permissions and jurisdiction-specific compliance.
+
+## Follow-up audit — 2026-10-12
+- Alpaca support reply dated Oct 11, ticket 371580: apply using https://alpaca.markets/broker-contact-form for sales team follow-up. This is NOT approval or production access.
+- ChangeNOW correspondence: prior verification confirmation exists; no new definitive production authorization or partner fee agreement confirmed in the searched messages.
+- TradingView Android wrapper latest GitHub tag v5.2.1 (Oct 8); official installation documentation currently illustrates Maven coordinate `com.tradingview:lightweightcharts:5.2.0`. Do not pin v5.2.1 until Maven artifact is confirmed. License Apache-2.0 and TradingView attribution notice/link required.
+- Binance official docs https://github.com/binance/binance-spot-api-docs provide supported REST/WS specifications and connectors; continue market-data-only integration without credentials.
+- Android CI on commit 49db6e4 was still in progress at check time. Do not advertise the latest APK as tested.
+
+### Integration acceptance plan
+1. Validate Android wrapper Maven dependency resolution and compileSdk against existing Kotlin/AGP versions in a separate branch; retain native Canvas fallback.
+2. Adapt Binance market-data parser using official documented endpoints and instrument precision; unit-test malformed/stale data.
+3. Submit Alpaca broker-contact form only with accurate entity/representative information; do not claim existing regulatory authorization.
+4. Obtain written ChangeNOW production scope, regional restrictions, KYC responsibilities, fee schedule and compliance approval before live transactions.
