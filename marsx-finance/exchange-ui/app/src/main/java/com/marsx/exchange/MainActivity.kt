@@ -48,6 +48,7 @@ private fun ExchangeApp() {
     var demoBtcText by rememberSaveable { mutableStateOf("0") }
     val demoBtc = demoBtcText.toBigDecimalOrNull() ?: BigDecimal.ZERO
     var demoMessage by remember { mutableStateOf("Simulated trades only • no real orders") }
+    var demoTradeCount by rememberSaveable { mutableIntStateOf(0) }
     val latestPrice = if (streamUpdatedAt >= restUpdatedAt && streamPrice != null) streamPrice?.toBigDecimalOrNull() else market?.price?.toBigDecimalOrNull()
     val lastPriceAt = maxOf(streamUpdatedAt, restUpdatedAt)
     val repository = remember { PublicMarketRepository() }
@@ -87,7 +88,7 @@ private fun ExchangeApp() {
                     when (tab) {
                         0 -> {
                             item { Panel("Overview") { Text("Public BTC market data • not an account balance") } }
-                            item { Panel("Paper portfolio") { Text("Demo USDT: $demoCash"); Text("Demo BTC: $demoBtc"); Text("Estimated portfolio: ${if (latestPrice != null) (demoCash + demoBtc.multiply(latestPrice)).setScale(2, RoundingMode.HALF_UP).toPlainString() + " USDT" else "Waiting for market price"}"); Text("No real funds or account connected."); TextButton(onClick = { demoCashText = "10000.00"; demoBtcText = "0"; demoMessage = "Paper balance reset" }) { Text("Reset paper account") } } }
+                            item { Panel("Paper portfolio") { Text("Demo USDT: $demoCash"); Text("Demo BTC: $demoBtc"); Text("Estimated portfolio: ${if (latestPrice != null) (demoCash + demoBtc.multiply(latestPrice)).setScale(2, RoundingMode.HALF_UP).toPlainString() + " USDT" else "Waiting for market price"}"); Text("Executed paper trades: $demoTradeCount"); Text("No real funds or account connected."); TextButton(onClick = { demoCashText = "10000.00"; demoBtcText = "0"; demoMessage = "Paper balance reset" }) { Text("Reset paper account") } } }
                         }
                         1 -> {
                             item { Panel("Markets") { Text("BTC/USDT • Binance public feed"); Text("24h change: ${market?.change ?: "—"}"); Text("Last ticker update: ${if (lastPriceAt > 0L) java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(lastPriceAt)) else "Waiting for data"}"); Text("Prices are indicative public market data, not executable quotes.") } }
@@ -118,6 +119,7 @@ private fun ExchangeApp() {
                                             demoCashText = (demoCash - BigDecimal("100")).toPlainString()
                                             demoBtcText = (demoBtc + BigDecimal("100").divide(p, 8, RoundingMode.DOWN)).toPlainString()
                                             demoMessage = "Paper BUY filled at $p"
+                                                demoTradeCount++
                                         }
                                     }) { Text("Demo Buy") }
                                     Spacer(Modifier.width(8.dp))
@@ -132,6 +134,7 @@ private fun ExchangeApp() {
                                                 demoBtcText = (demoBtc - qty).toPlainString()
                                                 demoCashText = (demoCash + qty.multiply(p)).toPlainString()
                                                 demoMessage = "Paper SELL filled at $p"
+                                                demoTradeCount++
                                             }
                                         }
                                     }) { Text("Demo Sell") }
