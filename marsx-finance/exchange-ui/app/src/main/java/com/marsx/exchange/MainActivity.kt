@@ -78,7 +78,7 @@ private fun ExchangeApp() {
                 Text("MARS-X EXCHANGE • DEMO", color = accents[tab])
                 Text("PAPER MODE", color = Color.LightGray)
             }
-            Text(if (streamPrice != null || market != null) "BTC/USDT  ${streamPrice ?: market!!.price} USDT  (${market?.change ?: "—"})" else "BTC/USDT loading…",
+            Text(if (streamPrice != null || market != null) "BTC/USDT  ${latestPrice?.toPlainString() ?: "—"} USDT  (${market?.change ?: "—"})" else "BTC/USDT loading…",
                 color = Color.White, modifier = Modifier.padding(12.dp))
             if (error != null) Text(error!!, color = Color(0xFFFF6677), modifier = Modifier.padding(12.dp))
             Box(Modifier.weight(1f)) {
