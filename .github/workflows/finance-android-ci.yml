@@ -1,0 +1,33 @@
+name: Finance Android CI
+on:
+  push:
+    branches: [finance-open-source-integration-20261012]
+    paths:
+      - 'marsx-finance/android/**'
+      - '.github/workflows/finance-android-ci.yml'
+  workflow_dispatch:
+jobs:
+  debug-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.3'
+      - name: Build Finance debug APK
+        working-directory: marsx-finance/android
+        run: gradle --no-daemon :app:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: marsx-finance-debug-apk
+          path: marsx-finance/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
