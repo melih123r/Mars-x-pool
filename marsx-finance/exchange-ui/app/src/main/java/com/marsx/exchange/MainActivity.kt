@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 private val bg = Color(0xFF0B1020)
 private val accents = listOf(Color(0xFFFF9C39), Color(0xFF17C3A4), Color(0xFF528BFF), Color(0xFFC083F8), Color(0xFFFF6677))
@@ -27,6 +29,9 @@ private fun ExchangeApp() {
     var theme by remember { mutableIntStateOf(0) }
     var market by remember { mutableStateOf<MarketSnapshot?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
+    var demoCash by remember { mutableStateOf(BigDecimal("10000.00")) }
+    var demoBtc by remember { mutableStateOf(BigDecimal.ZERO) }
+    var demoMessage by remember { mutableStateOf("Simulated trades only • no real orders") }
     val repository = remember { PublicMarketRepository() }
     LaunchedEffect(Unit) {
         while (true) {
@@ -49,7 +54,7 @@ private fun ExchangeApp() {
                     when (tab) {
                         0 -> {
                             item { Panel("Overview") { Text("Public BTC market data • not an account balance") } }
-                            item { Panel("Portfolio") { Text("No account connected. Demo mode only.") } }
+                            item { Panel("Paper portfolio") { Text("Demo USDT: $demoCash"); Text("Demo BTC: $demoBtc"); Text("No real funds or account connected.") } }
                         }
                         1 -> {
                             item { Panel("Markets") { Text("BTC/USDT • Binance public feed") } }
@@ -64,8 +69,36 @@ private fun ExchangeApp() {
                                 market?.bids?.forEach { Text("${it.first}  •  ${it.second}", color = Color.White) }
                             } }
                             item { Panel("Order entry") {
-                                Text("Buy / Sell orders disabled. No broker authorization.", color = Color.LightGray)
-                                Button(onClick = {}, enabled = false) { Text("Place order — unavailable") }
+                                Text("Paper trading: fixed 100 USDT per buy or sell", color = Color.LightGray)
+                                Text("Demo cash: $demoCash USDT • BTC: $demoBtc", color = Color.White)
+                                Row {
+                                    Button(onClick = {
+                                        val p = market?.price?.toBigDecimalOrNull()
+                                        if (p == null || p <= BigDecimal.ZERO) demoMessage = "No valid live price"
+                                        else if (demoCash < BigDecimal("100")) demoMessage = "Insufficient demo USDT"
+                                        else {
+                                            demoCash -= BigDecimal("100")
+                                            demoBtc += BigDecimal("100").divide(p, 8, RoundingMode.DOWN)
+                                            demoMessage = "Paper BUY filled at $p"
+                                        }
+                                    }) { Text("Demo Buy") }
+                                    Spacer(Modifier.width(8.dp))
+                                    Button(onClick = {
+                                        val p = market?.price?.toBigDecimalOrNull()
+                                        if (p == null || p <= BigDecimal.ZERO) demoMessage = "No valid live price"
+                                        else {
+                                            val qty = BigDecimal("100").divide(p, 8, RoundingMode.UP)
+                                            if (demoBtc < qty) demoMessage = "Insufficient demo BTC"
+                                            else {
+                                                demoBtc -= qty
+                                                demoCash += qty.multiply(p)
+                                                demoMessage = "Paper SELL filled at $p"
+                                            }
+                                        }
+                                    }) { Text("Demo Sell") }
+                                }
+                                Text(demoMessage, color = Color.LightGray)
+                                Text("Real orders and transfers disabled.", color = Color.LightGray)
                             } }
                         }
                         3 -> item { Panel("Wallet") { Text("No real wallet, custody or withdrawals connected.") } }
