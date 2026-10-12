@@ -5,7 +5,7 @@ plugins {
 }
 android {
     namespace = "com.marsx.exchange"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.marsx.finance"
         minSdk = 26
