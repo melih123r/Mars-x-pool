@@ -29,7 +29,7 @@ export async function fetchPublicOrderBook(symbol, {fetchImpl=fetch, timeoutMs=5
     return levels.map(level=>{
       if (!Array.isArray(level) || level.length < 2 ||
           typeof level[0] !== "string" || typeof level[1] !== "string" ||
-          !/^\\d+(?:\\.\\d+)?$/.test(level[0]) || !/^\\d+(?:\\.\\d+)?$/.test(level[1]) ||
+          !/^\d+(?:\.\d+)?$/.test(level[0]) || !/^\d+(?:\.\d+)?$/.test(level[1]) ||
           !(Number(level[0]) > 0) || !(Number(level[1]) > 0) ||
           !Number.isFinite(Number(level[0])) || !Number.isFinite(Number(level[1])))
         throw Object.assign(new Error("invalid_market_data"),{status:502});
