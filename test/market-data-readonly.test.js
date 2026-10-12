@@ -13,3 +13,23 @@ test("depth snapshot is read only and validated",async()=>{
 test("upstream failure is not disguised as empty order book",async()=>{
  await assert.rejects(fetchPublicOrderBook("BTCUSDT",{fetchImpl:async()=>({ok:false})}),/market_data_unavailable/);
 });
+
+test("rejects malformed and crossed market books",async()=>{
+ const invalid=[
+  {lastUpdateId:1,bids:[["NaN","2"]],asks:[["101","3"]]},
+  {lastUpdateId:1,bids:[["100","-1"]],asks:[["101","3"]]},
+  {lastUpdateId:1,bids:[["102","1"]],asks:[["101","3"]]},
+  {lastUpdateId:1,bids:[["100","1"],["101","1"]],asks:[["102","1"]]},
+  {lastUpdateId:1,bids:[["100","1"]],asks:[["102","1"],["101","1"]]},
+  {lastUpdateId:1,bids:[["100","1"]],asks:[["101","1"]],extra:"ignored"},
+  {lastUpdateId:-1,bids:[],asks:[]}
+ ];
+ for (const payload of invalid.filter((_,i)=>i!==5)) {
+  await assert.rejects(fetchPublicOrderBook("BTCUSDT",{fetchImpl:async()=>({ok:true,json:async()=>payload})}),/invalid_market_data/);
+ }
+});
+test("rejects broken upstream JSON and invalid timeout",async()=>{
+ await assert.rejects(fetchPublicOrderBook("BTCUSDT",{fetchImpl:async()=>({ok:true,json:async()=>{throw Error("bad json")}})}),/invalid_market_data/);
+ await assert.rejects(fetchPublicOrderBook("BTCUSDT",{fetchImpl:async()=>{throw Error("network")}}),/market_data_unavailable/);
+ await assert.rejects(fetchPublicOrderBook("BTCUSDT",{timeoutMs:99999}),/invalid_timeout/);
+});
