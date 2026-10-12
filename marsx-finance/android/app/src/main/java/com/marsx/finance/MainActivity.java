@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
         root.addView(ticker);
         ChartsView chart = new ChartsView(this, null);
         root.addView(chart, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+        chart.setOnErrorListener(error -> status.setText("Chart bridge error"));
         status = new TextView(this);
         status.setText("Public market feed • Chart candle series not connected");
         status.setPadding(24, 12, 24, 24);
