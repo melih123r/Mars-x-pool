@@ -45,6 +45,7 @@ private fun ExchangeApp() {
     var demoBtcText by rememberSaveable { mutableStateOf("0") }
     val demoBtc = demoBtcText.toBigDecimalOrNull() ?: BigDecimal.ZERO
     var demoMessage by remember { mutableStateOf("Simulated trades only • no real orders") }
+    val latestPrice = streamPrice?.toBigDecimalOrNull() ?: market?.price?.toBigDecimalOrNull()
     val repository = remember { PublicMarketRepository() }
     DisposableEffect(Unit) {
         val stream = PublicMarketStream(
@@ -103,7 +104,7 @@ private fun ExchangeApp() {
                                 Text("Demo cash: $demoCash USDT • BTC: $demoBtc", color = Color.White)
                                 Row {
                                     Button(onClick = {
-                                        val p = market?.price?.toBigDecimalOrNull()
+                                        val p = latestPrice
                                         if (p == null || p <= BigDecimal.ZERO) demoMessage = "No valid live price"
                                         else if (demoCash < BigDecimal("100")) demoMessage = "Insufficient demo USDT"
                                         else {
