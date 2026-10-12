@@ -41,7 +41,6 @@ public final class PublicMarketStream extends WebSocketListener {
     }
     public void close() {
         closed = true;
-        connected = false;
         if (socket != null) socket.close(1000, "closed");
         client.dispatcher().executorService().shutdown();
     }
