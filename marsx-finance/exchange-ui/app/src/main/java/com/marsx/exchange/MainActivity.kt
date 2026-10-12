@@ -35,6 +35,8 @@ private fun ExchangeApp() {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var market by remember { mutableStateOf<MarketSnapshot?>(null) }
     var streamPrice by remember { mutableStateOf<String?>(null) }
+    var streamUpdatedAt by remember { mutableLongStateOf(0L) }
+    var restUpdatedAt by remember { mutableLongStateOf(0L) }
     var streamStatus by remember { mutableStateOf("Connecting live ticker…") }
     var interval by rememberSaveable { mutableStateOf("1m") }
     var candles by remember { mutableStateOf<List<Candle>>(emptyList()) }
@@ -45,11 +47,12 @@ private fun ExchangeApp() {
     var demoBtcText by rememberSaveable { mutableStateOf("0") }
     val demoBtc = demoBtcText.toBigDecimalOrNull() ?: BigDecimal.ZERO
     var demoMessage by remember { mutableStateOf("Simulated trades only • no real orders") }
-    val latestPrice = streamPrice?.toBigDecimalOrNull() ?: market?.price?.toBigDecimalOrNull()
+    val latestPrice = if (streamUpdatedAt >= restUpdatedAt && streamPrice != null) streamPrice?.toBigDecimalOrNull() else market?.price?.toBigDecimalOrNull()
+    val lastPriceAt = maxOf(streamUpdatedAt, restUpdatedAt)
     val repository = remember { PublicMarketRepository() }
     DisposableEffect(Unit) {
         val stream = PublicMarketStream(
-            onPrice = { streamPrice = it },
+            onPrice = { streamPrice = it; streamUpdatedAt = System.currentTimeMillis() },
             onStatus = { streamStatus = it }
         )
         stream.start()
@@ -57,7 +60,7 @@ private fun ExchangeApp() {
     }
     LaunchedEffect(Unit) {
         while (true) {
-            try { market = repository.btcSnapshot(); error = null }
+            try { market = repository.btcSnapshot(); restUpdatedAt = System.currentTimeMillis(); error = null }
             catch (e: Exception) { error = "Market data unavailable"; }
             delay(10000)
         }
@@ -105,7 +108,8 @@ private fun ExchangeApp() {
                                 Row {
                                     Button(onClick = {
                                         val p = latestPrice
-                                        if (p == null || p <= BigDecimal.ZERO) demoMessage = "No valid live price"
+                                        if (lastPriceAt == 0L || System.currentTimeMillis() - lastPriceAt > 30000L) demoMessage = "Market price stale; paper order blocked"
+                                        else if (p == null || p <= BigDecimal.ZERO) demoMessage = "No valid live price"
                                         else if (demoCash < BigDecimal("100")) demoMessage = "Insufficient demo USDT"
                                         else {
                                             demoCashText = (demoCash - BigDecimal("100")).toPlainString()
