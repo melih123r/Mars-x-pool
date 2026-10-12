@@ -8,6 +8,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.SpannableString;
 import android.text.style.URLSpan;
 import android.text.Spanned;
+import android.view.ViewGroup;
 import com.tradingview.lightweightcharts.view.ChartsView;
 
 /** Public market terminal; no trading credentials or order submission. */
@@ -30,7 +31,7 @@ public class MainActivity extends Activity {
         ticker.setPadding(24, 8, 24, 8);
         root.addView(ticker);
         ChartsView chart = new ChartsView(this, null);
-        root.addView(chart, new LinearLayout.LayoutParams(-1, 0, 1f));
+        root.addView(chart, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
         status = new TextView(this);
         status.setText("Public market feed • Chart candle series not connected");
         status.setPadding(24, 12, 24, 24);
