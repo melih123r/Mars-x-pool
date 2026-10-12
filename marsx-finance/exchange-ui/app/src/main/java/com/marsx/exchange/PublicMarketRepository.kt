@@ -18,9 +18,10 @@ class PublicMarketRepository {
         .build()
     suspend fun btcSnapshot(): MarketSnapshot = withContext(Dispatchers.IO) {
         val ticker = get("https://data-api.binance.vision/api/v3/ticker/24hr?symbol=BTCUSDT")
-        val depth = get("https://data-api.binance.vision/api/v3/depth?symbol=BTCUSDT&limit=5")
-        val bids = depth.getJSONArray("bids")
-        val asks = depth.getJSONArray("asks")
+        // Depth may fail independently: keep the verified ticker instead of blanking the entire market.
+        val depth = try { get("https://data-api.binance.vision/api/v3/depth?symbol=BTCUSDT&limit=5") } catch (_: IOException) { null }
+        val bids = depth?.optJSONArray("bids") ?: JSONArray()
+        val asks = depth?.optJSONArray("asks") ?: JSONArray()
         MarketSnapshot(
             price = ticker.getString("lastPrice"),
             change = ticker.getString("priceChangePercent") + "%",
