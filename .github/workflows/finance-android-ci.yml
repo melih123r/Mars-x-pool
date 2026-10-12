@@ -7,6 +7,11 @@ on:
       - 'marsx-finance/exchange-ui/**'
       - '.github/workflows/finance-android-ci.yml'
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'marsx-finance/android/**'
+      - 'marsx-finance/exchange-ui/**'
+      - '.github/workflows/finance-android-ci.yml'
 jobs:
   debug-apk:
     runs-on: ubuntu-latest
