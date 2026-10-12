@@ -2,6 +2,8 @@ package com.marsx.finance;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.text.method.LinkMovementMethod;
@@ -15,67 +17,15 @@ import com.tradingview.lightweightcharts.view.ChartsView;
 public class MainActivity extends Activity {
     private PublicMarketStream stream;
     private PublicOrderBookClient orderBook;
-    private TextView spread;
-    private TextView ticker;
-    private TextView status;
-
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        TextView title = new TextView(this);
-        title.setText("MARS-X Finance • Market Terminal");
-        title.setTextSize(22);
-        title.setPadding(24, 32, 24, 12);
-        root.addView(title);
-        ticker = new TextView(this);
-        ticker.setText("BTC/USDT: waiting for live feed…");
-        ticker.setPadding(24, 8, 24, 8);
-        root.addView(ticker);
-        spread = new TextView(this);
-        spread.setText("Best bid / ask: loading…");
-        spread.setPadding(24, 8, 24, 8);
-        root.addView(spread);
-        ChartsView chart = new ChartsView(this, null);
-        root.addView(chart, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
-
-        status = new TextView(this);
-        status.setText("Public market feed • Chart candle series not connected");
-        status.setPadding(24, 12, 24, 24);
-        root.addView(status);
-        TextView attribution = new TextView(this);
-        SpannableString credit = new SpannableString("Charts powered by TradingView");
-        credit.setSpan(new URLSpan("https://www.tradingview.com/"), credit.toString().indexOf("TradingView"), credit.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-        attribution.setText(credit);
-        attribution.setMovementMethod(LinkMovementMethod.getInstance());
-        attribution.setPadding(24, 8, 24, 20);
-        root.addView(attribution);
-        setContentView(root);
-    }
-
-    @Override protected void onStart() {
-        super.onStart();
-        stream = new PublicMarketStream(new PublicMarketStream.Listener() {
-            @Override public void onPrice(String symbol, String price) {
-                if (!isFinishing() && !isDestroyed()) ticker.setText(symbol + ": " + price + " USDT");
-            }
-            @Override public void onStatus(String message) {
-                if (!isFinishing() && !isDestroyed()) status.setText(message);
-            }
-        });
-        stream.start();
-        orderBook = new PublicOrderBookClient();
-        orderBook.fetchBtcUsdt(new PublicOrderBookClient.Listener() {
-            @Override public void onSnapshot(String bid, String ask) {
-                if (!isFinishing() && !isDestroyed()) spread.setText("Best bid: " + bid + " | Best ask: " + ask);
-            }
-            @Override public void onError(String message) {
-                if (!isFinishing() && !isDestroyed()) spread.setText(message);
-            }
-        });
+    private final Handler refreshHandler = new Handler(Looper.getMainLooper());
+    private final Runnable refreshBook = new Runnable() {
+        @Override public void run() {
+            if (orderBook == null) return;
+            refreshHandler.post(refreshBook);
     }
 
     @Override protected void onStop() {
+        refreshHandler.removeCallbacks(refreshBook);
         if (stream != null) {
             stream.close();
             stream = null;
