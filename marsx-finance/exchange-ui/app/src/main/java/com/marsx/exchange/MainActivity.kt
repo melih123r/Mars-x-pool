@@ -89,9 +89,9 @@ private fun ExchangeApp() {
                             item { Panel("Paper portfolio") { Text("Demo USDT: $demoCash"); Text("Demo BTC: $demoBtc"); Text("Estimated portfolio: ${if (latestPrice != null) (demoCash + demoBtc.multiply(latestPrice)).setScale(2, RoundingMode.HALF_UP).toPlainString() + " USDT" else "Waiting for market price"}"); Text("No real funds or account connected."); TextButton(onClick = { demoCashText = "10000.00"; demoBtcText = "0"; demoMessage = "Paper balance reset" }) { Text("Reset paper account") } } }
                         }
                         1 -> {
-                            item { Panel("Markets") { Text("BTC/USDT • Binance public feed") } }
+                            item { Panel("Markets") { Text("BTC/USDT • Binance public feed"); Text("24h change: ${market?.change ?: "—"}"); Text("Last ticker update: ${if (lastPriceAt > 0L) java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(lastPriceAt)) else "Waiting for data"}"); Text("Prices are indicative public market data, not executable quotes.") } }
                             item { Panel("BTC/USDT candles • $interval") { CandleControls(interval, { interval = it }); CandleChart(candles); if (candleError != null) Text(candleError!!, color = Color.Red) } }
-                            item { Panel("Market status") { Text(streamStatus); Text(if (market == null) "Waiting for REST snapshot" else "REST order book refresh: 10 seconds") } }
+                            item { Panel("Market status") { Text(streamStatus); Text(if (market == null) "Waiting for REST snapshot" else "REST order book refresh: 10 seconds"); Text(if (lastPriceAt == 0L || System.currentTimeMillis() - lastPriceAt > 30000L) "Price feed may be stale — paper orders disabled" else "Recent price received") } }
                         }
                         2 -> {
                             item { Panel("BTC/USDT candles • $interval") { CandleControls(interval, { interval = it }); CandleChart(candles); if (candleError != null) Text(candleError!!, color = Color.Red) } }
