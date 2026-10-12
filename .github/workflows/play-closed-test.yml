@@ -1,8 +1,14 @@
 name: Google Play closed-test release
 
-# Never publish on every push. Requires owner-configured Play credentials and signing.
+# Manual by design. The default path builds a signed AAB for owner upload.
 on:
   workflow_dispatch:
+    inputs:
+      publish_to_play:
+        description: Upload the signed AAB to the Play closed-test track
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -37,25 +43,31 @@ jobs:
         run: |
           yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
           "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
-      - name: Require signing and Play secrets
+      - name: Require signing secrets
         env:
           KEYSTORE_B64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          PLAY_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
         run: |
-          for value in "$KEYSTORE_B64" "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" "$PLAY_JSON" "$GOOGLE_WEB_CLIENT_ID"; do
-            if [ -z "$value" ]; then echo "Missing signing or Play credential"; exit 1; fi
+          for value in "$KEYSTORE_B64" "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" "$GOOGLE_WEB_CLIENT_ID"; do
+            if [ -z "$value" ]; then echo "Missing signing credential"; exit 1; fi
           done
           case "$GOOGLE_WEB_CLIENT_ID" in
             *-*.apps.googleusercontent.com) ;;
             *) echo "Invalid Google Web OAuth client ID"; exit 1 ;;
           esac
           printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/upload-keystore.jks"
+          chmod 600 "$RUNNER_TEMP/upload-keystore.jks"
+      - name: Require Play credential when publishing
+        if: ${{ inputs.publish_to_play }}
+        env:
+          PLAY_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$PLAY_JSON" ]; then echo "Missing Play service-account credential"; exit 1; fi
           printf '%s' "$PLAY_JSON" > "$RUNNER_TEMP/google-play.json"
-          chmod 600 "$RUNNER_TEMP/upload-keystore.jks" "$RUNNER_TEMP/google-play.json"
+          chmod 600 "$RUNNER_TEMP/google-play.json"
       - name: Build signed release AAB
         env:
           KEYSTORE_PATH: ${{ runner.temp }}/upload-keystore.jks
@@ -77,6 +89,7 @@ jobs:
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 7
       - name: Upload to Google Play closed testing
+        if: ${{ inputs.publish_to_play }}
         uses: r0adkll/upload-google-play@v1.1.3
         with:
           serviceAccountJson: ${{ runner.temp }}/google-play.json
