@@ -13,35 +13,7 @@ on:
       - 'marsx-finance/exchange-ui/**'
       - '.github/workflows/finance-android-ci.yml'
 jobs:
-  debug-apk:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-      - name: Install Android SDK packages
-        run: |
-          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.14.3'
-      - name: Build Finance debug APK
-        working-directory: marsx-finance/android
-        run: gradle --no-daemon :app:assembleDebug
-      - uses: actions/upload-artifact@v4
-        with:
-          name: marsx-finance-debug-apk
-          path: marsx-finance/android/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
-          retention-days: 7
-
-  exchange-demo-apk:
+  unified-finance-apk:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -58,12 +30,14 @@ jobs:
       - name: Install Android SDK
         run: |
           "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
-      - name: Build Exchange demo APK
+      - name: Build unified MARS-X Finance APK
         working-directory: marsx-finance/exchange-ui
         run: gradle --no-daemon :app:assembleDebug
+      - name: Verify unified APK exists
+        run: test -s marsx-finance/exchange-ui/app/build/outputs/apk/debug/app-debug.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: marsx-exchange-demo-debug-apk
-          path: marsx-finance/exchange-ui/app/build/outputs/apk/debug/*.apk
+          name: MARS-X-Finance-unified-debug-APK
+          path: marsx-finance/exchange-ui/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 7
