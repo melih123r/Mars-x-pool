@@ -18,7 +18,7 @@ class PublicMarketRepository {
         .build()
     suspend fun btcSnapshot(): MarketSnapshot = withContext(Dispatchers.IO) {
         val ticker = get("https://data-api.binance.vision/api/v3/ticker/24hr?symbol=BTCUSDT")
-        val depth = get("https://api.binance.com/api/v3/depth?symbol=BTCUSDT&limit=5")
+        val depth = get("https://data-api.binance.vision/api/v3/depth?symbol=BTCUSDT&limit=5")
         val bids = depth.getJSONArray("bids")
         val asks = depth.getJSONArray("asks")
         MarketSnapshot(
