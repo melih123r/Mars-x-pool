@@ -16,8 +16,10 @@ public final class PublicMarketStream extends WebSocketListener {
     private final Handler main = new Handler(Looper.getMainLooper());
     private final OkHttpClient client = new OkHttpClient();
     private WebSocket socket;
+    private volatile boolean closed;
     public PublicMarketStream(Listener listener) { this.listener = listener; }
     public void start() {
+        closed = false;
         Request request = new Request.Builder().url("wss://stream.binance.com:9443/ws/btcusdt@miniTicker").build();
         socket = client.newWebSocket(request, this);
     }
@@ -29,15 +31,16 @@ public final class PublicMarketStream extends WebSocketListener {
             JSONObject json = new JSONObject(message);
             String symbol = json.getString("s");
             String price = json.getString("c");
-            main.post(() -> listener.onPrice(symbol, price));
+            if (!closed) main.post(() -> { if (!closed) listener.onPrice(symbol, price); });
         } catch (Exception error) {
             main.post(() -> listener.onStatus("Malformed market update"));
         }
     }
     @Override public void onFailure(WebSocket socket, Throwable error, Response response) {
-        main.post(() -> listener.onStatus("Market stream disconnected"));
+        if (!closed) main.post(() -> { if (!closed) listener.onStatus("Market stream disconnected"); });
     }
     public void close() {
+        closed = true;
         if (socket != null) socket.close(1000, "closed");
         client.dispatcher().executorService().shutdown();
     }
