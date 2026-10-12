@@ -83,7 +83,7 @@ private fun ExchangeApp() {
                     when (tab) {
                         0 -> {
                             item { Panel("Overview") { Text("Public BTC market data • not an account balance") } }
-                            item { Panel("Paper portfolio") { Text("Demo USDT: $demoCash"); Text("Demo BTC: $demoBtc"); Text("No real funds or account connected."); TextButton(onClick = { demoCashText = "10000.00"; demoBtcText = "0"; demoMessage = "Paper balance reset" }) { Text("Reset paper account") } } }
+                            item { Panel("Paper portfolio") { Text("Demo USDT: $demoCash"); Text("Demo BTC: $demoBtc"); Text("Estimated portfolio: ${if (latestPrice != null) (demoCash + demoBtc.multiply(latestPrice)).setScale(2, RoundingMode.HALF_UP).toPlainString() + " USDT" else "Waiting for market price"}"); Text("No real funds or account connected."); TextButton(onClick = { demoCashText = "10000.00"; demoBtcText = "0"; demoMessage = "Paper balance reset" }) { Text("Reset paper account") } } }
                         }
                         1 -> {
                             item { Panel("Markets") { Text("BTC/USDT • Binance public feed") } }
@@ -115,10 +115,10 @@ private fun ExchangeApp() {
                                     }) { Text("Demo Buy") }
                                     Spacer(Modifier.width(8.dp))
                                     Button(onClick = {
-                                        val p = market?.price?.toBigDecimalOrNull()
+                                        val p = latestPrice
                                         if (p == null || p <= BigDecimal.ZERO) demoMessage = "No valid live price"
                                         else {
-                                            val qty = BigDecimal("100").divide(p, 8, RoundingMode.UP)
+                                            val qty = BigDecimal("100").divide(p, 8, RoundingMode.DOWN)
                                             if (demoBtc < qty) demoMessage = "Insufficient demo BTC"
                                             else {
                                                 demoBtcText = (demoBtc - qty).toPlainString()
@@ -135,7 +135,7 @@ private fun ExchangeApp() {
                         3 -> item { Panel("Wallet") { Text("No real wallet, custody or withdrawals connected.") } }
                         else -> {
                             item { Panel("Security") { Text("KYC, MFA and production permissions not configured.") } }
-                            item { Panel("Open source") { Text("TradingView chart library — Apache 2.0. https://www.tradingview.com/") } }
+                            item { Panel("Chart engine") { Text("Native Jetpack Compose Canvas candlestick renderer. No TradingView library bundled in this build.") } }
                         }
                     }
                 }
