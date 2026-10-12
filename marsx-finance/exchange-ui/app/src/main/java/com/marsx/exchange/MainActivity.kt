@@ -48,6 +48,7 @@ private fun ExchangeApp() {
     var demoBtcText by rememberSaveable { mutableStateOf("0") }
     val demoBtc = demoBtcText.toBigDecimalOrNull() ?: BigDecimal.ZERO
     var demoMessage by remember { mutableStateOf("Simulated trades only • no real orders") }
+    // Paper balances and fills are simulated; no exchange order endpoint is used.
     var demoTradeCount by rememberSaveable { mutableIntStateOf(0) }
     val latestPrice = if (streamUpdatedAt >= restUpdatedAt && streamPrice != null) streamPrice?.toBigDecimalOrNull() else market?.price?.toBigDecimalOrNull()
     val lastPriceAt = maxOf(streamUpdatedAt, restUpdatedAt)
