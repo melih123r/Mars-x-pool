@@ -98,6 +98,7 @@ private fun ExchangeApp() {
                             item { Panel("BTC/USDT candles • $interval") { CandleControls(interval, { interval = it }); CandleChart(candles); TradingViewAttribution(); if (candleError != null) Text(candleError!!, color = Color.Red) } }
                             item { Panel("Order book — public snapshot") {
                                 Text("Order book spread: ${market?.let { snapshot -> val bid = snapshot.bids.firstOrNull()?.first?.toBigDecimalOrNull(); val ask = snapshot.asks.firstOrNull()?.first?.toBigDecimalOrNull(); if (bid != null && ask != null && ask >= bid) (ask - bid).stripTrailingZeros().toPlainString() + " USDT" else "—" } ?: "—"}", color = Color.LightGray)
+                                Text("Order book: top 5 levels per side • snapshot every 10 seconds", color = Color.LightGray)
                                 Text("ASKS", color = Color(0xFFFF6677))
                                 market?.asks?.forEach { Text("${it.first}  •  ${it.second}", color = Color.White) }
                                 Spacer(Modifier.height(10.dp))
