@@ -196,11 +196,10 @@ test('expired last-attempt worker generates failed outbox report', async () => {
 test('malformed or oversized intake cannot write anything to database', async () => {
   const pool = fakePool();
   const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
-  const oversized = planFiveLaneTasks(9, 'valid');
-  for (const task of oversized) task.message = 'x'.repeat(4001);
+  const oversized = planFiveLaneTasks(9, 'valid').map(task => ({ ...task, message: 'x'.repeat(4001) }));
   await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: oversized }), /invalid_message/);
   const tampered = planFiveLaneTasks(9, 'hello');
-  tampered[3].updateId = 10;
+  tampered[3] = { ...tampered[3], updateId: 10 };
   await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: tampered }), /task_plan_mismatch/);
   assert.equal(pool.calls.length, 0);
 });
