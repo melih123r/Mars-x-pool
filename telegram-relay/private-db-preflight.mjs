@@ -31,6 +31,19 @@ if (missing.length) {
         Object.entries(checks).filter(([, ok]) => !ok).map(([name]) => name).join(', '));
       process.exitCode = 1;
     } else {
+      const privileges = await pool.query(`
+        SELECT
+          has_schema_privilege(current_user, 'marsx_telegram', 'USAGE') AS schema_usage,
+          has_table_privilege(current_user, 'marsx_telegram.intakes', 'SELECT, INSERT, UPDATE') AS intake_rw,
+          has_table_privilege(current_user, 'marsx_telegram.tasks', 'SELECT, INSERT, UPDATE') AS task_rw,
+          has_table_privilege(current_user, 'marsx_telegram.outbox', 'SELECT, INSERT, UPDATE') AS outbox_rw,
+          has_sequence_privilege(current_user, pg_get_serial_sequence('marsx_telegram.outbox', 'event_id'), 'USAGE') AS outbox_sequence
+      `);
+      const denied = Object.entries(privileges.rows[0]).filter(([, allowed]) => !allowed).map(([name]) => name);
+      if (denied.length) {
+        console.error('BLOCKED: insufficient private DB permissions: ' + denied.join(', '));
+        process.exitCode = 1;
+      } else {
       const laneConstraint = await pool.query(`
         SELECT pg_get_constraintdef(c.oid) AS definition
         FROM pg_constraint c
@@ -46,6 +59,7 @@ if (missing.length) {
       } else {
         console.log('PASS: credentials present, encryption key valid, private DB schema and 10-lane constraint verified');
         console.log('NOTE: real AI worker connectivity and Telegram E2E are NOT verified');
+      }
       }
     }
   } catch (error) {
