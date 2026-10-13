@@ -1,3 +1,4 @@
+import { flushOutbox } from './outbox-flush.mjs';
 import { PostgresTaskQueue } from './postgres-task-queue.mjs';
 import { enqueueFiveDurably } from './durable-queue-contract.mjs';
 import http from 'node:http';
@@ -11,6 +12,18 @@ const allowedUser = process.env.TELEGRAM_ALLOWED_USER_ID || '';
 const publicUrl = process.env.RENDER_EXTERNAL_URL || 'https://marsx-telegram-relay.onrender.com';
 const durableMode = process.env.MARSX_DISPATCH_MODE === 'postgres';
 const durableQueue = durableMode ? new PostgresTaskQueue({ connectionString: process.env.DATABASE_URL, encryptionKeyHex: process.env.MARSX_MESSAGE_ENCRYPTION_KEY }) : null;
+const outboxEnabled = durableMode && process.env.MARSX_OUTBOX_ENABLED === 'true';
+let outboxBusy = false;
+async function pollOutbox() {
+  if (!outboxEnabled || outboxBusy) return;
+  outboxBusy = true;
+  try {
+    const results = await flushOutbox({ queue: durableQueue, token, chatId: allowedUser, limit: 10 });
+    for (const item of results) if (!item.delivered) console.warn('Outbox pending', item.eventId, item.error || 'ack_not_confirmed');
+  } catch (error) { console.error('Outbox polling failed:', error.message); }
+  finally { outboxBusy = false; }
+}
+
 const recentUpdates = new Set();
 const processingUpdates = new Set();
 const MAX_RECENT_UPDATES = 1000;
@@ -162,4 +175,10 @@ const server = http.createServer(async (req, res) => {
 server.listen(port, '0.0.0.0', () => {
   console.log('Telegram inbox listening on ' + port);
   void registerWebhook();
+  if (outboxEnabled) {
+    console.log('PostgreSQL outbox polling enabled');
+    const interval = setInterval(() => void pollOutbox(), 30000);
+    interval.unref();
+    void pollOutbox();
+  }
 });
