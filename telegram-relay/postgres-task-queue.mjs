@@ -116,6 +116,40 @@ export class PostgresTaskQueue {
     );
     return result.rows[0] || null;
   }
+  async markTaskNotConfigured(taskId, workerId) {
+    if (typeof taskId !== 'string' || !/^telegram-\\d+-lane-[1-5]$/.test(taskId)) throw new Error('invalid_task_id');
+    if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await client.query(
+        `UPDATE marsx_telegram.tasks SET status='not_configured',lease_until=NULL,updated_at=now()
+         WHERE task_id=$1 AND worker_id=$2 AND status='claimed' AND lease_until > now()
+         RETURNING task_id,update_id,lane,status`,
+        [taskId, workerId]
+      );
+      if (result.rows[0]) {
+        const updateId = result.rows[0].update_id;
+        await client.query('SELECT update_id FROM marsx_telegram.intakes WHERE update_id=$1 FOR UPDATE', [updateId]);
+        const statuses = await client.query('SELECT status FROM marsx_telegram.tasks WHERE update_id=$1', [updateId]);
+        if (statuses.rows.length === 5 && statuses.rows.every(row =>
+          ['succeeded','failed','not_configured'].includes(row.status))) {
+          const kind = statuses.rows.every(row => row.status === 'succeeded') ? 'completed' : 'failed';
+          await client.query(
+            'INSERT INTO marsx_telegram.outbox(update_id,event_kind) VALUES ($1,$2) ON CONFLICT (update_id,event_kind) DO NOTHING',
+            [updateId, kind]
+          );
+        }
+      }
+      await client.query('COMMIT');
+      return result.rows[0] || null;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
   async recoverExpired(limit = 50) {
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid_limit');
     const result = await this.pool.query(
