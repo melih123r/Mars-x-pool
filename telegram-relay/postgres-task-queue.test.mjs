@@ -13,7 +13,8 @@ function fakePool({ duplicate = false, failAt = -1 } = {}) {
       if (count === failAt) throw new Error('database_failure');
       if (sql.startsWith('INSERT INTO marsx_telegram.intakes')) return { rowCount: duplicate ? 0 : 1 };
       if (sql.startsWith('SELECT count(*)')) return { rows: [{ count: 5 }] };
-      if (sql.startsWith('UPDATE marsx_telegram.tasks')) return { rows: [{ task_id: params[0], status: 'claimed' }] };
+      if (sql.startsWith('UPDATE marsx_telegram.tasks')) return { rows: [{ task_id: params[0], update_id: 9, status: 'claimed' }] };
+      if (sql.startsWith('SELECT status FROM marsx_telegram.tasks')) return { rows: [{ status: 'queued' }] };
       return { rowCount: 1 };
     },
     release() { calls.push({ sql: 'RELEASE' }); }
@@ -122,4 +123,23 @@ test('outbox acknowledgement requires matching claim token and active lease', as
   await queue.markClaimedOutboxDelivered(1, token);
   assert.ok(pool.calls.some(x => x.sql.includes('claim_token=$2::uuid AND claim_until > now()')));
   await assert.rejects(queue.markClaimedOutboxDelivered(1, 'bad'), /invalid_claim_token/);
+});
+
+test('last worker acknowledgement creates outbox event inside same transaction', async () => {
+  const pool = fakePool();
+  const originalConnect = pool.connect;
+  pool.connect = async () => {
+    const client = await originalConnect();
+    const originalQuery = client.query;
+    client.query = async (sql, params) => {
+      if (sql.startsWith('SELECT status FROM marsx_telegram.tasks'))
+        return { rows: Array.from({ length: 5 }, () => ({ status: 'succeeded' })) };
+      return originalQuery(sql, params);
+    };
+    return client;
+  };
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  await queue.ackAtomic('telegram-9-lane-5', 'worker_5', 'succeeded');
+  assert.ok(pool.calls.some(x => x.sql.startsWith('INSERT INTO marsx_telegram.outbox')));
+  assert.ok(pool.calls.some(x => x.sql === 'COMMIT'));
 });
