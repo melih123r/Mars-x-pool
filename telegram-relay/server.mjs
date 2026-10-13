@@ -102,8 +102,9 @@ const server = http.createServer(async (req, res) => {
       body += chunk.toString('utf8');
     }
     const update = JSON.parse(body);
+    if (!update || typeof update !== 'object' || Array.isArray(update)) return send(res, 400, { error: 'invalid_payload' });
     const msg = update.message;
-    if (!msg || msg.chat?.type !== 'private' || String(msg.from?.id) !== allowedUser)
+    if (!msg || msg.chat?.type !== 'private' || String(msg.from?.id) !== allowedUser || String(msg.chat?.id) !== allowedUser)
       return send(res, 200, { ok: true, ignored: true });
     const content = typeof msg.text === 'string' ? msg.text : '';
     if (!content.trim() || content.length > 4000) return send(res, 200, { ok: true, ignored: true });
