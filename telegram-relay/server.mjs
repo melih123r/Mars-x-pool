@@ -16,6 +16,7 @@ const lanes = ['Android', 'Grafik ve UI', 'Backend ve API', 'Finance ve Exchange
 async function githubRequest(path, options = {}) {
   const response = await fetch('https://api.github.com' + path, {
     ...options,
+    signal: AbortSignal.timeout(10000),
     headers: { accept: 'application/vnd.github+json', authorization: 'Bearer ' + githubToken,
       'x-github-api-version': '2022-11-28', 'user-agent': 'marsx-telegram-relay', ...(options.headers || {}) }
   });
@@ -55,6 +56,7 @@ async function registerWebhook() {
   try {
     const url = new URL('/telegram/webhook', publicUrl).toString();
     const response = await fetch('https://api.telegram.org/bot' + token + '/setWebhook', {
+      signal: AbortSignal.timeout(10000),
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ url, secret_token: secret, allowed_updates: ['message'], drop_pending_updates: false })
@@ -78,6 +80,7 @@ function send(res, status, payload) {
 }
 async function reply(chatId, text) {
   const response = await fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
+    signal: AbortSignal.timeout(10000),
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ chat_id: chatId, text })
   });
@@ -107,6 +110,7 @@ const server = http.createServer(async (req, res) => {
     // Best-effort duplicate suppression for Telegram retries during this process lifetime.
     // This is not durable exactly-once delivery across restarts or multiple instances.
     const updateId = update.update_id;
+    if (!Number.isSafeInteger(updateId) || updateId < 0) return send(res, 400, { error: 'invalid_update_id' });
     if (Number.isSafeInteger(updateId) && recentUpdates.has(updateId)) return send(res, 200, { ok: true, duplicate: true });
     if (Number.isSafeInteger(updateId) && processingUpdates.has(updateId)) return send(res, 503, { error: 'processing_in_progress' });
     if (Number.isSafeInteger(updateId)) processingUpdates.add(updateId);
