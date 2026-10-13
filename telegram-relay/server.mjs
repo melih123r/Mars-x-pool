@@ -7,6 +7,7 @@ const secret = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const allowedUser = process.env.TELEGRAM_ALLOWED_USER_ID || '';
 const publicUrl = process.env.RENDER_EXTERNAL_URL || 'https://marsx-telegram-relay.onrender.com';
 const recentUpdates = new Set();
+const processingUpdates = new Set();
 const MAX_RECENT_UPDATES = 1000;
 const githubToken = process.env.MARSX_GITHUB_TOKEN || '';
 const githubRepo = 'melih123r/Mars-x-pool';
@@ -103,7 +104,10 @@ const server = http.createServer(async (req, res) => {
     // This is not durable exactly-once delivery across restarts or multiple instances.
     const updateId = update.update_id;
     if (Number.isSafeInteger(updateId) && recentUpdates.has(updateId)) return send(res, 200, { ok: true, duplicate: true });
+    if (Number.isSafeInteger(updateId) && processingUpdates.has(updateId)) return send(res, 503, { error: 'processing_in_progress' });
+    if (Number.isSafeInteger(updateId)) processingUpdates.add(updateId);
     let answer;
+    try {
     if (content === '/status' || content === '/start' || content === '/help') {
       answer = 'MARS-X Telegram aktif. GitHub görev kaydı: ' + (githubToken ? 'yapılandırıldı' : 'token eksik') + '. 5 görev yürütücüsü ve mevcut ChatGPT sohbetlerine gönderim bağlı değil.';
     } else {
@@ -120,6 +124,9 @@ const server = http.createServer(async (req, res) => {
       if (recentUpdates.size > MAX_RECENT_UPDATES) recentUpdates.delete(recentUpdates.values().next().value);
     }
     return send(res, 200, { ok: true });
+    } finally {
+      if (Number.isSafeInteger(updateId)) processingUpdates.delete(updateId);
+    }
   } catch (err) {
     console.error('Telegram webhook error:', err.message);
     return send(res, 500, { error: 'processing_failed' });
