@@ -33,6 +33,9 @@ async function startRelay(t) {
 test('health endpoint and unauthorized webhook', async t => {
   const base = await startRelay(t);
   assert.deepEqual(await (await fetch(base + '/health')).json(), { ok: true });
+  const ready = await fetch(base + '/ready');
+  assert.equal(ready.status, 200);
+  assert.deepEqual(await ready.json(), { ready: true, mode: 'metadata_only', agents_connected: false });
   const response = await fetch(base + '/telegram/webhook', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' });
   assert.equal(response.status, 403);
 });
@@ -103,4 +106,22 @@ test('UTF-8 split across transport chunks is decoded without invalid JSON', asyn
   });
   assert.equal(response.status, 200);
   assert.equal(response.body.ignored, true);
+});
+
+test('relay fails readiness when Telegram secrets are missing', async t => {
+  const port = await availablePort();
+  const child = spawn(process.execPath, [new URL('./server.mjs', import.meta.url).pathname], {
+    env: { ...process.env, PORT: String(port), TELEGRAM_BOT_TOKEN: '', TELEGRAM_WEBHOOK_SECRET: '', TELEGRAM_ALLOWED_USER_ID: '', MARSX_DISPATCH_MODE: '' },
+    stdio: 'ignore'
+  });
+  t.after(() => child.kill());
+  const base = 'http://127.0.0.1:' + port;
+  let response;
+  for (let i = 0; i < 50; i++) {
+    try { response = await fetch(base + '/ready'); break; } catch {}
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  assert.ok(response);
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).reason, 'telegram_not_configured');
 });
