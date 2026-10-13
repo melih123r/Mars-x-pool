@@ -27,6 +27,7 @@ async function githubRequest(path, options = {}) {
 
 async function dispatchToGithub(updateId, content) {
   if (!githubToken) return { state: 'not_configured' };
+  if (Buffer.byteLength(messageHmacKey, 'utf8') < 32) return { state: 'message_hmac_key_required' };
   // GitHub issues store only a SHA-256 digest and lane names; plaintext remains unavailable to workers.
   if (!Number.isSafeInteger(updateId)) return { state: 'invalid_update_id' };
   const marker = 'marsx-telegram-update-' + updateId;
@@ -35,7 +36,7 @@ async function dispatchToGithub(updateId, content) {
   const existing = await githubRequest('/search/issues?q=' + encodeURIComponent('repo:' + githubRepo + ' in:title ' + marker) + '&per_page=5');
   const exactMatch = existing.items?.find(item => item.title === '[Telegram] ' + marker);
   if (exactMatch) return { state: 'already_recorded', url: exactMatch.html_url };
-  const digest = createHmac('sha256', secret).update(content, 'utf8').digest('hex');
+  const digest = createHmac('sha256', messageHmacKey).update(content, 'utf8').digest('hex');
   const body = [
     'Telegram üzerinden alınan komutun YALNIZCA meta veri kaydı. Mesaj metni gizlilik için GitHub üzerinde saklanmaz.',
     '', 'Telegram update ID: ' + updateId, 'Mesaj HMAC-SHA256: ' + digest, 'Mesaj karakter sayısı: ' + content.length, '',
@@ -124,7 +125,7 @@ const server = http.createServer(async (req, res) => {
     let answer;
     try {
     if (content === '/status' || content === '/start' || content === '/help') {
-      answer = 'MARS-X Telegram aktif. GitHub görev kaydı: ' + (githubToken ? 'yapılandırıldı' : 'token eksik') + '. 5 görev yürütücüsü ve mevcut ChatGPT sohbetlerine gönderim bağlı değil.';
+      answer = 'MARS-X Telegram aktif. GitHub meta veri kaydı: ' + (githubToken && Buffer.byteLength(messageHmacKey, 'utf8') >= 32 ? 'yapılandırıldı' : 'kimlik bilgileri eksik') + '. 5 görev yürütücüsü ve mevcut ChatGPT sohbetlerine gönderim bağlı değil.';
     } else if (content.startsWith('/')) {
       answer = 'MARS-X: bilinmeyen komut. /status ile bağlantıyı kontrol et. Komut GitHub görev kaydına alınmadı.';
     } else {
