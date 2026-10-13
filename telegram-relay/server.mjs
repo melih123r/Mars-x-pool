@@ -125,6 +125,8 @@ const server = http.createServer(async (req, res) => {
     try {
     if (content === '/status' || content === '/start' || content === '/help') {
       answer = 'MARS-X Telegram aktif. GitHub görev kaydı: ' + (githubToken ? 'yapılandırıldı' : 'token eksik') + '. 5 görev yürütücüsü ve mevcut ChatGPT sohbetlerine gönderim bağlı değil.';
+    } else if (content.startsWith('/')) {
+      answer = 'MARS-X: bilinmeyen komut. /status ile bağlantıyı kontrol et. Komut GitHub görev kaydına alınmadı.';
     } else {
       const dispatch = await dispatchToGithub(updateId, content);
       answer = dispatch.state === 'recorded' || dispatch.state === 'already_recorded'
