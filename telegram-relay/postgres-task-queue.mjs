@@ -59,7 +59,7 @@ export class PostgresTaskQueue {
   }
   async ackAtomic(taskId, workerId, outcome) {
     if (!['succeeded','failed'].includes(outcome)) throw new Error('invalid_outcome');
-    if (typeof taskId !== 'string' || !/^telegram-\\d+-lane-[1-5]$/.test(taskId)) throw new Error('invalid_task_id');
+    if (typeof taskId !== 'string' || !/^telegram-\d+-lane-[1-5]$/.test(taskId)) throw new Error('invalid_task_id');
     if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
     const client = await this.pool.connect();
     try {
@@ -117,7 +117,7 @@ export class PostgresTaskQueue {
     return result.rows[0] || null;
   }
   async markTaskNotConfigured(taskId, workerId) {
-    if (typeof taskId !== 'string' || !/^telegram-\\d+-lane-[1-5]$/.test(taskId)) throw new Error('invalid_task_id');
+    if (typeof taskId !== 'string' || !/^telegram-\d+-lane-[1-5]$/.test(taskId)) throw new Error('invalid_task_id');
     if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
     const client = await this.pool.connect();
     try {
