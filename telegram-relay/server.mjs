@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { StringDecoder } from 'node:string_decoder';
 import { timingSafeEqual, createHmac } from 'node:crypto';
 
 const port = Number(process.env.PORT || 10000);
@@ -95,13 +96,17 @@ const server = http.createServer(async (req, res) => {
     return send(res, 403, { error: 'forbidden' });
   let body = '';
   let bytes = 0;
+  const decoder = new StringDecoder('utf8');
   try {
     for await (const chunk of req) {
       bytes += chunk.length;
       if (bytes > 32768) return send(res, 413, { error: 'too_large' });
-      body += chunk.toString('utf8');
+      body += decoder.write(chunk);
     }
-    const update = JSON.parse(body);
+    body += decoder.end();
+    let update;
+    try { update = JSON.parse(body); }
+    catch { return send(res, 400, { error: 'invalid_json' }); }
     if (!update || typeof update !== 'object' || Array.isArray(update)) return send(res, 400, { error: 'invalid_payload' });
     const msg = update.message;
     if (!msg || msg.chat?.type !== 'private' || String(msg.from?.id) !== allowedUser || String(msg.chat?.id) !== allowedUser)
