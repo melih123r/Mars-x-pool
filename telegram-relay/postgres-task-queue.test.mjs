@@ -58,16 +58,23 @@ test('worker claims and acknowledgements require validated IDs', async () => {
   await assert.rejects(queue.ackAtomic('telegram-9-lane-1', 'worker_1', 'queued'), /invalid_outcome/);
 });
 
-test('expired worker leases are atomically recovered', async () => {
+test('expired worker leases use parent-first locking and recheck expiry', async () => {
   const pool = fakePool();
+  pool.query = async (sql, params = []) => {
+    pool.calls.push({ sql, params });
+    if (sql.includes('SELECT task_id,update_id FROM marsx_telegram.tasks')) {
+      return { rows: [{ task_id: 'telegram-9-lane-1', update_id: 9 }] };
+    }
+    return pool.connect().then(client => client.query(sql, params));
+  };
   const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
   await queue.recoverExpired(25);
-  const sql = pool.calls.find(x => x.sql.includes('FOR UPDATE SKIP LOCKED'));
-  assert.ok(sql);
-  assert.deepEqual(sql.params, [25]);
-  assert.ok(pool.calls.some(x => x.sql === 'BEGIN'));
-  assert.ok(pool.calls.some(x => x.sql === 'COMMIT'));
-  assert.ok(pool.calls.some(x => x.sql === 'RELEASE'));
+  const queries = pool.calls.map(call => call.sql);
+  const parentIndex = queries.findIndex(sql => sql.includes('FROM marsx_telegram.intakes') && sql.includes('FOR UPDATE'));
+  const taskIndex = queries.findIndex(sql => sql.includes('UPDATE marsx_telegram.tasks'));
+  assert.ok(parentIndex >= 0 && taskIndex > parentIndex);
+  assert.ok(queries[taskIndex].includes('lease_until <= now()'));
+  assert.ok(queries.some(sql => sql === 'COMMIT'));
   await assert.rejects(queue.recoverExpired(0), /invalid_limit/);
 });
 
