@@ -1,0 +1,29 @@
+name: MARS-X five-agent QA (5 min)
+on:
+  schedule:
+    - cron: '2/5 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: marsx-five-agent-qa
+  cancel-in-progress: false
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run five independent read-only agents
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.MARSX_QA_MODEL }}
+        run: python3 scripts/marsx_five_agent_qa.py
+      - name: Save evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: marsx-five-agent-qa-${{ github.run_id }}
+          path: qa-output/
+          retention-days: 7
