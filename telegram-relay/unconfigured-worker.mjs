@@ -1,4 +1,5 @@
 import { PostgresTaskQueue } from './postgres-task-queue.mjs';
+import { LANES } from './lane-planner.mjs';
 
 // Safety-first worker: no AI, financial orders, or ChatGPT session impersonation.
 // Explicitly marks each lane as not configured, so Telegram receives a truthful
@@ -14,7 +15,7 @@ export async function runUnconfiguredLaneOnce({ queue, lane, workerId }) {
 
 export async function runAllUnconfiguredLanesOnce(queue) {
   const results = [];
-  for (let lane = 1; lane <= 5; lane++) {
+  for (let lane = 1; lane <= LANES.length; lane++) {
     results.push(await runUnconfiguredLaneOnce({ queue, lane, workerId: 'unconfigured_lane_' + lane }));
   }
   return results;

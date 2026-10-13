@@ -1,3 +1,5 @@
+import { LANES } from './lane-planner.mjs';
+
 // Telegram outbox delivery helper. Actual dispatch must be called by a configured worker.
 // A successful Telegram API response is required before marking an event delivered.
 // If the process crashes after sending and before marking delivered, Telegram may get a duplicate;
@@ -22,18 +24,19 @@ export async function deliverOutboxEvent({ event, token, chatId, send = fetch })
   return { delivered: true, telegramMessageId: payload.result.message_id };
 }
 
-export function formatFiveLaneReport(updateId, rows) {
-  const lanes = ['Android', 'Grafik ve UI', 'Backend ve API', 'Finance ve Exchange', 'QA ve Test'];
-  if (!Number.isSafeInteger(updateId) || updateId < 0 || !Array.isArray(rows) || rows.length !== 5)
+export function formatTenLaneReport(updateId, rows) {
+  if (!Number.isSafeInteger(updateId) || updateId < 0 || !Array.isArray(rows) || rows.length !== LANES.length)
     throw new Error('invalid_report_rows');
   const seen = new Set();
   for (const row of rows) {
-    if (!Number.isInteger(row.lane) || row.lane < 1 || row.lane > 5 ||
+    if (!Number.isInteger(row.lane) || row.lane < 1 || row.lane > LANES.length ||
         seen.has(row.lane) || !['succeeded','failed','not_configured'].includes(row.status))
       throw new Error('invalid_lane_result');
     seen.add(row.lane);
   }
   return ['MARS-X görev raporu · Telegram #' + updateId,
-    ...rows.sort((a, b) => a.lane - b.lane).map(row => lanes[row.lane - 1] + ': ' + row.status),
+    ...rows.sort((a, b) => a.lane - b.lane).map(row => LANES[row.lane - 1] + ': ' + row.status),
     'Not: Bu rapor ChatGPT sohbetlerine mesaj gönderildiği anlamına gelmez.'].join('\n');
 }
+
+export const formatFiveLaneReport = formatTenLaneReport;

@@ -1,12 +1,12 @@
 // Durable queue interface. This adapter is deliberately non-persistent and MUST NOT be used in production.
 // It makes task execution contracts testable without claiming exactly-once delivery.
-import { planFiveLaneTasks } from './lane-planner.mjs';
+import { planLaneTasks } from './lane-planner.mjs';
 import { transitionTask } from './task-state.mjs';
 
 export class InMemoryTaskQueue {
   #tasks = new Map();
   enqueue(updateId, message) {
-    const tasks = planFiveLaneTasks(updateId, message);
+    const tasks = planLaneTasks(updateId, message);
     // Validate all identities before mutating the queue, so a repeated update is idempotent.
     if (tasks.some(task => this.#tasks.has(task.taskId))) {
       if (tasks.every(task => this.#tasks.has(task.taskId))) return { duplicate: true, tasks: this.list(updateId) };

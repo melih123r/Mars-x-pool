@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { runAllUnconfiguredLanesOnce, runUnconfiguredLaneOnce } from './unconfigured-worker.mjs';
 
-test('five safe workers report not_configured without pretending to execute AI', async () => {
+test('ten safe workers report not_configured without pretending to execute AI', async () => {
   const claimed = [];
   const acknowledged = [];
   const queue = {
@@ -16,10 +16,10 @@ test('five safe workers report not_configured without pretending to execute AI',
     }
   };
   const result = await runAllUnconfiguredLanesOnce(queue);
-  assert.equal(result.length, 5);
+  assert.equal(result.length, 10);
   assert.ok(result.every(x => x.outcome === 'not_configured' && x.processed));
-  assert.deepEqual(claimed.map(x => x.lane), [1,2,3,4,5]);
-  assert.equal(acknowledged.length, 5);
+  assert.deepEqual(claimed.map(x => x.lane), [1,2,3,4,5,6,7,8,9,10]);
+  assert.equal(acknowledged.length, 10);
 });
 test('idle worker does not invent an outcome', async () => {
   const queue = { claimNextTask: async () => null, markTaskNotConfigured: async () => { throw Error('unexpected'); } };

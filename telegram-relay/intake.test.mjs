@@ -3,11 +3,13 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const source = readFileSync(new URL('./server.mjs', import.meta.url), 'utf8');
+const laneSource = readFileSync(new URL('./lane-planner.mjs', import.meta.url), 'utf8');
 
-test('five named lanes are defined', () => {
-  for (const name of ['Android', 'Grafik ve UI', 'Backend ve API', 'Finance ve Exchange', 'QA ve Test']) {
-    assert.ok(source.includes(name), `missing lane ${name}`);
+test('ten named lanes are defined', () => {
+  for (const name of ['Android', 'Grafik motoru', 'UI/UX', 'Backend ve API', 'Exchange ve broker', 'Cuzdan ve portfoy', 'Guvenlik ve KYC/AML', 'Veritabani ve altyapi', 'Otomatik test ve CI', 'Entegrasyon ve son QA']) {
+    assert.ok(laneSource.includes(name), `missing lane ${name}`);
   }
+  assert.match(source, /const lanes = LANES/);
 });
 
 test('GitHub issue records hash and never embeds message plaintext', () => {

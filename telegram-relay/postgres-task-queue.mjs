@@ -1,10 +1,10 @@
 import pg from 'pg';
 import { randomUUID } from 'node:crypto';
 import { encryptMessage, decryptMessage, loadEncryptionKey } from './message-crypto.mjs';
-import { planFiveLaneTasks } from './lane-planner.mjs';
+import { LANES, planLaneTasks } from './lane-planner.mjs';
 
 // Production adapter: requires an already-migrated PostgreSQL schema and dedicated role.
-// Does not execute agents. Atomic intake protects against partial five-lane writes.
+// Does not execute agents. Atomic intake protects against partial ten-lane writes.
 export class PostgresTaskQueue {
   durable = true;
   constructor({ connectionString, encryptionKeyHex, pool } = {}) {
@@ -13,9 +13,9 @@ export class PostgresTaskQueue {
     this.pool = pool || new pg.Pool({ connectionString, max: 3, connectionTimeoutMillis: 5000, idleTimeoutMillis: 10000, ssl: connectionString?.includes('render.com') ? { rejectUnauthorized: true } : undefined });
   }
   async enqueueAtomic({ updateId, tasks }) {
-    if (!Number.isSafeInteger(updateId) || updateId < 0 || !Array.isArray(tasks) || tasks.length !== 5) throw new Error('invalid_intake');
+    if (!Number.isSafeInteger(updateId) || updateId < 0 || !Array.isArray(tasks) || tasks.length !== LANES.length) throw new Error('invalid_intake');
     if (typeof tasks[0]?.message !== 'string' || !tasks[0].message.trim() || tasks[0].message.length > 4000) throw new Error('invalid_message');
-    const expected = planFiveLaneTasks(updateId, tasks[0].message);
+    const expected = planLaneTasks(updateId, tasks[0].message);
     if (!expected.every((task, i) => task.taskId === tasks[i]?.taskId && task.lane === tasks[i]?.lane && task.updateId === tasks[i]?.updateId && task.message === tasks[i]?.message))
       throw new Error('task_plan_mismatch');
     const client = await this.pool.connect();
@@ -34,9 +34,9 @@ export class PostgresTaskQueue {
         }
       }
       const count = await client.query('SELECT count(*)::integer AS count FROM marsx_telegram.tasks WHERE update_id=$1', [updateId]);
-      if (count.rows[0].count !== 5) throw new Error('incomplete_task_set');
+      if (count.rows[0].count !== LANES.length) throw new Error('incomplete_task_set');
       await client.query('COMMIT');
-      return { committed: true, taskCount: 5, duplicate: inserted.rowCount === 0 };
+      return { committed: true, taskCount: LANES.length, duplicate: inserted.rowCount === 0 };
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;
@@ -45,7 +45,7 @@ export class PostgresTaskQueue {
     }
   }
   async claimAtomic(taskId, workerId, leaseSeconds = 60) {
-    if (typeof taskId !== 'string' || !/^telegram-\d+-lane-[1-5]$/.test(taskId)) throw new Error('invalid_task_id');
+    if (typeof taskId !== 'string' || !/^telegram-\d+-lane-(10|[1-9])$/.test(taskId)) throw new Error('invalid_task_id');
     if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
     if (!Number.isSafeInteger(leaseSeconds) || leaseSeconds < 1 || leaseSeconds > 300) throw new Error('invalid_lease');
     const result = await this.pool.query(
@@ -60,7 +60,7 @@ export class PostgresTaskQueue {
   }
   async ackAtomic(taskId, workerId, outcome) {
     if (!['succeeded','failed'].includes(outcome)) throw new Error('invalid_outcome');
-    if (typeof taskId !== 'string' || !/^telegram-\d+-lane-[1-5]$/.test(taskId)) throw new Error('invalid_task_id');
+    if (typeof taskId !== 'string' || !/^telegram-\d+-lane-(10|[1-9])$/.test(taskId)) throw new Error('invalid_task_id');
     if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
     const client = await this.pool.connect();
     try {
@@ -79,7 +79,7 @@ export class PostgresTaskQueue {
           'SELECT status FROM marsx_telegram.tasks WHERE update_id=$1',
           [updateId]
         );
-        if (statuses.rows.length === 5 && statuses.rows.every(row =>
+        if (statuses.rows.length === LANES.length && statuses.rows.every(row =>
           ['succeeded','failed','not_configured'].includes(row.status))) {
           const kind = statuses.rows.every(row => row.status === 'succeeded') ? 'completed' : 'failed';
           await client.query(
@@ -99,7 +99,7 @@ export class PostgresTaskQueue {
   }
   async claimNextTask(workerId, lane, leaseSeconds = 90) {
     if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
-    if (!Number.isInteger(lane) || lane < 1 || lane > 5) throw new Error('invalid_lane');
+    if (!Number.isInteger(lane) || lane < 1 || lane > LANES.length) throw new Error('invalid_lane');
     if (!Number.isSafeInteger(leaseSeconds) || leaseSeconds < 15 || leaseSeconds > 300) throw new Error('invalid_lease');
     const result = await this.pool.query(
       `WITH available AS (
@@ -118,7 +118,7 @@ export class PostgresTaskQueue {
     return result.rows[0] || null;
   }
   async markTaskNotConfigured(taskId, workerId) {
-    if (typeof taskId !== 'string' || !/^telegram-\d+-lane-[1-5]$/.test(taskId)) throw new Error('invalid_task_id');
+    if (typeof taskId !== 'string' || !/^telegram-\d+-lane-(10|[1-9])$/.test(taskId)) throw new Error('invalid_task_id');
     if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
     const client = await this.pool.connect();
     try {
@@ -133,7 +133,7 @@ export class PostgresTaskQueue {
         const updateId = result.rows[0].update_id;
         await client.query('SELECT update_id FROM marsx_telegram.intakes WHERE update_id=$1 FOR UPDATE', [updateId]);
         const statuses = await client.query('SELECT status FROM marsx_telegram.tasks WHERE update_id=$1', [updateId]);
-        if (statuses.rows.length === 5 && statuses.rows.every(row =>
+        if (statuses.rows.length === LANES.length && statuses.rows.every(row =>
           ['succeeded','failed','not_configured'].includes(row.status))) {
           const kind = statuses.rows.every(row => row.status === 'succeeded') ? 'completed' : 'failed';
           await client.query(
@@ -170,12 +170,12 @@ export class PostgresTaskQueue {
         [limit]
       );
       // A crashed worker may have exhausted its retries. Reconcile every affected
-      // intake so an otherwise completed five-lane job still produces a report.
+      // intake so an otherwise completed ten-lane job still produces a report.
       const updateIds = [...new Set(result.rows.filter(row => row.status === 'failed').map(row => row.update_id))];
       for (const updateId of updateIds) {
         await client.query('SELECT update_id FROM marsx_telegram.intakes WHERE update_id=$1 FOR UPDATE', [updateId]);
         const statuses = await client.query('SELECT status FROM marsx_telegram.tasks WHERE update_id=$1', [updateId]);
-        if (statuses.rows.length === 5 && statuses.rows.every(row =>
+        if (statuses.rows.length === LANES.length && statuses.rows.every(row =>
           ['succeeded','failed','not_configured'].includes(row.status))) {
           await client.query(
             `INSERT INTO marsx_telegram.outbox(update_id,event_kind)
@@ -223,7 +223,7 @@ export class PostgresTaskQueue {
         'SELECT lane,status FROM marsx_telegram.tasks WHERE update_id=$1 ORDER BY lane',
         [updateId]
       );
-      const done = rows.rows.length === 5 && rows.rows.every(row =>
+      const done = rows.rows.length === LANES.length && rows.rows.every(row =>
         ['succeeded','failed','not_configured'].includes(row.status));
       if (!done) {
         await client.query('COMMIT');

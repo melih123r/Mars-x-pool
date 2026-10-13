@@ -17,6 +17,6 @@ Apply `telegram-relay/sql/001_durable_queue.sql` once using an authorized databa
 
 ## Operational limitations
 
-The webhook now supports durable encrypted five-lane intake when explicitly enabled. It does **not** start any lane worker, access existing ChatGPT consumer conversations, or produce completion events by itself. A separately enabled outbox polling loop can deliver events that real workers have already recorded. Worker processing, database permissions and end-to-end verification remain release blockers. Outbox polling and lease recovery exist as opt-in loops but do not execute real AI agents. Do not claim the feature is live merely because unit tests pass.
+The webhook now supports durable encrypted ten-lane intake when explicitly enabled. It does **not** start any lane worker, access existing ChatGPT consumer conversations, or produce completion events by itself. A separately enabled outbox polling loop can deliver events that real workers have already recorded. Worker processing, database permissions and end-to-end verification remain release blockers. Outbox polling and lease recovery exist as opt-in loops but do not execute real AI agents. Do not claim the feature is live merely because unit tests pass.
 
 Outbox claim leases reduce concurrent duplicate sends, but Telegram `sendMessage` cannot guarantee exactly-once delivery after a process crash between send and acknowledgement.

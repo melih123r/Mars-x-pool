@@ -3,14 +3,14 @@ import assert from 'node:assert/strict';
 import { InMemoryTaskQueue } from './task-queue.mjs';
 import { summarizeLaneResults } from './lane-planner.mjs';
 
-test('single update creates five tasks and retry creates no extra tasks', () => {
+test('single update creates ten tasks and retry creates no extra tasks', () => {
   const queue = new InMemoryTaskQueue();
   const first = queue.enqueue(7, 'Check project');
   assert.equal(first.duplicate, false);
-  assert.equal(first.tasks.length, 5);
+  assert.equal(first.tasks.length, 10);
   const second = queue.enqueue(7, 'Check project');
   assert.equal(second.duplicate, true);
-  assert.equal(queue.list(7).length, 5);
+  assert.equal(queue.list(7).length, 10);
 });
 
 test('each lane is independently claimable and produces a truthful summary', () => {
@@ -23,7 +23,7 @@ test('each lane is independently claimable and produces a truthful summary', () 
     queue.update(task.taskId, 'succeeded', worker, 3000);
   }
   const summary = summarizeLaneResults(queue.list(8));
-  assert.equal(summary.split('\n').length, 5);
+  assert.equal(summary.split('\n').length, 10);
   assert.ok(summary.split('\n').every(line => line.endsWith(': succeeded')));
 });
 

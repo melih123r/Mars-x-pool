@@ -1,11 +1,13 @@
 import { flushOutbox } from './outbox-flush.mjs';
 import { PostgresTaskQueue } from './postgres-task-queue.mjs';
-import { enqueueFiveDurably } from './durable-queue-contract.mjs';
+import { enqueueTenDurably } from './durable-queue-contract.mjs';
+import { LANES } from './lane-planner.mjs';
 import http from 'node:http';
 import { StringDecoder } from 'node:string_decoder';
 import { timingSafeEqual, createHmac } from 'node:crypto';
 
 const port = Number(process.env.PORT || 10000);
+const host = process.env.HOST || '0.0.0.0';
 const token = process.env.TELEGRAM_BOT_TOKEN || '';
 const secret = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const allowedUser = process.env.TELEGRAM_ALLOWED_USER_ID || '';
@@ -39,7 +41,7 @@ const MAX_RECENT_UPDATES = 1000;
 const githubToken = process.env.MARSX_GITHUB_TOKEN || '';
 const messageHmacKey = process.env.MARSX_MESSAGE_HMAC_KEY || '';
 const githubRepo = 'melih123r/Mars-x-pool';
-const lanes = ['Android', 'Grafik ve UI', 'Backend ve API', 'Finance ve Exchange', 'QA ve Test'];
+const lanes = LANES;
 
 async function githubRequest(path, options = {}) {
   const response = await fetch('https://api.github.com' + path, {
@@ -67,7 +69,7 @@ async function dispatchToGithub(updateId, content) {
   const body = [
     'Telegram üzerinden alınan komutun YALNIZCA meta veri kaydı. Mesaj metni gizlilik için GitHub üzerinde saklanmaz.',
     '', 'Telegram update ID: ' + updateId, 'Mesaj HMAC-SHA256: ' + digest, 'Mesaj karakter sayısı: ' + content.length, '',
-    '## Beş görev alanı', ...lanes.map((lane, i) => '- [ ] ' + (i + 1) + '. ' + lane + ' — worker bağlı değil'),
+    '## 10 görev alanı', ...lanes.map((lane, i) => '- [ ] ' + (i + 1) + '. ' + lane + ' — worker bağlı değil'),
     '', 'Durum: meta veri kaydedildi; mesaj aktarılmadı, görevler çalıştırılmadı. ChatGPT sohbetlerine mesaj gönderilmedi.'
   ].join('\n');
   const issue = await githubRequest('/repos/' + githubRepo + '/issues', {
@@ -165,19 +167,19 @@ const server = http.createServer(async (req, res) => {
     let answer;
     try {
     if (content === '/status' || content === '/start' || content === '/help') {
-      answer = 'MARS-X Telegram aktif. Görev kuyruğu: ' + (durableMode ? 'PostgreSQL şifreli intake' : 'GitHub meta veri modu') + '. GitHub meta veri kaydı: ' + (githubToken && Buffer.byteLength(messageHmacKey, 'utf8') >= 32 ? 'yapılandırıldı' : 'kimlik bilgileri eksik') + '. 5 görev yürütücüsü ve mevcut ChatGPT sohbetlerine gönderim bağlı değil.';
+      answer = 'MARS-X Telegram aktif. Görev kuyruğu: ' + (durableMode ? 'PostgreSQL şifreli intake' : 'GitHub meta veri modu') + '. GitHub meta veri kaydı: ' + (githubToken && Buffer.byteLength(messageHmacKey, 'utf8') >= 32 ? 'yapılandırıldı' : 'kimlik bilgileri eksik') + '. 10 görev yürütücüsü ve mevcut ChatGPT sohbetlerine gönderim bağlı değil.';
     } else if (content === '/queue') {
       answer = durableMode ? 'MARS-X: şifreli PostgreSQL kuyruğu yapılandırıldı. /ready sunucu kontrolünü kullan; görevlerin yürütülmesi henüz etkin değil.' : 'MARS-X: PostgreSQL görev kuyruğu etkin değil; mevcut mod yalnızca GitHub meta verisi saklar.';
     } else if (content.startsWith('/')) {
       answer = 'MARS-X: bilinmeyen komut. /status ile bağlantıyı kontrol et. Komut GitHub görev kaydına alınmadı.';
     } else {
       const dispatch = durableMode
-        ? await enqueueFiveDurably(durableQueue, updateId, content)
+        ? await enqueueTenDurably(durableQueue, updateId, content)
         : await dispatchToGithub(updateId, content);
       answer = durableMode
-        ? 'MARS-X: mesaj şifreli PostgreSQL kuyruğuna 5 görev olarak kaydedildi' + (dispatch.duplicate ? ' (önceden kayıtlı).' : '.') + ' Worker yürütmesi ve ChatGPT sohbetlerine gönderim henüz bağlı değil.'
+        ? 'MARS-X: mesaj şifreli PostgreSQL kuyruğuna 10 görev olarak kaydedildi' + (dispatch.duplicate ? ' (önceden kayıtlı).' : '.') + ' Worker yürütmesi ve ChatGPT sohbetlerine gönderim henüz bağlı değil.'
         : dispatch.state === 'recorded' || dispatch.state === 'already_recorded'
-        ? 'MARS-X: 5 görev alanı için mesajın sadece meta verisi GitHub kaydına alındı. Mesaj metni aktarılmadı; görevler çalıştırılmadı. ' + dispatch.url
+        ? 'MARS-X: 10 görev alanı için mesajın sadece meta verisi GitHub kaydına alındı. Mesaj metni aktarılmadı; görevler çalıştırılmadı. ' + dispatch.url
         : 'MARS-X: mesaj alındı ama görev kaydı oluşturulmadı (' + dispatch.state + '). Özel mesaj güvenliği ve worker bağlantısı gerekiyor.';
     }
     // Deliberately no ChatGPT session access or message forwarding.
@@ -202,7 +204,7 @@ const server = http.createServer(async (req, res) => {
     return send(res, 500, { error: 'processing_failed' });
   }
 });
-server.listen(port, '0.0.0.0', () => {
+server.listen(port, host, () => {
   console.log('Telegram inbox listening on ' + port);
   void registerWebhook();
   if (outboxEnabled) {

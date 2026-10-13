@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { flushOutbox } from './outbox-flush.mjs';
 
-const rows = [1,2,3,4,5].map(lane => ({ lane, status: 'succeeded' }));
+const rows = [1,2,3,4,5,6,7,8,9,10].map(lane => ({ lane, status: 'succeeded' }));
 const event = { event_id: 7, update_id: 10, event_kind: 'completed' };
 const token = '11111111-1111-4111-8111-111111111111';
 test('confirmed Telegram delivery acknowledges only its claimed event', async () => {

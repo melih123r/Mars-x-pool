@@ -1,4 +1,4 @@
-import { deliverOutboxEvent, formatFiveLaneReport } from './outbox-delivery.mjs';
+import { deliverOutboxEvent, formatTenLaneReport } from './outbox-delivery.mjs';
 
 // Claim each event atomically before sending. The lease prevents concurrent
 // dispatchers from sending the same report during the lease window.
@@ -14,7 +14,7 @@ export async function flushOutbox({ queue, token, chatId, send = fetch, limit = 
   for (const event of claim.events) {
     try {
       const rows = await queue.getUpdateStatus(Number(event.update_id));
-      const text = formatFiveLaneReport(Number(event.update_id), rows);
+      const text = formatTenLaneReport(Number(event.update_id), rows);
       const receipt = await deliverOutboxEvent({
         event: { event_id: Number(event.event_id), text }, token, chatId, send
       });

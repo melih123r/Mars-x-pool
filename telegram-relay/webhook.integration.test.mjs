@@ -17,7 +17,7 @@ async function availablePort() {
 async function startRelay(t) {
   const port = await availablePort();
   const child = spawn(process.execPath, [new URL('./server.mjs', import.meta.url).pathname], {
-    env: { ...process.env, PORT: String(port), TELEGRAM_BOT_TOKEN: 'integration-test-token', TELEGRAM_WEBHOOK_SECRET: 'integration-test-secret', TELEGRAM_ALLOWED_USER_ID: '123456', RENDER_EXTERNAL_URL: 'http://127.0.0.1:1' },
+    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), TELEGRAM_BOT_TOKEN: 'integration-test-token', TELEGRAM_WEBHOOK_SECRET: 'integration-test-secret', TELEGRAM_ALLOWED_USER_ID: '123456', RENDER_EXTERNAL_URL: 'http://127.0.0.1:1' },
     stdio: 'ignore'
   });
   t.after(() => { child.kill(); });
@@ -111,7 +111,7 @@ test('UTF-8 split across transport chunks is decoded without invalid JSON', asyn
 test('relay fails readiness when Telegram secrets are missing', async t => {
   const port = await availablePort();
   const child = spawn(process.execPath, [new URL('./server.mjs', import.meta.url).pathname], {
-    env: { ...process.env, PORT: String(port), TELEGRAM_BOT_TOKEN: '', TELEGRAM_WEBHOOK_SECRET: '', TELEGRAM_ALLOWED_USER_ID: '', MARSX_DISPATCH_MODE: '' },
+    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), TELEGRAM_BOT_TOKEN: '', TELEGRAM_WEBHOOK_SECRET: '', TELEGRAM_ALLOWED_USER_ID: '', MARSX_DISPATCH_MODE: '' },
     stdio: 'ignore'
   });
   t.after(() => child.kill());

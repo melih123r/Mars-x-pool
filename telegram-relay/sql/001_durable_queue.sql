@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS marsx_telegram.intakes (
 CREATE TABLE IF NOT EXISTS marsx_telegram.tasks (
   task_id TEXT PRIMARY KEY,
   update_id BIGINT NOT NULL REFERENCES marsx_telegram.intakes(update_id) ON DELETE RESTRICT,
-  lane SMALLINT NOT NULL CHECK (lane BETWEEN 1 AND 5),
+  lane SMALLINT NOT NULL CHECK (lane BETWEEN 1 AND 10),
   status TEXT NOT NULL DEFAULT 'queued'
     CHECK (status IN ('queued','claimed','running','succeeded','failed','not_configured')),
   worker_id TEXT,

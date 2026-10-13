@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { PostgresTaskQueue } from './postgres-task-queue.mjs';
-import { planFiveLaneTasks } from './lane-planner.mjs';
+import { planLaneTasks } from './lane-planner.mjs';
 
 function fakePool({ duplicate = false, failAt = -1 } = {}) {
   const calls = [];
@@ -12,7 +12,7 @@ function fakePool({ duplicate = false, failAt = -1 } = {}) {
       count++;
       if (count === failAt) throw new Error('database_failure');
       if (sql.startsWith('INSERT INTO marsx_telegram.intakes')) return { rowCount: duplicate ? 0 : 1 };
-      if (sql.startsWith('SELECT count(*)')) return { rows: [{ count: 5 }] };
+      if (sql.startsWith('SELECT count(*)')) return { rows: [{ count: 10 }] };
       if (sql.includes('WITH expired AS')) return { rows: [] };
       if (sql.includes('WITH available AS')) return { rows: [{ task_id: 'telegram-9-lane-1', update_id: 9, status: 'claimed' }] };
       if (sql.startsWith('UPDATE marsx_telegram.tasks')) return { rows: [{ task_id: params[0], update_id: 9, status: 'claimed' }] };
@@ -23,28 +23,28 @@ function fakePool({ duplicate = false, failAt = -1 } = {}) {
   };
   return { calls, async connect() { return client; }, async query(...args) { return client.query(...args); }, async end() {} };
 }
-test('five tasks and encrypted intake are written in one transaction', async () => {
+test('ten tasks and encrypted intake are written in one transaction', async () => {
   const pool = fakePool();
   const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
-  const result = await queue.enqueueAtomic({ updateId: 9, tasks: planFiveLaneTasks(9, 'Sensitive Türkçe 🚀') });
-  assert.deepEqual(result, { committed: true, taskCount: 5, duplicate: false });
-  assert.equal(pool.calls.filter(x => x.sql.startsWith('INSERT INTO marsx_telegram.tasks')).length, 5);
+  const result = await queue.enqueueAtomic({ updateId: 9, tasks: planLaneTasks(9, 'Sensitive Türkçe 🚀') });
+  assert.deepEqual(result, { committed: true, taskCount: 10, duplicate: false });
+  assert.equal(pool.calls.filter(x => x.sql.startsWith('INSERT INTO marsx_telegram.tasks')).length, 10);
   assert.equal(pool.calls.filter(x => x.sql === 'COMMIT').length, 1);
   const payload = pool.calls.find(x => x.sql.startsWith('INSERT INTO marsx_telegram.intakes')).params[1];
   assert.ok(Buffer.isBuffer(payload));
   assert.ok(!payload.includes(Buffer.from('Sensitive')));
 });
-test('duplicate update cannot enqueue another five tasks', async () => {
+test('duplicate update cannot enqueue another ten tasks', async () => {
   const pool = fakePool({ duplicate: true });
   const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
-  const result = await queue.enqueueAtomic({ updateId: 9, tasks: planFiveLaneTasks(9, 'task') });
+  const result = await queue.enqueueAtomic({ updateId: 9, tasks: planLaneTasks(9, 'task') });
   assert.equal(result.duplicate, true);
   assert.equal(pool.calls.filter(x => x.sql.startsWith('INSERT INTO marsx_telegram.tasks')).length, 0);
 });
 test('database error triggers rollback and never commits', async () => {
   const pool = fakePool({ failAt: 3 });
   const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
-  await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: planFiveLaneTasks(9, 'task') }), /database_failure/);
+  await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: planLaneTasks(9, 'task') }), /database_failure/);
   assert.ok(pool.calls.some(x => x.sql === 'ROLLBACK'));
   assert.ok(!pool.calls.some(x => x.sql === 'COMMIT'));
 });
@@ -78,14 +78,14 @@ test('encrypted message retrieval rejects unknown encryption versions', async ()
   await assert.rejects(queue.getEncryptedMessage(-1), /invalid_update_id/);
 });
 
-test('completion event is recorded only after all five lanes finish', async () => {
+test('completion event is recorded only after all ten lanes finish', async () => {
   const pool = fakePool();
   const query = pool.connect;
   pool.connect = async () => {
     const client = await query();
     const original = client.query;
     client.query = async (sql, params) => {
-      if (sql.startsWith('SELECT lane,status')) return { rows: [1,2,3,4,5].map(lane => ({ lane, status: 'succeeded' })) };
+      if (sql.startsWith('SELECT lane,status')) return { rows: [1,2,3,4,5,6,7,8,9,10].map(lane => ({ lane, status: 'succeeded' })) };
       if (sql.startsWith('INSERT INTO marsx_telegram.outbox')) return { rowCount: 1 };
       return original(sql, params);
     };
@@ -138,7 +138,7 @@ test('last worker acknowledgement creates outbox event inside same transaction',
     const originalQuery = client.query;
     client.query = async (sql, params) => {
       if (sql.startsWith('SELECT status FROM marsx_telegram.tasks'))
-        return { rows: Array.from({ length: 5 }, () => ({ status: 'succeeded' })) };
+        return { rows: Array.from({ length: 10 }, () => ({ status: 'succeeded' })) };
       return originalQuery(sql, params);
     };
     return client;
@@ -158,7 +158,7 @@ test('worker polls only its assigned lane using atomic SKIP LOCKED', async () =>
   assert.ok(claim);
   assert.match(claim.sql, /FOR UPDATE SKIP LOCKED/);
   assert.deepEqual(claim.params, ['android_worker', 1, 90]);
-  await assert.rejects(queue.claimNextTask('worker', 6), /invalid_lane/);
+  await assert.rejects(queue.claimNextTask('worker', 11), /invalid_lane/);
   await assert.rejects(queue.claimNextTask('bad worker', 1), /invalid_worker_id/);
 });
 
@@ -182,7 +182,7 @@ test('expired last-attempt worker generates failed outbox report', async () => {
         return { rows: [{ task_id: 'telegram-9-lane-5', update_id: 9, status: 'failed' }] };
       }
       if (sql.startsWith('SELECT status FROM marsx_telegram.tasks'))
-        return { rows: ['succeeded','succeeded','succeeded','succeeded','failed'].map(status => ({ status })) };
+        return { rows: ['succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','failed'].map(status => ({ status })) };
       return original(sql, params);
     };
     return client;
@@ -196,9 +196,9 @@ test('expired last-attempt worker generates failed outbox report', async () => {
 test('malformed or oversized intake cannot write anything to database', async () => {
   const pool = fakePool();
   const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
-  const oversized = planFiveLaneTasks(9, 'valid').map(task => ({ ...task, message: 'x'.repeat(4001) }));
+  const oversized = planLaneTasks(9, 'valid').map(task => ({ ...task, message: 'x'.repeat(4001) }));
   await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: oversized }), /invalid_message/);
-  const tampered = planFiveLaneTasks(9, 'hello');
+  const tampered = [...planLaneTasks(9, 'hello')];
   tampered[3] = { ...tampered[3], updateId: 10 };
   await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: tampered }), /task_plan_mismatch/);
   assert.equal(pool.calls.length, 0);

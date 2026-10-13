@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { deliverOutboxEvent, formatFiveLaneReport } from './outbox-delivery.mjs';
+import { deliverOutboxEvent, formatTenLaneReport } from './outbox-delivery.mjs';
 
-const rows = [1,2,3,4,5].map(lane => ({ lane, status: lane === 1 ? 'succeeded' : 'failed' }));
-test('five lane reports include each status exactly once', () => {
-  const report = formatFiveLaneReport(99, rows);
+const rows = [1,2,3,4,5,6,7,8,9,10].map(lane => ({ lane, status: lane === 1 ? 'succeeded' : 'failed' }));
+test('ten lane reports include each status exactly once', () => {
+  const report = formatTenLaneReport(99, rows);
   assert.match(report, /Android: succeeded/);
-  assert.match(report, /QA ve Test: failed/);
+  assert.match(report, /Entegrasyon ve son QA: failed/);
   assert.match(report, /ChatGPT sohbetlerine/);
-  assert.throws(() => formatFiveLaneReport(99, rows.slice(0,4)), /invalid_report_rows/);
-  assert.throws(() => formatFiveLaneReport(99, [rows[0], rows[0], ...rows.slice(2)]), /invalid_lane_result/);
+  assert.throws(() => formatTenLaneReport(99, rows.slice(0,9)), /invalid_report_rows/);
+  assert.throws(() => formatTenLaneReport(99, [rows[0], rows[0], ...rows.slice(2)]), /invalid_lane_result/);
 });
 test('Telegram success requires a valid message ID', async () => {
   const sent = [];
