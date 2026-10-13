@@ -1,6 +1,7 @@
 const trimSlash=s=>String(s||"").replace(/\/+$/,"");
 const enc=v=>encodeURIComponent(String(v));
-const required=(v,n)=>{if(v===undefined||v===null||v==="")throw new Error(n+" required");return v;};
+const invalidRequest=message=>{const e=new Error(message);e.code="INVALID_REQUEST";e.status=400;return e;};
+const required=(v,n)=>{if(v===undefined||v===null||v==="")throw invalidRequest(n+" required");return v;};
 const DEFAULT_MAX_RESPONSE_BYTES=2*1024*1024;
 const HARD_MAX_RESPONSE_BYTES=8*1024*1024;
 const responseTooLarge=()=>{const e=new Error("ChangeNOW response exceeds safe size limit");e.code="RESPONSE_TOO_LARGE";e.status=502;return e;};
@@ -50,7 +51,7 @@ export class ChangeNowAdapter{
  }
  estimate({fromCurrency,toCurrency,fromAmount,fromNetwork,toNetwork,flow="standard"}){
   required(fromCurrency,"fromCurrency");required(toCurrency,"toCurrency");required(fromAmount,"fromAmount");
-  const amount=Number(fromAmount);if(!Number.isFinite(amount)||amount<=0)throw new Error("fromAmount must be positive");
+  const amount=Number(fromAmount);if(!Number.isFinite(amount)||amount<=0)throw invalidRequest("fromAmount must be positive");
   const q=new URLSearchParams({fromCurrency,toCurrency,fromAmount:String(fromAmount),flow});if(fromNetwork)q.set("fromNetwork",fromNetwork);if(toNetwork)q.set("toNetwork",toNetwork);
   return this.request("/exchange/estimated-amount?"+q,{auth:true});
  }
