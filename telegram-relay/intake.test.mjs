@@ -12,7 +12,7 @@ test('five named lanes are defined', () => {
 
 test('GitHub issue records hash and never embeds message plaintext', () => {
   assert.match(source, /createHash\('sha256'\)/);
-  assert.match(source, /Mesaj SHA-256/);
+  assert.match(source, /Mesaj HMAC-SHA256/);
   assert.doesNotMatch(source, /content\.replaceAll\('```'/);
   assert.doesNotMatch(source, /'```text', content/);
 });
