@@ -33,7 +33,12 @@ CREATE TABLE IF NOT EXISTS marsx_telegram.outbox (
   update_id BIGINT NOT NULL REFERENCES marsx_telegram.intakes(update_id),
   event_kind TEXT NOT NULL CHECK (event_kind IN ('completed','failed')),
   delivered_at TIMESTAMPTZ,
+  claim_token UUID,
+  claim_until TIMESTAMPTZ,
+  attempt_count INTEGER NOT NULL DEFAULT 0 CHECK (attempt_count BETWEEN 0 AND 20),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE(update_id,event_kind)
 );
+CREATE INDEX IF NOT EXISTS marsx_telegram_outbox_pending
+  ON marsx_telegram.outbox(event_id) WHERE delivered_at IS NULL;
 COMMIT;
