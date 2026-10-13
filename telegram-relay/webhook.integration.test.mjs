@@ -45,3 +45,22 @@ test('invalid JSON and spoofed sender are rejected without dispatch', async t =>
   assert.equal(unauthorized.status, 200);
   assert.equal((await unauthorized.json()).ignored, true);
 });
+
+
+test('authorized sender with invalid update id cannot dispatch', async t => {
+  const base = await startRelay(t);
+  const headers = { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'integration-test-secret' };
+  const payload = { update_id: -1, message: { from: { id: 123456 }, chat: { id: 123456, type: 'private' }, text: 'do work' } };
+  const response = await fetch(base + '/telegram/webhook', { method: 'POST', headers, body: JSON.stringify(payload) });
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).error, 'invalid_update_id');
+});
+
+test('group messages cannot dispatch even when sender is authorized', async t => {
+  const base = await startRelay(t);
+  const headers = { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'integration-test-secret' };
+  const payload = { update_id: 2, message: { from: { id: 123456 }, chat: { id: -100, type: 'supergroup' }, text: 'do work' } };
+  const response = await fetch(base + '/telegram/webhook', { method: 'POST', headers, body: JSON.stringify(payload) });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).ignored, true);
+});
