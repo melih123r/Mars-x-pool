@@ -24,4 +24,4 @@ jobs:
       - name: Check JavaScript syntax
         run: node --check telegram-relay/server.mjs
       - name: Run relay regression tests
-        run: node --test telegram-relay/intake.test.mjs telegram-relay/webhook.integration.test.mjs telegram-relay/lane-planner.test.mjs telegram-relay/task-state.test.mjs telegram-relay/task-queue.test.mjs telegram-relay/durable-queue-contract.test.mjs telegram-relay/message-crypto.test.mjs telegram-relay/postgres-task-queue.test.mjs
+        run: node --test telegram-relay/intake.test.mjs telegram-relay/webhook.integration.test.mjs telegram-relay/lane-planner.test.mjs telegram-relay/task-state.test.mjs telegram-relay/task-queue.test.mjs telegram-relay/durable-queue-contract.test.mjs telegram-relay/message-crypto.test.mjs telegram-relay/postgres-task-queue.test.mjs telegram-relay/outbox-delivery.test.mjs
