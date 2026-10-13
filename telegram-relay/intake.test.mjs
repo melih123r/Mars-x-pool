@@ -73,3 +73,8 @@ test('unknown slash commands never create task records', () => {
   assert.match(source, /content\.startsWith\('\/'\)/);
   assert.match(source, /Komut GitHub görev kaydına alınmadı/);
 });
+
+test('fingerprint key is distinct from Telegram webhook secret and minimum length is checked', () => {
+  assert.match(source, /MARSX_MESSAGE_HMAC_KEY/);
+  assert.match(source, /Buffer\.byteLength\(messageHmacKey, 'utf8'\) < 32/);
+});
