@@ -1,0 +1,46 @@
+name: MARS-X Command Center 5m
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+concurrency:
+  group: marsx-command-center-monitor
+  cancel-in-progress: true
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Check PRs and recent workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          python3 - <<'PY'
+          import json, os, urllib.request, datetime
+          repo=os.environ["GH_REPO"]
+          token=os.environ["GH_TOKEN"]
+          def get(path):
+              req=urllib.request.Request("https://api.github.com/repos/"+repo+path,headers={"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json","User-Agent":"marsx-command-center"})
+              with urllib.request.urlopen(req,timeout=15) as response:
+                  return json.load(response)
+          prs=get("/pulls?state=open&per_page=100")
+          runs=get("/actions/runs?per_page=50").get("workflow_runs",[])
+          report={"checked_at":datetime.datetime.now(datetime.timezone.utc).isoformat(),"repository":repo,"pull_requests":[{"number":p["number"],"title":p["title"],"head_sha":p["head"]["sha"],"draft":p["draft"],"url":p["html_url"]} for p in prs],"recent_runs":[{"id":r["id"],"name":r["name"],"head_sha":r["head_sha"],"status":r["status"],"conclusion":r["conclusion"],"url":r["html_url"]} for r in runs]}
+          with open("reports/command-center.json","w") as f: json.dump(report,f,indent=2)
+          print("Open PRs:",len(prs),"Recent runs:",len(runs))
+          for r in report["recent_runs"]:
+              if r["conclusion"]=="failure": print("FAIL:",r["name"],r["head_sha"],r["url"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: command-center-status
+          path: reports/command-center.json
+          retention-days: 7
