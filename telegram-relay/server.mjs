@@ -25,6 +25,7 @@ async function githubRequest(path, options = {}) {
 
 async function dispatchToGithub(updateId, content) {
   if (!githubToken) return { state: 'not_configured' };
+  // GitHub issues store only a SHA-256 digest and lane names; plaintext remains unavailable to workers.
   if (!Number.isSafeInteger(updateId)) return { state: 'invalid_update_id' };
   const marker = 'marsx-telegram-update-' + updateId;
   // A GitHub issue is a durable coordination record, NOT a running agent.
@@ -80,7 +81,8 @@ async function reply(chatId, text) {
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ chat_id: chatId, text })
   });
-  if (!response.ok) throw new Error('Telegram response HTTP ' + response.status);
+  const result = await response.json();
+  if (!response.ok || result.ok !== true) throw new Error('Telegram response HTTP ' + response.status);
 }
 const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && req.url === '/health') return send(res, 200, { ok: true });
@@ -89,10 +91,12 @@ const server = http.createServer(async (req, res) => {
   if (!equal(String(req.headers['x-telegram-bot-api-secret-token'] || ''), secret))
     return send(res, 403, { error: 'forbidden' });
   let body = '';
+  let bytes = 0;
   try {
     for await (const chunk of req) {
-      body += chunk;
-      if (body.length > 32768) return send(res, 413, { error: 'too_large' });
+      bytes += chunk.length;
+      if (bytes > 32768) return send(res, 413, { error: 'too_large' });
+      body += chunk.toString('utf8');
     }
     const update = JSON.parse(body);
     const msg = update.message;
