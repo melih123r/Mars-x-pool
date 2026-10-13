@@ -71,3 +71,36 @@ test('encrypted message retrieval rejects unknown encryption versions', async ()
   await assert.rejects(queue.getEncryptedMessage(1), /unsupported_key_version/);
   await assert.rejects(queue.getEncryptedMessage(-1), /invalid_update_id/);
 });
+
+test('completion event is recorded only after all five lanes finish', async () => {
+  const pool = fakePool();
+  const query = pool.connect;
+  pool.connect = async () => {
+    const client = await query();
+    const original = client.query;
+    client.query = async (sql, params) => {
+      if (sql.startsWith('SELECT lane,status')) return { rows: [1,2,3,4,5].map(lane => ({ lane, status: 'succeeded' })) };
+      if (sql.startsWith('INSERT INTO marsx_telegram.outbox')) return { rowCount: 1 };
+      return original(sql, params);
+    };
+    return client;
+  };
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  assert.deepEqual(await queue.recordCompletionEvent(9), { ready: true, eventKind: 'completed', newlyRecorded: true });
+});
+
+test('incomplete task sets never create a completion event', async () => {
+  const pool = fakePool();
+  const connect = pool.connect;
+  pool.connect = async () => {
+    const client = await connect();
+    const original = client.query;
+    client.query = async (sql, params) => sql.startsWith('SELECT lane,status')
+      ? { rows: [{ lane: 1, status: 'succeeded' }] }
+      : original(sql, params);
+    return client;
+  };
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  assert.deepEqual(await queue.recordCompletionEvent(9), { ready: false });
+  assert.ok(!pool.calls.some(x => x.sql.startsWith('INSERT INTO marsx_telegram.outbox')));
+});
