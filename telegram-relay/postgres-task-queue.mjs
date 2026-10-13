@@ -71,7 +71,7 @@ export class PostgresTaskQueue {
         'SELECT update_id FROM marsx_telegram.tasks WHERE task_id=$1',
         [taskId]
       );
-      if (parent.rows[0]) {
+      if (parent.rows?.[0]) {
         await client.query('SELECT update_id FROM marsx_telegram.intakes WHERE update_id=$1 FOR UPDATE', [parent.rows[0].update_id]);
       }
       const result = await client.query(
@@ -136,7 +136,7 @@ export class PostgresTaskQueue {
         'SELECT update_id FROM marsx_telegram.tasks WHERE task_id=$1',
         [taskId]
       );
-      if (parent.rows[0]) {
+      if (parent.rows?.[0]) {
         await client.query('SELECT update_id FROM marsx_telegram.intakes WHERE update_id=$1 FOR UPDATE', [parent.rows[0].update_id]);
       }
       const result = await client.query(
