@@ -67,6 +67,9 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
       - name: Validate Android project
         run: |
           test -f android/settings.gradle
@@ -80,8 +83,8 @@ jobs:
             chmod +x ./gradlew
             ./gradlew --no-daemon :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
           else
-            echo 'BLOCKED: Android Gradle wrapper absent; no trusted build invoked.' >> "$GITHUB_STEP_SUMMARY"
-            exit 1
+            echo 'Gradle wrapper absent: using pinned Gradle 8.11.1 from setup-gradle' >> "$GITHUB_STEP_SUMMARY"
+            gradle --no-daemon :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
           fi
       - name: Check actual APK size (1 GiB maximum)
         if: success()
