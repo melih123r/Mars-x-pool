@@ -33,7 +33,8 @@ async function dispatchToGithub(updateId, content) {
   // A GitHub issue is a durable coordination record, NOT a running agent.
   // Search reduces duplicate issues on retry but is not atomic across instances.
   const existing = await githubRequest('/search/issues?q=' + encodeURIComponent('repo:' + githubRepo + ' in:title ' + marker) + '&per_page=5');
-  if (existing.items?.length) return { state: 'already_recorded', url: existing.items[0].html_url };
+  const exactMatch = existing.items?.find(item => item.title === '[Telegram] ' + marker);
+  if (exactMatch) return { state: 'already_recorded', url: exactMatch.html_url };
   const digest = createHmac('sha256', secret).update(content, 'utf8').digest('hex');
   const body = [
     'Telegram üzerinden alınan komutun YALNIZCA meta veri kaydı. Mesaj metni gizlilik için GitHub üzerinde saklanmaz.',
