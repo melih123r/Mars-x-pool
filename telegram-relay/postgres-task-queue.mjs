@@ -168,45 +168,56 @@ export class PostgresTaskQueue {
   }
   async recoverExpired(limit = 50) {
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid_limit');
-    const client = await this.pool.connect();
-    try {
-      await client.query('BEGIN');
-      const result = await client.query(
-        `WITH expired AS (
-           SELECT task_id FROM marsx_telegram.tasks
-           WHERE status IN ('claimed','running') AND lease_until <= now()
-           ORDER BY lease_until FOR UPDATE SKIP LOCKED LIMIT $1
-         )
-         UPDATE marsx_telegram.tasks t
-         SET status=CASE WHEN attempt_count >= 20 THEN 'failed' ELSE 'queued' END,
-             worker_id=NULL, lease_until=NULL, updated_at=now()
-         FROM expired e WHERE t.task_id=e.task_id
-         RETURNING t.task_id,t.update_id,t.status`,
-        [limit]
-      );
-      // A crashed worker may have exhausted its retries. Reconcile every affected
-      // intake so an otherwise completed ten-lane job still produces a report.
-      const updateIds = [...new Set(result.rows.filter(row => row.status === 'failed').map(row => row.update_id))];
-      for (const updateId of updateIds) {
-        await client.query('SELECT update_id FROM marsx_telegram.intakes WHERE update_id=$1 FOR UPDATE', [updateId]);
-        const statuses = await client.query('SELECT status FROM marsx_telegram.tasks WHERE update_id=$1', [updateId]);
-        if (statuses.rows.length === LANES.length && statuses.rows.every(row =>
-          ['succeeded','failed','not_configured'].includes(row.status))) {
-          await client.query(
-            `INSERT INTO marsx_telegram.outbox(update_id,event_kind)
-             VALUES ($1,'failed') ON CONFLICT (update_id,event_kind) DO NOTHING`,
-            [updateId]
+    // Read candidate IDs without taking row locks. Every mutation below locks the
+    // parent intake first, then the task, matching ackAtomic and markTaskNotConfigured.
+    // Expiry predicates are rechecked inside UPDATE because candidates may change.
+    const candidates = await this.pool.query(
+      `SELECT task_id,update_id FROM marsx_telegram.tasks
+       WHERE status IN ('claimed','running') AND lease_until <= now()
+       ORDER BY lease_until,task_id LIMIT $1`, [limit]
+    );
+    const recovered = [];
+    for (const candidate of candidates.rows) {
+      const client = await this.pool.connect();
+      try {
+        await client.query('BEGIN');
+        await client.query(
+          'SELECT update_id FROM marsx_telegram.intakes WHERE update_id=$1 FOR UPDATE',
+          [candidate.update_id]
+        );
+        const result = await client.query(
+          `UPDATE marsx_telegram.tasks
+           SET status=CASE WHEN attempt_count >= 20 THEN 'failed' ELSE 'queued' END,
+               worker_id=NULL,lease_until=NULL,updated_at=now()
+           WHERE task_id=$1 AND update_id=$2
+             AND status IN ('claimed','running') AND lease_until <= now()
+           RETURNING task_id,update_id,status`,
+          [candidate.task_id,candidate.update_id]
+        );
+        if (result.rows[0]?.status === 'failed') {
+          const statuses = await client.query(
+            'SELECT status FROM marsx_telegram.tasks WHERE update_id=$1',
+            [candidate.update_id]
           );
+          if (statuses.rows.length === LANES.length && statuses.rows.every(row =>
+            ['succeeded','failed','not_configured'].includes(row.status))) {
+            await client.query(
+              `INSERT INTO marsx_telegram.outbox(update_id,event_kind)
+               VALUES ($1,'failed') ON CONFLICT (update_id,event_kind) DO NOTHING`,
+              [candidate.update_id]
+            );
+          }
         }
+        await client.query('COMMIT');
+        if (result.rows[0]) recovered.push(result.rows[0]);
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
       }
-      await client.query('COMMIT');
-      return result.rows;
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
     }
+    return recovered;
   }
   async getEncryptedMessage(updateId) {
     if (!Number.isSafeInteger(updateId) || updateId < 0) throw new Error('invalid_update_id');
