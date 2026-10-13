@@ -64,3 +64,18 @@ test('group messages cannot dispatch even when sender is authorized', async t =>
   assert.equal(response.status, 200);
   assert.equal((await response.json()).ignored, true);
 });
+
+
+test('oversized webhook payload is rejected before JSON parsing or dispatch', async t => {
+  const base = await startRelay(t);
+  const headers = { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'integration-test-secret' };
+  const response = await fetch(base + '/telegram/webhook', { method: 'POST', headers, body: 'x'.repeat(32769) });
+  assert.equal(response.status, 413);
+  assert.equal((await response.json()).error, 'too_large');
+});
+
+test('unknown webhook routes do not accept commands', async t => {
+  const base = await startRelay(t);
+  const response = await fetch(base + '/not-the-webhook', { method: 'POST', body: '{}' });
+  assert.equal(response.status, 404);
+});
