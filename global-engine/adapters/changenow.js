@@ -67,7 +67,7 @@ export class ChangeNowAdapter{
     throw Object.assign(new Error("invalid_refund_address"),{status:400});
   if([extraId,refundExtraId].some(v=>v!==undefined&&(typeof v!=="string"||v.length>128)))
     throw Object.assign(new Error("invalid_extra_id"),{status:400});
-  if(typeof fromAmount!=="string"||!/^\\d+(?:\\.\\d{1,18})?$/.test(fromAmount)||!(Number(fromAmount)>0)||!Number.isFinite(Number(fromAmount)))
+  if(typeof fromAmount!=="string"||!/^\d+(?:\.\d{1,18})?$/.test(fromAmount)||!(Number(fromAmount)>0)||!Number.isFinite(Number(fromAmount)))
     throw Object.assign(new Error("invalid_exchange_amount"),{status:400});
   if(intent.flow!==undefined&&intent.flow!=="standard")
     throw Object.assign(new Error("unsupported_exchange_flow"),{status:400});
