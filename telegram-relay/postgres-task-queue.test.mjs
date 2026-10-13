@@ -190,3 +190,13 @@ test('expired last-attempt worker generates failed outbox report', async () => {
   assert.ok(pool.calls.some(x => x.sql.includes("VALUES ($1,'failed')")));
   assert.ok(pool.calls.some(x => x.sql === 'COMMIT'));
 });
+
+test('malformed or oversized intake cannot write anything to database', async () => {
+  const pool = fakePool();
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: planFiveLaneTasks(9, 'x'.repeat(4001)) }), /invalid_message/);
+  const tampered = planFiveLaneTasks(9, 'hello');
+  tampered[3].updateId = 10;
+  await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: tampered }), /task_plan_mismatch/);
+  assert.equal(pool.calls.length, 0);
+});
