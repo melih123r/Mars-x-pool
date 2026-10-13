@@ -33,3 +33,9 @@ test("rejects broken upstream JSON and invalid timeout",async()=>{
  await assert.rejects(fetchPublicOrderBook("BTCUSDT",{fetchImpl:async()=>{throw Error("network")}}),/market_data_unavailable/);
  await assert.rejects(fetchPublicOrderBook("BTCUSDT",{timeoutMs:99999}),/invalid_timeout/);
 });
+
+test("rejects streamed order book responses above the byte cap",async()=>{
+ const payload={lastUpdateId:10,bids:[["100","2"]],asks:[["101","3"]],padding:"x".repeat(256*1024)};
+ const fetchImpl=async()=>new Response(JSON.stringify(payload),{status:200,headers:{"content-type":"application/json"}});
+ await assert.rejects(fetchPublicOrderBook("BTCUSDT",{fetchImpl}),/market_data_too_large/);
+});
