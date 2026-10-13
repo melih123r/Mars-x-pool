@@ -78,6 +78,35 @@ test('expired worker leases use parent-first locking and recheck expiry', async 
   await assert.rejects(queue.recoverExpired(0), /invalid_limit/);
 });
 
+test('recovery skips a lease renewed after candidate scan without generating an outbox event', async () => {
+  const pool = fakePool();
+  const originalQuery = pool.query.bind(pool);
+  pool.query = async (sql, params) => {
+    if (sql.includes('SELECT task_id,update_id FROM marsx_telegram.tasks')) {
+      pool.calls.push({ sql, params });
+      return { rows: [{ task_id: 'telegram-9-lane-1', update_id: 9 }] };
+    }
+    return originalQuery(sql, params);
+  };
+  const connect = pool.connect.bind(pool);
+  pool.connect = async () => {
+    const client = await connect();
+    const original = client.query.bind(client);
+    client.query = async (sql, params) => {
+      if (sql.startsWith('UPDATE marsx_telegram.tasks') && sql.includes('lease_until <= now()')) {
+        pool.calls.push({ sql, params });
+        return { rows: [] }; // Another worker renewed the lease after scanning.
+      }
+      return original(sql, params);
+    };
+    return client;
+  };
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  assert.deepEqual(await queue.recoverExpired(1), []);
+  assert.ok(pool.calls.some(x => x.sql === 'COMMIT'));
+  assert.ok(!pool.calls.some(x => x.sql.includes('INSERT INTO marsx_telegram.outbox')));
+});
+
 test('encrypted message retrieval rejects unknown encryption versions', async () => {
   const pool = fakePool();
   pool.query = async () => ({ rows: [{ payload_ciphertext: Buffer.from('x'), encryption_key_version: 99 }] });
