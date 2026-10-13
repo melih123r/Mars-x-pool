@@ -68,3 +68,8 @@ test('invalid JSON returns client error', () => {
 test('deduplication only accepts exact matching issue title', () => {
   assert.match(source, /item\.title === '\[Telegram\] ' \+ marker/);
 });
+
+test('unknown slash commands never create task records', () => {
+  assert.match(source, /content\.startsWith\('\/'\)/);
+  assert.match(source, /Komut GitHub görev kaydına alınmadı/);
+});
