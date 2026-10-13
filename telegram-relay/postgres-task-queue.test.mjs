@@ -143,3 +143,16 @@ test('last worker acknowledgement creates outbox event inside same transaction',
   assert.ok(pool.calls.some(x => x.sql.startsWith('INSERT INTO marsx_telegram.outbox')));
   assert.ok(pool.calls.some(x => x.sql === 'COMMIT'));
 });
+
+test('worker polls only its assigned lane using atomic SKIP LOCKED', async () => {
+  const pool = fakePool();
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  const task = await queue.claimNextTask('android_worker', 1);
+  assert.ok(task);
+  const claim = pool.calls.find(x => x.sql.includes("WHERE lane=$2 AND status='queued'"));
+  assert.ok(claim);
+  assert.match(claim.sql, /FOR UPDATE SKIP LOCKED/);
+  assert.deepEqual(claim.params, ['android_worker', 1, 90]);
+  await assert.rejects(queue.claimNextTask('worker', 6), /invalid_lane/);
+  await assert.rejects(queue.claimNextTask('bad worker', 1), /invalid_worker_id/);
+});
