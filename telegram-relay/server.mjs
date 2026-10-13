@@ -11,6 +11,7 @@ const recentUpdates = new Set();
 const processingUpdates = new Set();
 const MAX_RECENT_UPDATES = 1000;
 const githubToken = process.env.MARSX_GITHUB_TOKEN || '';
+const messageHmacKey = process.env.MARSX_MESSAGE_HMAC_KEY || '';
 const githubRepo = 'melih123r/Mars-x-pool';
 const lanes = ['Android', 'Grafik ve UI', 'Backend ve API', 'Finance ve Exchange', 'QA ve Test'];
 
@@ -28,7 +29,7 @@ async function githubRequest(path, options = {}) {
 async function dispatchToGithub(updateId, content) {
   if (!githubToken) return { state: 'not_configured' };
   if (Buffer.byteLength(messageHmacKey, 'utf8') < 32) return { state: 'message_hmac_key_required' };
-  // GitHub issues store only a SHA-256 digest and lane names; plaintext remains unavailable to workers.
+  // GitHub issues store only a keyed HMAC fingerprint and lane names; plaintext remains unavailable to workers.
   if (!Number.isSafeInteger(updateId)) return { state: 'invalid_update_id' };
   const marker = 'marsx-telegram-update-' + updateId;
   // A GitHub issue is a durable coordination record, NOT a running agent.
