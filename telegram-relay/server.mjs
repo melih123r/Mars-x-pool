@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual, createHash } from 'node:crypto';
 
 const port = Number(process.env.PORT || 10000);
 const token = process.env.TELEGRAM_BOT_TOKEN || '';
@@ -23,8 +23,6 @@ async function githubRequest(path, options = {}) {
 }
 
 async function dispatchToGithub(updateId, content) {
-  // Fail closed: GitHub issues can be public. Never copy Telegram messages to issues by default.
-  if (process.env.MARSX_ALLOW_GITHUB_MESSAGE_STORAGE !== 'true') return { state: 'private_storage_required' };
   if (!githubToken) return { state: 'not_configured' };
   if (!Number.isSafeInteger(updateId)) return { state: 'invalid_update_id' };
   const marker = 'marsx-telegram-update-' + updateId;
@@ -32,12 +30,12 @@ async function dispatchToGithub(updateId, content) {
   // Search reduces duplicate issues on retry but is not atomic across instances.
   const existing = await githubRequest('/search/issues?q=' + encodeURIComponent('repo:' + githubRepo + ' in:title ' + marker) + '&per_page=5');
   if (existing.items?.length) return { state: 'already_recorded', url: existing.items[0].html_url };
+  const digest = createHash('sha256').update(content, 'utf8').digest('hex');
   const body = [
-    'Telegram üzerinden alınan komut. Bu kayıt görevleri yürütmez; worker entegrasyonu henüz bağlı değildir.',
-    '', 'Telegram update ID: ' + updateId, '',
-    '## Orijinal mesaj (aynen)', '```text', content.replaceAll('```', '` ` `'), '```', '',
+    'Telegram üzerinden alınan komutun YALNIZCA meta veri kaydı. Mesaj metni gizlilik için GitHub üzerinde saklanmaz.',
+    '', 'Telegram update ID: ' + updateId, 'Mesaj SHA-256: ' + digest, 'Mesaj karakter sayısı: ' + content.length, '',
     '## Beş görev alanı', ...lanes.map((lane, i) => '- [ ] ' + (i + 1) + '. ' + lane + ' — worker bağlı değil'),
-    '', 'Durum: kaydedildi, çalıştırılmadı. ChatGPT tüketici sohbetlerine mesaj gönderilmedi.'
+    '', 'Durum: meta veri kaydedildi; mesaj aktarılmadı, görevler çalıştırılmadı. ChatGPT sohbetlerine mesaj gönderilmedi.'
   ].join('\n');
   const issue = await githubRequest('/repos/' + githubRepo + '/issues', {
     method: 'POST', headers: { 'content-type': 'application/json' },
@@ -111,7 +109,7 @@ const server = http.createServer(async (req, res) => {
     } else {
       const dispatch = await dispatchToGithub(updateId, content);
       answer = dispatch.state === 'recorded' || dispatch.state === 'already_recorded'
-        ? 'MARS-X: mesajın 5 görev alanı için GitHub kaydına alındı. Görevler henüz çalıştırılmadı. ' + dispatch.url
+        ? 'MARS-X: 5 görev alanı için mesajın sadece meta verisi GitHub kaydına alındı. Mesaj metni aktarılmadı; görevler çalıştırılmadı. ' + dispatch.url
         : 'MARS-X: mesaj alındı ama görev kaydı oluşturulmadı (' + dispatch.state + '). Özel mesaj güvenliği ve worker bağlantısı gerekiyor.';
     }
     // Deliberately no ChatGPT session access or message forwarding.
