@@ -132,5 +132,31 @@ export class PostgresTaskQueue {
       client.release();
     }
   }
+  async fetchPendingOutbox(limit = 20) {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid_limit');
+    const result = await this.pool.query(
+      `SELECT o.event_id,o.update_id,o.event_kind,t.lane,t.status
+       FROM marsx_telegram.outbox o
+       JOIN marsx_telegram.tasks t ON t.update_id=o.update_id
+       WHERE o.delivered_at IS NULL AND o.event_id IN
+         (SELECT event_id FROM marsx_telegram.outbox WHERE delivered_at IS NULL ORDER BY event_id LIMIT $1)
+       ORDER BY o.event_id,t.lane`,
+      [limit]
+    );
+    const events = new Map();
+    for (const row of result.rows) {
+      if (!events.has(row.event_id)) events.set(row.event_id, { event_id: row.event_id, update_id: Number(row.update_id), event_kind: row.event_kind, rows: [] });
+      events.get(row.event_id).rows.push({ lane: row.lane, status: row.status });
+    }
+    return [...events.values()];
+  }
+  async markOutboxDelivered(eventId) {
+    if (!Number.isSafeInteger(eventId) || eventId < 1) throw new Error('invalid_event_id');
+    const result = await this.pool.query(
+      'UPDATE marsx_telegram.outbox SET delivered_at=now() WHERE event_id=$1 AND delivered_at IS NULL RETURNING event_id',
+      [eventId]
+    );
+    return result.rowCount === 1;
+  }
   async close() { await this.pool.end(); }
 }
