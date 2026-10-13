@@ -1,4 +1,5 @@
 import pg from 'pg';
+import { randomUUID } from 'node:crypto';
 import { encryptMessage, decryptMessage, loadEncryptionKey } from './message-crypto.mjs';
 import { planFiveLaneTasks } from './lane-planner.mjs';
 
@@ -155,6 +156,37 @@ export class PostgresTaskQueue {
     const result = await this.pool.query(
       'UPDATE marsx_telegram.outbox SET delivered_at=now() WHERE event_id=$1 AND delivered_at IS NULL RETURNING event_id',
       [eventId]
+    );
+    return result.rowCount === 1;
+  }
+  async claimOutbox(limit = 20, leaseSeconds = 90) {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid_limit');
+    if (!Number.isSafeInteger(leaseSeconds) || leaseSeconds < 15 || leaseSeconds > 300) throw new Error('invalid_lease');
+    const token = randomUUID();
+    const result = await this.pool.query(
+      `WITH available AS (
+         SELECT event_id FROM marsx_telegram.outbox
+         WHERE delivered_at IS NULL AND (claim_until IS NULL OR claim_until <= now())
+           AND attempt_count < 20
+         ORDER BY event_id FOR UPDATE SKIP LOCKED LIMIT $1
+       )
+       UPDATE marsx_telegram.outbox o
+       SET claim_token=$2::uuid, claim_until=now()+($3::integer * interval '1 second'),
+           attempt_count=attempt_count+1
+       FROM available a WHERE o.event_id=a.event_id
+       RETURNING o.event_id,o.update_id,o.event_kind`,
+      [limit, token, leaseSeconds]
+    );
+    return { token, events: result.rows };
+  }
+  async markClaimedOutboxDelivered(eventId, token) {
+    if (!Number.isSafeInteger(eventId) || eventId < 1) throw new Error('invalid_event_id');
+    if (typeof token !== 'string' || !/^[0-9a-f-]{36}$/i.test(token)) throw new Error('invalid_claim_token');
+    const result = await this.pool.query(
+      `UPDATE marsx_telegram.outbox SET delivered_at=now(), claim_token=NULL, claim_until=NULL
+       WHERE event_id=$1 AND claim_token=$2::uuid AND claim_until > now()
+         AND delivered_at IS NULL RETURNING event_id`,
+      [eventId, token]
     );
     return result.rowCount === 1;
   }
