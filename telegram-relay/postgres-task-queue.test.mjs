@@ -58,17 +58,53 @@ test('worker claims and acknowledgements require validated IDs', async () => {
   await assert.rejects(queue.ackAtomic('telegram-9-lane-1', 'worker_1', 'queued'), /invalid_outcome/);
 });
 
-test('expired worker leases are atomically recovered', async () => {
+test('expired worker leases use parent-first locking and recheck expiry', async () => {
   const pool = fakePool();
+  pool.query = async (sql, params = []) => {
+    pool.calls.push({ sql, params });
+    if (sql.includes('SELECT task_id,update_id FROM marsx_telegram.tasks')) {
+      return { rows: [{ task_id: 'telegram-9-lane-1', update_id: 9 }] };
+    }
+    return pool.connect().then(client => client.query(sql, params));
+  };
   const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
   await queue.recoverExpired(25);
-  const sql = pool.calls.find(x => x.sql.includes('FOR UPDATE SKIP LOCKED'));
-  assert.ok(sql);
-  assert.deepEqual(sql.params, [25]);
-  assert.ok(pool.calls.some(x => x.sql === 'BEGIN'));
-  assert.ok(pool.calls.some(x => x.sql === 'COMMIT'));
-  assert.ok(pool.calls.some(x => x.sql === 'RELEASE'));
+  const queries = pool.calls.map(call => call.sql);
+  const parentIndex = queries.findIndex(sql => sql.includes('FROM marsx_telegram.intakes') && sql.includes('FOR UPDATE'));
+  const taskIndex = queries.findIndex(sql => sql.includes('UPDATE marsx_telegram.tasks'));
+  assert.ok(parentIndex >= 0 && taskIndex > parentIndex);
+  assert.ok(queries[taskIndex].includes('lease_until <= now()'));
+  assert.ok(queries.some(sql => sql === 'COMMIT'));
   await assert.rejects(queue.recoverExpired(0), /invalid_limit/);
+});
+
+test('recovery skips a lease renewed after candidate scan without generating an outbox event', async () => {
+  const pool = fakePool();
+  const originalQuery = pool.query.bind(pool);
+  pool.query = async (sql, params) => {
+    if (sql.includes('SELECT task_id,update_id FROM marsx_telegram.tasks')) {
+      pool.calls.push({ sql, params });
+      return { rows: [{ task_id: 'telegram-9-lane-1', update_id: 9 }] };
+    }
+    return originalQuery(sql, params);
+  };
+  const connect = pool.connect.bind(pool);
+  pool.connect = async () => {
+    const client = await connect();
+    const original = client.query.bind(client);
+    client.query = async (sql, params) => {
+      if (sql.startsWith('UPDATE marsx_telegram.tasks') && sql.includes('lease_until <= now()')) {
+        pool.calls.push({ sql, params });
+        return { rows: [] }; // Another worker renewed the lease after scanning.
+      }
+      return original(sql, params);
+    };
+    return client;
+  };
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  assert.deepEqual(await queue.recoverExpired(1), []);
+  assert.ok(pool.calls.some(x => x.sql === 'COMMIT'));
+  assert.ok(!pool.calls.some(x => x.sql.includes('INSERT INTO marsx_telegram.outbox')));
 });
 
 test('encrypted message retrieval rejects unknown encryption versions', async () => {
@@ -173,17 +209,27 @@ test('legitimate worker task ID can be marked not configured', async () => {
 
 test('expired last-attempt worker generates failed outbox report', async () => {
   const pool = fakePool();
-  const connect = pool.connect;
+  const baseQuery = pool.query.bind(pool);
+  pool.query = async (sql, params) => {
+    if (sql.includes('SELECT task_id,update_id FROM marsx_telegram.tasks')) {
+      pool.calls.push({ sql, params });
+      return { rows: [{ task_id: 'telegram-9-lane-5', update_id: 9 }] };
+    }
+    return baseQuery(sql, params);
+  };
+  const connect = pool.connect.bind(pool);
   pool.connect = async () => {
     const client = await connect();
-    const original = client.query;
+    const original = client.query.bind(client);
     client.query = async (sql, params) => {
-      if (sql.includes('WITH expired AS')) {
+      if (sql.startsWith('UPDATE marsx_telegram.tasks') && sql.includes('lease_until <= now()')) {
         pool.calls.push({ sql, params });
         return { rows: [{ task_id: 'telegram-9-lane-5', update_id: 9, status: 'failed' }] };
       }
-      if (sql.startsWith('SELECT status FROM marsx_telegram.tasks'))
-        return { rows: ['succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','failed'].map(status => ({ status })) };
+      if (sql.startsWith('SELECT status FROM marsx_telegram.tasks')) {
+        pool.calls.push({ sql, params });
+        return { rows: [...Array(9).fill('succeeded'), 'failed'].map(status => ({ status })) };
+      }
       return original(sql, params);
     };
     return client;
