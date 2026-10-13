@@ -65,6 +65,15 @@ export class PostgresTaskQueue {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+      // Acquire the parent intake lock before changing any task row. This
+      // matches recordCompletionEvent and avoids concurrent completion deadlocks.
+      const parent = await client.query(
+        'SELECT update_id FROM marsx_telegram.tasks WHERE task_id=$1',
+        [taskId]
+      );
+      if (parent.rows[0]) {
+        await client.query('SELECT update_id FROM marsx_telegram.intakes WHERE update_id=$1 FOR UPDATE', [parent.rows[0].update_id]);
+      }
       const result = await client.query(
         `UPDATE marsx_telegram.tasks SET status=$3, lease_until=NULL, updated_at=now()
          WHERE task_id=$1 AND worker_id=$2 AND status IN ('claimed','running')
@@ -73,8 +82,7 @@ export class PostgresTaskQueue {
       );
       if (result.rows[0]) {
         const updateId = result.rows[0].update_id;
-        // Serialize completion checks for this intake across concurrent lane workers.
-        await client.query('SELECT update_id FROM marsx_telegram.intakes WHERE update_id=$1 FOR UPDATE', [updateId]);
+        // Parent intake lock is already held before updating the task.
         const statuses = await client.query(
           'SELECT status FROM marsx_telegram.tasks WHERE update_id=$1',
           [updateId]
@@ -123,6 +131,14 @@ export class PostgresTaskQueue {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+      // Use the same parent-first lock order as acknowledgements and recovery.
+      const parent = await client.query(
+        'SELECT update_id FROM marsx_telegram.tasks WHERE task_id=$1',
+        [taskId]
+      );
+      if (parent.rows[0]) {
+        await client.query('SELECT update_id FROM marsx_telegram.intakes WHERE update_id=$1 FOR UPDATE', [parent.rows[0].update_id]);
+      }
       const result = await client.query(
         `UPDATE marsx_telegram.tasks SET status='not_configured',lease_until=NULL,updated_at=now()
          WHERE task_id=$1 AND worker_id=$2 AND status='claimed' AND lease_until > now()
@@ -131,7 +147,6 @@ export class PostgresTaskQueue {
       );
       if (result.rows[0]) {
         const updateId = result.rows[0].update_id;
-        await client.query('SELECT update_id FROM marsx_telegram.intakes WHERE update_id=$1 FOR UPDATE', [updateId]);
         const statuses = await client.query('SELECT status FROM marsx_telegram.tasks WHERE update_id=$1', [updateId]);
         if (statuses.rows.length === LANES.length && statuses.rows.every(row =>
           ['succeeded','failed','not_configured'].includes(row.status))) {
