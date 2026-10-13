@@ -1,5 +1,5 @@
 import pg from 'pg';
-import { encryptMessage, loadEncryptionKey } from './message-crypto.mjs';
+import { encryptMessage, decryptMessage, loadEncryptionKey } from './message-crypto.mjs';
 import { planFiveLaneTasks } from './lane-planner.mjs';
 
 // Production adapter: requires an already-migrated PostgreSQL schema and dedicated role.
@@ -67,6 +67,33 @@ export class PostgresTaskQueue {
       [taskId, workerId, outcome]
     );
     return result.rows[0] || null;
+  }
+  async recoverExpired(limit = 50) {
+    if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid_limit');
+    const result = await this.pool.query(
+      `WITH expired AS (
+         SELECT task_id FROM marsx_telegram.tasks
+         WHERE status IN ('claimed','running') AND lease_until <= now()
+         ORDER BY lease_until FOR UPDATE SKIP LOCKED LIMIT $1
+       )
+       UPDATE marsx_telegram.tasks t
+       SET status=CASE WHEN attempt_count >= 20 THEN 'failed' ELSE 'queued' END,
+           worker_id=NULL, lease_until=NULL, updated_at=now()
+       FROM expired e WHERE t.task_id=e.task_id
+       RETURNING t.task_id,t.status`,
+      [limit]
+    );
+    return result.rows;
+  }
+  async getEncryptedMessage(updateId) {
+    if (!Number.isSafeInteger(updateId) || updateId < 0) throw new Error('invalid_update_id');
+    const result = await this.pool.query(
+      'SELECT payload_ciphertext,encryption_key_version FROM marsx_telegram.intakes WHERE update_id=$1',
+      [updateId]
+    );
+    if (!result.rows[0]) return null;
+    if (result.rows[0].encryption_key_version !== 1) throw new Error('unsupported_key_version');
+    return decryptMessage(result.rows[0].payload_ciphertext, this.key, updateId);
   }
   async close() { await this.pool.end(); }
 }
