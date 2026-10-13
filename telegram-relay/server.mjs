@@ -13,6 +13,15 @@ const publicUrl = process.env.RENDER_EXTERNAL_URL || 'https://marsx-telegram-rel
 const durableMode = process.env.MARSX_DISPATCH_MODE === 'postgres';
 const durableQueue = durableMode ? new PostgresTaskQueue({ connectionString: process.env.DATABASE_URL, encryptionKeyHex: process.env.MARSX_MESSAGE_ENCRYPTION_KEY }) : null;
 const outboxEnabled = durableMode && process.env.MARSX_OUTBOX_ENABLED === 'true';
+const recoveryEnabled = durableMode && process.env.MARSX_RECOVERY_ENABLED === 'true';
+let recoveryBusy = false;
+async function pollRecovery() {
+  if (!recoveryEnabled || recoveryBusy) return;
+  recoveryBusy = true;
+  try { await durableQueue.recoverExpired(50); }
+  catch (error) { console.error('Task lease recovery failed:', error.message); }
+  finally { recoveryBusy = false; }
+}
 let outboxBusy = false;
 async function pollOutbox() {
   if (!outboxEnabled || outboxBusy) return;
@@ -180,5 +189,11 @@ server.listen(port, '0.0.0.0', () => {
     const interval = setInterval(() => void pollOutbox(), 30000);
     interval.unref();
     void pollOutbox();
+  }
+  if (recoveryEnabled) {
+    console.log('PostgreSQL expired-task recovery enabled');
+    const recoveryInterval = setInterval(() => void pollRecovery(), 60000);
+    recoveryInterval.unref();
+    void pollRecovery();
   }
 });
