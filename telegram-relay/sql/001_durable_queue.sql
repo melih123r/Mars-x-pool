@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS marsx_telegram.tasks (
       OR (status NOT IN ('claimed','running') AND lease_until IS NULL))
 );
 CREATE INDEX IF NOT EXISTS marsx_telegram_tasks_claimable
-  ON marsx_telegram.tasks(status, updated_at) WHERE status = 'queued';
+  ON marsx_telegram.tasks(lane, updated_at, task_id) WHERE status = 'queued' AND attempt_count < 20;
 CREATE INDEX IF NOT EXISTS marsx_telegram_tasks_expired
   ON marsx_telegram.tasks(lease_until) WHERE status IN ('claimed','running');
 CREATE TABLE IF NOT EXISTS marsx_telegram.outbox (
@@ -40,5 +40,5 @@ CREATE TABLE IF NOT EXISTS marsx_telegram.outbox (
   UNIQUE(update_id,event_kind)
 );
 CREATE INDEX IF NOT EXISTS marsx_telegram_outbox_pending
-  ON marsx_telegram.outbox(event_id) WHERE delivered_at IS NULL;
+  ON marsx_telegram.outbox(event_id) WHERE delivered_at IS NULL AND attempt_count < 20;
 COMMIT;
