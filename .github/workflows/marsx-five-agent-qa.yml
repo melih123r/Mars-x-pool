@@ -1,0 +1,29 @@
+name: MARS-X zero-cost QA (5 min)
+on:
+  schedule:
+    - cron: '2/5 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: marsx-zero-cost-qa
+  cancel-in-progress: false
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MARSX_API_BUDGET_USD: "0"
+      MARSX_ALLOW_PAID_API: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run deterministic read-only QA (no OpenAI API)
+        run: python3 scripts/marsx_five_agent_qa.py
+      - name: Save evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: marsx-zero-cost-qa-${{ github.run_id }}
+          path: qa-output/
+          retention-days: 7
