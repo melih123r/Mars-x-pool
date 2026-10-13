@@ -6,6 +6,8 @@ const token = process.env.TELEGRAM_BOT_TOKEN || '';
 const secret = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const allowedUser = process.env.TELEGRAM_ALLOWED_USER_ID || '';
 const publicUrl = process.env.RENDER_EXTERNAL_URL || 'https://marsx-telegram-relay.onrender.com';
+const recentUpdates = new Set();
+const MAX_RECENT_UPDATES = 1000;
 
 async function registerWebhook() {
   if (!token || !secret || !allowedUser) {
@@ -61,9 +63,20 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { ok: true, ignored: true });
     const content = String(msg.text || '').trim();
     if (!content || content.length > 4000) return send(res, 200, { ok: true, ignored: true });
+    // Best-effort duplicate suppression for Telegram retries during this process lifetime.
+    // This is not durable exactly-once delivery across restarts or multiple instances.
+    const updateId = update.update_id;
+    if (Number.isSafeInteger(updateId) && recentUpdates.has(updateId)) return send(res, 200, { ok: true, duplicate: true });
+    const answer = content === '/status' || content === '/start' || content === '/help'
+      ? 'MARS-X Telegram bağlantısı aktif. 5 mevcut ChatGPT sohbetine otomatik aktarım bağlı değil. /status ile durumu görebilirsin.'
+      : 'MARS-X: mesaj alındı. 5 ChatGPT sohbetine gönderilmedi; mevcut sohbetlere otomatik erişim bağlı değil.';
     // Deliberately no ChatGPT session access or message forwarding.
-    console.log(JSON.stringify({ event: 'telegram_command_received', updateId: update.update_id, length: content.length }));
-    await reply(msg.chat.id, 'MARS-X: mesaj alındı. ChatGPT sohbetlerine aktarım henüz bağlı değil.');
+    console.log(JSON.stringify({ event: 'telegram_command_received', updateId, length: content.length }));
+    await reply(msg.chat.id, answer);
+    if (Number.isSafeInteger(updateId)) {
+      recentUpdates.add(updateId);
+      if (recentUpdates.size > MAX_RECENT_UPDATES) recentUpdates.delete(recentUpdates.values().next().value);
+    }
     return send(res, 200, { ok: true });
   } catch (err) {
     console.error('Telegram webhook error:', err.message);
