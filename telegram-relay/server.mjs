@@ -1,13 +1,84 @@
+import { flushOutbox } from './outbox-flush.mjs';
+import { PostgresTaskQueue } from './postgres-task-queue.mjs';
+import { enqueueTenDurably } from './durable-queue-contract.mjs';
+import { LANES } from './lane-planner.mjs';
 import http from 'node:http';
-import { timingSafeEqual } from 'node:crypto';
+import { StringDecoder } from 'node:string_decoder';
+import { timingSafeEqual, createHmac } from 'node:crypto';
 
 const port = Number(process.env.PORT || 10000);
+const host = process.env.HOST || '0.0.0.0';
 const token = process.env.TELEGRAM_BOT_TOKEN || '';
 const secret = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const allowedUser = process.env.TELEGRAM_ALLOWED_USER_ID || '';
 const publicUrl = process.env.RENDER_EXTERNAL_URL || 'https://marsx-telegram-relay.onrender.com';
+const durableMode = process.env.MARSX_DISPATCH_MODE === 'postgres';
+const durableQueue = durableMode ? new PostgresTaskQueue({ connectionString: process.env.DATABASE_URL, encryptionKeyHex: process.env.MARSX_MESSAGE_ENCRYPTION_KEY }) : null;
+const outboxEnabled = durableMode && process.env.MARSX_OUTBOX_ENABLED === 'true';
+const recoveryEnabled = durableMode && process.env.MARSX_RECOVERY_ENABLED === 'true';
+let recoveryBusy = false;
+async function pollRecovery() {
+  if (!recoveryEnabled || recoveryBusy) return;
+  recoveryBusy = true;
+  try { await durableQueue.recoverExpired(50); }
+  catch (error) { console.error('Task lease recovery failed:', error.message); }
+  finally { recoveryBusy = false; }
+}
+let outboxBusy = false;
+async function pollOutbox() {
+  if (!outboxEnabled || outboxBusy) return;
+  outboxBusy = true;
+  try {
+    const results = await flushOutbox({ queue: durableQueue, token, chatId: allowedUser, limit: 10 });
+    for (const item of results) if (!item.delivered) console.warn('Outbox pending', item.eventId, item.error || 'ack_not_confirmed');
+  } catch (error) { console.error('Outbox polling failed:', error.message); }
+  finally { outboxBusy = false; }
+}
+
 const recentUpdates = new Set();
+const processingUpdates = new Set();
 const MAX_RECENT_UPDATES = 1000;
+const githubToken = process.env.MARSX_GITHUB_TOKEN || '';
+const messageHmacKey = process.env.MARSX_MESSAGE_HMAC_KEY || '';
+const githubRepo = 'melih123r/Mars-x-pool';
+const lanes = LANES;
+
+async function githubRequest(path, options = {}) {
+  const response = await fetch('https://api.github.com' + path, {
+    ...options,
+    signal: AbortSignal.timeout(10000),
+    headers: { accept: 'application/vnd.github+json', authorization: 'Bearer ' + githubToken,
+      'x-github-api-version': '2022-11-28', 'user-agent': 'marsx-telegram-relay', ...(options.headers || {}) }
+  });
+  if (!response.ok) throw new Error('GitHub API HTTP ' + response.status);
+  return response.json();
+}
+
+async function dispatchToGithub(updateId, content) {
+  if (!githubToken) return { state: 'not_configured' };
+  if (Buffer.byteLength(messageHmacKey, 'utf8') < 32) return { state: 'message_hmac_key_required' };
+  // GitHub issues store only a keyed HMAC fingerprint and lane names; plaintext remains unavailable to workers.
+  if (!Number.isSafeInteger(updateId)) return { state: 'invalid_update_id' };
+  const marker = 'marsx-telegram-update-' + updateId;
+  // A GitHub issue is a durable coordination record, NOT a running agent.
+  // Search reduces duplicate issues on retry but is not atomic across instances.
+  const existing = await githubRequest('/search/issues?q=' + encodeURIComponent('repo:' + githubRepo + ' in:title ' + marker) + '&per_page=5');
+  const exactMatch = existing.items?.find(item => item.title === '[Telegram] ' + marker);
+  if (exactMatch) return { state: 'already_recorded', url: exactMatch.html_url };
+  const digest = createHmac('sha256', messageHmacKey).update(content, 'utf8').digest('hex');
+  const body = [
+    'Telegram üzerinden alınan komutun YALNIZCA meta veri kaydı. Mesaj metni gizlilik için GitHub üzerinde saklanmaz.',
+    '', 'Telegram update ID: ' + updateId, 'Mesaj HMAC-SHA256: ' + digest, 'Mesaj karakter sayısı: ' + content.length, '',
+    '## 10 görev alanı', ...lanes.map((lane, i) => '- [ ] ' + (i + 1) + '. ' + lane + ' — worker bağlı değil'),
+    '', 'Durum: meta veri kaydedildi; mesaj aktarılmadı, görevler çalıştırılmadı. ChatGPT sohbetlerine mesaj gönderilmedi.'
+  ].join('\n');
+  const issue = await githubRequest('/repos/' + githubRepo + '/issues', {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ title: '[Telegram] ' + marker, body })
+  });
+  return { state: 'recorded', url: issue.html_url };
+}
+
 
 async function registerWebhook() {
   if (!token || !secret || !allowedUser) {
@@ -17,6 +88,7 @@ async function registerWebhook() {
   try {
     const url = new URL('/telegram/webhook', publicUrl).toString();
     const response = await fetch('https://api.telegram.org/bot' + token + '/setWebhook', {
+      signal: AbortSignal.timeout(10000),
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ url, secret_token: secret, allowed_updates: ['message'], drop_pending_updates: false })
@@ -40,50 +112,111 @@ function send(res, status, payload) {
 }
 async function reply(chatId, text) {
   const response = await fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
+    signal: AbortSignal.timeout(10000),
     method: 'POST', headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ chat_id: chatId, text })
   });
-  if (!response.ok) throw new Error('Telegram response HTTP ' + response.status);
+  const result = await response.json();
+  if (!response.ok || result.ok !== true) throw new Error('Telegram response HTTP ' + response.status);
 }
 const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && req.url === '/health') return send(res, 200, { ok: true });
+  if (req.method === 'GET' && req.url === '/ready') {
+    if (!token || !secret || !allowedUser) return send(res, 503, { ready: false, reason: 'telegram_not_configured' });
+    if (!durableMode) return send(res, 200, { ready: true, mode: 'metadata_only', agents_connected: false });
+    try {
+      await durableQueue.pool.query('SELECT 1 FROM marsx_telegram.intakes LIMIT 1');
+      await durableQueue.pool.query('SELECT 1 FROM marsx_telegram.tasks LIMIT 1');
+      await durableQueue.pool.query('SELECT 1 FROM marsx_telegram.outbox LIMIT 1');
+      return send(res, 200, { ready: true, mode: 'postgres_intake', agents_connected: false });
+    } catch (error) {
+      console.error('PostgreSQL readiness check failed:', error.message);
+      return send(res, 503, { ready: false, reason: 'postgres_unavailable_or_schema_missing' });
+    }
+  }
   if (req.method !== 'POST' || req.url !== '/telegram/webhook') return send(res, 404, { error: 'not_found' });
   if (!token || !secret || !allowedUser) return send(res, 503, { error: 'not_configured' });
   if (!equal(String(req.headers['x-telegram-bot-api-secret-token'] || ''), secret))
     return send(res, 403, { error: 'forbidden' });
   let body = '';
+  let bytes = 0;
+  const decoder = new StringDecoder('utf8');
   try {
     for await (const chunk of req) {
-      body += chunk;
-      if (body.length > 32768) return send(res, 413, { error: 'too_large' });
+      bytes += chunk.length;
+      if (bytes > 32768) return send(res, 413, { error: 'too_large' });
+      body += decoder.write(chunk);
     }
-    const update = JSON.parse(body);
+    body += decoder.end();
+    let update;
+    try { update = JSON.parse(body); }
+    catch { return send(res, 400, { error: 'invalid_json' }); }
+    if (!update || typeof update !== 'object' || Array.isArray(update)) return send(res, 400, { error: 'invalid_payload' });
     const msg = update.message;
-    if (!msg || msg.chat?.type !== 'private' || String(msg.from?.id) !== allowedUser)
+    if (!msg || msg.chat?.type !== 'private' || String(msg.from?.id) !== allowedUser || String(msg.chat?.id) !== allowedUser)
       return send(res, 200, { ok: true, ignored: true });
-    const content = String(msg.text || '').trim();
-    if (!content || content.length > 4000) return send(res, 200, { ok: true, ignored: true });
+    const content = typeof msg.text === 'string' ? msg.text : '';
+    if (!content.trim() || content.length > 4000) return send(res, 200, { ok: true, ignored: true });
     // Best-effort duplicate suppression for Telegram retries during this process lifetime.
     // This is not durable exactly-once delivery across restarts or multiple instances.
     const updateId = update.update_id;
+    if (!Number.isSafeInteger(updateId) || updateId < 0) return send(res, 400, { error: 'invalid_update_id' });
     if (Number.isSafeInteger(updateId) && recentUpdates.has(updateId)) return send(res, 200, { ok: true, duplicate: true });
-    const answer = content === '/status' || content === '/start' || content === '/help'
-      ? 'MARS-X Telegram bağlantısı aktif. 5 mevcut ChatGPT sohbetine otomatik aktarım bağlı değil. /status ile durumu görebilirsin.'
-      : 'MARS-X: mesaj alındı. 5 ChatGPT sohbetine gönderilmedi; mevcut sohbetlere otomatik erişim bağlı değil.';
+    if (Number.isSafeInteger(updateId) && processingUpdates.has(updateId)) return send(res, 503, { error: 'processing_in_progress' });
+    if (Number.isSafeInteger(updateId)) processingUpdates.add(updateId);
+    let answer;
+    try {
+    if (content === '/status' || content === '/start' || content === '/help') {
+      answer = 'MARS-X Telegram aktif. Görev kuyruğu: ' + (durableMode ? 'PostgreSQL şifreli intake' : 'GitHub meta veri modu') + '. GitHub meta veri kaydı: ' + (githubToken && Buffer.byteLength(messageHmacKey, 'utf8') >= 32 ? 'yapılandırıldı' : 'kimlik bilgileri eksik') + '. 10 görev yürütücüsü ve mevcut ChatGPT sohbetlerine gönderim bağlı değil.';
+    } else if (content === '/queue') {
+      answer = durableMode ? 'MARS-X: şifreli PostgreSQL kuyruğu yapılandırıldı. /ready sunucu kontrolünü kullan; görevlerin yürütülmesi henüz etkin değil.' : 'MARS-X: PostgreSQL görev kuyruğu etkin değil; mevcut mod yalnızca GitHub meta verisi saklar.';
+    } else if (content.startsWith('/')) {
+      answer = 'MARS-X: bilinmeyen komut. /status ile bağlantıyı kontrol et. Komut GitHub görev kaydına alınmadı.';
+    } else {
+      const dispatch = durableMode
+        ? await enqueueTenDurably(durableQueue, updateId, content)
+        : await dispatchToGithub(updateId, content);
+      answer = durableMode
+        ? 'MARS-X: mesaj şifreli PostgreSQL kuyruğuna 10 görev olarak kaydedildi' + (dispatch.duplicate ? ' (önceden kayıtlı).' : '.') + ' Worker yürütmesi ve ChatGPT sohbetlerine gönderim henüz bağlı değil.'
+        : dispatch.state === 'recorded' || dispatch.state === 'already_recorded'
+        ? 'MARS-X: 10 görev alanı için mesajın sadece meta verisi GitHub kaydına alındı. Mesaj metni aktarılmadı; görevler çalıştırılmadı. ' + dispatch.url
+        : 'MARS-X: mesaj alındı ama görev kaydı oluşturulmadı (' + dispatch.state + '). Özel mesaj güvenliği ve worker bağlantısı gerekiyor.';
+    }
     // Deliberately no ChatGPT session access or message forwarding.
     console.log(JSON.stringify({ event: 'telegram_command_received', updateId, length: content.length }));
-    await reply(msg.chat.id, answer);
+    // Durable intake is already committed. Telegram sendMessage failures must not
+    // turn a committed command into an apparent ingestion failure.
+    try { await reply(msg.chat.id, answer); }
+    catch (error) {
+      if (!durableMode || content.startsWith('/')) throw error;
+      console.error('Telegram intake acknowledged in DB but reply failed:', error.message);
+    }
     if (Number.isSafeInteger(updateId)) {
       recentUpdates.add(updateId);
       if (recentUpdates.size > MAX_RECENT_UPDATES) recentUpdates.delete(recentUpdates.values().next().value);
     }
     return send(res, 200, { ok: true });
+    } finally {
+      if (Number.isSafeInteger(updateId)) processingUpdates.delete(updateId);
+    }
   } catch (err) {
     console.error('Telegram webhook error:', err.message);
     return send(res, 500, { error: 'processing_failed' });
   }
 });
-server.listen(port, '0.0.0.0', () => {
+server.listen(port, host, () => {
   console.log('Telegram inbox listening on ' + port);
   void registerWebhook();
+  if (outboxEnabled) {
+    console.log('PostgreSQL outbox polling enabled');
+    const interval = setInterval(() => void pollOutbox(), 30000);
+    interval.unref();
+    void pollOutbox();
+  }
+  if (recoveryEnabled) {
+    console.log('PostgreSQL expired-task recovery enabled');
+    const recoveryInterval = setInterval(() => void pollRecovery(), 60000);
+    recoveryInterval.unref();
+    void pollRecovery();
+  }
 });
