@@ -182,7 +182,13 @@ const server = http.createServer(async (req, res) => {
     }
     // Deliberately no ChatGPT session access or message forwarding.
     console.log(JSON.stringify({ event: 'telegram_command_received', updateId, length: content.length }));
-    await reply(msg.chat.id, answer);
+    // Durable intake is already committed. Telegram sendMessage failures must not
+    // turn a committed command into an apparent ingestion failure.
+    try { await reply(msg.chat.id, answer); }
+    catch (error) {
+      if (!durableMode || content.startsWith('/')) throw error;
+      console.error('Telegram intake acknowledged in DB but reply failed:', error.message);
+    }
     if (Number.isSafeInteger(updateId)) {
       recentUpdates.add(updateId);
       if (recentUpdates.size > MAX_RECENT_UPDATES) recentUpdates.delete(recentUpdates.values().next().value);
