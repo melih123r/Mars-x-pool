@@ -95,5 +95,42 @@ export class PostgresTaskQueue {
     if (result.rows[0].encryption_key_version !== 1) throw new Error('unsupported_key_version');
     return decryptMessage(result.rows[0].payload_ciphertext, this.key, updateId);
   }
+  async getUpdateStatus(updateId) {
+    if (!Number.isSafeInteger(updateId) || updateId < 0) throw new Error('invalid_update_id');
+    const result = await this.pool.query(
+      'SELECT lane,status FROM marsx_telegram.tasks WHERE update_id=$1 ORDER BY lane',
+      [updateId]
+    );
+    return result.rows;
+  }
+  async recordCompletionEvent(updateId) {
+    if (!Number.isSafeInteger(updateId) || updateId < 0) throw new Error('invalid_update_id');
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const rows = await client.query(
+        'SELECT lane,status FROM marsx_telegram.tasks WHERE update_id=$1 ORDER BY lane FOR UPDATE',
+        [updateId]
+      );
+      const done = rows.rows.length === 5 && rows.rows.every(row =>
+        ['succeeded','failed','not_configured'].includes(row.status));
+      if (!done) {
+        await client.query('COMMIT');
+        return { ready: false };
+      }
+      const kind = rows.rows.some(row => row.status !== 'succeeded') ? 'failed' : 'completed';
+      const result = await client.query(
+        'INSERT INTO marsx_telegram.outbox(update_id,event_kind) VALUES ($1,$2) ON CONFLICT (update_id,event_kind) DO NOTHING RETURNING event_id',
+        [updateId, kind]
+      );
+      await client.query('COMMIT');
+      return { ready: true, eventKind: kind, newlyRecorded: result.rowCount === 1 };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
   async close() { await this.pool.end(); }
 }
