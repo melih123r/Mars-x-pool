@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { timingSafeEqual, createHash } from 'node:crypto';
+import { timingSafeEqual, createHmac } from 'node:crypto';
 
 const port = Number(process.env.PORT || 10000);
 const token = process.env.TELEGRAM_BOT_TOKEN || '';
@@ -33,10 +33,10 @@ async function dispatchToGithub(updateId, content) {
   // Search reduces duplicate issues on retry but is not atomic across instances.
   const existing = await githubRequest('/search/issues?q=' + encodeURIComponent('repo:' + githubRepo + ' in:title ' + marker) + '&per_page=5');
   if (existing.items?.length) return { state: 'already_recorded', url: existing.items[0].html_url };
-  const digest = createHash('sha256').update(content, 'utf8').digest('hex');
+  const digest = createHmac('sha256', secret).update(content, 'utf8').digest('hex');
   const body = [
     'Telegram üzerinden alınan komutun YALNIZCA meta veri kaydı. Mesaj metni gizlilik için GitHub üzerinde saklanmaz.',
-    '', 'Telegram update ID: ' + updateId, 'Mesaj SHA-256: ' + digest, 'Mesaj karakter sayısı: ' + content.length, '',
+    '', 'Telegram update ID: ' + updateId, 'Mesaj HMAC-SHA256: ' + digest, 'Mesaj karakter sayısı: ' + content.length, '',
     '## Beş görev alanı', ...lanes.map((lane, i) => '- [ ] ' + (i + 1) + '. ' + lane + ' — worker bağlı değil'),
     '', 'Durum: meta veri kaydedildi; mesaj aktarılmadı, görevler çalıştırılmadı. ChatGPT sohbetlerine mesaj gönderilmedi.'
   ].join('\n');
