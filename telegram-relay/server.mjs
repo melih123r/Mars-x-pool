@@ -23,6 +23,8 @@ async function githubRequest(path, options = {}) {
 }
 
 async function dispatchToGithub(updateId, content) {
+  // Fail closed: GitHub issues can be public. Never copy Telegram messages to issues by default.
+  if (process.env.MARSX_ALLOW_GITHUB_MESSAGE_STORAGE !== 'true') return { state: 'private_storage_required' };
   if (!githubToken) return { state: 'not_configured' };
   if (!Number.isSafeInteger(updateId)) return { state: 'invalid_update_id' };
   const marker = 'marsx-telegram-update-' + updateId;
@@ -110,7 +112,7 @@ const server = http.createServer(async (req, res) => {
       const dispatch = await dispatchToGithub(updateId, content);
       answer = dispatch.state === 'recorded' || dispatch.state === 'already_recorded'
         ? 'MARS-X: mesajın 5 görev alanı için GitHub kaydına alındı. Görevler henüz çalıştırılmadı. ' + dispatch.url
-        : 'MARS-X: mesaj alındı ama 5 görev alanına kaydedilmedi (' + dispatch.state + '). GitHub token ve worker bağlantısı gerekiyor.';
+        : 'MARS-X: mesaj alındı ama görev kaydı oluşturulmadı (' + dispatch.state + '). Özel mesaj güvenliği ve worker bağlantısı gerekiyor.';
     }
     // Deliberately no ChatGPT session access or message forwarding.
     console.log(JSON.stringify({ event: 'telegram_command_received', updateId, length: content.length }));
