@@ -104,3 +104,22 @@ test('incomplete task sets never create a completion event', async () => {
   assert.deepEqual(await queue.recordCompletionEvent(9), { ready: false });
   assert.ok(!pool.calls.some(x => x.sql.startsWith('INSERT INTO marsx_telegram.outbox')));
 });
+
+test('outbox claim uses SKIP LOCKED and returns unique lease token', async () => {
+  const pool = fakePool();
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  const claimed = await queue.claimOutbox(5, 90);
+  assert.match(claimed.token, /^[0-9a-f-]{36}$/i);
+  assert.ok(pool.calls.some(x => x.sql.includes('FOR UPDATE SKIP LOCKED')));
+  await assert.rejects(queue.claimOutbox(0, 90), /invalid_limit/);
+  await assert.rejects(queue.claimOutbox(5, 1), /invalid_lease/);
+});
+
+test('outbox acknowledgement requires matching claim token and active lease', async () => {
+  const pool = fakePool();
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  const token = '11111111-1111-4111-8111-111111111111';
+  await queue.markClaimedOutboxDelivered(1, token);
+  assert.ok(pool.calls.some(x => x.sql.includes('claim_token=$2::uuid AND claim_until > now()')));
+  await assert.rejects(queue.markClaimedOutboxDelivered(1, 'bad'), /invalid_claim_token/);
+});
