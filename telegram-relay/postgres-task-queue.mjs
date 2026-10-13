@@ -14,8 +14,9 @@ export class PostgresTaskQueue {
   }
   async enqueueAtomic({ updateId, tasks }) {
     if (!Number.isSafeInteger(updateId) || updateId < 0 || !Array.isArray(tasks) || tasks.length !== 5) throw new Error('invalid_intake');
-    const expected = planFiveLaneTasks(updateId, tasks[0]?.message);
-    if (!expected.every((task, i) => task.taskId === tasks[i]?.taskId && task.lane === tasks[i]?.lane && task.message === tasks[i]?.message))
+    if (typeof tasks[0]?.message !== 'string' || !tasks[0].message.trim() || tasks[0].message.length > 4000) throw new Error('invalid_message');
+    const expected = planFiveLaneTasks(updateId, tasks[0].message);
+    if (!expected.every((task, i) => task.taskId === tasks[i]?.taskId && task.lane === tasks[i]?.lane && task.updateId === tasks[i]?.updateId && task.message === tasks[i]?.message))
       throw new Error('task_plan_mismatch');
     const client = await this.pool.connect();
     try {
