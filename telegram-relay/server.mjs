@@ -1,10 +1,32 @@
 import http from 'node:http';
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
 
 const port = Number(process.env.PORT || 10000);
 const token = process.env.TELEGRAM_BOT_TOKEN || '';
 const secret = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const allowedUser = process.env.TELEGRAM_ALLOWED_USER_ID || '';
+const publicUrl = process.env.RENDER_EXTERNAL_URL || 'https://marsx-telegram-relay.onrender.com';
+
+async function registerWebhook() {
+  if (!token || !secret || !allowedUser) {
+    console.warn('Telegram webhook registration skipped: missing required environment variables');
+    return;
+  }
+  try {
+    const url = new URL('/telegram/webhook', publicUrl).toString();
+    const response = await fetch('https://api.telegram.org/bot' + token + '/setWebhook', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ url, secret_token: secret, allowed_updates: ['message'], drop_pending_updates: false })
+    });
+    const data = await response.json();
+    if (!response.ok || data.ok !== true || data.result !== true) throw new Error('Telegram rejected webhook registration (HTTP ' + response.status + ')');
+    console.log('Telegram webhook registration successful');
+  } catch (error) {
+    console.error('Telegram webhook registration failed:', error.message);
+  }
+}
+
 
 function equal(a, b) {
   const aa = Buffer.from(a), bb = Buffer.from(b);
@@ -48,4 +70,7 @@ const server = http.createServer(async (req, res) => {
     return send(res, 500, { error: 'processing_failed' });
   }
 });
-server.listen(port, '0.0.0.0', () => console.log('Telegram inbox listening on ' + port));
+server.listen(port, '0.0.0.0', () => {
+  console.log('Telegram inbox listening on ' + port);
+  void registerWebhook();
+});
