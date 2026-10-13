@@ -168,6 +168,8 @@ const server = http.createServer(async (req, res) => {
     try {
     if (content === '/status' || content === '/start' || content === '/help') {
       answer = 'MARS-X Telegram aktif. Görev kuyruğu: ' + (durableMode ? 'PostgreSQL şifreli intake' : 'GitHub meta veri modu') + '. GitHub meta veri kaydı: ' + (githubToken && Buffer.byteLength(messageHmacKey, 'utf8') >= 32 ? 'yapılandırıldı' : 'kimlik bilgileri eksik') + '. 10 görev yürütücüsü ve mevcut ChatGPT sohbetlerine gönderim bağlı değil.';
+    } else if (content === '/lanes') {
+      answer = 'MARS-X 10 görev alanı (worker bağlantısı doğrulanmadı):\\n' + lanes.map((name, index) => (index + 1) + '. ' + name + ' — not_configured').join('\\n');
     } else if (content === '/queue') {
       answer = durableMode ? 'MARS-X: şifreli PostgreSQL kuyruğu yapılandırıldı. /ready sunucu kontrolünü kullan; görevlerin yürütülmesi henüz etkin değil.' : 'MARS-X: PostgreSQL görev kuyruğu etkin değil; mevcut mod yalnızca GitHub meta verisi saklar.';
     } else if (content.startsWith('/')) {
