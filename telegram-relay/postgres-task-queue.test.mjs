@@ -53,3 +53,21 @@ test('worker claims and acknowledgements require validated IDs', async () => {
   await assert.rejects(queue.claimAtomic('bad', 'worker_1'), /invalid_task_id/);
   await assert.rejects(queue.ackAtomic('telegram-9-lane-1', 'worker_1', 'queued'), /invalid_outcome/);
 });
+
+test('expired worker leases are atomically recovered', async () => {
+  const pool = fakePool();
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  await queue.recoverExpired(25);
+  const sql = pool.calls.find(x => x.sql.includes('FOR UPDATE SKIP LOCKED'));
+  assert.ok(sql);
+  assert.deepEqual(sql.params, [25]);
+  await assert.rejects(queue.recoverExpired(0), /invalid_limit/);
+});
+
+test('encrypted message retrieval rejects unknown encryption versions', async () => {
+  const pool = fakePool();
+  pool.query = async () => ({ rows: [{ payload_ciphertext: Buffer.from('x'), encryption_key_version: 99 }] });
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  await assert.rejects(queue.getEncryptedMessage(1), /unsupported_key_version/);
+  await assert.rejects(queue.getEncryptedMessage(-1), /invalid_update_id/);
+});
