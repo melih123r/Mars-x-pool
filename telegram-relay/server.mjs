@@ -119,6 +119,19 @@ async function reply(chatId, text) {
 }
 const server = http.createServer(async (req, res) => {
   if (req.method === 'GET' && req.url === '/health') return send(res, 200, { ok: true });
+  if (req.method === 'GET' && req.url === '/ready') {
+    if (!token || !secret || !allowedUser) return send(res, 503, { ready: false, reason: 'telegram_not_configured' });
+    if (!durableMode) return send(res, 200, { ready: true, mode: 'metadata_only', agents_connected: false });
+    try {
+      await durableQueue.pool.query('SELECT 1 FROM marsx_telegram.intakes LIMIT 1');
+      await durableQueue.pool.query('SELECT 1 FROM marsx_telegram.tasks LIMIT 1');
+      await durableQueue.pool.query('SELECT 1 FROM marsx_telegram.outbox LIMIT 1');
+      return send(res, 200, { ready: true, mode: 'postgres_intake', agents_connected: false });
+    } catch (error) {
+      console.error('PostgreSQL readiness check failed:', error.message);
+      return send(res, 503, { ready: false, reason: 'postgres_unavailable_or_schema_missing' });
+    }
+  }
   if (req.method !== 'POST' || req.url !== '/telegram/webhook') return send(res, 404, { error: 'not_found' });
   if (!token || !secret || !allowedUser) return send(res, 503, { error: 'not_configured' });
   if (!equal(String(req.headers['x-telegram-bot-api-secret-token'] || ''), secret))
