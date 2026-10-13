@@ -54,3 +54,13 @@ test('private chat and sender must both match authorized Telegram ID', () => {
   assert.match(source, /String\(msg\.from\?\.id\) !== allowedUser/);
   assert.match(source, /String\(msg\.chat\?\.id\) !== allowedUser/);
 });
+
+test('UTF-8 stream decoding preserves split multibyte characters', () => {
+  assert.match(source, /new StringDecoder\('utf8'\)/);
+  assert.match(source, /decoder\.write\(chunk\)/);
+  assert.match(source, /decoder\.end\(\)/);
+});
+
+test('invalid JSON returns client error', () => {
+  assert.match(source, /send\(res, 400, \{ error: 'invalid_json' \}\)/);
+});
