@@ -64,3 +64,7 @@ test('UTF-8 stream decoding preserves split multibyte characters', () => {
 test('invalid JSON returns client error', () => {
   assert.match(source, /send\(res, 400, \{ error: 'invalid_json' \}\)/);
 });
+
+test('deduplication only accepts exact matching issue title', () => {
+  assert.match(source, /item\.title === '\[Telegram\] ' \+ marker/);
+});
