@@ -96,6 +96,26 @@ export class PostgresTaskQueue {
       client.release();
     }
   }
+  async claimNextTask(workerId, lane, leaseSeconds = 90) {
+    if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
+    if (!Number.isInteger(lane) || lane < 1 || lane > 5) throw new Error('invalid_lane');
+    if (!Number.isSafeInteger(leaseSeconds) || leaseSeconds < 15 || leaseSeconds > 300) throw new Error('invalid_lease');
+    const result = await this.pool.query(
+      `WITH available AS (
+         SELECT task_id FROM marsx_telegram.tasks
+         WHERE lane=$2 AND status='queued' AND attempt_count < 20
+         ORDER BY updated_at,task_id FOR UPDATE SKIP LOCKED LIMIT 1
+       )
+       UPDATE marsx_telegram.tasks t
+       SET status='claimed',worker_id=$1,
+           lease_until=now()+($3::integer * interval '1 second'),
+           attempt_count=t.attempt_count+1,updated_at=now()
+       FROM available a WHERE t.task_id=a.task_id
+       RETURNING t.task_id,t.update_id,t.lane,t.status,t.worker_id,t.lease_until`,
+      [workerId, lane, leaseSeconds]
+    );
+    return result.rows[0] || null;
+  }
   async recoverExpired(limit = 50) {
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) throw new Error('invalid_limit');
     const result = await this.pool.query(
