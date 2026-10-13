@@ -13,6 +13,7 @@ function fakePool({ duplicate = false, failAt = -1 } = {}) {
       if (count === failAt) throw new Error('database_failure');
       if (sql.startsWith('INSERT INTO marsx_telegram.intakes')) return { rowCount: duplicate ? 0 : 1 };
       if (sql.startsWith('SELECT count(*)')) return { rows: [{ count: 10 }] };
+      if (sql.startsWith('SELECT update_id FROM marsx_telegram.tasks WHERE task_id=')) return { rows: [{ update_id: 9 }] };
       if (sql.includes('WITH expired AS')) return { rows: [] };
       if (sql.includes('WITH available AS')) return { rows: [{ task_id: 'telegram-9-lane-1', update_id: 9, status: 'claimed' }] };
       if (sql.startsWith('UPDATE marsx_telegram.tasks')) return { rows: [{ task_id: params[0], update_id: 9, status: 'claimed' }] };
