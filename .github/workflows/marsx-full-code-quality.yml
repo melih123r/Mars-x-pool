@@ -1,0 +1,103 @@
+name: MARS-X Full Code Quality
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: marsx-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install exact locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Syntax checks
+        run: npm run check
+      - name: Node tests
+        run: npm test
+      - name: Dependency vulnerability audit
+        run: npm audit --omit=dev --audit-level=high
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect tracked secrets (read-only)
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib,re,subprocess,sys
+          files=subprocess.check_output(['git','ls-files','-z']).split(b'\0')
+          findings=[]
+          patterns=[re.compile(rb'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----'),
+                    re.compile(rb'(?i)(?:sk-proj-|sk_live_|ghp_)[a-zA-Z0-9_-]{12,}')]
+          for raw in files:
+              if not raw: continue
+              p=pathlib.Path(raw.decode('utf-8','surrogateescape'))
+              try:
+                  if p.stat().st_size>2_000_000: continue
+                  data=p.read_bytes()
+              except (OSError,ValueError): continue
+              for pattern in patterns:
+                  if pattern.search(data): findings.append(str(p));break
+          if findings:
+              print('Potential secrets in: '+', '.join(findings))
+              sys.exit(1)
+          print('No configured secret patterns found; not a full secret scan.')
+          PY
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Validate Android project
+        run: |
+          test -f android/settings.gradle
+          test -f android/app/build.gradle
+          grep -nE 'minSdk|minSdkVersion' android/app/build.gradle || true
+      - name: Gradle lint, unit tests and debug APK
+        working-directory: android
+        shell: bash
+        run: |
+          if [ -f ./gradlew ]; then
+            chmod +x ./gradlew
+            ./gradlew --no-daemon :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
+          else
+            echo 'BLOCKED: Android Gradle wrapper absent; no trusted build invoked.' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+      - name: Check actual APK size (1 GiB maximum)
+        if: success()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          files=list(Path('android/app/build/outputs/apk/debug').glob('*.apk'))
+          if not files: raise SystemExit('FAIL: no APK produced')
+          for f in files:
+              print(f'{f}: {f.stat().st_size} bytes')
+              if f.stat().st_size>1024**3: raise SystemExit('FAIL: APK exceeds 1 GiB')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: marsx-android-debug-${{ github.sha }}
+          path: android/app/build/outputs/apk/debug/*.apk
+          retention-days: 3
