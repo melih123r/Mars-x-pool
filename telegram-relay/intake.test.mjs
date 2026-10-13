@@ -26,3 +26,12 @@ test('Telegram update IDs are used to prevent best-effort duplicate records', ()
   assert.match(source, /marsx-telegram-update-/);
   assert.match(source, /recentUpdates\.has\(updateId\)/);
 });
+
+test('Telegram reply validates API success payload', () => {
+  assert.match(source, /result\.ok !== true/);
+});
+
+test('webhook request size is measured in bytes', () => {
+  assert.match(source, /bytes \+= chunk\.length/);
+  assert.match(source, /bytes > 32768/);
+});
