@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import net from 'node:net';
+import http from 'node:http';
 
 async function availablePort() {
   const server = net.createServer();
@@ -78,4 +79,28 @@ test('unknown webhook routes do not accept commands', async t => {
   const base = await startRelay(t);
   const response = await fetch(base + '/not-the-webhook', { method: 'POST', body: '{}' });
   assert.equal(response.status, 404);
+});
+
+
+test('UTF-8 split across transport chunks is decoded without invalid JSON', async t => {
+  const base = await startRelay(t);
+  const target = new URL('/telegram/webhook', base);
+  const payload = JSON.stringify({ update_id: 10, message: { from: { id: 42 }, chat: { id: 42, type: 'private' }, text: 'Türkçe 🚀' } });
+  const bytes = Buffer.from(payload);
+  const emoji = Buffer.from('🚀');
+  const offset = bytes.indexOf(emoji);
+  assert.ok(offset > 0);
+  const response = await new Promise((resolve, reject) => {
+    const req = http.request(target, { method: 'POST', headers: { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'integration-test-secret', 'transfer-encoding': 'chunked' } }, res => {
+      let body = '';
+      res.setEncoding('utf8');
+      res.on('data', chunk => { body += chunk; });
+      res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(body) }));
+    });
+    req.on('error', reject);
+    req.write(bytes.subarray(0, offset + 2));
+    req.end(bytes.subarray(offset + 2));
+  });
+  assert.equal(response.status, 200);
+  assert.equal(response.body.ignored, true);
 });
