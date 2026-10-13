@@ -62,6 +62,9 @@ test('expired worker leases are atomically recovered', async () => {
   const sql = pool.calls.find(x => x.sql.includes('FOR UPDATE SKIP LOCKED'));
   assert.ok(sql);
   assert.deepEqual(sql.params, [25]);
+  assert.ok(pool.calls.some(x => x.sql === 'BEGIN'));
+  assert.ok(pool.calls.some(x => x.sql === 'COMMIT'));
+  assert.ok(pool.calls.some(x => x.sql === 'RELEASE'));
   await assert.rejects(queue.recoverExpired(0), /invalid_limit/);
 });
 
@@ -163,4 +166,27 @@ test('legitimate worker task ID can be marked not configured', async () => {
   assert.ok(await queue.markTaskNotConfigured('telegram-9-lane-1', 'worker_1'));
   assert.ok(pool.calls.some(x => x.sql.includes("status='not_configured'")));
   await assert.rejects(queue.markTaskNotConfigured('telegram-x-lane-1', 'worker_1'), /invalid_task_id/);
+});
+
+test('expired last-attempt worker generates failed outbox report', async () => {
+  const pool = fakePool();
+  const connect = pool.connect;
+  pool.connect = async () => {
+    const client = await connect();
+    const original = client.query;
+    client.query = async (sql, params) => {
+      if (sql.includes('WITH expired AS')) {
+        pool.calls.push({ sql, params });
+        return { rows: [{ task_id: 'telegram-9-lane-5', update_id: 9, status: 'failed' }] };
+      }
+      if (sql.startsWith('SELECT status FROM marsx_telegram.tasks'))
+        return { rows: ['succeeded','succeeded','succeeded','succeeded','failed'].map(status => ({ status })) };
+      return original(sql, params);
+    };
+    return client;
+  };
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  await queue.recoverExpired();
+  assert.ok(pool.calls.some(x => x.sql.includes("VALUES ($1,'failed')")));
+  assert.ok(pool.calls.some(x => x.sql === 'COMMIT'));
 });
