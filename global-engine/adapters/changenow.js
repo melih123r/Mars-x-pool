@@ -58,10 +58,10 @@ export class ChangeNowAdapter{
  async createTransaction(intent){
   if(!this.allowTransactions)throw Object.assign(new Error("ChangeNOW transaction creation disabled"),{status:403});
   if(!intent || intent.confirmed!==true)throw Object.assign(new Error("explicit_user_confirmation_required"),{status:400});
-  // This adapter does not persist idempotency state. Refuse direct execution until
-  // the authenticated transaction orchestrator supplies a durable claim token.
-  if(intent.durableClaimVerified!==true)
-    throw Object.assign(new Error("durable_idempotency_claim_required"),{status:409});
+  // A caller-provided boolean is not evidence of a durable idempotency claim.
+  // Keep real execution fail-closed until a trusted transactional orchestrator
+  // implements authenticated, atomic, persistent deduplication.
+  throw Object.assign(new Error("durable_transaction_orchestrator_not_implemented"),{status:503});
   const ticker=v=>typeof v==="string"&&/^[a-z0-9]{2,20}$/.test(v);
   const address=v=>typeof v==="string"&&v.length>=12&&v.length<=256&&/^[a-zA-Z0-9:_-]+$/.test(v);
   const {fromCurrency,toCurrency,fromNetwork,toNetwork,fromAmount,refundAddress,extraId,refundExtraId}=intent;
