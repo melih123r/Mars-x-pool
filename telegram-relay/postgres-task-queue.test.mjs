@@ -13,6 +13,8 @@ function fakePool({ duplicate = false, failAt = -1 } = {}) {
       if (count === failAt) throw new Error('database_failure');
       if (sql.startsWith('INSERT INTO marsx_telegram.intakes')) return { rowCount: duplicate ? 0 : 1 };
       if (sql.startsWith('SELECT count(*)')) return { rows: [{ count: 5 }] };
+      if (sql.includes('WITH expired AS')) return { rows: [] };
+      if (sql.includes('WITH available AS')) return { rows: [{ task_id: 'telegram-9-lane-1', update_id: 9, status: 'claimed' }] };
       if (sql.startsWith('UPDATE marsx_telegram.tasks')) return { rows: [{ task_id: params[0], update_id: 9, status: 'claimed' }] };
       if (sql.startsWith('SELECT status FROM marsx_telegram.tasks')) return { rows: [{ status: 'queued' }] };
       return { rowCount: 1 };
@@ -194,7 +196,9 @@ test('expired last-attempt worker generates failed outbox report', async () => {
 test('malformed or oversized intake cannot write anything to database', async () => {
   const pool = fakePool();
   const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
-  await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: planFiveLaneTasks(9, 'x'.repeat(4001)) }), /invalid_message/);
+  const oversized = planFiveLaneTasks(9, 'valid');
+  for (const task of oversized) task.message = 'x'.repeat(4001);
+  await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: oversized }), /invalid_message/);
   const tampered = planFiveLaneTasks(9, 'hello');
   tampered[3].updateId = 10;
   await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: tampered }), /task_plan_mismatch/);
