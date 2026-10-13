@@ -180,17 +180,27 @@ test('legitimate worker task ID can be marked not configured', async () => {
 
 test('expired last-attempt worker generates failed outbox report', async () => {
   const pool = fakePool();
-  const connect = pool.connect;
+  const baseQuery = pool.query.bind(pool);
+  pool.query = async (sql, params) => {
+    if (sql.includes('SELECT task_id,update_id FROM marsx_telegram.tasks')) {
+      pool.calls.push({ sql, params });
+      return { rows: [{ task_id: 'telegram-9-lane-5', update_id: 9 }] };
+    }
+    return baseQuery(sql, params);
+  };
+  const connect = pool.connect.bind(pool);
   pool.connect = async () => {
     const client = await connect();
-    const original = client.query;
+    const original = client.query.bind(client);
     client.query = async (sql, params) => {
-      if (sql.includes('WITH expired AS')) {
+      if (sql.startsWith('UPDATE marsx_telegram.tasks') && sql.includes('lease_until <= now()')) {
         pool.calls.push({ sql, params });
         return { rows: [{ task_id: 'telegram-9-lane-5', update_id: 9, status: 'failed' }] };
       }
-      if (sql.startsWith('SELECT status FROM marsx_telegram.tasks'))
-        return { rows: ['succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','succeeded','failed'].map(status => ({ status })) };
+      if (sql.startsWith('SELECT status FROM marsx_telegram.tasks')) {
+        pool.calls.push({ sql, params });
+        return { rows: [...Array(9).fill('succeeded'), 'failed'].map(status => ({ status })) };
+      }
       return original(sql, params);
     };
     return client;
