@@ -44,3 +44,13 @@ test('invalid update IDs are rejected before dispatch', () => {
   assert.match(source, /error: 'invalid_update_id'/);
   assert.match(source, /updateId < 0/);
 });
+
+test('payload must be a non-array object', () => {
+  assert.match(source, /Array\.isArray\(update\)/);
+  assert.match(source, /error: 'invalid_payload'/);
+});
+
+test('private chat and sender must both match authorized Telegram ID', () => {
+  assert.match(source, /String\(msg\.from\?\.id\) !== allowedUser/);
+  assert.match(source, /String\(msg\.chat\?\.id\) !== allowedUser/);
+});
