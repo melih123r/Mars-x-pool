@@ -156,3 +156,11 @@ test('worker polls only its assigned lane using atomic SKIP LOCKED', async () =>
   await assert.rejects(queue.claimNextTask('worker', 6), /invalid_lane/);
   await assert.rejects(queue.claimNextTask('bad worker', 1), /invalid_worker_id/);
 });
+
+test('legitimate worker task ID can be marked not configured', async () => {
+  const pool = fakePool();
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  assert.ok(await queue.markTaskNotConfigured('telegram-9-lane-1', 'worker_1'));
+  assert.ok(pool.calls.some(x => x.sql.includes("status='not_configured'")));
+  await assert.rejects(queue.markTaskNotConfigured('telegram-x-lane-1', 'worker_1'), /invalid_task_id/);
+});
