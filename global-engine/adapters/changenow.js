@@ -55,6 +55,30 @@ export class ChangeNowAdapter{
   return this.request("/exchange/estimated-amount?"+q,{auth:true});
  }
  status(transactionId){required(transactionId,"transactionId");return this.request("/exchange/by-id?id="+enc(transactionId),{auth:true});}
- createTransaction(){if(!this.allowTransactions)throw new Error("ChangeNOW transaction creation disabled");throw new Error("ChangeNOW transaction creation requires explicit approved execution path");}
+ async createTransaction(intent){
+  if(!this.allowTransactions)throw Object.assign(new Error("ChangeNOW transaction creation disabled"),{status:403});
+  if(!intent || intent.confirmed!==true)throw Object.assign(new Error("explicit_user_confirmation_required"),{status:400});
+  // A caller-provided boolean is not evidence of a durable idempotency claim.
+  // Keep real execution fail-closed until a trusted transactional orchestrator
+  // implements authenticated, atomic, persistent deduplication.
+  throw Object.assign(new Error("durable_transaction_orchestrator_not_implemented"),{status:503});
+  const ticker=v=>typeof v==="string"&&/^[a-z0-9]{2,20}$/.test(v);
+  const address=v=>typeof v==="string"&&v.length>=12&&v.length<=256&&/^[a-zA-Z0-9:_-]+$/.test(v);
+  const {fromCurrency,toCurrency,fromNetwork,toNetwork,fromAmount,refundAddress,extraId,refundExtraId}=intent;
+  if(!ticker(fromCurrency)||!ticker(toCurrency)||!ticker(fromNetwork)||!ticker(toNetwork)||!address(intent.address))
+    throw Object.assign(new Error("invalid_exchange_destination_or_pair"),{status:400});
+  if(refundAddress!==undefined&&refundAddress!==""&&!address(refundAddress))
+    throw Object.assign(new Error("invalid_refund_address"),{status:400});
+  if([extraId,refundExtraId].some(v=>v!==undefined&&(typeof v!=="string"||v.length>128)))
+    throw Object.assign(new Error("invalid_extra_id"),{status:400});
+  if(typeof fromAmount!=="string"||!/^\d+(?:\.\d{1,18})?$/.test(fromAmount)||!(Number(fromAmount)>0)||!Number.isFinite(Number(fromAmount)))
+    throw Object.assign(new Error("invalid_exchange_amount"),{status:400});
+  if(intent.flow!==undefined&&intent.flow!=="standard")
+    throw Object.assign(new Error("unsupported_exchange_flow"),{status:400});
+  const body={fromCurrency,toCurrency,fromNetwork,toNetwork,fromAmount,toAmount:"",address:intent.address,
+    extraId:extraId||"",refundAddress:refundAddress||"",refundExtraId:refundExtraId||"",
+    userId:"",payload:"",contactEmail:"",source:"",flow:"standard",type:"direct",rateId:""};
+  return this.request("/exchange",{method:"POST",body,auth:true});
+ }
  capabilities(){return Object.freeze({quotes:true,currencies:true,minAmount:true,status:true,createTransaction:false,withdrawals:false,payouts:false,custody:false});}
 }
