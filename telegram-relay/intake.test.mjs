@@ -35,3 +35,12 @@ test('webhook request size is measured in bytes', () => {
   assert.match(source, /bytes \+= chunk\.length/);
   assert.match(source, /bytes > 32768/);
 });
+
+test('outbound Telegram and GitHub requests have bounded timeouts', () => {
+  assert.ok((source.match(/AbortSignal\.timeout\(10000\)/g) || []).length >= 3);
+});
+
+test('invalid update IDs are rejected before dispatch', () => {
+  assert.match(source, /error: 'invalid_update_id'/);
+  assert.match(source, /updateId < 0/);
+});
