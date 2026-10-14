@@ -184,16 +184,6 @@ const server = http.createServer(async (req, res) => {
       }
     } else {
       answer = 'MARS-X: GEMINI_API_KEY bu Render servisinde tanımlı değil. Environment bölümüne ekleyip dağıtımı yenile.';
-      /* Legacy task dispatch intentionally disabled for ordinary chat messages.
-      const dispatch = durableMode
-        ? await enqueueTenDurably(durableQueue, updateId, content)
-        : await dispatchToGithub(updateId, content);
-      answer = durableMode
-        ? 'MARS-X: mesaj şifreli PostgreSQL kuyruğuna 10 görev olarak kaydedildi' + (dispatch.duplicate ? ' (önceden kayıtlı).' : '.') + ' Worker yürütmesi ve ChatGPT sohbetlerine gönderim henüz bağlı değil.'
-        : dispatch.state === 'recorded' || dispatch.state === 'already_recorded'
-        ? 'MARS-X: 10 görev alanı için mesajın sadece meta verisi GitHub kaydına alındı. Mesaj metni aktarılmadı; görevler çalıştırılmadı. ' + dispatch.url
-        : 'MARS-X: mesaj alındı ama görev kaydı oluşturulmadı (' + dispatch.state + '). Özel mesaj güvenliği ve worker bağlantısı gerekiyor.';
-      */
     }
     // Deliberately no ChatGPT session access or message forwarding.
     console.log(JSON.stringify({ event: 'telegram_command_received', updateId, length: content.length }));
