@@ -170,6 +170,8 @@ const server = http.createServer(async (req, res) => {
     try {
     if (content === '/status' || content === '/start' || content === '/help') {
       answer = 'MARS-X Telegram aktif. Gemini: ' + (geminiApiKey ? 'anahtar tanımlı (API yanıtı ayrıca test edilmeli)' : 'GEMINI_API_KEY eksik') + '. Görev yürütücüleri bağlı değil.';
+    } else if (content === '/lanes' || content === '/tasks') {
+      answer = 'MARS-X 10 görev alanı (henüz yürütücü bağlı değil):\n' + lanes.map((lane, index) => `${index + 1}. ${lane}`).join('\n') + '\nGörevler henüz otomatik çalıştırılmıyor.';
     } else if (content === '/queue') {
       answer = durableMode ? 'MARS-X: şifreli PostgreSQL kuyruğu yapılandırıldı. /ready sunucu kontrolünü kullan; görevlerin yürütülmesi henüz etkin değil.' : 'MARS-X: PostgreSQL görev kuyruğu etkin değil; mevcut mod yalnızca GitHub meta verisi saklar.';
     } else if (content.startsWith('/')) {
