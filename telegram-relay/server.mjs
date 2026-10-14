@@ -194,7 +194,7 @@ const server = http.createServer(async (req, res) => {
       } else {
         const statuses = await durableQueue.getUpdateStatus(Number(idText));
         answer = statuses.length
-          ? 'MARS-X görev ' + idText + ':\\n' + statuses.map(row => row.lane + '. ' + row.status).join('\\n')
+          ? 'MARS-X görev ' + idText + ':\n' + statuses.map(row => row.lane + '. ' + row.status).join('\n')
           : 'MARS-X: bu takip numarası için görev bulunamadı.';
       }
     } else if (content === '/queue') {
