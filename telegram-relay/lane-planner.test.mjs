@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LANES, planLaneTasks, summarizeLaneResults } from './lane-planner.mjs';
+import * as planner from './lane-planner.mjs';
+
+const { LANES, planLaneTasks, summarizeLaneResults } = planner;
 
 test('one message deterministically produces exactly ten distinct lane tasks', () => {
   const tasks = planLaneTasks(100, 'Build a safe release');
@@ -33,4 +35,22 @@ test('lane-specific completion summary is truthful', () => {
   assert.match(summary, /Entegrasyon ve son QA: not_configured/);
   assert.throws(() => summarizeLaneResults([...tasks.slice(0, 9), tasks[0]]));
   assert.throws(() => summarizeLaneResults(tasks.slice(0, 9)));
+});
+
+test('one Gemini call classifies across ten areas and returns a short Turkish advisory answer', async () => {
+  assert.equal(typeof planner.answerWithGemini, 'function');
+  const calls = [];
+  const result = await planner.answerWithGemini('APK neden derlenmiyor?', async prompt => {
+    calls.push(prompt);
+    return 'Alan: Android\nYanıt: Gradle hata kaydını kontrol et ve başarısız görevi yeniden çalıştır.';
+  });
+
+  assert.equal(calls.length, 1);
+  for (const lane of LANES) assert.match(calls[0], new RegExp(lane.replace('/', '\\/')));
+  assert.match(calls[0], /yalnızca tavsiye veya analiz/i);
+  assert.match(calls[0], /gerçek bir işlem yaptığını iddia etme/i);
+  assert.deepEqual(result, {
+    lane: 'Android',
+    answer: 'Gradle hata kaydını kontrol et ve başarısız görevi yeniden çalıştır.'
+  });
 });
