@@ -1,0 +1,2 @@
+import crypto from "node:crypto";
+export function authorize(req,{keys=(process.env.MARSX_API_KEYS||"").split(",").map(x=>x.trim()).filter(Boolean)}={}){if(!keys.length)return {ok:true,mode:"OPEN_READ_ONLY"};const raw=String(req?.headers?.["x-api-key"]||req?.headers?.get?.("x-api-key")||"");const ok=keys.some(k=>{const a=Buffer.from(raw),b=Buffer.from(k);return a.length===b.length&&crypto.timingSafeEqual(a,b)});return {ok,mode:"API_KEY",error:ok?null:"UNAUTHORIZED"};}

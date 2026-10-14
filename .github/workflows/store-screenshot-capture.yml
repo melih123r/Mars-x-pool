@@ -6,6 +6,8 @@ on:
     paths:
       - .github/workflows/store-screenshot-capture.yml
       - scripts/capture-store-screenshots.sh
+      - android/app/src/main/java/com/marsx/pool/FinanceActivity.java
+      - android/app/src/main/AndroidManifest.xml
 
 permissions:
   contents: read
