@@ -111,7 +111,10 @@ test("broker production readiness requires every explicit gate",async()=>{
   assert.equal(health.production.withdrawals,false);
   assert.equal(health.production.custody,false);
   assert.equal(health.providers[0].productionPrereqsReady,true);
+  assert.equal(health.providers[0].readiness.mode,"PRODUCTION_READY");
   assert.equal(health.providers[0].executionReady,false);
+  assert.equal(health.providers[0].ordersEnabled,true);
+  assert.equal(health.providers[0].withdrawalsEnabled,true);
   assert.deepEqual(health.providers[0].readiness.missing,[]);
   const order=await fetch(base+"/broker/order",{method:"POST"});
   assert.equal(order.status,404);
