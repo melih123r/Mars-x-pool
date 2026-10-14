@@ -185,6 +185,18 @@ const server = http.createServer(async (req, res) => {
           answer = 'MARS-X: ' + intake.taskCount + ' görev güvenli kuyruğa kaydedildi. Görevler henüz yürütülmedi. Takip numarası: ' + updateId;
         }
       }
+    } else if (content.startsWith('/job ')) {
+      const idText = content.slice('/job '.length).trim();
+      if (!/^[0-9]{1,16}$/.test(idText) || !Number.isSafeInteger(Number(idText))) {
+        answer = 'MARS-X: kullanım /job <takip numarası>';
+      } else if (!durableMode) {
+        answer = 'MARS-X: PostgreSQL görev kuyruğu etkin değil.';
+      } else {
+        const statuses = await durableQueue.getUpdateStatus(Number(idText));
+        answer = statuses.length
+          ? 'MARS-X görev ' + idText + ':\\n' + statuses.map(row => row.lane + '. ' + row.status).join('\\n')
+          : 'MARS-X: bu takip numarası için görev bulunamadı.';
+      }
     } else if (content === '/queue') {
       answer = durableMode ? 'MARS-X: şifreli PostgreSQL kuyruğu yapılandırıldı. /ready sunucu kontrolünü kullan; görevlerin yürütülmesi henüz etkin değil.' : 'MARS-X: PostgreSQL görev kuyruğu etkin değil; mevcut mod yalnızca GitHub meta verisi saklar.';
     } else if (content.startsWith('/')) {
