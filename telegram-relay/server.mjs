@@ -2,6 +2,7 @@ import { flushOutbox } from './outbox-flush.mjs';
 import { PostgresTaskQueue } from './postgres-task-queue.mjs';
 import { enqueueTenDurably } from './durable-queue-contract.mjs';
 import { LANES } from './lane-planner.mjs';
+import { generateGeminiReply } from './gemini-client.mjs';
 import http from 'node:http';
 import { StringDecoder } from 'node:string_decoder';
 import { timingSafeEqual, createHmac } from 'node:crypto';
@@ -11,6 +12,7 @@ const host = process.env.HOST || '0.0.0.0';
 const token = process.env.TELEGRAM_BOT_TOKEN || '';
 const secret = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const allowedUser = process.env.TELEGRAM_ALLOWED_USER_ID || '';
+const geminiApiKey = process.env.GEMINI_API_KEY || '';
 const publicUrl = process.env.RENDER_EXTERNAL_URL || 'https://marsx-telegram-relay.onrender.com';
 const durableMode = process.env.MARSX_DISPATCH_MODE === 'postgres';
 const durableQueue = durableMode ? new PostgresTaskQueue({ connectionString: process.env.DATABASE_URL, encryptionKeyHex: process.env.MARSX_MESSAGE_ENCRYPTION_KEY }) : null;
@@ -172,6 +174,8 @@ const server = http.createServer(async (req, res) => {
       answer = durableMode ? 'MARS-X: şifreli PostgreSQL kuyruğu yapılandırıldı. /ready sunucu kontrolünü kullan; görevlerin yürütülmesi henüz etkin değil.' : 'MARS-X: PostgreSQL görev kuyruğu etkin değil; mevcut mod yalnızca GitHub meta verisi saklar.';
     } else if (content.startsWith('/')) {
       answer = 'MARS-X: bilinmeyen komut. /status ile bağlantıyı kontrol et. Komut GitHub görev kaydına alınmadı.';
+    } else if (geminiApiKey) {
+      answer = await generateGeminiReply({ apiKey: geminiApiKey, prompt: content });
     } else {
       const dispatch = durableMode
         ? await enqueueTenDurably(durableQueue, updateId, content)
