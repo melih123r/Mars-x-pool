@@ -14,10 +14,10 @@ async function availablePort() {
   return port;
 }
 
-async function startRelay(t) {
+async function startRelay(t, extraEnv = {}) {
   const port = await availablePort();
   const child = spawn(process.execPath, [new URL('./server.mjs', import.meta.url).pathname], {
-    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), TELEGRAM_BOT_TOKEN: 'integration-test-token', TELEGRAM_WEBHOOK_SECRET: 'integration-test-secret', TELEGRAM_ALLOWED_USER_ID: '123456', RENDER_EXTERNAL_URL: 'http://127.0.0.1:1' },
+    env: { ...process.env, HOST: '127.0.0.1', PORT: String(port), TELEGRAM_BOT_TOKEN: 'integration-test-token', TELEGRAM_WEBHOOK_SECRET: 'integration-test-secret', TELEGRAM_ALLOWED_USER_ID: '123456', RENDER_EXTERNAL_URL: 'http://127.0.0.1:1', ...extraEnv },
     stdio: 'ignore'
   });
   t.after(() => { child.kill(); });
@@ -124,4 +124,24 @@ test('relay fails readiness when Telegram secrets are missing', async t => {
   assert.ok(response);
   assert.equal(response.status, 503);
   assert.equal((await response.json()).reason, 'telegram_not_configured');
+});
+
+test('configured Gemini response is forwarded to the authorized Telegram chat', async t => {
+  const bootstrap = new URL('./gemini-fetch.test-bootstrap.mjs', import.meta.url).href;
+  const base = await startRelay(t, { GEMINI_API_KEY: 'test-only-key', NODE_OPTIONS: '--import=' + bootstrap });
+  const headers = { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'integration-test-secret' };
+  const payload = { update_id: 100, message: { from: { id: 123456 }, chat: { id: 123456, type: 'private' }, text: 'Merhaba Gemini' } };
+  const response = await fetch(base + '/telegram/webhook', { method: 'POST', headers, body: JSON.stringify(payload) });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { ok: true });
+});
+
+test('missing Gemini key preserves the existing safe dispatch response', async t => {
+  const bootstrap = new URL('./gemini-fetch.test-bootstrap.mjs', import.meta.url).href;
+  const base = await startRelay(t, { GEMINI_API_KEY: '', MARSX_GITHUB_TOKEN: '', NODE_OPTIONS: '--import=' + bootstrap, TEST_ACCEPT_ANY_TELEGRAM_REPLY: 'true' });
+  const headers = { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'integration-test-secret' };
+  const payload = { update_id: 101, message: { from: { id: 123456 }, chat: { id: 123456, type: 'private' }, text: 'Mevcut davranış' } };
+  const response = await fetch(base + '/telegram/webhook', { method: 'POST', headers, body: JSON.stringify(payload) });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { ok: true });
 });
