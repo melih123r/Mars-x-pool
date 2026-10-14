@@ -1,4 +1,4 @@
-const DEFAULT_MODEL = 'gemini-2.5-flash';
+const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
 const MODEL_NAME_PATTERN = /^gemini-[a-z0-9.-]{1,60}$/;
 
 function modelUrl(model) {
