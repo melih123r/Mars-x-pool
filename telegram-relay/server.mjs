@@ -2,6 +2,8 @@ import { flushOutbox } from './outbox-flush.mjs';
 import { PostgresTaskQueue } from './postgres-task-queue.mjs';
 import { enqueueTenDurably } from './durable-queue-contract.mjs';
 import { LANES } from './lane-planner.mjs';
+import { createTelegramAiFlow } from './telegram-ai-flow.mjs';
+import { createUpdateGate } from './update-gate.mjs';
 import http from 'node:http';
 import { StringDecoder } from 'node:string_decoder';
 import { timingSafeEqual, createHmac } from 'node:crypto';
@@ -35,13 +37,12 @@ async function pollOutbox() {
   finally { outboxBusy = false; }
 }
 
-const recentUpdates = new Set();
-const processingUpdates = new Set();
-const MAX_RECENT_UPDATES = 1000;
+const updateGate = createUpdateGate({ maxRecent: 1000 });
 const githubToken = process.env.MARSX_GITHUB_TOKEN || '';
 const messageHmacKey = process.env.MARSX_MESSAGE_HMAC_KEY || '';
 const githubRepo = 'melih123r/Mars-x-pool';
 const lanes = LANES;
+const telegramAiFlow = createTelegramAiFlow({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 async function githubRequest(path, options = {}) {
   const response = await fetch('https://api.github.com' + path, {
@@ -161,9 +162,10 @@ const server = http.createServer(async (req, res) => {
     // This is not durable exactly-once delivery across restarts or multiple instances.
     const updateId = update.update_id;
     if (!Number.isSafeInteger(updateId) || updateId < 0) return send(res, 400, { error: 'invalid_update_id' });
-    if (Number.isSafeInteger(updateId) && recentUpdates.has(updateId)) return send(res, 200, { ok: true, duplicate: true });
-    if (Number.isSafeInteger(updateId) && processingUpdates.has(updateId)) return send(res, 503, { error: 'processing_in_progress' });
-    if (Number.isSafeInteger(updateId)) processingUpdates.add(updateId);
+    const gateState = updateGate.begin(updateId);
+    if (gateState === 'duplicate') return send(res, 200, { ok: true, duplicate: true });
+    if (gateState === 'processing') return send(res, 503, { error: 'processing_in_progress' });
+    let completed = false;
     let answer;
     try {
     if (content === '/status' || content === '/start' || content === '/help') {
@@ -173,31 +175,22 @@ const server = http.createServer(async (req, res) => {
     } else if (content.startsWith('/')) {
       answer = 'MARS-X: bilinmeyen komut. /status ile bağlantıyı kontrol et. Komut GitHub görev kaydına alınmadı.';
     } else {
-      const dispatch = durableMode
-        ? await enqueueTenDurably(durableQueue, updateId, content)
-        : await dispatchToGithub(updateId, content);
-      answer = durableMode
-        ? 'MARS-X: mesaj şifreli PostgreSQL kuyruğuna 10 görev olarak kaydedildi' + (dispatch.duplicate ? ' (önceden kayıtlı).' : '.') + ' Worker yürütmesi ve ChatGPT sohbetlerine gönderim henüz bağlı değil.'
-        : dispatch.state === 'recorded' || dispatch.state === 'already_recorded'
-        ? 'MARS-X: 10 görev alanı için mesajın sadece meta verisi GitHub kaydına alındı. Mesaj metni aktarılmadı; görevler çalıştırılmadı. ' + dispatch.url
-        : 'MARS-X: mesaj alındı ama görev kaydı oluşturulmadı (' + dispatch.state + '). Özel mesaj güvenliği ve worker bağlantısı gerekiyor.';
+      await telegramAiFlow({ chatId: msg.chat.id, text: content, token });
+      answer = null;
     }
     // Deliberately no ChatGPT session access or message forwarding.
     console.log(JSON.stringify({ event: 'telegram_command_received', updateId, length: content.length }));
     // Durable intake is already committed. Telegram sendMessage failures must not
     // turn a committed command into an apparent ingestion failure.
-    try { await reply(msg.chat.id, answer); }
+    if (answer !== null) try { await reply(msg.chat.id, answer); }
     catch (error) {
       if (!durableMode || content.startsWith('/')) throw error;
       console.error('Telegram intake acknowledged in DB but reply failed:', error.message);
     }
-    if (Number.isSafeInteger(updateId)) {
-      recentUpdates.add(updateId);
-      if (recentUpdates.size > MAX_RECENT_UPDATES) recentUpdates.delete(recentUpdates.values().next().value);
-    }
+    completed = true;
     return send(res, 200, { ok: true });
     } finally {
-      if (Number.isSafeInteger(updateId)) processingUpdates.delete(updateId);
+      updateGate.finish(updateId, completed);
     }
   } catch (err) {
     console.error('Telegram webhook error:', err.message);
