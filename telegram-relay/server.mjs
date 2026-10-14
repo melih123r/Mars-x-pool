@@ -12,7 +12,7 @@ const host = process.env.HOST || '0.0.0.0';
 const token = process.env.TELEGRAM_BOT_TOKEN || '';
 const secret = process.env.TELEGRAM_WEBHOOK_SECRET || '';
 const allowedUser = process.env.TELEGRAM_ALLOWED_USER_ID || '';
-const geminiApiKey = process.env.GEMINI_API_KEY || '';
+const geminiApiKey = (process.env.GEMINI_API_KEY || '').trim();
 const publicUrl = process.env.RENDER_EXTERNAL_URL || 'https://marsx-telegram-relay.onrender.com';
 const durableMode = process.env.MARSX_DISPATCH_MODE === 'postgres';
 const durableQueue = durableMode ? new PostgresTaskQueue({ connectionString: process.env.DATABASE_URL, encryptionKeyHex: process.env.MARSX_MESSAGE_ENCRYPTION_KEY }) : null;
@@ -169,22 +169,21 @@ const server = http.createServer(async (req, res) => {
     let answer;
     try {
     if (content === '/status' || content === '/start' || content === '/help') {
-      answer = 'MARS-X Telegram aktif. Görev kuyruğu: ' + (durableMode ? 'PostgreSQL şifreli intake' : 'GitHub meta veri modu') + '. GitHub meta veri kaydı: ' + (githubToken && Buffer.byteLength(messageHmacKey, 'utf8') >= 32 ? 'yapılandırıldı' : 'kimlik bilgileri eksik') + '. 10 görev yürütücüsü ve mevcut ChatGPT sohbetlerine gönderim bağlı değil.';
+      answer = 'MARS-X Telegram aktif. Gemini: ' + (geminiApiKey ? 'anahtar tanımlı (API yanıtı ayrıca test edilmeli)' : 'GEMINI_API_KEY eksik') + '. Görev yürütücüleri bağlı değil.';
     } else if (content === '/queue') {
       answer = durableMode ? 'MARS-X: şifreli PostgreSQL kuyruğu yapılandırıldı. /ready sunucu kontrolünü kullan; görevlerin yürütülmesi henüz etkin değil.' : 'MARS-X: PostgreSQL görev kuyruğu etkin değil; mevcut mod yalnızca GitHub meta verisi saklar.';
     } else if (content.startsWith('/')) {
       answer = 'MARS-X: bilinmeyen komut. /status ile bağlantıyı kontrol et. Komut GitHub görev kaydına alınmadı.';
     } else if (geminiApiKey) {
-      answer = await generateGeminiReply({ apiKey: geminiApiKey, prompt: content });
+      try {
+        answer = await generateGeminiReply({ apiKey: geminiApiKey, prompt: content });
+        console.log(JSON.stringify({ event: 'gemini_reply_generated', updateId }));
+      } catch (error) {
+        console.error(JSON.stringify({ event: 'gemini_reply_failed', updateId, reason: String(error.message).replace(/[^a-zA-Z0-9_ -]/g, '').slice(0, 80) }));
+        answer = 'MARS-X: Gemini yanıtı alınamadı. Biraz sonra tekrar dene.';
+      }
     } else {
-      const dispatch = durableMode
-        ? await enqueueTenDurably(durableQueue, updateId, content)
-        : await dispatchToGithub(updateId, content);
-      answer = durableMode
-        ? 'MARS-X: mesaj şifreli PostgreSQL kuyruğuna 10 görev olarak kaydedildi' + (dispatch.duplicate ? ' (önceden kayıtlı).' : '.') + ' Worker yürütmesi ve ChatGPT sohbetlerine gönderim henüz bağlı değil.'
-        : dispatch.state === 'recorded' || dispatch.state === 'already_recorded'
-        ? 'MARS-X: 10 görev alanı için mesajın sadece meta verisi GitHub kaydına alındı. Mesaj metni aktarılmadı; görevler çalıştırılmadı. ' + dispatch.url
-        : 'MARS-X: mesaj alındı ama görev kaydı oluşturulmadı (' + dispatch.state + '). Özel mesaj güvenliği ve worker bağlantısı gerekiyor.';
+      answer = 'MARS-X: GEMINI_API_KEY bu Render servisinde tanımlı değil. Environment bölümüne ekleyip dağıtımı yenile.';
     }
     // Deliberately no ChatGPT session access or message forwarding.
     console.log(JSON.stringify({ event: 'telegram_command_received', updateId, length: content.length }));
