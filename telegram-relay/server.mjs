@@ -16,6 +16,32 @@ const geminiApiKey = (process.env.GEMINI_API_KEY || '').trim();
 const publicUrl = process.env.RENDER_EXTERNAL_URL || 'https://marsx-telegram-relay.onrender.com';
 const durableMode = process.env.MARSX_DISPATCH_MODE === 'postgres';
 const durableQueue = durableMode ? new PostgresTaskQueue({ connectionString: process.env.DATABASE_URL, encryptionKeyHex: process.env.MARSX_MESSAGE_ENCRYPTION_KEY }) : null;
+// Safe startup diagnostics: report configuration presence, never credential values.
+async function reportDatabaseReadiness() {
+  const configured = {
+    database_url: Boolean(process.env.DATABASE_URL),
+    encryption_key: /^[0-9a-fA-F]{64}$/.test(process.env.MARSX_MESSAGE_ENCRYPTION_KEY || ''),
+    durable_mode: durableMode
+  };
+  if (!configured.database_url || !configured.encryption_key) {
+    console.log(JSON.stringify({ event: 'marsx_db_readiness', status: 'not_configured', configured }));
+    return;
+  }
+  if (!durableMode) {
+    console.log(JSON.stringify({ event: 'marsx_db_readiness', status: 'credentials_present_mode_disabled', configured }));
+    return;
+  }
+  try {
+    const rows = await durableQueue.pool.query(`SELECT
+      to_regclass('marsx_telegram.intakes') IS NOT NULL AS intakes,
+      to_regclass('marsx_telegram.tasks') IS NOT NULL AS tasks,
+      to_regclass('marsx_telegram.outbox') IS NOT NULL AS outbox`);
+    console.log(JSON.stringify({ event: 'marsx_db_readiness', status: 'checked', tables: rows.rows[0] }));
+  } catch (error) {
+    console.warn(JSON.stringify({ event: 'marsx_db_readiness', status: 'connection_failed', code: error.code || 'unknown' }));
+  }
+}
+void reportDatabaseReadiness();
 const outboxEnabled = durableMode && process.env.MARSX_OUTBOX_ENABLED === 'true';
 const recoveryEnabled = durableMode && process.env.MARSX_RECOVERY_ENABLED === 'true';
 let recoveryBusy = false;
