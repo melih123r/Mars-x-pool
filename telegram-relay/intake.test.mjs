@@ -26,7 +26,8 @@ test('unconfigured GitHub integration is explicitly reported', () => {
 
 test('Telegram update IDs are used to prevent best-effort duplicate records', () => {
   assert.match(source, /marsx-telegram-update-/);
-  assert.match(source, /recentUpdates\.has\(updateId\)/);
+  assert.match(source, /updateGate\.begin\(updateId\)/);
+  assert.match(source, /updateGate\.finish\(updateId, completed\)/);
 });
 
 test('Telegram reply validates API success payload', () => {
