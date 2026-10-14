@@ -1,0 +1,57 @@
+name: MARS-X Continuous Build Watch
+on:
+  workflow_dispatch:
+  push:
+    branches: [finance-open-source-integration-20261012]
+    paths:
+      - 'marsx-finance/**'
+      - '.github/workflows/marsx-build-watch.yml'
+  pull_request:
+    paths:
+      - 'marsx-finance/**'
+      - '.github/workflows/marsx-build-watch.yml'
+permissions:
+  contents: read
+concurrency:
+  group: marsx-build-watch-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  gateway:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Python syntax and offline tests
+        working-directory: marsx-finance/market-gateway
+        run: |
+          python -m compileall -q .
+          python -m unittest discover -v
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.3'
+      - name: Install Android platform
+        run: |
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;35.0.0"
+      - name: Compile Android and run lint
+        working-directory: marsx-finance/exchange-ui
+        run: gradle --no-daemon :app:assembleDebug :app:lintDebug --stacktrace
+      - name: Upload Android build
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MARS-X-Continuous-Debug-APK
+          path: marsx-finance/exchange-ui/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7

@@ -1,0 +1,9 @@
+plugins {
+    id 'java-library'
+    id 'org.jetbrains.kotlin.jvm' version '2.0.21'
+}
+
+kotlin { jvmToolchain(17) }
+
+dependencies { testImplementation 'org.jetbrains.kotlin:kotlin-test-junit:2.0.21' }
+test { useJUnit() }
