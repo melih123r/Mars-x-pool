@@ -172,6 +172,19 @@ const server = http.createServer(async (req, res) => {
       answer = 'MARS-X Telegram aktif. Gemini: ' + (geminiApiKey ? 'anahtar tanımlı (API yanıtı ayrıca test edilmeli)' : 'GEMINI_API_KEY eksik') + '. Görev yürütücüleri bağlı değil.';
     } else if (content === '/lanes' || content === '/tasks') {
       answer = 'MARS-X 10 görev alanı (henüz yürütücü bağlı değil):\n' + lanes.map((lane, index) => `${index + 1}. ${lane}`).join('\n') + '\nGörevler henüz otomatik çalıştırılmıyor.';
+    } else if (content.startsWith('/enqueue ')) {
+      if (!durableMode) {
+        answer = 'MARS-X: görev kuyruğu etkin değil. PostgreSQL yapılandırması gerekli.';
+      } else {
+        const taskMessage = content.slice('/enqueue '.length).trim();
+        if (!taskMessage || taskMessage.length > 3500) {
+          answer = 'MARS-X: görev metni 1-3500 karakter olmalı.';
+        } else {
+          const intake = await enqueueTenDurably(durableQueue, updateId, taskMessage);
+          console.log(JSON.stringify({ event: 'telegram_intake_committed', updateId, count: intake.taskCount, duplicate: intake.duplicate }));
+          answer = 'MARS-X: ' + intake.taskCount + ' görev güvenli kuyruğa kaydedildi. Görevler henüz yürütülmedi. Takip numarası: ' + updateId;
+        }
+      }
     } else if (content === '/queue') {
       answer = durableMode ? 'MARS-X: şifreli PostgreSQL kuyruğu yapılandırıldı. /ready sunucu kontrolünü kullan; görevlerin yürütülmesi henüz etkin değil.' : 'MARS-X: PostgreSQL görev kuyruğu etkin değil; mevcut mod yalnızca GitHub meta verisi saklar.';
     } else if (content.startsWith('/')) {
