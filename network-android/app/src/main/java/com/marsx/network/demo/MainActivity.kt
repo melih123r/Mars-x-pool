@@ -3,19 +3,35 @@ package com.marsx.network.demo
 import android.app.Activity
 import android.os.Bundle
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
 import android.view.ViewGroup
 import android.widget.*
 
-/** Offline demonstration only: no INTERNET permission, network routing, SDK, or earnings. */
+/** Offline, foreground-only demonstration. No INTERNET permission, proxy, or rewards. */
 class MainActivity : Activity() {
+ private val handler = Handler(Looper.getMainLooper())
  private var consent = false
  private var running = false
  private var points = 0
+ private var elapsedMs = 0L
+ private var startedAt = 0L
  private lateinit var status: TextView
  private lateinit var count: TextView
+ private lateinit var timer: TextView
  private lateinit var start: Button
+ private val tick = object : Runnable {
+  override fun run() {
+   if (running) {
+    timer.text = "Demo uptime: ${(elapsedMs + SystemClock.elapsedRealtime() - startedAt) / 1000}s"
+    handler.postDelayed(this, 1000)
+   }
+  }
+ }
  override fun onCreate(savedInstanceState: Bundle?) {
   super.onCreate(savedInstanceState)
+  // Never restore consent automatically. User opts in again on each launch.
   val root = LinearLayout(this).apply {
    orientation = LinearLayout.VERTICAL
    setPadding(32, 44, 32, 24)
@@ -25,41 +41,60 @@ class MainActivity : Activity() {
    text = value; textSize = size; setTextColor(Color.WHITE); setPadding(0, 8, 0, 16)
   }
   root.addView(label("MARS-X NETWORK", 27f))
-  root.addView(label("OFFLINE DEMO • No connection sharing or real rewards", 14f))
+  root.addView(label("OFFLINE SANDBOX • no IP sharing, traffic, or money", 14f))
   val toggle = CheckBox(this).apply {
-   text = "I agree to run local demonstration only"
+   text = "I agree to this local demonstration only"
    setTextColor(Color.WHITE)
    setOnCheckedChangeListener { _, checked ->
     consent = checked
-    if (!checked) { running = false; points = 0 }
+    if (!checked) { pauseDemo(); points = 0; elapsedMs = 0L }
     refresh()
    }
   }
   root.addView(toggle)
   status = label("Status: OFF")
-  count = label("Test points: 0")
+  count = label("Fictional test points: 0")
+  timer = label("Demo uptime: 0s")
   root.addView(status)
   root.addView(count)
+  root.addView(timer)
   start = Button(this).apply {
    text = "START DEMO"
-   setOnClickListener { if (consent) { running = !running; refresh() } }
+   setOnClickListener {
+    if (!consent) return@setOnClickListener
+    if (running) pauseDemo() else {
+     running = true
+     startedAt = SystemClock.elapsedRealtime()
+     handler.removeCallbacks(tick)
+     handler.post(tick)
+    }
+    refresh()
+   }
   }
   root.addView(start)
   root.addView(Button(this).apply {
-   text = "SIMULATE VERIFIED TEST RECEIPT"
+   text = "ADD FICTIONAL TEST POINT"
    setOnClickListener { if (running) { points++; refresh() } }
   })
   root.addView(Button(this).apply {
-   text = "STOP & RESET"
-   setOnClickListener { running = false; points = 0; refresh() }
+   text = "STOP AND RESET"
+   setOnClickListener { pauseDemo(); elapsedMs = 0L; points = 0; refresh() }
   })
-  root.addView(label("Points are fictional. This app does not connect to the internet.", 13f))
+  root.addView(label("This screen is a UI simulation. No network requests or actual earnings.", 13f))
   setContentView(root, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
   refresh()
  }
+ private fun pauseDemo() {
+  if (running) elapsedMs += SystemClock.elapsedRealtime() - startedAt
+  running = false
+  handler.removeCallbacks(tick)
+ }
+ override fun onStop() { pauseDemo(); if (::start.isInitialized) refresh(); super.onStop() }
+ override fun onDestroy() { handler.removeCallbacks(tick); super.onDestroy() }
  private fun refresh() {
-  status.text = "Status: " + if (running) "LOCAL TEST RUNNING" else if (consent) "READY" else "OFF"
-  count.text = "Test points: $points"
+  status.text = "Status: " + if (running) "LOCAL DEMO RUNNING" else if (consent) "READY / PAUSED" else "OFF"
+  count.text = "Fictional test points: $points"
+  timer.text = "Demo uptime: ${(elapsedMs + if (running) SystemClock.elapsedRealtime() - startedAt else 0L) / 1000}s"
   start.isEnabled = consent
   start.text = if (running) "PAUSE DEMO" else "START DEMO"
  }
