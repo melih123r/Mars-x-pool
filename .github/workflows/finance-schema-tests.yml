@@ -1,0 +1,23 @@
+name: Finance storage contract
+on:
+  pull_request:
+    paths:
+      - 'finance/**'
+      - '.github/workflows/finance-schema-tests.yml'
+  push:
+    branches: [bot1/finance-readonly-ledger]
+    paths:
+      - 'finance/**'
+      - '.github/workflows/finance-schema-tests.yml'
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test finance/schema-contract.test.mjs
