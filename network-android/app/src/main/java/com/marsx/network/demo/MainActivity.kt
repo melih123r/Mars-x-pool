@@ -8,6 +8,9 @@ import android.os.Looper
 import android.os.SystemClock
 import android.view.ViewGroup
 import android.widget.*
+import android.os.BatteryManager
+import android.content.IntentFilter
+import android.content.Intent
 
 /** Offline, foreground-only demonstration. No INTERNET permission, proxy, or rewards. */
 class MainActivity : Activity() {
@@ -62,6 +65,14 @@ class MainActivity : Activity() {
    text = "START DEMO"
    setOnClickListener {
     if (!consent) return@setOnClickListener
+    val battery = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+    val level = battery?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+    val scale = battery?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+    val percent = if (level >= 0 && scale > 0) level * 100 / scale else -1
+    if (!running && percent !in 16..100) {
+     Toast.makeText(this@MainActivity, "Battery unavailable or at/below 15%: demo blocked", Toast.LENGTH_LONG).show()
+     return@setOnClickListener
+    }
     if (running) pauseDemo() else {
      running = true
      startedAt = SystemClock.elapsedRealtime()
