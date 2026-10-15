@@ -17,11 +17,15 @@ function trustedRunUrl(value, runId) {
   }
 }
 
-export function classifyWorkflowEvidence(workflowRun, expectedSha) {
+export function classifyWorkflowEvidence(workflowRun, expectedSha, allowedWorkflowIds = []) {
   if (!SHA_PATTERN.test(expectedSha || ''))
     return { result: 'BLOCKED', runId: null, url: null, conclusion: null };
 
   if (!workflowRun || typeof workflowRun !== 'object')
+    return { result: 'BLOCKED', runId: null, url: null, conclusion: null };
+
+  if (!Array.isArray(allowedWorkflowIds) || allowedWorkflowIds.length === 0 ||
+      !allowedWorkflowIds.every(id => Number.isSafeInteger(id) && id > 0))
     return { result: 'BLOCKED', runId: null, url: null, conclusion: null };
 
   const runId = Number.isSafeInteger(workflowRun.id) && workflowRun.id > 0
@@ -30,7 +34,9 @@ export function classifyWorkflowEvidence(workflowRun, expectedSha) {
   const conclusion = typeof workflowRun.conclusion === 'string'
     ? workflowRun.conclusion : null;
 
-  if (!runId || !url || workflowRun.head_sha !== expectedSha)
+  if (!runId || !url || workflowRun.head_sha !== expectedSha ||
+      !allowedWorkflowIds.includes(workflowRun.workflow_id) ||
+      workflowRun.event !== 'workflow_dispatch')
     return { result: 'BLOCKED', runId, url: null, conclusion };
 
   if (workflowRun.status !== 'completed')
