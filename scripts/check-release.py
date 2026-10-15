@@ -56,8 +56,18 @@ if 'android.permission.INTERNET' not in manifest:
     raise SystemExit("INTERNET permission is required")
 if not re.search(r"targetSdk\s+36", gradle):
     raise SystemExit("targetSdk 36 is required")
-if 'versionName "0.9.0-beta"' not in gradle or 'versionCode 13' not in gradle:
-    raise SystemExit("Beta 0.9.0 Android version is required")
+# The Pool backend remains at 0.9.0 while the separate Finance APK
+# can advance independently. Validate Finance's version pair explicitly.
+app_id = re.search(r'applicationId\s+"([^"]+)"', gradle)
+version_name = re.search(r'versionName\s+"([^"]+)"', gradle)
+version_code = re.search(r'versionCode\s+(\d+)', gradle)
+if not app_id or not version_name or not version_code:
+    raise SystemExit("Android application ID and version fields are required")
+if app_id.group(1) == "com.marsx.finance":
+    if not re.fullmatch(r"0\.9\.[0-9]+-beta(?:-demo)?", version_name.group(1)) or int(version_code.group(1)) < 13:
+        raise SystemExit("Finance beta version is invalid")
+elif version_name.group(1) != "0.9.0-beta" or int(version_code.group(1)) != 13:
+    raise SystemExit("Pool beta 0.9.0 Android version is required")
 if '"version": "0.9.0"' not in package:
     raise SystemExit("Package version must match Beta 0.9.0")
 if 'APP_VERSION = "0.9.0-beta"' not in main_activity:
