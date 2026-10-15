@@ -23,7 +23,7 @@ object NetworkPolicy {
     fun evaluate(device: DeviceConditions, preferences: UserPreferences): BlockReason? = when {
         !preferences.explicitConsent -> BlockReason.NO_CONSENT
         !device.connected -> BlockReason.OFFLINE
-        device.batteryPercent <= 15 -> BlockReason.LOW_BATTERY
+        device.batteryPercent !in 16..100 -> BlockReason.LOW_BATTERY
         !device.temperatureC.isFinite() || device.temperatureC >= 43f -> BlockReason.HOT_DEVICE
         device.roaming && !preferences.allowRoaming -> BlockReason.ROAMING
         device.metered && !preferences.allowMetered -> BlockReason.METERED
