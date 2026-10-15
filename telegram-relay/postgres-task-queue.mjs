@@ -12,6 +12,84 @@ export class PostgresTaskQueue {
     this.key = loadEncryptionKey(encryptionKeyHex);
     this.pool = pool || new pg.Pool({ connectionString, max: 3, connectionTimeoutMillis: 5000, idleTimeoutMillis: 10000, ssl: connectionString?.includes('render.com') ? { rejectUnauthorized: true } : undefined });
   }
+  async storeCommandAtomic({ updateId, kind, project, message }) {
+    if (!Number.isSafeInteger(updateId) || updateId < 0) throw new Error('invalid_update_id');
+    if (!['chat', 'task'].includes(kind)) throw new Error('invalid_command_kind');
+    if (typeof project !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,31}$/.test(project)) throw new Error('invalid_project');
+    if (typeof message !== 'string' || !message.trim() || message.length > 3500) throw new Error('invalid_message');
+    const commandId = `telegram-${updateId}-${kind}`;
+    const encrypted = encryptMessage(JSON.stringify({ kind, project, message }), this.key, updateId);
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const inserted = await client.query(
+        `INSERT INTO marsx_telegram.command_inbox
+           (command_id,update_id,command_kind,project,payload_ciphertext,encryption_key_version)
+         VALUES ($1,$2,$3,$4,$5,1) ON CONFLICT (update_id) DO NOTHING`,
+        [commandId, updateId, kind, project, encrypted]
+      );
+      const result = await client.query(
+        `SELECT command_id,update_id,command_kind,project,status,attempt_count
+         FROM marsx_telegram.command_inbox WHERE update_id=$1 FOR UPDATE`,
+        [updateId]
+      );
+      const row = result.rows[0];
+      if (!row) throw new Error('command_insert_not_visible');
+      if (row.command_id !== commandId || row.command_kind !== kind || row.project !== project)
+        throw new Error('update_id_conflict');
+      await client.query('COMMIT');
+      return { commandId: row.command_id, status: row.status, duplicate: inserted.rowCount === 0 };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  async getCommandStatus(commandId) {
+    if (typeof commandId !== 'string' || !/^telegram-\d+-(chat|task)$/.test(commandId)) throw new Error('invalid_command_id');
+    const result = await this.pool.query(
+      `SELECT command_id,command_kind,project,status,attempt_count,created_at,updated_at
+       FROM marsx_telegram.command_inbox WHERE command_id=$1`,
+      [commandId]
+    );
+    return result.rows[0] || null;
+  }
+  async claimNextCommand(workerId, leaseSeconds = 60) {
+    if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
+    if (!Number.isSafeInteger(leaseSeconds) || leaseSeconds < 15 || leaseSeconds > 300) throw new Error('invalid_lease');
+    const result = await this.pool.query(
+      `WITH available AS (
+         SELECT command_id FROM marsx_telegram.command_inbox
+         WHERE status='pending' AND retry_at <= now() AND attempt_count < 10
+         ORDER BY created_at,command_id FOR UPDATE SKIP LOCKED LIMIT 1
+       )
+       UPDATE marsx_telegram.command_inbox c
+       SET status='claimed',worker_id=$1,lease_until=now()+($2::integer * interval '1 second'),
+           attempt_count=c.attempt_count+1,updated_at=now()
+       FROM available a WHERE c.command_id=a.command_id
+       RETURNING c.command_id,c.update_id,c.command_kind,c.project,c.status,c.worker_id,c.attempt_count`,
+      [workerId, leaseSeconds]
+    );
+    return result.rows[0] || null;
+  }
+  async retryCommand(commandId, workerId, errorCode, delaySeconds) {
+    if (typeof commandId !== 'string' || !/^telegram-\d+-(chat|task)$/.test(commandId)) throw new Error('invalid_command_id');
+    if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
+    if (typeof errorCode !== 'string' || !/^[a-z0-9_]{1,64}$/.test(errorCode)) throw new Error('invalid_error_code');
+    if (!Number.isSafeInteger(delaySeconds) || delaySeconds < 1 || delaySeconds > 3600) throw new Error('invalid_retry_delay');
+    const result = await this.pool.query(
+      `UPDATE marsx_telegram.command_inbox
+       SET status=CASE WHEN attempt_count < 10 THEN 'pending' ELSE 'failed' END,
+           worker_id=NULL,lease_until=NULL,
+           retry_at=CASE WHEN attempt_count < 10 THEN now()+($4::integer * interval '1 second') ELSE retry_at END,
+           last_error_code=$3,updated_at=now()
+       WHERE command_id=$1 AND worker_id=$2 AND status='claimed' AND lease_until > now()
+       RETURNING command_id,update_id,command_kind,project,status,attempt_count`,
+      [commandId, workerId, errorCode, delaySeconds]
+    );
+    return result.rows[0] || null;
+  }
   async enqueueAtomic({ updateId, tasks }) {
     if (!Number.isSafeInteger(updateId) || updateId < 0 || !Array.isArray(tasks) || tasks.length !== LANES.length) throw new Error('invalid_intake');
     if (typeof tasks[0]?.message !== 'string' || !tasks[0].message.trim() || tasks[0].message.length > 4000) throw new Error('invalid_message');
@@ -182,6 +260,19 @@ export class PostgresTaskQueue {
              worker_id=NULL, lease_until=NULL, updated_at=now()
          FROM expired e WHERE t.task_id=e.task_id
          RETURNING t.task_id,t.update_id,t.status`,
+        [limit]
+      );
+      await client.query(
+        `WITH expired_commands AS (
+           SELECT command_id FROM marsx_telegram.command_inbox
+           WHERE status='claimed' AND lease_until <= now()
+           ORDER BY lease_until FOR UPDATE SKIP LOCKED LIMIT $1
+         )
+         UPDATE marsx_telegram.command_inbox c
+         SET status=CASE WHEN attempt_count >= 10 THEN 'failed' ELSE 'pending' END,
+             worker_id=NULL,lease_until=NULL,retry_at=now(),
+             last_error_code='lease_expired',updated_at=now()
+         FROM expired_commands e WHERE c.command_id=e.command_id`,
         [limit]
       );
       // A crashed worker may have exhausted its retries. Reconcile every affected

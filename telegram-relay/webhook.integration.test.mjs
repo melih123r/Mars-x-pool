@@ -145,3 +145,29 @@ test('missing Gemini key preserves the existing safe dispatch response', async t
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { ok: true });
 });
+
+test('/chat fails closed when the private PostgreSQL inbox is unavailable', async t => {
+  const bootstrap = new URL('./gemini-fetch.test-bootstrap.mjs', import.meta.url).href;
+  const base = await startRelay(t, {
+    GEMINI_API_KEY: '', MARSX_DISPATCH_MODE: '', NODE_OPTIONS: '--import=' + bootstrap,
+    TEST_EXPECT_TELEGRAM_REPLY_PREFIX: 'MARS-X: kalıcı gelen kutusu etkin değil'
+  });
+  const headers = { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'integration-test-secret' };
+  const payload = { update_id: 102, message: { from: { id: 123456 }, chat: { id: 123456, type: 'private' }, text: '/chat finance özel mesaj' } };
+  const response = await fetch(base + '/telegram/webhook', { method: 'POST', headers, body: JSON.stringify(payload) });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { ok: true });
+});
+
+test('/task fails closed when the private PostgreSQL inbox is unavailable', async t => {
+  const bootstrap = new URL('./gemini-fetch.test-bootstrap.mjs', import.meta.url).href;
+  const base = await startRelay(t, {
+    GEMINI_API_KEY: '', MARSX_DISPATCH_MODE: '', NODE_OPTIONS: '--import=' + bootstrap,
+    TEST_EXPECT_TELEGRAM_REPLY_PREFIX: 'MARS-X: güvenli görev deposu etkin değil'
+  });
+  const headers = { 'content-type': 'application/json', 'x-telegram-bot-api-secret-token': 'integration-test-secret' };
+  const payload = { update_id: 103, message: { from: { id: 123456 }, chat: { id: 123456, type: 'private' }, text: '/task finance güvenli işi kaydet' } };
+  const response = await fetch(base + '/telegram/webhook', { method: 'POST', headers, body: JSON.stringify(payload) });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), { ok: true });
+});
