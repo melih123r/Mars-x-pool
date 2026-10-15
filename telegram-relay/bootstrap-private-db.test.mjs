@@ -33,6 +33,10 @@ test('real PostgreSQL: restricted setup, concurrent duplicate intake and ten tru
     assert.equal((await admin.query("SELECT to_regnamespace('marsx_telegram') AS ns")).rows[0].ns, null);
     await admin.query('REVOKE SELECT ON public.existing_pool_data FROM PUBLIC');
     assert.equal((await bootstrapPrivateDatabase(input)).created, true);
+    assert.equal(
+      (await admin.query("SELECT to_regclass('marsx_telegram.command_inbox') AS table_name")).rows[0].table_name,
+      'marsx_telegram.command_inbox'
+    );
     await assert.rejects(bootstrapPrivateDatabase(input), /existing_schema_or_role_requires_review/);
     const runtime = new URL(adminUrl);
     runtime.username = 'marsx_telegram_relay';

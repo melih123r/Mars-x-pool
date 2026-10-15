@@ -20,6 +20,8 @@ Apply `telegram-relay/sql/001_durable_queue.sql` once using an authorized databa
 - Render relay deploy `cdfa24d77a1c10164773f21f7c2cfa1f09f98cda` is live, and the latest reviewed GitHub CI checks passed.
 - Existing Render PostgreSQL is available in Frankfurt. Its external IP allowlist is empty; the hosted connector cannot inspect or migrate it. Keep it private and use Render's internal connection or an authorized private operator.
 - Database migration, internal `DATABASE_URL`, encryption secret, and real AI worker integrations have not been independently verified. Do not turn on PostgreSQL mode until the schema is present; the service would otherwise fail readiness.
+- New installations apply `sql/001_durable_queue.sql` and `sql/003_command_inbox.sql` through the explicitly approved private bootstrap. Existing installations must review and apply `003_command_inbox.sql` separately before enabling `/chat` or `/task`; the production server never runs migrations automatically.
+- `command_inbox.payload_ciphertext` contains the private `/chat` or `/task` body encrypted with `MARSX_MESSAGE_ENCRYPTION_KEY`. GitHub issues and logs receive only bounded metadata, never that body.
 - The free PostgreSQL instance expires on 2026-11-05; migrate or upgrade storage before then.
 - Validation order: backup → schema → internal connection and encryption secret → `/ready` → authorized Telegram ten-task intake → worker claim/ack → outbox result delivery → rollback verification.
 
