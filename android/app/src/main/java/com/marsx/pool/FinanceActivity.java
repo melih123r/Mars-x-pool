@@ -280,17 +280,23 @@ public final class FinanceActivity extends Activity{
    for(int i=start;i<end;i++){float[] a=candles.get(i);high=Math.max(high,a[1]);low=Math.min(low,a[2]);maxVol=Math.max(maxVol,a[4]);}
    float range=Math.max(.000001f,high-low);high+=range*.04f;low=Math.max(0,low-range*.04f);
    float cell=(w-left-right)/(float)count,body=Math.max(2,cell*.60f);
-   Path sma=new Path();boolean started=false;
+   Path sma=new Path(),ema=new Path(),upperBand=new Path(),lowerBand=new Path();boolean started=false,emaStarted=false,bandStarted=false;
+   double emaValue=0,alpha=2.0/22.0;
+   for(int j=0;j<start;j++){float price=candles.get(j)[3];emaValue=j==0?price:alpha*price+(1-alpha)*emaValue;}
+
    for(int i=start;i<end;i++){
     float[] a=candles.get(i);float cx=left+(i-start+.5f)*cell;
     float yo=y(a[0],high,low,top,plotH),yh=y(a[1],high,low,top,plotH),yl=y(a[2],high,low,top,plotH),yc=y(a[3],high,low,top,plotH);
     p.setColor(a[3]>=a[0]?Color.rgb(22,199,132):Color.rgb(234,57,67));p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(2);canvas.drawLine(cx,yh,cx,yl,p);
     p.setStyle(Paint.Style.FILL);canvas.drawRect(cx-body/2,Math.min(yo,yc),cx+body/2,Math.max(yo,yc)+1,p);
     p.setColor(Color.argb(140,148,165,185));canvas.drawRect(cx-body/2,volumeTop+volumeH*(1-a[4]/maxVol),cx+body/2,volumeTop+volumeH,p);
-    if(i>=19){double sum=0;for(int j=i-19;j<=i;j++)sum+=candles.get(j)[3];float sy=y((float)(sum/20),high,low,top,plotH);if(!started){sma.moveTo(cx,sy);started=true;}else sma.lineTo(cx,sy);}
+    if(i>=19){double sum=0,sumSq=0;for(int j=i-19;j<=i;j++){double v=candles.get(j)[3];sum+=v;sumSq+=v*v;}double avg=sum/20;float sy=y((float)avg,high,low,top,plotH);if(!started){sma.moveTo(cx,sy);started=true;}else sma.lineTo(cx,sy);
+     double deviation=Math.sqrt(Math.max(0,sumSq/20-avg*avg));float uy=y((float)(avg+2*deviation),high,low,top,plotH),ly=y((float)(avg-2*deviation),high,low,top,plotH);if(!bandStarted){upperBand.moveTo(cx,uy);lowerBand.moveTo(cx,ly);bandStarted=true;}else{upperBand.lineTo(cx,uy);lowerBand.lineTo(cx,ly);}
+    }
+    emaValue=i==0?a[3]:alpha*a[3]+(1-alpha)*emaValue;float ey=y((float)emaValue,high,low,top,plotH);if(!emaStarted){ema.moveTo(cx,ey);emaStarted=true;}else ema.lineTo(cx,ey);
    }
-   p.setStyle(Paint.Style.STROKE);p.setColor(accent);p.setStrokeWidth(2.5f);canvas.drawPath(sma,p);
-   p.setStyle(Paint.Style.FILL);p.setColor(Color.LTGRAY);p.setTextSize(22);canvas.drawText("SMA 20",left+6,top+22,p);canvas.drawText("VOL",left+6,h-8,p);
+   p.setStyle(Paint.Style.STROKE);p.setColor(accent);p.setStrokeWidth(2.5f);canvas.drawPath(sma,p);p.setColor(Color.rgb(66,176,245));canvas.drawPath(ema,p);p.setColor(Color.argb(160,175,120,245));p.setStrokeWidth(1.5f);canvas.drawPath(upperBand,p);canvas.drawPath(lowerBand,p);
+   p.setStyle(Paint.Style.FILL);p.setColor(Color.LTGRAY);p.setTextSize(22);canvas.drawText("SMA20  EMA21  BB20",left+6,top+22,p);canvas.drawText("VOL",left+6,h-8,p);
   }
   float y(float value,float high,float low,int top,int height){return top+(high-value)/Math.max(.000001f,high-low)*height;}
  }
