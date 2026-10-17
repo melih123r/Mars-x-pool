@@ -12,7 +12,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MarsX"
         android:usesCleartextTraffic="false">
-        <activity android:name=".LemonDemoActivity" android:exported="false" />\n        <activity android:name=".VrscPoolActivity" android:exported="false" />
+        <activity android:name=".LemonDemoActivity" android:exported="false" />
+        <activity android:name=".VrscPoolActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
         <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="true">
             <intent-filter>
