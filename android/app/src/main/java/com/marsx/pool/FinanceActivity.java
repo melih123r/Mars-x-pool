@@ -255,7 +255,7 @@ public final class FinanceActivity extends Activity{
   final Paint p=new Paint(3); final ArrayList<float[]> candles=new ArrayList<>(); int accent=Color.rgb(255,112,0);
   int visibleCount=48,scrollBack=0,chartStyle=0,smaPeriod=20,emaPeriod=21;boolean cryptoSession=false,placeLevelOnTap=false,placeTrendOnTap=false;float horizontalLevel=Float.NaN,trendX1=Float.NaN,trendY1=Float.NaN,trendX2=Float.NaN,trendY2=Float.NaN;float downX,downY,touchStartX,touchStartY;boolean dragging=false,touchMoved=false;
   ChartView(Context context){super(context);setBackgroundColor(Color.rgb(7,12,19));}
-  void clear(){candles.clear();scrollBack=0;invalidate();setContentDescription("Piyasa verisi bekleniyor");}
+  void clear(){candles.clear();horizontalLevel=Float.NaN;trendX1=Float.NaN;trendY1=Float.NaN;trendX2=Float.NaN;trendY2=Float.NaN;placeLevelOnTap=false;placeTrendOnTap=false;scrollBack=0;invalidate();setContentDescription("Piyasa verisi bekleniyor");}
   void setCandles(JSONArray raw){
    ArrayList<float[]> valid=new ArrayList<>();long lastTime=Long.MIN_VALUE;
    for(int i=0;i<raw.length();i++)try{
