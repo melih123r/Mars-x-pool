@@ -94,15 +94,15 @@ public final class FinanceActivity extends Activity{
     java.math.BigDecimal units=new java.math.BigDecimal(q),px=new java.math.BigDecimal(p);
     if(units.signum()<=0||px.signum()<=0||units.multiply(px).compareTo(new java.math.BigDecimal("1000000"))>0)throw new IllegalArgumentException();
     String sym=symbol.getSelectedItem().toString(),direction=side.getSelectedItem().toString(),kind=type.getSelectedItem().toString();
+    int removable=-1;
     if(paperOrders.size()>=200){
-     int removable=-1;
      for(int idx=0;idx<paperOrders.size();idx++)if(!"PENDING".equals(paperOrders.get(idx).status)){removable=idx;break;}
      if(removable<0){qty.setError("En fazla 200 açık demo emri; önce bekleyen emri iptal et");return;}
-     paperOrders.remove(removable);
     }
     if(kind.equals("MARKET")){
      if(!paperFill(sym,direction,units,px)){qty.setError("Demo bakiye veya pozisyon yetersiz");return;}
     }
+    if(removable>=0)paperOrders.remove(removable);
     paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,kind.equals("MARKET")?"FILLED":"PENDING"));
     d.dismiss();paperDashboard();
    }catch(IllegalArgumentException e){qty.setError("Pozitif adet ve fiyat gir; maksimum 1 milyon USD");}
