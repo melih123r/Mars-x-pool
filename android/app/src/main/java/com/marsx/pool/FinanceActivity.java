@@ -280,9 +280,9 @@ public final class FinanceActivity extends Activity{
    for(int i=start;i<end;i++){float[] a=candles.get(i);high=Math.max(high,a[1]);low=Math.min(low,a[2]);maxVol=Math.max(maxVol,a[4]);}
    float range=Math.max(.000001f,high-low);high+=range*.04f;low=Math.max(0,low-range*.04f);
    float cell=(w-left-right)/(float)count,body=Math.max(2,cell*.60f);
-   Path sma=new Path(),ema=new Path(),upperBand=new Path(),lowerBand=new Path();boolean started=false,emaStarted=false,bandStarted=false;
+   Path sma=new Path(),ema=new Path(),upperBand=new Path(),lowerBand=new Path(),vwapPath=new Path();boolean started=false,emaStarted=false,bandStarted=false,vwapStarted=false;double vwapPV=0,vwapVol=0;
    double emaValue=0,alpha=2.0/22.0;
-   for(int j=0;j<start;j++){float price=candles.get(j)[3];emaValue=j==0?price:alpha*price+(1-alpha)*emaValue;}
+   for(int j=0;j<start;j++){float[] b=candles.get(j);float price=b[3];emaValue=j==0?price:alpha*price+(1-alpha)*emaValue;double vol=b[4];vwapPV+=((b[1]+b[2]+b[3])/3.0)*vol;vwapVol+=vol;}
 
    for(int i=start;i<end;i++){
     float[] a=candles.get(i);float cx=left+(i-start+.5f)*cell;
@@ -293,10 +293,10 @@ public final class FinanceActivity extends Activity{
     if(i>=19){double sum=0,sumSq=0;for(int j=i-19;j<=i;j++){double v=candles.get(j)[3];sum+=v;sumSq+=v*v;}double avg=sum/20;float sy=y((float)avg,high,low,top,plotH);if(!started){sma.moveTo(cx,sy);started=true;}else sma.lineTo(cx,sy);
      double deviation=Math.sqrt(Math.max(0,sumSq/20-avg*avg));float uy=y((float)(avg+2*deviation),high,low,top,plotH),ly=y((float)(avg-2*deviation),high,low,top,plotH);if(!bandStarted){upperBand.moveTo(cx,uy);lowerBand.moveTo(cx,ly);bandStarted=true;}else{upperBand.lineTo(cx,uy);lowerBand.lineTo(cx,ly);}
     }
-    emaValue=i==0?a[3]:alpha*a[3]+(1-alpha)*emaValue;float ey=y((float)emaValue,high,low,top,plotH);if(!emaStarted){ema.moveTo(cx,ey);emaStarted=true;}else ema.lineTo(cx,ey);
+    double v=a[4];vwapPV+=((a[1]+a[2]+a[3])/3.0)*v;vwapVol+=v;if(vwapVol>0){float vy=y((float)(vwapPV/vwapVol),high,low,top,plotH);if(!vwapStarted){vwapPath.moveTo(cx,vy);vwapStarted=true;}else vwapPath.lineTo(cx,vy);}emaValue=i==0?a[3]:alpha*a[3]+(1-alpha)*emaValue;float ey=y((float)emaValue,high,low,top,plotH);if(!emaStarted){ema.moveTo(cx,ey);emaStarted=true;}else ema.lineTo(cx,ey);
    }
-   canvas.save();canvas.clipRect(left,top,w-right,top+plotH);p.setStyle(Paint.Style.STROKE);p.setColor(accent);p.setStrokeWidth(2.5f);canvas.drawPath(sma,p);p.setColor(Color.rgb(66,176,245));canvas.drawPath(ema,p);p.setColor(Color.argb(160,175,120,245));p.setStrokeWidth(1.5f);canvas.drawPath(upperBand,p);canvas.drawPath(lowerBand,p);canvas.restore();
-   p.setStyle(Paint.Style.FILL);p.setColor(Color.LTGRAY);p.setTextSize(22);canvas.drawText("SMA20  EMA21  BB20",left+6,top+22,p);canvas.drawText("VOL",left+6,h-8,p);double rsi=rsi14(candles,end);if(Double.isFinite(rsi)){p.setTextSize(18);p.setColor(Color.rgb(245,189,75));canvas.drawText(String.format(Locale.ROOT,"RSI14 %.1f",rsi),w-160,h-8,p);}double[] macd=macd12269(candles,end);if(Double.isFinite(macd[0])){p.setTextSize(15);p.setColor(Color.rgb(66,176,245));canvas.drawText(String.format(Locale.ROOT,"MACD %.3f / %.3f",macd[0],macd[1]),left+78,h-8,p);}
+   canvas.save();canvas.clipRect(left,top,w-right,top+plotH);p.setStyle(Paint.Style.STROKE);p.setColor(accent);p.setStrokeWidth(2.5f);canvas.drawPath(sma,p);p.setColor(Color.rgb(66,176,245));canvas.drawPath(ema,p);p.setColor(Color.argb(160,175,120,245));p.setStrokeWidth(1.5f);canvas.drawPath(upperBand,p);canvas.drawPath(lowerBand,p);p.setColor(Color.rgb(245,189,75));p.setStrokeWidth(2);canvas.drawPath(vwapPath,p);canvas.restore();
+   p.setStyle(Paint.Style.FILL);p.setColor(Color.LTGRAY);p.setTextSize(22);canvas.drawText("SMA20 EMA21 BB20 VWAP*",left+6,top+22,p);canvas.drawText("VOL",left+6,h-8,p);double rsi=rsi14(candles,end);if(Double.isFinite(rsi)){p.setTextSize(18);p.setColor(Color.rgb(245,189,75));canvas.drawText(String.format(Locale.ROOT,"RSI14 %.1f",rsi),w-160,h-8,p);}double[] macd=macd12269(candles,end);if(Double.isFinite(macd[0])){p.setTextSize(15);p.setColor(Color.rgb(66,176,245));canvas.drawText(String.format(Locale.ROOT,"MACD %.3f / %.3f",macd[0],macd[1]),left+78,h-8,p);}
   }
   static double[] macd12269(ArrayList<float[]> candles,int end){if(end<35)return new double[]{Double.NaN,Double.NaN,Double.NaN};double fast=0,slow=0,signal=0,macd=0;for(int i=0;i<end;i++){double close=candles.get(i)[3];fast=i==0?close:fast+(close-fast)*2.0/13;slow=i==0?close:slow+(close-slow)*2.0/27;macd=fast-slow;signal=i==0?macd:signal+(macd-signal)*2.0/10;}return new double[]{macd,signal,macd-signal};}
   static double rsi14(ArrayList<float[]> candles,int end){if(end<15)return Double.NaN;double gain=0,loss=0;for(int i=1;i<=14;i++){double d=candles.get(i)[3]-candles.get(i-1)[3];gain+=Math.max(0,d);loss+=Math.max(0,-d);}gain/=14;loss/=14;for(int i=15;i<end;i++){double d=candles.get(i)[3]-candles.get(i-1)[3];gain=(gain*13+Math.max(0,d))/14;loss=(loss*13+Math.max(0,-d))/14;}return loss==0?(gain==0?50:100):100-100/(1+gain/loss);}
