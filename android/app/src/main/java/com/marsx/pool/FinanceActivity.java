@@ -87,13 +87,14 @@ public final class FinanceActivity extends Activity{
  void paperOrderDialog(String preferredSymbol,float preferredPrice){
   LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);form.setPadding(24,8,24,8);
   // Reuse the chart market universe to avoid silently placing a demo order on a different asset.
+  if(marketAsset==null||marketAsset.getCount()==0){new AlertDialog.Builder(this).setTitle("Demo emir kullanılamıyor").setMessage("Piyasa sembolleri henüz yüklenmedi. Önce Piyasalar ekranını açın.").setPositiveButton("Tamam",null).show();return;}
   String[] paperSymbols=new String[marketAsset.getCount()];for(int i=0;i<paperSymbols.length;i++)paperSymbols[i]=marketAsset.getItemAtPosition(i).toString();
   Spinner symbol=spin(paperSymbols,0);
   if(preferredSymbol!=null){boolean supported=false;for(int i=0;i<symbol.getCount();i++)if(preferredSymbol.equals(symbol.getItemAtPosition(i).toString())){symbol.setSelection(i);supported=true;break;}if(!supported){new AlertDialog.Builder(this).setTitle("Demo emir desteklenmiyor").setMessage(preferredSymbol+" için demo emir desteği henüz yok. Yanlış sembole emir açılmasını önlemek için işlem durduruldu.").setPositiveButton("Tamam",null).show();return;}}
   Spinner side=spin(new String[]{"BUY","SELL"},0);
   Spinner type=spin(new String[]{"LIMIT","MARKET (devre dışı)"},0);
   EditText qty=new EditText(this);qty.setHint("Adet");qty.setInputType(2|8192);
-  EditText price=new EditText(this);price.setHint("Demo fiyat (USD)");price.setInputType(2|8192);if(Float.isFinite(preferredPrice)&&preferredPrice>0){type.setSelection(1);price.setText(new java.math.BigDecimal(Float.toString(preferredPrice)).setScale(6,java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString());}
+  EditText price=new EditText(this);price.setHint("Demo fiyat (USD)");price.setInputType(2|8192);if(Float.isFinite(preferredPrice)&&preferredPrice>0){price.setText(new java.math.BigDecimal(Float.toString(preferredPrice)).setScale(6,java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString());}
   form.addView(label("Sembol"));form.addView(symbol);form.addView(label("Yön"));form.addView(side);
   form.addView(label("Emir tipi"));form.addView(type);form.addView(label("Adet"));form.addView(qty);
   form.addView(label("Simüle edilen fiyat / limit"));form.addView(price);
@@ -117,7 +118,7 @@ public final class FinanceActivity extends Activity{
      price.setError("MARKET emirleri güvenli fiyat doğrulaması tamamlanana kadar kapalı. LIMIT seçin.");return;
     }
     if(removable>=0)paperOrders.remove(removable);
-    paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,kind.equals("MARKET")?"FILLED":"PENDING"));
+    paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,"PENDING"));
     d.dismiss();if(chartView!=null)chartView.invalidate();paperDashboard();
    }catch(IllegalArgumentException e){qty.setError("Pozitif adet ve fiyat gir; maksimum 1 milyon USD");}
   }));
