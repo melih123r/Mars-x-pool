@@ -167,7 +167,8 @@ public final class FinanceActivity extends Activity{
   final double quantity;
   try{quantity=Double.parseDouble(a);}catch(NumberFormatException e){result.setText("Geçerli bir miktar gir.");return;}
   if(!Double.isFinite(quantity)||quantity<=0){result.setText("Miktar sıfırdan büyük olmalı.");return;}
-  if(f.equals(tt)&&fn.equals(tn)){result.setText("Aynı coin ve ağ arasında dönüşüm yapılamaz.");return;}
+  if(quantity>1000000000d){result.setText("Önizleme miktarı çok büyük.");return;}
+  if(f.equals(tt)){result.setText("Aynı coin için dönüşüm teklifi verilmez. Ağlar arası transfer bu önizlemede desteklenmiyor.");return;}
   result.setText("Minimum tutar ve fiyat hesaplanıyor…");
   new Thread(()->{
    try{
