@@ -253,7 +253,7 @@ public final class FinanceActivity extends Activity{
  LinearLayout.LayoutParams mp(int top){LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=top;return p;}GradientDrawable round(int col,int rad){GradientDrawable g=new GradientDrawable();g.setColor(col);g.setCornerRadius(rad);return g;}GradientDrawable pill(int col,int stroke){GradientDrawable g=round(col,999);g.setStroke(1,stroke);return g;}GradientDrawable panel(int col,int rad,int stroke){GradientDrawable g=round(col,rad);g.setStroke(2,stroke);return g;}GradientDrawable box(){GradientDrawable g=round(Color.rgb(16,23,34),16);g.setStroke(1,Color.rgb(56,32,82));return g;}
  static final class ChartView extends View{
   final Paint p=new Paint(3); final ArrayList<float[]> candles=new ArrayList<>(); int accent=Color.rgb(255,112,0);
-  int visibleCount=48,scrollBack=0,chartStyle=0,smaPeriod=20,emaPeriod=21;boolean cryptoSession=false;float downX,downY;boolean dragging=false;
+  int visibleCount=48,scrollBack=0,chartStyle=0,smaPeriod=20,emaPeriod=21;boolean cryptoSession=false;float horizontalLevel=Float.NaN;float downX,downY;boolean dragging=false;
   ChartView(Context context){super(context);setBackgroundColor(Color.rgb(7,12,19));}
   void clear(){candles.clear();scrollBack=0;invalidate();setContentDescription("Piyasa verisi bekleniyor");}
   void setCandles(JSONArray raw){
