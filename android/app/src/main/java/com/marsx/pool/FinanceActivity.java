@@ -23,7 +23,7 @@ public final class FinanceActivity extends Activity{
  }
  void quoteInfo(){LinearLayout c=card();c.addView(t("Hizmet Durumu",12,ACCENT));c.addView(t("ChangeNOW read-only quote • Broker kapıları kilitli • KYC/SCA olmadan gerçek işlem yok",12,MUTED));String[] f={"✓ Hizlı işlem","✓ En iyi oranlar","✓ Çoklu ağ","✓ Varlıklar güvende","✓ Kayıt gerektirmez","✓ İşlem kapalı"};for(int i=0;i<3;i++){LinearLayout r=row();feature(r,f[i*2]);feature(r,f[i*2+1]);c.addView(r,mp(4));}root.addView(c,mp(12));}
  void popularPairs(){LinearLayout c=card();c.addView(t("POPÜLER ÇİFTLER",12,ACCENT));String[] pairs={"BTC  ›  ETH","ETH  ›  USDT","BNB  ›  USDT","SOL  ›  USDT","USDT  ›  TRX"};for(String pair:pairs){TextView p=t(pair+"        veri bekleniyor",14,Color.WHITE);p.setBackground(pill(Color.rgb(12,17,27),Color.rgb(35,45,62)));p.setPadding(16,10,16,10);c.addView(p,mp(6));}root.addView(c,mp(12));}
- void brokerCard(){LinearLayout c=card();c.addView(t("SİSTEM DURUMU",12,ACCENT));brokerStatus=t("Broker durumu kontrol ediliyor…",13,MUTED);c.addView(brokerStatus);c.addView(t("İşlem modu: Önizleme • canlı emir ve çekim kapalı",12,MUTED));financeAction(c,"Demo emir hesaplayıcı",()->brokerDemo());root.addView(c,mp(12));}
+ void brokerCard(){LinearLayout c=card();c.addView(t("SİSTEM DURUMU",12,ACCENT));brokerStatus=t("Broker durumu kontrol ediliyor…",13,MUTED);c.addView(brokerStatus);c.addView(t("İşlem modu: Önizleme • canlı emir ve çekim kapalı",12,MUTED));financeAction(c,"Demo emir hesaplayıcı",()->brokerDemo());financeAction(c,"Demo emir paneli",()->paperOrderDialog());financeAction(c,"Demo portföy ve emirler",()->paperDashboard());root.addView(c,mp(12));}
  void marketCard(){LinearLayout c=card();c.addView(t("PİYASA ÖZETİ",12,ACCENT));marketPrice=t("BTC / USD     —     veri bekleniyor",18,Color.WHITE);marketPrice.setTypeface(null,Typeface.BOLD);oneLine(marketPrice);c.addView(marketPrice);marketAsset=spin(new String[]{"BTC-USD","ETH-USD","SOL-USD","DOGE-USD","LTC-USD","AVAX-USD"},0);c.addView(marketAsset);marketTimeframe=spin(new String[]{"1m","5m","15m","1h","6h","1D"},0);c.addView(marketTimeframe);marketAsset.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int i,long id){if(chartView!=null)chartSnapshot();}});marketTimeframe.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int i,long id){if(chartView!=null)chartSnapshot();}});chartView=new ChartView(this);chartView.accent=ACCENT;chartView.setContentDescription("BTC USD mum grafiği; veri bekleniyor");c.addView(chartView,new LinearLayout.LayoutParams(-1,420));LinearLayout controls=row();Button zoomIn=new Button(this);zoomIn.setText("＋ Yakınlaştır");zoomIn.setAllCaps(false);zoomIn.setOnClickListener(v->chartView.zoom(-1));controls.addView(zoomIn,new LinearLayout.LayoutParams(0,54,1));Button zoomOut=new Button(this);zoomOut.setText("－ Uzaklaştır");zoomOut.setAllCaps(false);zoomOut.setOnClickListener(v->chartView.zoom(1));controls.addView(zoomOut,new LinearLayout.LayoutParams(0,54,1));c.addView(controls);c.addView(t("Mum grafik • hacim • salt okunur veri",12,MUTED));marketProviders=t("Piyasa verisi: Coinbase + Kraken + Bybit hazırlanıyor",12,MUTED);c.addView(marketProviders);root.addView(c,mp(12));}
  void nav(){LinearLayout r=row();String[] items={"Ana Sayfa","Piyasalar","Trading","Portföy","Cüzdan","Profil"};for(String item:items){TextView n=t(item,10,MUTED);n.setGravity(Gravity.CENTER);oneLine(n);n.setBackground(pill(Color.rgb(8,11,18),item.equals("Trading")?ACCENT:Color.rgb(32,40,56)));LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,52,1);p.setMargins(2,0,2,0);r.addView(n,p);n.setOnClickListener(v->openFinanceScreen(item));}root.addView(r,mp(20));}
  void openFinanceScreen(String name){chartRequestGeneration++;quoteRequestGeneration++;tradingScreenVisible=false;refreshHandler.removeCallbacks(refreshTick);
@@ -59,6 +59,85 @@ public final class FinanceActivity extends Activity{
    }catch(NumberFormatException e){qty.setError("Pozitif sayı ve toplam en fazla 1 milyon USD olmalı");}
   }));
   dialog.show();
+ }
+
+ final java.util.ArrayList<PaperOrder> paperOrders=new java.util.ArrayList<>();
+ final java.util.HashMap<String,java.math.BigDecimal> paperHoldings=new java.util.HashMap<>();
+ final java.util.HashMap<String,java.math.BigDecimal> paperCost=new java.util.HashMap<>();
+ java.math.BigDecimal paperCash=new java.math.BigDecimal("100000");
+ int paperSequence=0;
+ static final class PaperOrder{
+  final int id;final String symbol,side,type;final java.math.BigDecimal qty,price;
+  String status;
+  PaperOrder(int id,String symbol,String side,String type,java.math.BigDecimal qty,java.math.BigDecimal price,String status){
+   this.id=id;this.symbol=symbol;this.side=side;this.type=type;this.qty=qty;this.price=price;this.status=status;
+  }
+ }
+ void paperOrderDialog(){
+  LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);form.setPadding(24,8,24,8);
+  Spinner symbol=spin(new String[]{"AAPL","MSFT","NVDA","SPY","TSLA"},0);
+  Spinner side=spin(new String[]{"BUY","SELL"},0);
+  Spinner type=spin(new String[]{"MARKET","LIMIT"},0);
+  EditText qty=new EditText(this);qty.setHint("Adet");qty.setInputType(2|8192);
+  EditText price=new EditText(this);price.setHint("Demo fiyat (USD)");price.setInputType(2|8192);
+  form.addView(label("Sembol"));form.addView(symbol);form.addView(label("Yön"));form.addView(side);
+  form.addView(label("Emir tipi"));form.addView(type);form.addView(label("Adet"));form.addView(qty);
+  form.addView(label("Simüle edilen fiyat / limit"));form.addView(price);
+  AlertDialog d=new AlertDialog.Builder(this).setTitle("DEMO emir • gerçek işlem yok").setView(form).setNegativeButton("İptal",null).setPositiveButton("Kaydet",null).create();
+  d.setOnShowListener(v->d.getButton(-1).setOnClickListener(w->{
+   try{
+    String q=qty.getText().toString().trim(),p=price.getText().toString().trim();
+    if(!q.matches("[0-9]+(\\.[0-9]{1,6})?")||!p.matches("[0-9]+(\\.[0-9]{1,6})?"))throw new IllegalArgumentException();
+    java.math.BigDecimal units=new java.math.BigDecimal(q),px=new java.math.BigDecimal(p);
+    if(units.signum()<=0||px.signum()<=0||units.multiply(px).compareTo(new java.math.BigDecimal("1000000"))>0)throw new IllegalArgumentException();
+    String sym=symbol.getSelectedItem().toString(),direction=side.getSelectedItem().toString(),kind=type.getSelectedItem().toString();
+    if(kind.equals("MARKET")){
+     if(!paperFill(sym,direction,units,px)){qty.setError("Demo bakiye veya pozisyon yetersiz");return;}
+    }
+    paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,kind.equals("MARKET")?"FILLED":"PENDING"));
+    d.dismiss();paperDashboard();
+   }catch(IllegalArgumentException e){qty.setError("Pozitif adet ve fiyat gir; maksimum 1 milyon USD");}
+  }));
+  d.show();
+ }
+ boolean paperFill(String sym,String side,java.math.BigDecimal qty,java.math.BigDecimal px){
+  java.math.BigDecimal value=qty.multiply(px);
+  java.math.BigDecimal held=paperHoldings.containsKey(sym)?paperHoldings.get(sym):java.math.BigDecimal.ZERO;
+  if(side.equals("BUY")){
+   if(paperCash.compareTo(value)<0)return false;
+   paperCash=paperCash.subtract(value);
+   paperHoldings.put(sym,held.add(qty));
+   paperCost.put(sym,(paperCost.containsKey(sym)?paperCost.get(sym):java.math.BigDecimal.ZERO).add(value));
+  }else{
+   if(held.compareTo(qty)<0)return false;
+   java.math.BigDecimal oldCost=paperCost.containsKey(sym)?paperCost.get(sym):java.math.BigDecimal.ZERO;
+   java.math.BigDecimal remaining=held.subtract(qty);
+   paperCash=paperCash.add(value);paperHoldings.put(sym,remaining);
+   paperCost.put(sym,remaining.signum()==0?java.math.BigDecimal.ZERO:oldCost.multiply(remaining).divide(held,8,java.math.RoundingMode.HALF_UP));
+  }
+  return true;
+ }
+ void paperDashboard(){
+  StringBuilder out=new StringBuilder("DEMO • cihaz belleği • başlangıç 100.000 USD\\n");
+  out.append("Nakit: $").append(paperCash.toPlainString()).append("\\n\\nPozisyonlar:\\n");
+  for(String sym:paperHoldings.keySet()){
+   java.math.BigDecimal qty=paperHoldings.get(sym);
+   if(qty.signum()>0)out.append(sym).append(": ").append(qty.toPlainString()).append(" adet • maliyet $").append(paperCost.get(sym).toPlainString()).append("\\n");
+  }
+  out.append("\\nEmirler (LIMIT beklemede; piyasa fiyatı izlenmiyor):\\n");
+  for(int i=paperOrders.size()-1;i>=0;i--){
+   PaperOrder o=paperOrders.get(i);
+   out.append("#").append(o.id).append(" ").append(o.symbol).append(" ").append(o.side).append(" ").append(o.type).append(" ").append(o.qty).append(" × $").append(o.price).append(" ").append(o.status).append("\\n");
+  }
+  new AlertDialog.Builder(this).setTitle("DEMO portföy").setMessage(out.toString()).setPositiveButton("Kapat",null).setNeutralButton("Bekleyen emri iptal et",(d,w)->paperCancelDialog()).show();
+ }
+ void paperCancelDialog(){
+  java.util.ArrayList<PaperOrder> pending=new java.util.ArrayList<>();
+  for(PaperOrder o:paperOrders)if(o.status.equals("PENDING"))pending.add(o);
+  if(pending.isEmpty()){new AlertDialog.Builder(this).setMessage("Bekleyen demo emir yok.").setPositiveButton("Tamam",null).show();return;}
+  String[] names=new String[pending.size()];
+  for(int i=0;i<pending.size();i++){PaperOrder o=pending.get(i);names[i]="#"+o.id+" "+o.symbol+" "+o.side+" "+o.qty;}
+  new AlertDialog.Builder(this).setTitle("İptal edilecek demo emir").setItems(names,(d,index)->{pending.get(index).status="CANCELLED";paperDashboard();}).setNegativeButton("Vazgeç",null).show();
  }
  void financePreview(String title){new AlertDialog.Builder(this).setTitle(title).setMessage("MARS-X Finance arayüz önizlemesi. Gerçek işlem veya hesap değişikliği yapılmaz.").setPositiveButton("Tamam",null).show();}
  void financeLine(LinearLayout parent,String key,String value){LinearLayout r=row();r.setPadding(18,18,18,18);r.setBackground(panel(RAISED,14,Color.rgb(37,48,66)));TextView left=t(key,14,Color.WHITE);r.addView(left,new LinearLayout.LayoutParams(0,-2,1));r.addView(t(value,12,MUTED));parent.addView(r,mp(7));}
