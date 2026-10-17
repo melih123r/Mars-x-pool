@@ -1,0 +1,7 @@
+import test from "node:test";import assert from "node:assert/strict";import {normalizeSeries,resampleCandles,sma,ema,rsi,bollinger,macd,chartQuality,chartSnapshot} from "../global-engine/chart-engine.js";
+const rows=Array.from({length:40},(_,i)=>({time:1_700_000_000_000+i*60_000,open:100+i,high:102+i,low:99+i,close:101+i,volume:10+i}));
+test("chart engine normalizes and computes indicators",()=>{const s=chartSnapshot(rows);assert.equal(s.candles.length,40);assert.equal(s.indicators.sma20.length,40);assert.equal(s.indicators.rsi14[14],100);assert.ok(s.indicators.bollinger20[19].upper>s.indicators.bollinger20[19].lower);assert.equal(s.indicators.macd.length,40);});
+test("resampling aggregates OHLCV",()=>{const x=resampleCandles(rows.slice(0,5),"5m");assert.ok(x.length>=1);assert.ok(x[0].high>=x[0].open);assert.ok(x[0].volume>0);});
+test("bad candles and duplicates fail closed",()=>{assert.throws(()=>normalizeSeries([{time:1,open:2,high:1,low:1,close:2,volume:1}]),/invalid OHLC/);assert.throws(()=>normalizeSeries([rows[0],rows[0]]),/duplicate/);});
+test("quality vetoes stale data",()=>{assert.equal(chartQuality(rows,{now:rows.at(-1).time+1_000,maxStaleMs:2_000}).ok,true);assert.equal(chartQuality(rows,{now:rows.at(-1).time+3_000,maxStaleMs:2_000}).reason,"STALE");});
+test("indicator lengths stay aligned",()=>{for(const x of [sma(rows),ema(rows),rsi(rows),bollinger(rows),macd(rows)])assert.equal(x.length,rows.length);});
