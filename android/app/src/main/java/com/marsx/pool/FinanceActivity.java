@@ -91,7 +91,7 @@ public final class FinanceActivity extends Activity{
   Spinner symbol=spin(paperSymbols,0);
   if(preferredSymbol!=null){boolean supported=false;for(int i=0;i<symbol.getCount();i++)if(preferredSymbol.equals(symbol.getItemAtPosition(i).toString())){symbol.setSelection(i);supported=true;break;}if(!supported){new AlertDialog.Builder(this).setTitle("Demo emir desteklenmiyor").setMessage(preferredSymbol+" için demo emir desteği henüz yok. Yanlış sembole emir açılmasını önlemek için işlem durduruldu.").setPositiveButton("Tamam",null).show();return;}}
   Spinner side=spin(new String[]{"BUY","SELL"},0);
-  Spinner type=spin(new String[]{"MARKET","LIMIT"},0);
+  Spinner type=spin(new String[]{"LIMIT","MARKET (devre dışı)"},0);
   EditText qty=new EditText(this);qty.setHint("Adet");qty.setInputType(2|8192);
   EditText price=new EditText(this);price.setHint("Demo fiyat (USD)");price.setInputType(2|8192);if(Float.isFinite(preferredPrice)&&preferredPrice>0){type.setSelection(1);price.setText(new java.math.BigDecimal(Float.toString(preferredPrice)).setScale(6,java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString());}
   form.addView(label("Sembol"));form.addView(symbol);form.addView(label("Yön"));form.addView(side);
@@ -111,7 +111,7 @@ public final class FinanceActivity extends Activity{
      for(int idx=0;idx<paperOrders.size();idx++)if(!"PENDING".equals(paperOrders.get(idx).status)){removable=idx;break;}
      if(removable<0){qty.setError("En fazla 200 açık demo emri; önce bekleyen emri iptal et");return;}
     }
-    if(kind.equals("MARKET")){
+    if(kind.startsWith("MARKET")){
      // Market fills must never use an arbitrary user-entered price.
      // A validated quote-based fill is required before MARKET orders can be enabled.
      price.setError("MARKET emirleri güvenli fiyat doğrulaması tamamlanana kadar kapalı. LIMIT seçin.");return;
