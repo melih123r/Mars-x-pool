@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { PostgresTaskQueue } from './postgres-task-queue.mjs';
 
 function fakePool({ duplicate = false, existing } = {}) {
@@ -91,4 +92,21 @@ test('expired command leases are recovered for bounded retry', async () => {
   assert.ok(recovery);
   assert.match(recovery.sql, /attempt_count >= 10 THEN 'failed' ELSE 'pending'/);
   assert.match(recovery.sql, /FOR UPDATE SKIP LOCKED/);
+});
+
+const auditMigrationUrl = new URL('./sql/004_command_audit_log.sql', import.meta.url);
+
+test('v2 audit log is append-only, idempotent and bounded to ten task lanes', async () => {
+  const [inboxSql, auditSql] = await Promise.all([
+    readFile(new URL('./sql/003_command_inbox.sql', import.meta.url), 'utf8'),
+    readFile(auditMigrationUrl, 'utf8')
+  ]);
+  assert.match(inboxSql, /CREATE TABLE IF NOT EXISTS marsx_telegram\.command_inbox/);
+  assert.match(auditSql, /^BEGIN;/);
+  assert.match(auditSql, /CREATE TABLE IF NOT EXISTS marsx_telegram\.command_audit_log/);
+  assert.match(auditSql, /lane_number INTEGER NOT NULL CHECK \(lane_number BETWEEN 1 AND 10\)/);
+  assert.match(auditSql, /UNIQUE \(command_id, event_key\)/);
+  assert.match(auditSql, /BEFORE UPDATE OR DELETE ON marsx_telegram\.command_audit_log/);
+  assert.doesNotMatch(auditSql, /payload_ciphertext|DROP|TRUNCATE|ALTER TABLE marsx_telegram\.command_inbox/);
+  assert.match(auditSql, /COMMIT;\s*$/);
 });
