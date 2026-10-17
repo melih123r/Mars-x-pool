@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createLoopsNotifier } from "./loops-notifier.mjs";
 const args = { apiKey: "test-key", enabled: true, transactionalIds: { "network.device_offline": "template_123456" } };
-const event = { project: "network", event: "device_offline", email: "user@example.com", optedIn: true };
+const event = { project: "network", event: "device_offline", email: "user@example.com", optedIn: true, idempotencyKey: "network:event:12345678" };
 test("disabled by default", async () => {
   const n = createLoopsNotifier({ apiKey: "test" });
   assert.equal((await n.notify(event)).reason, "disabled");
@@ -32,4 +32,31 @@ test("rejects unsupported project", async () => {
 test("fails closed on network error", async () => {
   const n = createLoopsNotifier({ ...args, fetchImpl: async () => { throw Error("secret"); } });
   assert.equal((await n.notify(event)).reason, "network_error");
+});
+
+test("retries 429 with same idempotency key", async () => {
+  const keys = []; let count = 0;
+  const n = createLoopsNotifier({ ...args, sleep: async () => {}, fetchImpl: async (_u, opts) => {
+    keys.push(opts.headers["Idempotency-Key"]); count++;
+    return { ok: count === 2, status: count === 2 ? 200 : 429 };
+  } });
+  assert.equal((await n.notify(event)).ok, true);
+  assert.equal(count, 2);
+  assert.deepEqual(keys, ["network:event:12345678", "network:event:12345678"]);
+});
+test("does not retry non-transient 400 errors", async () => {
+  let count = 0;
+  const n = createLoopsNotifier({ ...args, sleep: async () => {}, fetchImpl: async () => { count++; return { ok: false, status: 400 }; } });
+  assert.equal((await n.notify(event)).status, 400);
+  assert.equal(count, 1);
+});
+test("409 is reported for reconciliation, not retried", async () => {
+  let count = 0;
+  const n = createLoopsNotifier({ ...args, fetchImpl: async () => { count++; return { ok: false, status: 409 }; } });
+  assert.equal((await n.notify(event)).reason, "duplicate_or_conflict_reconcile");
+  assert.equal(count, 1);
+});
+test("requires durable business event idempotency key", async () => {
+  const n = createLoopsNotifier(args);
+  assert.equal((await n.notify({ ...event, idempotencyKey: undefined })).reason, "idempotency_key_required");
 });
