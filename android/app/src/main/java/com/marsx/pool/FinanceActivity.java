@@ -58,25 +58,25 @@ public final class FinanceActivity extends Activity{
   if(!a.matches("[0-9]+(\\.[0-9]{1,12})?")){result.setText("Geçerli bir miktar gir.");return;}
   final double quantity;
   try{quantity=Double.parseDouble(a);}catch(NumberFormatException e){result.setText("Geçerli bir miktar gir.");return;}
-  if(!Double.isFinite(quantity)||quantity<=0){result.setText("Miktar sıfırdan büyük olmalı.");return;}
+  if(!Double.isFinite(quantity)||quantity<=0){result.setText("Miktar sıfırdan büyük olmalı.");return;}\n  if(f.equals(tt)&&fn.equals(tn)){result.setText("Aynı coin ve ağ arasında dönüşüm yapılamaz.");return;}
   result.setText("Minimum tutar ve fiyat hesaplanıyor…");
   new Thread(()->{
    try{
     String route="fromCurrency="+enc(f)+"&toCurrency="+enc(tt)+"&fromNetwork="+enc(fn)+"&toNetwork="+enc(tn)+"&flow=standard";
     JSONObject m=get("/convert/min-amount?"+route);JSONObject md=m.optJSONObject("data");
     double min=md==null?Double.NaN:md.optDouble("minAmount",Double.NaN);
-    if(Double.isFinite(min)&&quantity<min){
+    if(!Double.isFinite(min)||min<=0){throw new IOException("Minimum amount unavailable");}\n    if(quantity<min){
      String msg="Minimum tutar: "+min+" "+f.toUpperCase(Locale.ROOT)+"\\nSeçilen ağ: "+fn.toUpperCase(Locale.ROOT)+" → "+tn.toUpperCase(Locale.ROOT)+"\\nİşlem oluşturulmadı.";
-     runOnUiThread(()->{if(screenActive&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(msg);});return;
+     runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(msg);});return;
     }
     JSONObject j=get("/convert/quote?"+route+"&fromAmount="+enc(a));JSONObject d=j.optJSONObject("data");
     String est=d==null?"—":d.optString("toAmount",d.optString("estimatedAmount","—"));
     String fee=d==null?"—":d.optString("fee",d.optString("networkFee","—"));
     String minText=Double.isFinite(min)?String.valueOf(min):"—";
     String out="Minimum tutar: "+minText+" "+f.toUpperCase(Locale.ROOT)+"\\nTahmini alacağın miktar: "+est+" "+tt.toUpperCase(Locale.ROOT)+"\\nAğ/komisyon: "+fee+"\\nİşlem oluşturulmadı.";
-    runOnUiThread(()->{if(screenActive&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(out);});
-   }catch(ApiException e){runOnUiThread(()->{if(screenActive&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(errorMessage(e));});}
-   catch(Exception e){runOnUiThread(()->{if(screenActive&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText("Fiyat servisi şu anda kullanılamıyor. İşlem oluşturulmadı.");});}
+    runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(out);});
+   }catch(ApiException e){runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(errorMessage(e));});}
+   catch(Exception e){runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText("Fiyat servisi şu anda kullanılamıyor. İşlem oluşturulmadı.");});}
   }).start();
  }
  String errorMessage(ApiException e){String k=e.body.optString("kind","");if("authentication".equals(k))return "Fiyat API anahtarı backend tarafında hazır değil. İşlem oluşturulmadı.";if("request_rejected".equals(k))return "Bu coin/ağ çifti desteklenmiyor ya da minimum tutarın altında. İşlem oluşturulmadı.";if("timeout".equals(k)||"provider_unavailable".equals(k)||"rate_limited".equals(k))return "Fiyat sağlayıcı şu an yanıt vermiyor. Biraz sonra tekrar dene. İşlem oluşturulmadı.";return "Fiyat servisi şu anda kullanılamıyor. İşlem oluşturulmadı.";}
