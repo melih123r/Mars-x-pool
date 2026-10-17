@@ -135,7 +135,7 @@ public final class FinanceActivity extends Activity{
   }
   return true;
  }
- void matchPaperLimits(String symbol,double lastClose){if(!Double.isFinite(lastClose)||lastClose<=0)return;java.math.BigDecimal current=java.math.BigDecimal.valueOf(lastClose);boolean changed=false;for(PaperOrder order:paperOrders){if(!"PENDING".equals(order.status)||!"LIMIT".equals(order.type)||!symbol.equals(order.symbol))continue;boolean crossed="BUY".equals(order.side)?current.compareTo(order.price)<=0:current.compareTo(order.price)>=0;if(!crossed)continue;if(paperFill(order.symbol,order.side,order.qty,order.price)){order.status="FILLED";changed=true;}}if(changed&&chartView!=null)chartView.invalidate();}
+ void matchPaperLimits(String symbol,double lastClose){if(!Double.isFinite(lastClose)||lastClose<=0)return;java.math.BigDecimal current=java.math.BigDecimal.valueOf(lastClose);boolean changed=false;for(PaperOrder order:paperOrders){if(!"PENDING".equals(order.status)||!"LIMIT".equals(order.type)||!symbol.equals(order.symbol))continue;boolean crossed="BUY".equals(order.side)?current.compareTo(order.price)<=0:current.compareTo(order.price)>=0;if(!crossed)continue;java.math.BigDecimal simulatedFill="BUY".equals(order.side)?current.min(order.price):current.max(order.price);if(paperFill(order.symbol,order.side,order.qty,simulatedFill)){order.status="FILLED";changed=true;}}if(changed&&chartView!=null)chartView.invalidate();}
  void paperDashboard(){
   StringBuilder out=new StringBuilder("DEMO • yalnızca açık uygulama oturumu • başlangıç 100.000 USD\\n");
   int pendingCount=0,filledCount=0,cancelledCount=0;
