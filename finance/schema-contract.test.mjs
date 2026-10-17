@@ -44,3 +44,21 @@ test('audit records reject update and delete mutations', async () => {
   assert.match(sql, /CREATE TRIGGER finance_audit_immutable/);
   assert.match(sql, /BEFORE UPDATE OR DELETE ON marsx_finance\.audit_log/);
 });
+
+const v2MigrationUrl = new URL('./sql/002_ingest_idempotency.sql', import.meta.url);
+
+test('v2 ingest registry deduplicates immutable provider events without rewriting v1', async () => {
+  const [v1, v2] = await Promise.all([
+    readFile(migrationUrl, 'utf8'),
+    readFile(v2MigrationUrl, 'utf8')
+  ]);
+  assert.match(v1, /CREATE TABLE marsx_finance\.provider_accounts/);
+  assert.match(v2, /^BEGIN;/);
+  assert.match(v2, /CREATE TABLE marsx_finance\.ingest_events/);
+  assert.match(v2, /stream_kind text NOT NULL CHECK \(stream_kind IN \('PORTFOLIO','QUOTE','TEST_ORDER'\)\)/);
+  assert.match(v2, /UNIQUE \(provider_account_id, stream_kind, source_event_key\)/);
+  assert.match(v2, /payload_sha256 text NOT NULL CHECK \(payload_sha256 ~ '\^\[a-f0-9\]\{64\}\$'\)/);
+  assert.match(v2, /BEFORE UPDATE OR DELETE ON marsx_finance\.ingest_events/);
+  assert.doesNotMatch(v2, /DROP|TRUNCATE|ALTER TABLE marsx_finance\.(provider_accounts|portfolio_snapshots|quotes|test_orders)/);
+  assert.match(v2, /COMMIT;\s*$/);
+});
