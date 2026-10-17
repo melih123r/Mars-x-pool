@@ -110,7 +110,7 @@ public final class FinanceActivity extends Activity{
     }
     if(removable>=0)paperOrders.remove(removable);
     paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,kind.equals("MARKET")?"FILLED":"PENDING"));
-    d.dismiss();paperDashboard();
+    d.dismiss();if(chartView!=null)chartView.invalidate();paperDashboard();
    }catch(IllegalArgumentException e){qty.setError("Pozitif adet ve fiyat gir; maksimum 1 milyon USD");}
   }));
   d.show();
@@ -157,7 +157,7 @@ public final class FinanceActivity extends Activity{
   if(pending.isEmpty()){new AlertDialog.Builder(this).setMessage("Bekleyen demo emir yok.").setPositiveButton("Tamam",null).show();return;}
   String[] names=new String[pending.size()];
   for(int i=0;i<pending.size();i++){PaperOrder o=pending.get(i);names[i]="#"+o.id+" "+o.symbol+" "+o.side+" "+o.qty;}
-  new AlertDialog.Builder(this).setTitle("İptal edilecek demo emir").setItems(names,(d,index)->{pending.get(index).status="CANCELLED";paperDashboard();}).setNegativeButton("Vazgeç",null).show();
+  new AlertDialog.Builder(this).setTitle("İptal edilecek demo emir").setItems(names,(d,index)->{pending.get(index).status="CANCELLED";if(chartView!=null)chartView.invalidate();paperDashboard();}).setNegativeButton("Vazgeç",null).show();
  }
  void financePreview(String title){new AlertDialog.Builder(this).setTitle(title).setMessage("MARS-X Finance arayüz önizlemesi. Gerçek işlem veya hesap değişikliği yapılmaz.").setPositiveButton("Tamam",null).show();}
  void financeLine(LinearLayout parent,String key,String value){LinearLayout r=row();r.setPadding(18,18,18,18);r.setBackground(panel(RAISED,14,Color.rgb(37,48,66)));TextView left=t(key,14,Color.WHITE);r.addView(left,new LinearLayout.LayoutParams(0,-2,1));r.addView(t(value,12,MUTED));parent.addView(r,mp(7));}
