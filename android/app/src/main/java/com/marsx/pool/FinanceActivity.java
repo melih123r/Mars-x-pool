@@ -94,6 +94,7 @@ public final class FinanceActivity extends Activity{
     if(kind.equals("MARKET")){
      if(!paperFill(sym,direction,units,px)){qty.setError("Demo bakiye veya pozisyon yetersiz");return;}
     }
+    if(paperOrders.size()>=200)paperOrders.remove(0);
     paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,kind.equals("MARKET")?"FILLED":"PENDING"));
     d.dismiss();paperDashboard();
    }catch(IllegalArgumentException e){qty.setError("Pozitif adet ve fiyat gir; maksimum 1 milyon USD");}
@@ -113,12 +114,12 @@ public final class FinanceActivity extends Activity{
    java.math.BigDecimal oldCost=paperCost.containsKey(sym)?paperCost.get(sym):java.math.BigDecimal.ZERO;
    java.math.BigDecimal remaining=held.subtract(qty);
    paperCash=paperCash.add(value);paperHoldings.put(sym,remaining);
-   paperCost.put(sym,remaining.signum()==0?java.math.BigDecimal.ZERO:oldCost.multiply(remaining).divide(held,8,java.math.RoundingMode.HALF_UP));
+   paperCost.put(sym,remaining.signum()==0?java.math.BigDecimal.ZERO:oldCost.multiply(remaining).divide(held,16,java.math.RoundingMode.HALF_UP));
   }
   return true;
  }
  void paperDashboard(){
-  StringBuilder out=new StringBuilder("DEMO • cihaz belleği • başlangıç 100.000 USD\\n");
+  StringBuilder out=new StringBuilder("DEMO • yalnızca açık uygulama oturumu • başlangıç 100.000 USD\\n");
   out.append("Nakit: $").append(paperCash.toPlainString()).append("\\n\\nPozisyonlar:\\n");
   for(String sym:paperHoldings.keySet()){
    java.math.BigDecimal qty=paperHoldings.get(sym);
