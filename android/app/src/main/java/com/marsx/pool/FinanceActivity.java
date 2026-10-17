@@ -181,8 +181,11 @@ public final class FinanceActivity extends Activity{
      runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(msg);});return;
     }
     JSONObject j=get("/convert/quote?"+route+"&fromAmount="+enc(a));JSONObject d=j.optJSONObject("data");
-    String est=d==null?"—":d.optString("toAmount",d.optString("estimatedAmount","—"));
-    String fee=d==null?"—":d.optString("fee",d.optString("networkFee","—"));
+    String est=d==null?"":d.optString("toAmount",d.optString("estimatedAmount",""));
+    double received;
+    try{received=Double.parseDouble(est);}catch(NumberFormatException badQuote){throw new IOException("Invalid provider quote");}
+    if(!Double.isFinite(received)||received<=0)throw new IOException("Invalid provider quote");
+    String fee=d.optString("fee",d.optString("networkFee","—"));
     String minText=Double.isFinite(min)?String.valueOf(min):"—";
     String out="Minimum tutar: "+minText+" "+f.toUpperCase(Locale.ROOT)+"\\nTahmini alacağın miktar: "+est+" "+tt.toUpperCase(Locale.ROOT)+"\\nAğ/komisyon: "+fee+"\\nİşlem oluşturulmadı.";
     runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(out);});
