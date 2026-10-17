@@ -298,6 +298,7 @@ public final class FinanceActivity extends Activity{
    canvas.save();canvas.clipRect(left,top,w-right,top+plotH);p.setStyle(Paint.Style.STROKE);p.setColor(accent);p.setStrokeWidth(2.5f);canvas.drawPath(sma,p);p.setColor(Color.rgb(66,176,245));canvas.drawPath(ema,p);p.setColor(Color.argb(160,175,120,245));p.setStrokeWidth(1.5f);canvas.drawPath(upperBand,p);canvas.drawPath(lowerBand,p);canvas.restore();
    p.setStyle(Paint.Style.FILL);p.setColor(Color.LTGRAY);p.setTextSize(22);canvas.drawText("SMA20  EMA21  BB20",left+6,top+22,p);canvas.drawText("VOL",left+6,h-8,p);
   }
+  static double rsi14(ArrayList<float[]> candles,int end){if(end<15)return Double.NaN;double gain=0,loss=0;for(int i=1;i<=14;i++){double d=candles.get(i)[3]-candles.get(i-1)[3];gain+=Math.max(0,d);loss+=Math.max(0,-d);}gain/=14;loss/=14;for(int i=15;i<end;i++){double d=candles.get(i)[3]-candles.get(i-1)[3];gain=(gain*13+Math.max(0,d))/14;loss=(loss*13+Math.max(0,-d))/14;}return loss==0?(gain==0?50:100):100-100/(1+gain/loss);}
   float y(float value,float high,float low,int top,int height){return top+(high-value)/Math.max(.000001f,high-low)*height;}
  }
  static final class MarsFinanceHero extends View{
