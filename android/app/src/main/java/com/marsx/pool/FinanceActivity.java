@@ -165,6 +165,7 @@ public final class FinanceActivity extends Activity{
  JSONArray getPublicStockCandles(String symbol,String timeframe)throws Exception{
   if(!Arrays.asList("AAPL","MSFT","NVDA","TSLA","SPY","AMZN","GOOGL","GOOG","META","NFLX","AMD","INTC","AVGO","ORCL","CRM","ADBE","QCOM","TXN","MU","AMAT","ASML","IBM","CSCO","NOW","PLTR","UBER","ABNB","SHOP","PYPL","SQ","COIN","HOOD","JPM","BAC","WFC","GS","MS","C","V","MA","AXP","BRK-B","UNH","JNJ","PFE","MRK","ABBV","LLY","TMO","ABT","MDT","ISRG","NVO","WMT","COST","TGT","HD","LOW","NKE","MCD","SBUX","KO","PEP","PG","CL","DIS","CMCSA","T","VZ","TMUS","BA","CAT","DE","GE","HON","LMT","RTX","NOC","F","GM","RIVN","LCID","XOM","CVX","COP","SLB","OXY","EOG","NEM","FCX","GLD","SLV","USO","IWM","QQQ","DIA","VOO","VTI","XLK","XLF","XLE","XLI","XLY","XLP","XLU","XLV","XLB","ARKK","TLT","IEF","HYG","LQD","EEM","EFA","EWJ","FXI","BABA","PDD","JD","BIDU","TSM","SAP","SONY","RY","TD","BMO","ENB","SU","BP","SHEL","RIO","BHP","VALE").contains(symbol))throw new IOException("Unsupported stock");
   String interval,range;
+  if(symbol==null||symbol.length()>16||!symbol.matches("[A-Z0-9.\\-]+"))throw new IOException("Invalid stock ticker");
   switch(timeframe){
    case "1m":interval="1m";range="5d";break;
    case "5m":interval="5m";range="5d";break;
