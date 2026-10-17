@@ -110,3 +110,11 @@ test('v2 audit log is append-only, idempotent and bounded to ten task lanes', as
   assert.doesNotMatch(auditSql, /payload_ciphertext|DROP|TRUNCATE|ALTER TABLE marsx_telegram\.command_inbox/);
   assert.match(auditSql, /COMMIT;\s*$/);
 });
+
+test('bootstrap applies the audit migration after the durable inbox', async () => {
+  const bootstrap = await readFile(new URL('./bootstrap-private-db.mjs', import.meta.url), 'utf8');
+  const inbox = bootstrap.indexOf("./sql/003_command_inbox.sql");
+  const audit = bootstrap.indexOf("./sql/004_command_audit_log.sql");
+  assert.ok(inbox >= 0);
+  assert.ok(audit > inbox);
+});
