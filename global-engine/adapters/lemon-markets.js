@@ -5,7 +5,7 @@ const ALLOWED_LEMON_HOSTS=new Set(["sandbox.api.lemon.markets","dev-brokerage.le
 const validateBaseUrl=(value)=>{
   const normalized=trimSlash(value);
   const url=new URL(normalized);
-  if(url.protocol!=="https:" || !ALLOWED_LEMON_HOSTS.has(url.hostname) || url.username || url.password || url.search || url.hash) {
+  if(url.protocol!=="https:" || !ALLOWED_LEMON_HOSTS.has(url.hostname) || url.username || url.password || url.port || url.search || url.hash) {
     throw new Error("invalid lemon.markets base URL");
   }
   if(url.pathname!=="/v1") throw new Error("invalid lemon.markets API version path");
