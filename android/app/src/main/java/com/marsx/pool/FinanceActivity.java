@@ -254,7 +254,7 @@ public final class FinanceActivity extends Activity{
    for(int i=0;i<raw.length();i++)try{
     JSONObject x=raw.getJSONObject(i);long time=x.getLong("time");
     double o=x.getDouble("open"),h=x.getDouble("high"),l=x.getDouble("low"),close=x.getDouble("close"),vol=x.getDouble("volume");
-    if(time<=lastTime||!Double.isFinite(o)||!Double.isFinite(h)||!Double.isFinite(l)||!Double.isFinite(close)||!Double.isFinite(vol)||l<=0||o<=0||close<=0||h<Math.max(o,close)||l>Math.min(o,close)||vol<0||h>Float.MAX_VALUE||vol>Float.MAX_VALUE)continue;
+    if(time<=lastTime||!Double.isFinite(o)||!Double.isFinite(h)||!Double.isFinite(l)||!Double.isFinite(close)||!Double.isFinite(vol)||l<=0||o<=0||close<=0||h<Math.max(o,close)||l>Math.min(o,close)||vol<0||h>Float.MAX_VALUE||o>Float.MAX_VALUE||l>Float.MAX_VALUE||close>Float.MAX_VALUE||vol>Float.MAX_VALUE)continue;
     valid.add(new float[]{(float)o,(float)h,(float)l,(float)close,(float)vol});lastTime=time;
    }catch(Exception ignored){}
    candles.clear();candles.addAll(valid);scrollBack=0;invalidate();
@@ -295,7 +295,7 @@ public final class FinanceActivity extends Activity{
     }
     emaValue=i==0?a[3]:alpha*a[3]+(1-alpha)*emaValue;float ey=y((float)emaValue,high,low,top,plotH);if(!emaStarted){ema.moveTo(cx,ey);emaStarted=true;}else ema.lineTo(cx,ey);
    }
-   p.setStyle(Paint.Style.STROKE);p.setColor(accent);p.setStrokeWidth(2.5f);canvas.drawPath(sma,p);p.setColor(Color.rgb(66,176,245));canvas.drawPath(ema,p);p.setColor(Color.argb(160,175,120,245));p.setStrokeWidth(1.5f);canvas.drawPath(upperBand,p);canvas.drawPath(lowerBand,p);
+   canvas.save();canvas.clipRect(left,top,w-right,top+plotH);p.setStyle(Paint.Style.STROKE);p.setColor(accent);p.setStrokeWidth(2.5f);canvas.drawPath(sma,p);p.setColor(Color.rgb(66,176,245));canvas.drawPath(ema,p);p.setColor(Color.argb(160,175,120,245));p.setStrokeWidth(1.5f);canvas.drawPath(upperBand,p);canvas.drawPath(lowerBand,p);canvas.restore();
    p.setStyle(Paint.Style.FILL);p.setColor(Color.LTGRAY);p.setTextSize(22);canvas.drawText("SMA20  EMA21  BB20",left+6,top+22,p);canvas.drawText("VOL",left+6,h-8,p);
   }
   float y(float value,float high,float low,int top,int height){return top+(high-value)/Math.max(.000001f,high-low)*height;}
