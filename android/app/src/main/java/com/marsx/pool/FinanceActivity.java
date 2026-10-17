@@ -196,9 +196,9 @@ public final class FinanceActivity extends Activity{
   JSONArray opens=q.getJSONArray("open"),highs=q.getJSONArray("high"),lows=q.getJSONArray("low"),closes=q.getJSONArray("close"),volumes=q.getJSONArray("volume");
   JSONArray candles=new JSONArray();
   for(int i=0;i<times.length();i++){
-   if(opens.isNull(i)||highs.isNull(i)||lows.isNull(i)||closes.isNull(i))continue;
+   if(i>=opens.length()||i>=highs.length()||i>=lows.length()||i>=closes.length()||i>=volumes.length()||opens.isNull(i)||highs.isNull(i)||lows.isNull(i)||closes.isNull(i))continue;
    double o=opens.getDouble(i),h=highs.getDouble(i),l=lows.getDouble(i),close=closes.getDouble(i),v=volumes.isNull(i)?0:volumes.getDouble(i);
-   if(!Double.isFinite(o)||!Double.isFinite(h)||!Double.isFinite(l)||!Double.isFinite(close)||!Double.isFinite(v)||l<=0||o<=0||close<=0||h<Math.max(o,close)||l>Math.min(o,close)||v<0)continue;
+   if(!Double.isFinite(o)||!Double.isFinite(h)||!Double.isFinite(l)||!Double.isFinite(close)||!Double.isFinite(v)||l<=0||o<=0||close<=0||h<l||h<Math.max(o,close)||l>Math.min(o,close)||v<0)continue;
    JSONObject item=new JSONObject();item.put("time",times.getLong(i));item.put("open",o);item.put("high",h);item.put("low",l);item.put("close",close);item.put("volume",v);candles.put(item);
   }
   return candles;
