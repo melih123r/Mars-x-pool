@@ -85,7 +85,7 @@ public final class FinanceActivity extends Activity{
  void paperOrderDialog(String preferredSymbol,float preferredPrice){
   LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);form.setPadding(24,8,24,8);
   Spinner symbol=spin(new String[]{"AAPL","MSFT","NVDA","SPY","TSLA","BTC-USD","ETH-USD","SOL-USD","DOGE-USD","LTC-USD","AVAX-USD"},0);
-  if(preferredSymbol!=null){for(int i=0;i<symbol.getCount();i++)if(preferredSymbol.equals(symbol.getItemAtPosition(i).toString())){symbol.setSelection(i);break;}}
+  if(preferredSymbol!=null){boolean supported=false;for(int i=0;i<symbol.getCount();i++)if(preferredSymbol.equals(symbol.getItemAtPosition(i).toString())){symbol.setSelection(i);supported=true;break;}if(!supported){new AlertDialog.Builder(this).setTitle("Demo emir desteklenmiyor").setMessage(preferredSymbol+" için demo emir desteği henüz yok. Yanlış sembole emir açılmasını önlemek için işlem durduruldu.").setPositiveButton("Tamam",null).show();return;}}
   Spinner side=spin(new String[]{"BUY","SELL"},0);
   Spinner type=spin(new String[]{"MARKET","LIMIT"},0);
   EditText qty=new EditText(this);qty.setHint("Adet");qty.setInputType(2|8192);
