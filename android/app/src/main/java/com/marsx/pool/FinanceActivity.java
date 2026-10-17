@@ -111,6 +111,11 @@ public final class FinanceActivity extends Activity{
      if(removable<0){qty.setError("En fazla 200 açık demo emri; önce bekleyen emri iptal et");return;}
     }
     if(kind.equals("MARKET")){
+     // Market fills must never use an arbitrary user-entered price.
+     // A validated quote-based fill is required before MARKET orders can be enabled.
+     price.setError("MARKET emirleri güvenli fiyat doğrulaması tamamlanana kadar kapalı. LIMIT seçin.");return;
+    }
+    if(kind.equals("MARKET")){
      if(!paperFill(sym,direction,units,px)){qty.setError("Demo bakiye veya pozisyon yetersiz");return;}
     }
     if(removable>=0)paperOrders.remove(removable);
