@@ -152,14 +152,16 @@ public final class FinanceActivity extends Activity{
   if(!a.matches("[0-9]+(\\.[0-9]{1,12})?")){result.setText("Geçerli bir miktar gir.");return;}
   final double quantity;
   try{quantity=Double.parseDouble(a);}catch(NumberFormatException e){result.setText("Geçerli bir miktar gir.");return;}
-  if(!Double.isFinite(quantity)||quantity<=0){result.setText("Miktar sıfırdan büyük olmalı.");return;}\n  if(f.equals(tt)&&fn.equals(tn)){result.setText("Aynı coin ve ağ arasında dönüşüm yapılamaz.");return;}
+  if(!Double.isFinite(quantity)||quantity<=0){result.setText("Miktar sıfırdan büyük olmalı.");return;}
+  if(f.equals(tt)&&fn.equals(tn)){result.setText("Aynı coin ve ağ arasında dönüşüm yapılamaz.");return;}
   result.setText("Minimum tutar ve fiyat hesaplanıyor…");
   new Thread(()->{
    try{
     String route="fromCurrency="+enc(f)+"&toCurrency="+enc(tt)+"&fromNetwork="+enc(fn)+"&toNetwork="+enc(tn)+"&flow=standard";
     JSONObject m=get("/convert/min-amount?"+route);JSONObject md=m.optJSONObject("data");
     double min=md==null?Double.NaN:md.optDouble("minAmount",Double.NaN);
-    if(!Double.isFinite(min)||min<=0){throw new IOException("Minimum amount unavailable");}\n    if(quantity<min){
+    if(!Double.isFinite(min)||min<=0){throw new IOException("Minimum amount unavailable");}
+    if(quantity<min){
      String msg="Minimum tutar: "+min+" "+f.toUpperCase(Locale.ROOT)+"\\nSeçilen ağ: "+fn.toUpperCase(Locale.ROOT)+" → "+tn.toUpperCase(Locale.ROOT)+"\\nİşlem oluşturulmadı.";
      runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(msg);});return;
     }
