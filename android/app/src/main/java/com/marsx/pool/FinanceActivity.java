@@ -86,7 +86,9 @@ public final class FinanceActivity extends Activity{
  void paperOrderDialog(String preferredSymbol){paperOrderDialog(preferredSymbol,Float.NaN);}
  void paperOrderDialog(String preferredSymbol,float preferredPrice){
   LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);form.setPadding(24,8,24,8);
-  Spinner symbol=spin(new String[]{"AAPL","MSFT","NVDA","SPY","TSLA","BTC-USD","ETH-USD","SOL-USD","DOGE-USD","LTC-USD","AVAX-USD"},0);
+  // Reuse the chart market universe to avoid silently placing a demo order on a different asset.
+  String[] paperSymbols=new String[marketAsset.getCount()];for(int i=0;i<paperSymbols.length;i++)paperSymbols[i]=marketAsset.getItemAtPosition(i).toString();
+  Spinner symbol=spin(paperSymbols,0);
   if(preferredSymbol!=null){boolean supported=false;for(int i=0;i<symbol.getCount();i++)if(preferredSymbol.equals(symbol.getItemAtPosition(i).toString())){symbol.setSelection(i);supported=true;break;}if(!supported){new AlertDialog.Builder(this).setTitle("Demo emir desteklenmiyor").setMessage(preferredSymbol+" için demo emir desteği henüz yok. Yanlış sembole emir açılmasını önlemek için işlem durduruldu.").setPositiveButton("Tamam",null).show();return;}}
   Spinner side=spin(new String[]{"BUY","SELL"},0);
   Spinner type=spin(new String[]{"MARKET","LIMIT"},0);
