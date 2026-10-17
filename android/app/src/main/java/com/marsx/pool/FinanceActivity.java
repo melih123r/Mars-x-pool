@@ -105,6 +105,7 @@ public final class FinanceActivity extends Activity{
     java.math.BigDecimal units=new java.math.BigDecimal(q),px=new java.math.BigDecimal(p);
     if(units.signum()<=0||px.signum()<=0||units.multiply(px).compareTo(new java.math.BigDecimal("1000000"))>0)throw new IllegalArgumentException();
     String sym=symbol.getSelectedItem().toString(),direction=side.getSelectedItem().toString(),kind=type.getSelectedItem().toString();
+    if(sym.startsWith("FX:")||sym.startsWith("INDEX:")||sym.startsWith("CMD:")){price.setError("Bu piyasanın para birimi ve sözleşme çarpanı doğrulanmadan demo emir açılamaz.");return;}
     int removable=-1;
     if(paperOrders.size()>=200){
      for(int idx=0;idx<paperOrders.size();idx++)if(!"PENDING".equals(paperOrders.get(idx).status)){removable=idx;break;}
@@ -114,9 +115,6 @@ public final class FinanceActivity extends Activity{
      // Market fills must never use an arbitrary user-entered price.
      // A validated quote-based fill is required before MARKET orders can be enabled.
      price.setError("MARKET emirleri güvenli fiyat doğrulaması tamamlanana kadar kapalı. LIMIT seçin.");return;
-    }
-    if(kind.equals("MARKET")){
-     if(!paperFill(sym,direction,units,px)){qty.setError("Demo bakiye veya pozisyon yetersiz");return;}
     }
     if(removable>=0)paperOrders.remove(removable);
     paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,kind.equals("MARKET")?"FILLED":"PENDING"));
