@@ -32,3 +32,22 @@ test('append-only trigger protects test point receipts', async () => {
   assert.match(sql, /CREATE TRIGGER network_test_receipt_immutable/);
   assert.match(sql, /BEFORE UPDATE OR DELETE ON marsx_network_demo\.test_point_receipts/);
 });
+
+const lifecycleSqlUrl = new URL('./sql/002_session_consent_lifecycle.sql', import.meta.url);
+
+test('v2 persists idempotent sessions and append-only consent revocation events', async () => {
+  const [v1, v2] = await Promise.all([
+    readFile(sqlUrl, 'utf8'),
+    readFile(lifecycleSqlUrl, 'utf8')
+  ]);
+  assert.match(v1, /CREATE TABLE marsx_network_demo\.mock_devices/);
+  assert.match(v2, /^BEGIN;/);
+  assert.match(v2, /CREATE TABLE marsx_network_demo\.mock_sessions/);
+  assert.match(v2, /UNIQUE \(mock_device_id, idempotency_key\)/);
+  assert.match(v2, /CREATE TABLE marsx_network_demo\.consent_events/);
+  assert.match(v2, /event_kind text NOT NULL CHECK \(event_kind IN \('GRANTED','REVOKED'\)\)/);
+  assert.match(v2, /BEFORE UPDATE OR DELETE ON marsx_network_demo\.consent_events/);
+  assert.match(v2, /network_consent_required_for_receipt/);
+  assert.doesNotMatch(v2, /DROP|TRUNCATE|ALTER TABLE marsx_network_demo\.mock_devices/);
+  assert.match(v2, /COMMIT;\s*$/);
+});
