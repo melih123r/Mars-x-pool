@@ -3,11 +3,11 @@ package com.marsx.pool;
 import android.app.*;import android.content.*;import android.graphics.*;import android.graphics.drawable.*;import android.os.*;import android.view.*;import android.widget.*;import org.json.*;import java.io.*;import java.net.*;import java.nio.charset.StandardCharsets;import java.util.*;
 
 public final class FinanceActivity extends Activity{
- LinearLayout root; TextView result,status,brokerStatus,marketPrice,marketProviders; ChartView chartView; Spinner marketAsset,marketTimeframe; EditText amount; Spinner from,to,fromNet,toNet; int ACCENT=Color.rgb(255,106,0),BG=Color.rgb(4,7,12),CARD=Color.rgb(10,14,22),RAISED=Color.rgb(15,20,31),MUTED=Color.rgb(158,169,188); final int[] THEMES={Color.rgb(0,194,255),Color.rgb(50,134,255),Color.rgb(185,60,255),Color.rgb(255,182,55),Color.rgb(42,207,129)}; int themeIndex=0; final Handler refreshHandler=new Handler(Looper.getMainLooper()); boolean screenActive=false; final Runnable refreshTick=new Runnable(){public void run(){if(screenActive){chartSnapshot();refreshHandler.postDelayed(this,60000);}}};
- @Override protected void onResume(){super.onResume();screenActive=true;refreshHandler.removeCallbacks(refreshTick);refreshHandler.postDelayed(refreshTick,60000);if(chartView!=null)chartSnapshot();}
- @Override protected void onPause(){screenActive=false;refreshHandler.removeCallbacks(refreshTick);super.onPause();}
+ LinearLayout root; TextView result,status,brokerStatus,marketPrice,marketProviders; ChartView chartView; Spinner marketAsset,marketTimeframe; EditText amount; Spinner from,to,fromNet,toNet; int ACCENT=Color.rgb(255,106,0),BG=Color.rgb(4,7,12),CARD=Color.rgb(10,14,22),RAISED=Color.rgb(15,20,31),MUTED=Color.rgb(158,169,188); final int[] THEMES={Color.rgb(0,194,255),Color.rgb(50,134,255),Color.rgb(185,60,255),Color.rgb(255,182,55),Color.rgb(42,207,129)}; int themeIndex=0; final Handler refreshHandler=new Handler(Looper.getMainLooper()); boolean screenActive=false; boolean tradingScreenVisible=false; int chartRequestGeneration=0; int quoteRequestGeneration=0; final Runnable refreshTick=new Runnable(){public void run(){if(screenActive&&tradingScreenVisible){chartSnapshot();refreshHandler.postDelayed(this,60000);}}};
+ @Override protected void onResume(){super.onResume();screenActive=true;refreshHandler.removeCallbacks(refreshTick);if(tradingScreenVisible){refreshHandler.postDelayed(refreshTick,60000);if(chartView!=null)chartSnapshot();}}
+ @Override protected void onPause(){screenActive=false;chartRequestGeneration++;quoteRequestGeneration++;refreshHandler.removeCallbacks(refreshTick);super.onPause();}
  @Override public void onCreate(Bundle b){super.onCreate(b);requestWindowFeature(Window.FEATURE_NO_TITLE);getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);themeIndex=getPreferences(MODE_PRIVATE).getInt("theme",0);if(themeIndex<0||themeIndex>=THEMES.length)themeIndex=0;ACCENT=THEMES[themeIndex];build();}
- void build(){if(root!=null)root=null;ScrollView s=new ScrollView(this);root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(28,24,28,34);root.setBackgroundColor(BG);
+ void build(){tradingScreenVisible=true;chartRequestGeneration++;quoteRequestGeneration++;refreshHandler.removeCallbacks(refreshTick);if(screenActive)refreshHandler.postDelayed(refreshTick,60000);if(root!=null)root=null;ScrollView s=new ScrollView(this);root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(28,24,28,34);root.setBackgroundColor(BG);
   rowTitle(); themePicker(); visualHero(); balanceCard(); cardHeader(); selectors(); quoteInfo(); popularPairs(); marketCard(); brokerCard(); nav(); s.addView(root);setContentView(s); health(); brokerHealth(); marketProviders(); chartSnapshot();
  }
  void rowTitle(){LinearLayout r=row();LinearLayout brand=new LinearLayout(this);brand.setOrientation(LinearLayout.VERTICAL);TextView logo=t("MARS-X",26,Color.WHITE);logo.setTypeface(null,Typeface.BOLD);logo.setLetterSpacing(.04f);oneLine(logo);brand.addView(logo);TextView sub=t("Dönüştür",13,ACCENT);sub.setTypeface(null,Typeface.BOLD);sub.setLetterSpacing(.08f);oneLine(sub);brand.addView(sub);r.addView(brand,new LinearLayout.LayoutParams(0,-2,1));status=t("● Bağlanıyor",12,MUTED);oneLine(status);status.setBackground(pill(Color.rgb(16,20,30),ACCENT));status.setPadding(14,10,14,10);r.addView(status);root.addView(r);}
@@ -23,15 +23,15 @@ public final class FinanceActivity extends Activity{
  }
  void quoteInfo(){LinearLayout c=card();c.addView(t("Hizmet Durumu",12,ACCENT));c.addView(t("ChangeNOW read-only quote • Broker kapıları kilitli • KYC/SCA olmadan gerçek işlem yok",12,MUTED));String[] f={"✓ Hizlı işlem","✓ En iyi oranlar","✓ Çoklu ağ","✓ Varlıklar güvende","✓ Kayıt gerektirmez","✓ İşlem kapalı"};for(int i=0;i<3;i++){LinearLayout r=row();feature(r,f[i*2]);feature(r,f[i*2+1]);c.addView(r,mp(4));}root.addView(c,mp(12));}
  void popularPairs(){LinearLayout c=card();c.addView(t("POPÜLER ÇİFTLER",12,ACCENT));String[] pairs={"BTC  ›  ETH","ETH  ›  USDT","BNB  ›  USDT","SOL  ›  USDT","USDT  ›  TRX"};for(String pair:pairs){TextView p=t(pair+"        veri bekleniyor",14,Color.WHITE);p.setBackground(pill(Color.rgb(12,17,27),Color.rgb(35,45,62)));p.setPadding(16,10,16,10);c.addView(p,mp(6));}root.addView(c,mp(12));}
- void brokerCard(){LinearLayout c=card();c.addView(t("SİSTEM DURUMU",12,ACCENT));brokerStatus=t("Broker durumu kontrol ediliyor…",13,MUTED);c.addView(brokerStatus);c.addView(t("İşlem modu: Önizleme • canlı emir ve çekim kapalı",12,MUTED));root.addView(c,mp(12));}
+ void brokerCard(){LinearLayout c=card();c.addView(t("SİSTEM DURUMU",12,ACCENT));brokerStatus=t("Broker durumu kontrol ediliyor…",13,MUTED);c.addView(brokerStatus);c.addView(t("İşlem modu: Önizleme • canlı emir ve çekim kapalı",12,MUTED));financeAction(c,"Demo emir hesaplayıcı",()->brokerDemo());financeAction(c,"Demo emir paneli",()->paperOrderDialog());financeAction(c,"Demo portföy ve emirler",()->paperDashboard());root.addView(c,mp(12));}
  void marketCard(){LinearLayout c=card();c.addView(t("PİYASA ÖZETİ",12,ACCENT));marketPrice=t("BTC / USD     —     veri bekleniyor",18,Color.WHITE);marketPrice.setTypeface(null,Typeface.BOLD);oneLine(marketPrice);c.addView(marketPrice);marketAsset=spin(new String[]{"BTC-USD","ETH-USD","SOL-USD","DOGE-USD","LTC-USD","AVAX-USD"},0);c.addView(marketAsset);marketTimeframe=spin(new String[]{"1m","5m","15m","1h","6h","1D"},0);c.addView(marketTimeframe);marketAsset.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int i,long id){if(chartView!=null)chartSnapshot();}});marketTimeframe.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int i,long id){if(chartView!=null)chartSnapshot();}});chartView=new ChartView(this);chartView.accent=ACCENT;chartView.setContentDescription("BTC USD mum grafiği; veri bekleniyor");c.addView(chartView,new LinearLayout.LayoutParams(-1,420));LinearLayout controls=row();Button zoomIn=new Button(this);zoomIn.setText("＋ Yakınlaştır");zoomIn.setAllCaps(false);zoomIn.setOnClickListener(v->chartView.zoom(-1));controls.addView(zoomIn,new LinearLayout.LayoutParams(0,54,1));Button zoomOut=new Button(this);zoomOut.setText("－ Uzaklaştır");zoomOut.setAllCaps(false);zoomOut.setOnClickListener(v->chartView.zoom(1));controls.addView(zoomOut,new LinearLayout.LayoutParams(0,54,1));c.addView(controls);c.addView(t("Mum grafik • hacim • salt okunur veri",12,MUTED));marketProviders=t("Piyasa verisi: Coinbase + Kraken + Bybit hazırlanıyor",12,MUTED);c.addView(marketProviders);root.addView(c,mp(12));}
- void nav(){LinearLayout r=row();String[] items={"Ana Sayfa","Piyasalar","Trading","Portföy","Cüzdan","Profil"};for(String item:items){TextView n=t(item,10,MUTED);n.setGravity(Gravity.CENTER);oneLine(n);n.setBackground(pill(Color.rgb(8,11,18),item.equals("Trading")?ACCENT:Color.rgb(32,40,56)));LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,52,1);p.setMargins(2,0,2,0);r.addView(n,p);n.setOnClickListener(v->openFinanceScreen(item));}root.addView(r,mp(20));}
- void openFinanceScreen(String name){
+ void nav(){LinearLayout r=row();String[] items={"Ana Sayfa","Piyasalar","Trading","Portföy","Cüzdan","Profil"};for(String item:items){TextView n=t(item,12,MUTED);n.setGravity(Gravity.CENTER);oneLine(n);n.setBackground(pill(Color.rgb(8,11,18),item.equals("Trading")?ACCENT:Color.rgb(32,40,56)));LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,64,1);p.setMargins(2,0,2,0);r.addView(n,p);n.setOnClickListener(v->openFinanceScreen(item));}root.addView(r,mp(20));}
+ void openFinanceScreen(String name){chartRequestGeneration++;quoteRequestGeneration++;tradingScreenVisible=false;refreshHandler.removeCallbacks(refreshTick);
   if("Trading".equals(name)){build();return;}
   final int white=Color.WHITE;ScrollView scroll=new ScrollView(this);LinearLayout body=new LinearLayout(this);body.setOrientation(LinearLayout.VERTICAL);body.setPadding(26,24,26,26);body.setBackgroundColor(BG);scroll.addView(body);
   TextView heading=t(name.toUpperCase(Locale.ROOT),24,white);heading.setTypeface(null,Typeface.BOLD);heading.setLetterSpacing(.06f);body.addView(heading);body.addView(t("MARS-X FINANCE  /  DEMO WORKSPACE",10,ACCENT));
   if("Ana Sayfa".equals(name)){financeHero(body,"TOPLAM PORTFÖY","—","Canlı bakiye bağlantısı bekleniyor");financeSection(body,"PİYASA GENEL BAKIŞ");financeLine(body,"BTC / USD","Veri bekleniyor");financeLine(body,"ETH / USD","Veri bekleniyor");financeLine(body,"SOL / USD","Veri bekleniyor");financeSection(body,"HIZLI İŞLEMLER");financeAction(body,"Piyasaları Gör",()->openFinanceScreen("Piyasalar"));financeAction(body,"Cüzdanı Aç",()->openFinanceScreen("Cüzdan"));}
-  else if("Piyasalar".equals(name)){financeSection(body,"İZLEME LİSTESİ");for(String coin:new String[]{"BTC / USD","ETH / USD","SOL / USD","BNB / USD","EUR / USD","XAU / USD"})financeLine(body,coin,"—");financeSection(body,"VERİ KALİTESİ");financeLine(body,"Durum","Bağlantı bekleniyor");financeLine(body,"Veri kaynağı","Salt okunur");}
+  else if("Piyasalar".equals(name)){financeSection(body,"İZLEME LİSTESİ");body.addView(t("Canlı fiyatlar aşağıda tek listede gösterilir. Desteklenmeyen paritelerde fiyat uydurulmaz.",12,MUTED));financeSection(body,"VERİ KALİTESİ");financeLine(body,"Durum","Bağlantı bekleniyor");financeLine(body,"Veri kaynağı","Salt okunur");}
   else if("Portföy".equals(name)){financeHero(body,"PORTFÖY DEĞERİ","—","Doğrulanmış bakiye bulunmuyor");financeSection(body,"VARLIK DAĞILIMI");financeLine(body,"Spot Varlıklar","—");financeLine(body,"Açık Pozisyonlar","—");financeLine(body,"Günlük Kâr / Zarar","—");financeSection(body,"PERFORMANS");financeLine(body,"Gerçekleşmiş Kâr / Zarar","—");financeLine(body,"Geçmiş İşlemler","Henüz veri yok");}
   else if("Cüzdan".equals(name)){financeHero(body,"CÜZDAN BAKİYESİ","—","Bakiye sağlayıcısı bağlı değil");financeSection(body,"CÜZDAN İŞLEMLERİ");financeAction(body,"Para Yatır",()->financePreview("Para yatırma"));financeAction(body,"Para Çek",()->financePreview("Para çekme"));financeAction(body,"Transfer",()->financePreview("Transfer"));financeSection(body,"VARLIKLAR");for(String coin:new String[]{"BTC","ETH","USDT","SOL"})financeLine(body,coin,"—");}
   else if("Profil".equals(name)){financeSection(body,"HESAP");financeLine(body,"Oturum","Demo");financeLine(body,"Kimlik Doğrulama","Bağlı değil");financeSection(body,"GÜVENLİK");financeLine(body,"İki Aşamalı Doğrulama","Yapılandırılmadı");financeLine(body,"Cihazlar","—");financeSection(body,"TERCİHLER");financeAction(body,"Görünüm ve Tema",()->financeThemeDialog());financeAction(body,"Bildirimler",()->financePreview("Bildirimler"));financeAction(body,"İşlem Geçmişi",()->financePreview("İşlem geçmişi"));financeAction(body,"Fiyat Alarmları",()->financePreview("Fiyat alarmları"));}
@@ -40,21 +40,158 @@ public final class FinanceActivity extends Activity{
   LinearLayout screen=new LinearLayout(this);screen.setOrientation(LinearLayout.VERTICAL);screen.setBackgroundColor(BG);screen.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
   setContentView(screen);screen.setAlpha(0f);screen.animate().alpha(1f).setDuration(220).start();
  }
- void loadPublicPrices(LinearLayout body){TextView state=t("Coinbase • canlı fiyatlar yükleniyor…",13,MUTED);body.addView(state,mp(8));new Thread(()->{String[] assets={"BTC-USD","ETH-USD","SOL-USD","DOGE-USD","LTC-USD"};ArrayList<String> lines=new ArrayList<>();for(String symbol:assets){try{HttpURLConnection c=(HttpURLConnection)new URL("https://api.exchange.coinbase.com/products/"+symbol+"/ticker").openConnection();c.setConnectTimeout(5000);c.setReadTimeout(5000);c.setRequestProperty("Accept","application/json");try{if(c.getResponseCode()!=200)throw new IOException("HTTP "+c.getResponseCode());JSONObject j=new JSONObject(read(c.getInputStream()));double price=j.optDouble("price",Double.NaN);if(Double.isFinite(price)&&price>0)lines.add(symbol+"   $"+String.format(Locale.ROOT,"%,.2f",price));}finally{c.disconnect();}}catch(Exception ignored){}}runOnUiThread(()->{if(!body.isAttachedToWindow())return;state.setText(lines.isEmpty()?"Canlı fiyat bağlantısı başarısız • demo fiyatı gösterilmiyor":"Coinbase Exchange • doğrulanmış salt-okunur fiyatlar");for(String line:lines)financeLine(body,line.split("   ")[0],line.substring(line.indexOf("   ")+3));});}).start();}
+ void loadPublicPrices(LinearLayout body){TextView state=t("Coinbase • canlı fiyatlar yükleniyor…",13,MUTED);body.addView(state,mp(8));new Thread(()->{String[] assets={"BTC-USD","ETH-USD","SOL-USD","DOGE-USD","LTC-USD","AVAX-USD","BNB-USD","ADA-USD","XRP-USD","LINK-USD","EUR-USD","GBP-USD"};ArrayList<String> lines=new ArrayList<>();for(String symbol:assets){try{HttpURLConnection c=(HttpURLConnection)new URL("https://api.exchange.coinbase.com/products/"+symbol+"/ticker").openConnection();c.setConnectTimeout(5000);c.setReadTimeout(5000);c.setRequestProperty("Accept","application/json");try{if(c.getResponseCode()!=200)throw new IOException("HTTP "+c.getResponseCode());JSONObject j=new JSONObject(read(c.getInputStream()));double price=j.optDouble("price",Double.NaN);if(Double.isFinite(price)&&price>0)lines.add(symbol+"   $"+String.format(Locale.ROOT,"%,.2f",price));}finally{c.disconnect();}}catch(Exception ignored){}}runOnUiThread(()->{if(!body.isAttachedToWindow())return;state.setText(lines.isEmpty()?"Canlı fiyat bağlantısı başarısız • demo fiyatı gösterilmiyor":"Coinbase Exchange • doğrulanmış salt-okunur fiyatlar");for(String line:lines)financeLine(body,line.split("   ")[0],line.substring(line.indexOf("   ")+3));});}).start();}
  void financeHero(LinearLayout parent,String label,String value,String note){LinearLayout panel=new LinearLayout(this);panel.setOrientation(LinearLayout.VERTICAL);panel.setPadding(24,22,24,22);panel.setBackground(panel(RAISED,22,ACCENT));TextView title=t(label,11,ACCENT);title.setLetterSpacing(.08f);panel.addView(title);TextView big=t(value,35,Color.WHITE);big.setTypeface(null,Typeface.BOLD);panel.addView(big);panel.addView(t(note,12,MUTED));MiniGraph g=new MiniGraph(this);g.accent=ACCENT;panel.addView(g,new LinearLayout.LayoutParams(-1,120));parent.addView(panel,mp(20));}
  void financeSection(LinearLayout parent,String title){TextView v=t(title,12,ACCENT);v.setTypeface(null,Typeface.BOLD);v.setLetterSpacing(.08f);parent.addView(v,mp(24));}
  void financeAction(LinearLayout parent,String title,Runnable action){Button b=new Button(this);b.setText(title+"   →");b.setTextSize(14);b.setAllCaps(false);b.setTextColor(Color.WHITE);b.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);b.setPadding(24,12,16,12);b.setBackground(panel(RAISED,16,Color.rgb(37,48,66)));b.setOnClickListener(v->action.run());parent.addView(b,mp(8));}
  void financeThemeDialog(){String[] names={"Klasik • Buz Mavisi","Uzay • Kozmik Mavi","Neon • Mor","Altın • Mars","Orman • Yeşil"};new AlertDialog.Builder(this).setTitle("Renk Teması").setSingleChoiceItems(names,themeIndex,(dialog,selected)->{themeIndex=selected;ACCENT=THEMES[selected];getPreferences(MODE_PRIVATE).edit().putInt("theme",selected).apply();dialog.dismiss();build();root.setAlpha(0f);root.animate().alpha(1f).setDuration(260).start();}).setNegativeButton("Vazgeç",null).show();}
+ void brokerDemo(){
+  LinearLayout box=new LinearLayout(this);box.setOrientation(LinearLayout.VERTICAL);box.setPadding(24,8,24,8);
+  EditText qty=new EditText(this);qty.setHint("Adet");qty.setInputType(2|8192);box.addView(qty);
+  EditText price=new EditText(this);price.setHint("Örnek fiyat (USD)");price.setInputType(2|8192);box.addView(price);
+  AlertDialog dialog=new AlertDialog.Builder(this).setTitle("Broker demo hesaplayıcı").setMessage("Bu bir emir değildir. Borsaya bağlanmaz.").setView(box).setNegativeButton("Kapat",null).setPositiveButton("Hesapla",null).create();
+  dialog.setOnShowListener(v->dialog.getButton(-1).setOnClickListener(w->{
+   try{
+    java.math.BigDecimal q=new java.math.BigDecimal(qty.getText().toString().trim());
+    java.math.BigDecimal p=new java.math.BigDecimal(price.getText().toString().trim());
+    if(q.signum()<=0||p.signum()<=0||q.multiply(p).compareTo(new java.math.BigDecimal("1000000"))>0)throw new NumberFormatException();
+    new AlertDialog.Builder(this).setTitle("Demo nominal tutar").setMessage(q.multiply(p).toPlainString()+" USD. Gerçek emir gönderilmedi.").setPositiveButton("Tamam",null).show();
+   }catch(NumberFormatException e){qty.setError("Pozitif sayı ve toplam en fazla 1 milyon USD olmalı");}
+  }));
+  dialog.show();
+ }
+
+ final java.util.ArrayList<PaperOrder> paperOrders=new java.util.ArrayList<>();
+ final java.util.HashMap<String,java.math.BigDecimal> paperHoldings=new java.util.HashMap<>();
+ final java.util.HashMap<String,java.math.BigDecimal> paperCost=new java.util.HashMap<>();
+ java.math.BigDecimal paperCash=new java.math.BigDecimal("100000");
+ int paperSequence=0;
+ static final class PaperOrder{
+  final int id;final String symbol,side,type;final java.math.BigDecimal qty,price;
+  String status;
+  PaperOrder(int id,String symbol,String side,String type,java.math.BigDecimal qty,java.math.BigDecimal price,String status){
+   this.id=id;this.symbol=symbol;this.side=side;this.type=type;this.qty=qty;this.price=price;this.status=status;
+  }
+ }
+ void paperOrderDialog(){
+  LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);form.setPadding(24,8,24,8);
+  Spinner symbol=spin(new String[]{"AAPL","MSFT","NVDA","SPY","TSLA","BTC-USD","ETH-USD","SOL-USD","DOGE-USD","LTC-USD","AVAX-USD"},0);
+  Spinner side=spin(new String[]{"BUY","SELL"},0);
+  Spinner type=spin(new String[]{"MARKET","LIMIT"},0);
+  EditText qty=new EditText(this);qty.setHint("Adet");qty.setInputType(2|8192);
+  EditText price=new EditText(this);price.setHint("Demo fiyat (USD)");price.setInputType(2|8192);
+  form.addView(label("Sembol"));form.addView(symbol);form.addView(label("Yön"));form.addView(side);
+  form.addView(label("Emir tipi"));form.addView(type);form.addView(label("Adet"));form.addView(qty);
+  form.addView(label("Simüle edilen fiyat / limit"));form.addView(price);
+  AlertDialog d=new AlertDialog.Builder(this).setTitle("DEMO emir • gerçek işlem yok").setView(form).setNegativeButton("İptal",null).setPositiveButton("Kaydet",null).create();
+  d.setOnShowListener(v->d.getButton(-1).setOnClickListener(w->{
+   try{
+    String q=qty.getText().toString().trim(),p=price.getText().toString().trim();
+    if(!q.matches("[0-9]+(\\.[0-9]{1,6})?")||!p.matches("[0-9]+(\\.[0-9]{1,6})?"))throw new IllegalArgumentException();
+    java.math.BigDecimal units=new java.math.BigDecimal(q),px=new java.math.BigDecimal(p);
+    if(units.signum()<=0||px.signum()<=0||units.multiply(px).compareTo(new java.math.BigDecimal("1000000"))>0)throw new IllegalArgumentException();
+    String sym=symbol.getSelectedItem().toString(),direction=side.getSelectedItem().toString(),kind=type.getSelectedItem().toString();
+    if(kind.equals("MARKET")){
+     if(!paperFill(sym,direction,units,px)){qty.setError("Demo bakiye veya pozisyon yetersiz");return;}
+    }
+    if(paperOrders.size()>=200)paperOrders.remove(0);
+    paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,kind.equals("MARKET")?"FILLED":"PENDING"));
+    d.dismiss();paperDashboard();
+   }catch(IllegalArgumentException e){qty.setError("Pozitif adet ve fiyat gir; maksimum 1 milyon USD");}
+  }));
+  d.show();
+ }
+ boolean paperFill(String sym,String side,java.math.BigDecimal qty,java.math.BigDecimal px){
+  java.math.BigDecimal value=qty.multiply(px);
+  java.math.BigDecimal held=paperHoldings.containsKey(sym)?paperHoldings.get(sym):java.math.BigDecimal.ZERO;
+  if(side.equals("BUY")){
+   if(paperCash.compareTo(value)<0)return false;
+   paperCash=paperCash.subtract(value);
+   paperHoldings.put(sym,held.add(qty));
+   paperCost.put(sym,(paperCost.containsKey(sym)?paperCost.get(sym):java.math.BigDecimal.ZERO).add(value));
+  }else{
+   if(held.compareTo(qty)<0)return false;
+   java.math.BigDecimal oldCost=paperCost.containsKey(sym)?paperCost.get(sym):java.math.BigDecimal.ZERO;
+   java.math.BigDecimal remaining=held.subtract(qty);
+   paperCash=paperCash.add(value);paperHoldings.put(sym,remaining);
+   paperCost.put(sym,remaining.signum()==0?java.math.BigDecimal.ZERO:oldCost.multiply(remaining).divide(held,16,java.math.RoundingMode.HALF_UP));
+  }
+  return true;
+ }
+ void paperDashboard(){
+  StringBuilder out=new StringBuilder("DEMO • yalnızca açık uygulama oturumu • başlangıç 100.000 USD\\n");
+  int pendingCount=0,filledCount=0,cancelledCount=0;
+  for(PaperOrder o:paperOrders){if("PENDING".equals(o.status))pendingCount++;else if("FILLED".equals(o.status))filledCount++;else if("CANCELLED".equals(o.status))cancelledCount++;}
+  out.append("Açık pozisyonlar: ").append(paperHoldings.values().stream().filter(v->v.signum()>0).count()).append(" • Bekleyen: ").append(pendingCount).append(" • Gerçekleşen: ").append(filledCount).append(" • İptal: ").append(cancelledCount).append("\\n");
+  out.append("Nakit: $").append(paperCash.toPlainString()).append("\\n\\nPozisyonlar:\\n");
+  for(String sym:paperHoldings.keySet()){
+   java.math.BigDecimal qty=paperHoldings.get(sym);
+   if(qty.signum()>0)out.append(sym).append(": ").append(qty.toPlainString()).append(" adet • maliyet $").append(paperCost.get(sym).toPlainString()).append("\\n");
+  }
+  out.append("\\nEmirler (LIMIT beklemede; piyasa fiyatı izlenmiyor):\\n");
+  for(int i=paperOrders.size()-1;i>=0;i--){
+   PaperOrder o=paperOrders.get(i);
+   out.append("#").append(o.id).append(" ").append(o.symbol).append(" ").append(o.side).append(" ").append(o.type).append(" ").append(o.qty).append(" × $").append(o.price).append(" ").append(o.status).append("\\n");
+  }
+  new AlertDialog.Builder(this).setTitle("DEMO portföy").setMessage(out.toString()).setPositiveButton("Kapat",null).setNeutralButton("Bekleyen emri iptal et",(d,w)->paperCancelDialog()).show();
+ }
+ void paperCancelDialog(){
+  java.util.ArrayList<PaperOrder> pending=new java.util.ArrayList<>();
+  for(PaperOrder o:paperOrders)if(o.status.equals("PENDING"))pending.add(o);
+  if(pending.isEmpty()){new AlertDialog.Builder(this).setMessage("Bekleyen demo emir yok.").setPositiveButton("Tamam",null).show();return;}
+  String[] names=new String[pending.size()];
+  for(int i=0;i<pending.size();i++){PaperOrder o=pending.get(i);names[i]="#"+o.id+" "+o.symbol+" "+o.side+" "+o.qty;}
+  new AlertDialog.Builder(this).setTitle("İptal edilecek demo emir").setItems(names,(d,index)->{pending.get(index).status="CANCELLED";paperDashboard();}).setNegativeButton("Vazgeç",null).show();
+ }
  void financePreview(String title){new AlertDialog.Builder(this).setTitle(title).setMessage("MARS-X Finance arayüz önizlemesi. Gerçek işlem veya hesap değişikliği yapılmaz.").setPositiveButton("Tamam",null).show();}
  void financeLine(LinearLayout parent,String key,String value){LinearLayout r=row();r.setPadding(18,18,18,18);r.setBackground(panel(RAISED,14,Color.rgb(37,48,66)));TextView left=t(key,14,Color.WHITE);r.addView(left,new LinearLayout.LayoutParams(0,-2,1));r.addView(t(value,12,MUTED));parent.addView(r,mp(7));}
  void health(){new Thread(()->{try{JSONObject j=get("/convert/health");boolean ok=j.optBoolean("configured",false);runOnUiThread(()->{status.setText(ok?"● Fiyat API hazır":"● Bağlantı Bekleniyor");status.setTextColor(ok?Color.rgb(0,220,160):Color.LTGRAY);});}catch(Exception e){runOnUiThread(()->status.setText("● Hizmet Bekleniyor"));}}).start();}
  void brokerHealth(){new Thread(()->{try{JSONObject j=get("/broker/health");JSONArray p=j.optJSONArray("providers");JSONObject b=p==null||p.length()==0?null:p.optJSONObject(0);boolean configured=b!=null&&b.optBoolean("configured",false);JSONObject prod=j.optJSONObject("production");boolean trading=prod!=null&&prod.optBoolean("liveTrading",false);String text=(configured?"lemon bağlantısı hazır":"lemon API anahtarı bekleniyor")+" • "+(trading?"production review hazır":"güvenlik kapıları kilitli");runOnUiThread(()->{brokerStatus.setText(text);brokerStatus.setTextColor(trading?Color.rgb(0,220,160):(configured?Color.rgb(255,190,90):Color.LTGRAY));});}catch(Exception e){runOnUiThread(()->brokerStatus.setText("Broker durumu alınamadı. Paper mod korunuyor."));}}).start();}
  void marketProviders(){new Thread(()->{try{JSONObject j=get("/market/providers");JSONArray p=j.optJSONArray("providers");ArrayList<String> ready=new ArrayList<>();if(p!=null)for(int i=0;i<p.length();i++){JSONObject x=p.optJSONObject(i);if(x!=null&&"DATA_READY".equals(x.optString("status")))ready.add(x.optString("id"));}String label=ready.isEmpty()?"Coinbase public feed • backend provider listesi boş":"Backend providers: "+String.join(" + ",ready);runOnUiThread(()->{if(marketProviders!=null)marketProviders.setText(label);});}catch(Exception e){runOnUiThread(()->{if(marketProviders!=null)marketProviders.setText("Coinbase public feed • backend provider listesi erişilemiyor");});}}).start();}
- void chartSnapshot(){if(!screenActive||marketAsset==null||marketTimeframe==null||chartView==null)return;final String symbol=marketAsset.getSelectedItem().toString(),tf=marketTimeframe.getSelectedItem().toString();final int seconds=new int[]{60,300,900,3600,21600,86400}[marketTimeframe.getSelectedItemPosition()];marketPrice.setText(symbol+" • yükleniyor");new Thread(()->{try{JSONArray candles=getPublicCoinbaseCandles(symbol,seconds);if(candles.length()==0)throw new IOException("No candles");long candleTime=candles.getJSONObject(candles.length()-1).getLong("time");long now=System.currentTimeMillis()/1000L;if(candleTime>now+120L||now-candleTime>Math.max(900L,3L*seconds))throw new IOException("Stale candles");double close=candles.getJSONObject(candles.length()-1).getDouble("close");runOnUiThread(()->{if(marketAsset==null||!symbol.equals(marketAsset.getSelectedItem().toString())||!tf.equals(marketTimeframe.getSelectedItem().toString()))return;chartView.setCandles(candles);marketPrice.setText(symbol+"     "+String.format(Locale.ROOT,"%,.2f",close)+"     Coinbase • "+tf);marketProviders.setText("Coinbase Exchange • "+tf+" • salt okunur");});}catch(Exception e){runOnUiThread(()->{if(marketAsset!=null&&symbol.equals(marketAsset.getSelectedItem().toString())){marketPrice.setText(symbol+" • veri alınamadı");marketProviders.setText("Canlı piyasa bağlantısı başarısız • yeniden seçim yaparak dene");chartView.clear();}});}}).start();}
+ void chartSnapshot(){if(!screenActive||!tradingScreenVisible||marketAsset==null||marketTimeframe==null||chartView==null)return;final int requestGeneration=++chartRequestGeneration;final String symbol=marketAsset.getSelectedItem().toString(),tf=marketTimeframe.getSelectedItem().toString();final int seconds=new int[]{60,300,900,3600,21600,86400}[marketTimeframe.getSelectedItemPosition()];marketPrice.setText(symbol+" • yükleniyor");new Thread(()->{try{JSONArray candles=getPublicCoinbaseCandles(symbol,seconds);if(candles.length()==0)throw new IOException("No candles");long candleTime=candles.getJSONObject(candles.length()-1).getLong("time");long now=System.currentTimeMillis()/1000L;if(candleTime>now+120L||now-candleTime>Math.max(900L,3L*seconds))throw new IOException("Stale candles");double close=candles.getJSONObject(candles.length()-1).getDouble("close");runOnUiThread(()->{if(!screenActive||!tradingScreenVisible||requestGeneration!=chartRequestGeneration||marketAsset==null||!symbol.equals(marketAsset.getSelectedItem().toString())||!tf.equals(marketTimeframe.getSelectedItem().toString()))return;chartView.setCandles(candles);marketPrice.setText(symbol+"     "+String.format(Locale.ROOT,"%,.2f",close)+"     Coinbase • "+tf);marketProviders.setText("Coinbase Exchange • "+tf+" • salt okunur");});}catch(Exception e){runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==chartRequestGeneration&&marketAsset!=null&&marketTimeframe!=null&&symbol.equals(marketAsset.getSelectedItem().toString())&&tf.equals(marketTimeframe.getSelectedItem().toString())){marketPrice.setText(symbol+" • veri alınamadı");marketProviders.setText("Canlı piyasa bağlantısı başarısız • yeniden seçim yaparak dene");chartView.clear();}});}}).start();}
  JSONArray getPublicCoinbaseCandles(String symbol,int granularity)throws Exception{HttpURLConnection c=(HttpURLConnection)new URL("https://api.exchange.coinbase.com/products/"+enc(symbol)+"/candles?granularity="+granularity).openConnection();c.setConnectTimeout(9000);c.setReadTimeout(9000);c.setRequestProperty("Accept","application/json");c.setRequestProperty("User-Agent","MARS-X-Finance/0.9");int code=c.getResponseCode();if(code!=200){c.disconnect();throw new IOException("Coinbase HTTP "+code);}JSONArray raw;try(InputStream stream=c.getInputStream()){raw=new JSONArray(read(stream));}finally{c.disconnect();}JSONArray candles=new JSONArray();for(int i=raw.length()-1;i>=0;i--){JSONArray x=raw.getJSONArray(i);JSONObject item=new JSONObject();item.put("time",x.getLong(0));item.put("open",x.getDouble(3));item.put("high",x.getDouble(2));item.put("low",x.getDouble(1));item.put("close",x.getDouble(4));item.put("volume",x.getDouble(5));candles.put(item);}return candles;}
- void quote(){String f=asset(from),tt=asset(to),a=amount.getText().toString().trim(),fn=net(fromNet),tn=net(toNet);if(!a.matches("[0-9]+(\\.[0-9]{1,12})?")){result.setText("Geçerli bir miktar gir.");return;}result.setText("Minimum tutar ve fiyat hesaplanıyor…");new Thread(()->{try{String route="fromCurrency="+enc(f)+"&toCurrency="+enc(tt)+"&fromNetwork="+enc(fn)+"&toNetwork="+enc(tn)+"&flow=standard";JSONObject m=get("/convert/min-amount?"+route);JSONObject md=m.optJSONObject("data");double min=md==null?Double.NaN:md.optDouble("minAmount",Double.NaN);if(Double.isFinite(min)&&Double.parseDouble(a)<min){String msg="Minimum tutar: "+min+" "+f.toUpperCase(Locale.ROOT)+"\nSeçilen ağ: "+fn.toUpperCase(Locale.ROOT)+" → "+tn.toUpperCase(Locale.ROOT)+"\nİşlem oluşturulmadı.";runOnUiThread(()->result.setText(msg));return;}JSONObject j=get("/convert/quote?"+route+"&fromAmount="+enc(a));JSONObject d=j.optJSONObject("data");String est=d==null?"—":d.optString("toAmount",d.optString("estimatedAmount","—"));String fee=d==null?"—":d.optString("fee",d.optString("networkFee","—"));String minText=Double.isFinite(min)?String.valueOf(min):"—";String out="Minimum tutar: "+minText+" "+f.toUpperCase(Locale.ROOT)+"\nTahmini alacağın miktar: "+est+" "+tt.toUpperCase(Locale.ROOT)+"\nAğ/komisyon: "+fee+"\nİşlem oluşturulmadı.";runOnUiThread(()->result.setText(out));}catch(ApiException e){runOnUiThread(()->result.setText(errorMessage(e)));}catch(Exception e){runOnUiThread(()->result.setText("Fiyat servisi şu anda kullanılamıyor. İşlem oluşturulmadı."));}}).start();}
+ void quote(){
+  final int requestGeneration=++quoteRequestGeneration;
+  String f=asset(from),tt=asset(to),a=amount.getText().toString().trim(),fn=net(fromNet),tn=net(toNet);
+  if(!a.matches("[0-9]+(\\.[0-9]{1,12})?")){result.setText("Geçerli bir miktar gir.");return;}
+  final double quantity;
+  try{quantity=Double.parseDouble(a);}catch(NumberFormatException e){result.setText("Geçerli bir miktar gir.");return;}
+  if(!Double.isFinite(quantity)||quantity<=0){result.setText("Miktar sıfırdan büyük olmalı.");return;}
+  if(f.equals(tt)&&fn.equals(tn)){result.setText("Aynı coin ve ağ arasında dönüşüm yapılamaz.");return;}
+  result.setText("Minimum tutar ve fiyat hesaplanıyor…");
+  new Thread(()->{
+   try{
+    String route="fromCurrency="+enc(f)+"&toCurrency="+enc(tt)+"&fromNetwork="+enc(fn)+"&toNetwork="+enc(tn)+"&flow=standard";
+    JSONObject m=get("/convert/min-amount?"+route);JSONObject md=m.optJSONObject("data");
+    double min=md==null?Double.NaN:md.optDouble("minAmount",Double.NaN);
+    if(!Double.isFinite(min)||min<=0){throw new IOException("Minimum amount unavailable");}
+    if(quantity<min){
+     String msg="Minimum tutar: "+min+" "+f.toUpperCase(Locale.ROOT)+"\\nSeçilen ağ: "+fn.toUpperCase(Locale.ROOT)+" → "+tn.toUpperCase(Locale.ROOT)+"\\nİşlem oluşturulmadı.";
+     runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(msg);});return;
+    }
+    JSONObject j=get("/convert/quote?"+route+"&fromAmount="+enc(a));JSONObject d=j.optJSONObject("data");
+    String est=d==null?"—":d.optString("toAmount",d.optString("estimatedAmount","—"));
+    String fee=d==null?"—":d.optString("fee",d.optString("networkFee","—"));
+    String minText=Double.isFinite(min)?String.valueOf(min):"—";
+    String out="Minimum tutar: "+minText+" "+f.toUpperCase(Locale.ROOT)+"\\nTahmini alacağın miktar: "+est+" "+tt.toUpperCase(Locale.ROOT)+"\\nAğ/komisyon: "+fee+"\\nİşlem oluşturulmadı.";
+    runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(out);});
+   }catch(ApiException e){runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText(errorMessage(e));});}
+   catch(Exception e){runOnUiThread(()->{if(screenActive&&tradingScreenVisible&&requestGeneration==quoteRequestGeneration&&result!=null)result.setText("Fiyat servisi şu anda kullanılamıyor. İşlem oluşturulmadı.");});}
+  }).start();
+ }
  String errorMessage(ApiException e){String k=e.body.optString("kind","");if("authentication".equals(k))return "Fiyat API anahtarı backend tarafında hazır değil. İşlem oluşturulmadı.";if("request_rejected".equals(k))return "Bu coin/ağ çifti desteklenmiyor ya da minimum tutarın altında. İşlem oluşturulmadı.";if("timeout".equals(k)||"provider_unavailable".equals(k)||"rate_limited".equals(k))return "Fiyat sağlayıcı şu an yanıt vermiyor. Biraz sonra tekrar dene. İşlem oluşturulmadı.";return "Fiyat servisi şu anda kullanılamıyor. İşlem oluşturulmadı.";}
- JSONObject get(String p)throws Exception{HttpURLConnection c=(HttpURLConnection)new URL(BuildConfig.MARSX_FINANCE_API_BASE_URL+p).openConnection();c.setConnectTimeout(7000);c.setReadTimeout(7000);c.setRequestProperty("Accept","application/json");int code=c.getResponseCode();InputStream in=code>=400?c.getErrorStream():c.getInputStream();String body=read(in);c.disconnect();if(code>=400)throw new ApiException(code,body);return new JSONObject(body);}
+ JSONObject get(String p)throws Exception{
+  HttpURLConnection c=(HttpURLConnection)new URL(BuildConfig.MARSX_FINANCE_API_BASE_URL+p).openConnection();
+  try{
+   c.setConnectTimeout(7000);c.setReadTimeout(7000);c.setRequestProperty("Accept","application/json");
+   int code=c.getResponseCode();
+   InputStream in=code>=400?c.getErrorStream():c.getInputStream();
+   String body=in==null?"":read(in);
+   if(code>=400)throw new ApiException(code,body);
+   if(code<200||code>=300)throw new IOException("Unexpected HTTP "+code);
+   return new JSONObject(body);
+  }finally{c.disconnect();}
+ }
  String read(InputStream in)throws Exception{try(BufferedReader r=new BufferedReader(new InputStreamReader(in,StandardCharsets.UTF_8))){StringBuilder b=new StringBuilder();char[] buf=new char[8192];int n;while((n=r.read(buf))!=-1){if(b.length()+n>262144)throw new IOException("Response too large");b.append(buf,0,n);}return b.toString();}}
  String enc(String s)throws Exception{return URLEncoder.encode(s,"UTF-8");}String asset(Spinner s){return s.getSelectedItem().toString().split(" ")[0].toLowerCase(Locale.ROOT);}String net(Spinner s){String v=s.getSelectedItem().toString().toLowerCase(Locale.ROOT);if(v.contains("bitcoin"))return "btc";if(v.contains("ethereum"))return "eth";if(v.contains("solana"))return "sol";return "bsc";}
  static final class ApiException extends IOException{final int code;final JSONObject body;ApiException(int c,String b){super("HTTP "+c);code=c;JSONObject j;try{j=new JSONObject(b==null?"{}":b);}catch(Exception e){j=new JSONObject();}body=j;}}
@@ -74,7 +211,7 @@ public final class FinanceActivity extends Activity{
    for(int i=0;i<raw.length();i++)try{
     JSONObject x=raw.getJSONObject(i);long time=x.getLong("time");
     double o=x.getDouble("open"),h=x.getDouble("high"),l=x.getDouble("low"),close=x.getDouble("close"),vol=x.getDouble("volume");
-    if(time<=lastTime||!Double.isFinite(o)||!Double.isFinite(h)||!Double.isFinite(l)||!Double.isFinite(close)||!Double.isFinite(vol)||l<=0||o<=0||close<=0||h<Math.max(o,close)||l>Math.min(o,close)||vol<0)continue;
+    if(time<=lastTime||!Double.isFinite(o)||!Double.isFinite(h)||!Double.isFinite(l)||!Double.isFinite(close)||!Double.isFinite(vol)||l<=0||o<=0||close<=0||h<Math.max(o,close)||l>Math.min(o,close)||vol<0||h>Float.MAX_VALUE||vol>Float.MAX_VALUE)continue;
     valid.add(new float[]{(float)o,(float)h,(float)l,(float)close,(float)vol});lastTime=time;
    }catch(Exception ignored){}
    candles.clear();candles.addAll(valid);scrollBack=0;invalidate();
