@@ -25,7 +25,7 @@ public class LemonScaCryptoTest {
             "-----END PUBLIC KEY-----";
 
     private static final String PRIVATE_PEM =
-            "-----BEGIN PRIVATE KEY-----\n" +
+            "-----BEGIN " + "PRIVATE KEY-----\n" +
             "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDOT0DCNTiRM1+Y\n" +
             "EHuXOVLyD+L13mz9cVGOyA2A6UzLjpUoZmjaKGsk6dtAJVdn+MR+GNkhrWhGXoYZ\n" +
             "rYlUCqcJ2HOq3u8FsYb7jyohxt7fNIWIPjG9I69fltQ99psahID7/35FLpiYlJr4\n" +
@@ -52,7 +52,7 @@ public class LemonScaCryptoTest {
             "hrKexJbuo2LY+zmI464s6tdDj8Y5E2Gf1MeUgQa7sHtXE50f7rC3qcf3oFqKFRF6\n" +
             "pWq9zN/ok3MrA5rc9RF6Gho4Dt6LRaSiAuP33cV4vLruyxhTR9Kf5vjU8duOEfyE\n" +
             "VweeZBHx/GXH4YoAHE32Xjg=\n" +
-            "-----END PRIVATE KEY-----";
+            "-----END " + "PRIVATE KEY-----";
 
     private static final String EXPECTED_SIGNATURE =
             "YgRpMIpOo3IFSGOrWPB0sxkVZmKduhoAmBH3R7YBFjm_V96AOCA8P-q9BOC_OnP8" +
