@@ -80,7 +80,18 @@ public final class FinanceActivity extends Activity{
   }).start();
  }
  String errorMessage(ApiException e){String k=e.body.optString("kind","");if("authentication".equals(k))return "Fiyat API anahtarı backend tarafında hazır değil. İşlem oluşturulmadı.";if("request_rejected".equals(k))return "Bu coin/ağ çifti desteklenmiyor ya da minimum tutarın altında. İşlem oluşturulmadı.";if("timeout".equals(k)||"provider_unavailable".equals(k)||"rate_limited".equals(k))return "Fiyat sağlayıcı şu an yanıt vermiyor. Biraz sonra tekrar dene. İşlem oluşturulmadı.";return "Fiyat servisi şu anda kullanılamıyor. İşlem oluşturulmadı.";}
- JSONObject get(String p)throws Exception{HttpURLConnection c=(HttpURLConnection)new URL(BuildConfig.MARSX_FINANCE_API_BASE_URL+p).openConnection();c.setConnectTimeout(7000);c.setReadTimeout(7000);c.setRequestProperty("Accept","application/json");int code=c.getResponseCode();InputStream in=code>=400?c.getErrorStream():c.getInputStream();String body=read(in);c.disconnect();if(code>=400)throw new ApiException(code,body);return new JSONObject(body);}
+ JSONObject get(String p)throws Exception{
+  HttpURLConnection c=(HttpURLConnection)new URL(BuildConfig.MARSX_FINANCE_API_BASE_URL+p).openConnection();
+  try{
+   c.setConnectTimeout(7000);c.setReadTimeout(7000);c.setRequestProperty("Accept","application/json");
+   int code=c.getResponseCode();
+   InputStream in=code>=400?c.getErrorStream():c.getInputStream();
+   String body=in==null?"":read(in);
+   if(code>=400)throw new ApiException(code,body);
+   if(code<200||code>=300)throw new IOException("Unexpected HTTP "+code);
+   return new JSONObject(body);
+  }finally{c.disconnect();}
+ }
  String read(InputStream in)throws Exception{try(BufferedReader r=new BufferedReader(new InputStreamReader(in,StandardCharsets.UTF_8))){StringBuilder b=new StringBuilder();char[] buf=new char[8192];int n;while((n=r.read(buf))!=-1){if(b.length()+n>262144)throw new IOException("Response too large");b.append(buf,0,n);}return b.toString();}}
  String enc(String s)throws Exception{return URLEncoder.encode(s,"UTF-8");}String asset(Spinner s){return s.getSelectedItem().toString().split(" ")[0].toLowerCase(Locale.ROOT);}String net(Spinner s){String v=s.getSelectedItem().toString().toLowerCase(Locale.ROOT);if(v.contains("bitcoin"))return "btc";if(v.contains("ethereum"))return "eth";if(v.contains("solana"))return "sol";return "bsc";}
  static final class ApiException extends IOException{final int code;final JSONObject body;ApiException(int c,String b){super("HTTP "+c);code=c;JSONObject j;try{j=new JSONObject(b==null?"{}":b);}catch(Exception e){j=new JSONObject();}body=j;}}
