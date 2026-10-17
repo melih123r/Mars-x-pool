@@ -191,7 +191,7 @@ public final class FinanceActivity extends Activity{
   URL url=new URL("https://query1.finance.yahoo.com/v8/finance/chart/"+enc(symbol)+"?interval="+interval+"&range="+range);
   HttpURLConnection c=(HttpURLConnection)url.openConnection();c.setConnectTimeout(9000);c.setReadTimeout(9000);c.setRequestProperty("Accept","application/json");c.setRequestProperty("User-Agent","Mozilla/5.0");
   JSONObject json;try{if(c.getResponseCode()!=200)throw new IOException("Stock data HTTP "+c.getResponseCode());json=new JSONObject(read(c.getInputStream()));}finally{c.disconnect();}
-  JSONArray results=json.getJSONObject("chart").getJSONArray("result");if(results.length()==0)throw new IOException("No stock data");
+  JSONObject chart=json.getJSONObject("chart");JSONArray results=chart.optJSONArray("result");if(results==null||results.length()==0||results.isNull(0))throw new IOException("Yahoo chart unavailable: "+symbol);
   JSONObject r=results.getJSONObject(0);JSONArray times=r.getJSONArray("timestamp");JSONObject q=r.getJSONObject("indicators").getJSONArray("quote").getJSONObject(0);
   JSONArray opens=q.getJSONArray("open"),highs=q.getJSONArray("high"),lows=q.getJSONArray("low"),closes=q.getJSONArray("close"),volumes=q.getJSONArray("volume");
   JSONArray candles=new JSONArray();
