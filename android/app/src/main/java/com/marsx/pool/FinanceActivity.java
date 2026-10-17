@@ -254,7 +254,7 @@ public final class FinanceActivity extends Activity{
    for(int i=0;i<raw.length();i++)try{
     JSONObject x=raw.getJSONObject(i);long time=x.getLong("time");
     double o=x.getDouble("open"),h=x.getDouble("high"),l=x.getDouble("low"),close=x.getDouble("close"),vol=x.getDouble("volume");
-    if(time<=lastTime||!Double.isFinite(o)||!Double.isFinite(h)||!Double.isFinite(l)||!Double.isFinite(close)||!Double.isFinite(vol)||l<=0||o<=0||close<=0||h<Math.max(o,close)||l>Math.min(o,close)||vol<0||h>Float.MAX_VALUE||o>Float.MAX_VALUE||l>Float.MAX_VALUE||close>Float.MAX_VALUE||vol>Float.MAX_VALUE)continue;
+    if(time<=lastTime||!Double.isFinite(o)||!Double.isFinite(h)||!Double.isFinite(l)||!Double.isFinite(close)||!Double.isFinite(vol)||l<=0||o<=0||close<=0||h<Math.max(o,close)||l>Math.min(o,close)||l>h||vol<0||h>Float.MAX_VALUE||o>Float.MAX_VALUE||l>Float.MAX_VALUE||close>Float.MAX_VALUE||vol>Float.MAX_VALUE)continue;
     valid.add(new float[]{(float)o,(float)h,(float)l,(float)close,(float)vol});lastTime=time;
    }catch(Exception ignored){}
    candles.clear();candles.addAll(valid);scrollBack=0;invalidate();
