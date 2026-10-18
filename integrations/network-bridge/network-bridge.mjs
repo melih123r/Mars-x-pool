@@ -5,9 +5,11 @@ export function createNetworkBridge({ apiBase, getSession, hasConsent, fetchImpl
   const origin = new URL(apiBase);
   if (origin.protocol !== "https:" || origin.username || origin.password || origin.search || origin.hash) throw new Error("HTTPS API required");
   if (typeof getSession !== "function" || typeof hasConsent !== "function") throw new TypeError("session and consent callbacks required");
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 100 || timeoutMs > 60000) throw new RangeError("timeoutMs must be 100..60000");
   const base = origin.href.replace(/\/$/, "");
   async function send(path, worker) {
     if (!ALLOWED_PATHS.has(path)) return { ok: false, reason: "invalid_path" };
+    if (!worker || typeof worker !== "object" || Array.isArray(worker) || typeof worker.workerId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(worker.workerId)) return { ok: false, reason: "invalid_worker" };
     if (!hasConsent()) return { ok: false, reason: "consent_required" };
     const session = await getSession();
     if (!session?.token || !session?.installId) return { ok: false, reason: "license_required" };
