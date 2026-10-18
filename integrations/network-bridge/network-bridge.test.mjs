@@ -51,3 +51,28 @@ test("rejects invalid request timeout configuration", () => {
     assert.throws(() => createNetworkBridge({ ...base, hasConsent: () => true, timeoutMs }), /timeoutMs/);
   }
 });
+
+test("rejects header injection and malformed license credentials before network", async () => {
+  for (const session of [
+    { token: "abc\r\nx-evil: yes", installId: "install" },
+    { token: "test", installId: "install\nattack" },
+    { token: "test", installId: "../unsafe" },
+    { token: "test", installId: "x".repeat(129) }
+  ]) {
+    let calls = 0;
+    const bridge = createNetworkBridge({ ...base, getSession: async () => session,
+      hasConsent: () => true, fetchImpl: async () => { calls++; throw Error("unexpected"); } });
+    assert.deepEqual(await bridge.register({ workerId: "abc" }), { ok: false, reason: "license_required" });
+    assert.equal(calls, 0);
+  }
+});
+test("sends only allowlisted worker ID, never arbitrary worker metadata", async () => {
+  let body;
+  const bridge = createNetworkBridge({ ...base, hasConsent: () => true,
+    fetchImpl: async (_, options) => { body = options.body; return { ok: true, status: 200 }; } });
+  assert.equal((await bridge.register({ workerId: "abc", secret: "must-not-send", deviceLocation: "private" })).ok, true);
+  assert.deepEqual(JSON.parse(body), { workerId: "abc" });
+});
+test("rejects API base with path to avoid route confusion", () => {
+  assert.throws(() => createNetworkBridge({ ...base, apiBase: "https://example.com/private", hasConsent: () => true }), /HTTPS/);
+});
