@@ -119,7 +119,7 @@ public final class FinanceActivity extends Activity{
   d.show();
  }
  boolean paperFill(String sym,String side,java.math.BigDecimal qty,java.math.BigDecimal px){
-  if(qty==null||px==null||sym==null||side==null||qty.signum()<=0||px.signum()<=0||(!"BUY".equals(side)&&!"SELL".equals(side)))return false;
+  if(qty==null||px==null||sym==null||sym.trim().isEmpty()||side==null||qty.signum()<=0||px.signum()<=0||(!"BUY".equals(side)&&!"SELL".equals(side)))return false;
   java.math.BigDecimal value=qty.multiply(px);
   if(value.compareTo(new java.math.BigDecimal("1000000"))>0)return false;
   java.math.BigDecimal held=paperHoldings.containsKey(sym)?paperHoldings.get(sym):java.math.BigDecimal.ZERO;
