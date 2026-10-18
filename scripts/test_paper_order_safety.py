@@ -34,6 +34,7 @@ require("do not fill unfinished or future candles", "completedCandleEnd>System.c
 require("reject invalid last-close price", "!Double.isFinite(lastClose)||lastClose<=0" in matching)
 require("ignore null pending order entries", 'if(order==null||!"PENDING".equals(order.status)' in matching)
 require("reject invalid pending order quantity", "order.qty==null||order.price==null||order.qty.signum()<=0||order.price.signum()<=0" in matching)
+require("reject invalid sell cost basis", "if(oldCost==null||oldCost.signum()<0)return false;" in source)
 require("record executed order status", 'order.status="FILLED"' in matching)
 require("persist demo state", "persistPaperState()" in matching)
 print("PASS: all static demo safety invariants")
