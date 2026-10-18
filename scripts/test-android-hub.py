@@ -64,6 +64,18 @@ class AndroidHubTests(unittest.TestCase):
         self.assertIn('marketScanner.setText("Piyasa tarayıcı • "+marketAsset.getCount()+" sembol")', code)
         self.assertNotIn('marketScanner.setText("Piyasa tarayıcı • 244 sembol")', code)
 
+    def test_demo_conversion_parses_locale_decimal_inputs(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        start = code.index("static java.math.BigDecimal parseDemoDecimal(String raw)")
+        end = code.index("void demoConversionDialog()", start)
+        parser = code[start:end]
+        self.assertIn("value.replace(',', '.')", parser)
+        self.assertIn("value.indexOf(',')>=0&&value.indexOf('.')>=0", parser)
+        self.assertIn("new java.math.BigDecimal(value)", parser)
+        dialog = code[end:code.index("void quoteInfo()", end)]
+        self.assertIn("parseDemoDecimal(qty.getText().toString())", dialog)
+        self.assertIn("parseDemoDecimal(rate.getText().toString())", dialog)
+
     def test_conversion_dialog_is_scrollable_on_small_screens(self):
         code = FINANCE.read_text(encoding="utf-8")
         start = code.index("void demoConversionDialog()")
