@@ -66,15 +66,45 @@ export class PostgresTaskQueue {
     let encoded;
     try { encoded = JSON.stringify(metadata); } catch { throw new Error('invalid_audit_metadata'); }
     if (Buffer.byteLength(encoded, 'utf8') > 16000) throw new Error('audit_metadata_too_large');
-    const result = await this.pool.query(
-      `INSERT INTO marsx_telegram.command_audit_log
-         (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,metadata)
-       VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,$3,$4,$5,$6)
-       ON CONFLICT (command_id,event_key) DO NOTHING
-       RETURNING audit_event_id`,
-      [commandId, eventKey, eventKind, laneNumber, actorRefHash, metadata]
-    );
-    return { recorded: result.rowCount === 1 };
+
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const inserted = await client.query(
+        `INSERT INTO marsx_telegram.command_audit_log
+           (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,metadata)
+         VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,$3,$4,$5,$6)
+         ON CONFLICT (command_id,event_key) DO NOTHING
+         RETURNING audit_event_id`,
+        [commandId, eventKey, eventKind, laneNumber, actorRefHash, metadata]
+      );
+      if (inserted.rowCount === 1) {
+        await client.query('COMMIT');
+        return { recorded: true };
+      }
+
+      const existing = await client.query(
+        `SELECT event_kind,lane_number,actor_ref_hash,metadata
+           FROM marsx_telegram.command_audit_log
+          WHERE command_id=$1 AND event_key=$2 FOR UPDATE`,
+        [commandId, eventKey]
+      );
+      const row = existing.rows[0];
+      if (!row) throw new Error('audit_insert_not_visible');
+      if (row.event_kind !== eventKind
+          || row.lane_number !== laneNumber
+          || row.actor_ref_hash !== actorRefHash
+          || JSON.stringify(row.metadata) !== encoded) {
+        throw new Error('audit_idempotency_conflict');
+      }
+      await client.query('COMMIT');
+      return { recorded: false };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
   async claimNextCommand(workerId, leaseSeconds = 60) {
     if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
