@@ -23,6 +23,19 @@ public class FinanceCandleAggregatorTest {
         assertEquals(14, b.close, 1e-9);
         assertEquals(10, b.volume, 1e-9);
     }
+    @Test public void aggregatesFiveSecondsFromOneSecondBars() {
+        List<FinanceCandleAggregator.Candle> ticks = Arrays.asList(
+            c(0,10,11,9,10,1), c(1,10,12,10,11,2),
+            c(2,11,13,10,12,3), c(3,12,12,11,11,4),
+            c(4,11,14,11,13,5));
+        List<FinanceCandleAggregator.Candle> bars = FinanceCandleAggregator.aggregate(ticks,1,5);
+        assertEquals(1,bars.size());
+        assertEquals(10,bars.get(0).open,1e-9);
+        assertEquals(14,bars.get(0).high,1e-9);
+        assertEquals(9,bars.get(0).low,1e-9);
+        assertEquals(13,bars.get(0).close,1e-9);
+        assertEquals(15,bars.get(0).volume,1e-9);
+    }
     @Test public void dropsPartialBucket() {
         assertTrue(FinanceCandleAggregator.aggregate(Arrays.asList(
             c(0, 10, 10, 10, 10, 1),
