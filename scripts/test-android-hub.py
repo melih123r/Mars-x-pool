@@ -52,6 +52,13 @@ class AndroidHubTests(unittest.TestCase):
         self.assertIn('if("Network".equals(name)){startActivity(new Intent(this,MainActivity.class));return;}', code)
         self.assertNotIn('if("Network".equals(name)){startActivity(new Intent(this,PremiumActivity.class));return;}', code)
 
+    def test_finance_navigation_uses_density_independent_touch_targets(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        self.assertIn("n.setMinHeight(dp(64))", code)
+        self.assertIn("new LinearLayout.LayoutParams(0,dp(64),1)", code)
+        self.assertNotIn("n.setMinHeight(96)", code)
+        self.assertNotIn("new LinearLayout.LayoutParams(0,96,1)", code)
+
     def test_telegram_is_explicitly_read_only(self):
         code = TELEGRAM.read_text(encoding="utf-8")
         self.assertIn("NOT CONNECTED", code)
