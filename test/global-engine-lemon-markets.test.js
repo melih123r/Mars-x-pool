@@ -16,6 +16,11 @@ test("privacy tracing headers are mandatory",()=>{
   assert.equal(h.Authorization,"Bearer test-only");
   assert.equal(h["LMG-Data-Privacy-Access-Principal"],"backend-test");
   assert.equal(h["LMG-Data-Privacy-Access-Justification"],"test.read");
+  assert.throws(()=>a.headers({principal:"user\r\nX-Evil: 1",justification:"test.read"}),/invalid privacy principal/);
+  assert.throws(()=>a.headers({principal:"backend-test",justification:"read\nX-Evil: 1"}),/invalid privacy justification/);
+  assert.throws(()=>a.headers({principal:"x".repeat(257),justification:"test.read"}),/invalid privacy principal/);
+  const unsafeCredential=new LemonBrokerAdapter({apiKey:"fixture\r\nX-Evil: 1"});
+  assert.throws(()=>unsafeCredential.headers({principal:"backend-test",justification:"test.read"}),/invalid API credential/);
 });
 
 test("order submission and withdrawals are disabled by default", async()=>{
