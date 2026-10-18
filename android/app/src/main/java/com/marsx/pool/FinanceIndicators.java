@@ -107,4 +107,51 @@ public final class FinanceIndicators {
         }
         return new double[][]{line, signal, histogram};
     }
+    /** Stochastic oscillator: %K and smoothed %D. Flat windows return 50. */
+    public static double[][] stochastic(double[] highs, double[] lows, double[] closes, int lookback, int smooth) {
+        if (highs == null || lows == null || closes == null || highs.length != lows.length || lows.length != closes.length || lookback <= 0 || smooth <= 0)
+            throw new IllegalArgumentException("Invalid stochastic inputs");
+        int n = closes.length;
+        double[] k = new double[n], d = new double[n];
+        java.util.Arrays.fill(k, Double.NaN);
+        java.util.Arrays.fill(d, Double.NaN);
+        for (int i = 0; i < n; i++) {
+            if (!Double.isFinite(highs[i]) || !Double.isFinite(lows[i]) || !Double.isFinite(closes[i])
+                || lows[i] < 0 || highs[i] < lows[i] || closes[i] < lows[i] || closes[i] > highs[i])
+                throw new IllegalArgumentException("Invalid OHLC");
+            if (i < lookback - 1) continue;
+            double high = Double.NEGATIVE_INFINITY, low = Double.POSITIVE_INFINITY;
+            for (int j = i - lookback + 1; j <= i; j++) {
+                high = Math.max(high, highs[j]);
+                low = Math.min(low, lows[j]);
+            }
+            k[i] = high == low ? 50 : 100 * (closes[i] - low) / (high - low);
+            if (i >= lookback + smooth - 2) {
+                double sum = 0;
+                for (int j = i - smooth + 1; j <= i; j++) sum += k[j];
+                d[i] = sum / smooth;
+            }
+        }
+        return new double[][]{k, d};
+    }
+
+    /** Cumulative volume weighted average price, using typical price (H+L+C)/3. */
+    public static double[] vwap(double[] highs, double[] lows, double[] closes, double[] volumes) {
+        if (highs == null || lows == null || closes == null || volumes == null
+            || highs.length != lows.length || lows.length != closes.length || closes.length != volumes.length)
+            throw new IllegalArgumentException("Invalid VWAP inputs");
+        double[] result = new double[closes.length];
+        double weighted = 0, totalVolume = 0;
+        for (int i = 0; i < closes.length; i++) {
+            if (!Double.isFinite(highs[i]) || !Double.isFinite(lows[i]) || !Double.isFinite(closes[i])
+                || !Double.isFinite(volumes[i]) || volumes[i] < 0 || lows[i] < 0
+                || highs[i] < lows[i] || closes[i] < lows[i] || closes[i] > highs[i])
+                throw new IllegalArgumentException("Invalid VWAP candle");
+            weighted += ((highs[i] + lows[i] + closes[i]) / 3.0) * volumes[i];
+            totalVolume += volumes[i];
+            result[i] = totalVolume > 0 ? weighted / totalVolume : Double.NaN;
+        }
+        return result;
+    }
+
 }
