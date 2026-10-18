@@ -204,3 +204,44 @@ test('malformed or oversized intake cannot write anything to database', async ()
   await assert.rejects(queue.enqueueAtomic({ updateId: 9, tasks: tampered }), /task_plan_mismatch/);
   assert.equal(pool.calls.length, 0);
 });
+
+
+test('conflicting audit retry fails closed instead of accepting an immutable event mismatch', async () => {
+  const calls = [];
+  const client = {
+    async query(sql) {
+      calls.push(sql);
+      if (sql === 'BEGIN' || sql === 'COMMIT' || sql === 'ROLLBACK') return { rowCount: 0, rows: [] };
+      if (sql.startsWith('INSERT INTO marsx_telegram.command_audit_log'))
+        return { rowCount: 0, rows: [] };
+      if (sql.startsWith('SELECT event_kind,lane_number,actor_ref_hash,metadata'))
+        return {
+          rowCount: 1,
+          rows: [{
+            event_kind: 'FAILED',
+            lane_number: 10,
+            actor_ref_hash: 'a'.repeat(64),
+            metadata: { worker: 'command_worker' }
+          }]
+        };
+      return { rowCount: 0, rows: [] };
+    },
+    release() { calls.push('RELEASE'); }
+  };
+  const pool = { async connect() { return client; }, async end() {} };
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+
+  await assert.rejects(
+    queue.appendCommandAudit({
+      commandId: 'telegram-86-chat',
+      eventKey: 'worker-claim-0001',
+      eventKind: 'CLAIMED',
+      laneNumber: 10,
+      actorRefHash: 'a'.repeat(64),
+      metadata: { worker: 'command_worker' }
+    }),
+    /audit_idempotency_conflict/
+  );
+  assert.ok(calls.includes('ROLLBACK'));
+  assert.ok(!calls.includes('COMMIT'));
+});
