@@ -81,6 +81,18 @@ class AndroidHubTests(unittest.TestCase):
         self.assertIn("parseDemoDecimal(qty.getText().toString())", dialog)
         self.assertIn("parseDemoDecimal(rate.getText().toString())", dialog)
 
+    def test_finance_subscreens_have_unique_accent_and_dp_navigation(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        start = code.index("void openFinanceScreen(String name)")
+        end = code.index("void loadPublicPrices(", start)
+        screen = code[start:end]
+        self.assertIn("Color.red(screenAccent(name))", screen)
+        self.assertIn("Color.green(screenAccent(name))", screen)
+        self.assertIn("Color.blue(screenAccent(name))", screen)
+        self.assertIn("section.equals(name)?screenAccent(name)", screen)
+        self.assertIn("new LinearLayout.LayoutParams(0,dp(56),1)", screen)
+        self.assertNotIn("new LinearLayout.LayoutParams(0,80,1)", screen)
+
     def test_finance_navigation_density_helper_is_defined(self):
         code = FINANCE.read_text(encoding="utf-8")
         self.assertIn("int dp(int value){return Math.round(value*getResources().getDisplayMetrics().density);}", code)
