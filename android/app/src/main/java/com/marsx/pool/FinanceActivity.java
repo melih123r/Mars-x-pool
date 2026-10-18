@@ -474,11 +474,6 @@ public final class FinanceActivity extends Activity{
      price.setError("Yalnızca LIMIT demo emirleri etkin. MARKET / STOP_LOSS / TAKE_PROFIT güvenli yürütme ve tetikleme testleri tamamlanana kadar kapalı.");
      return;
     }
-    if(kind.startsWith("MARKET")){
-     // Market fills must never use an arbitrary user-entered price.
-     // A validated quote-based fill is required before MARKET orders can be enabled.
-     price.setError("MARKET emirleri güvenli fiyat doğrulaması tamamlanana kadar kapalı. LIMIT seçin.");return;
-    }
     if(removable>=0)paperOrders.remove(removable);
     paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,"PENDING"));persistPaperState();
     d.dismiss();if(chartView!=null)chartView.invalidate();paperDashboard();
