@@ -6,6 +6,10 @@ on:
       - 'android/app/src/main/java/com/marsx/pool/MainActivity.java'
       - 'android/app/src/main/java/com/marsx/pool/TelegramStatusActivity.java'
       - 'scripts/test-android-hub.py'
+      - 'scripts/test_paper_order_safety.py'
+      - 'scripts/test_technical_indicators.py'
+      - 'android/app/src/main/java/com/marsx/pool/FinanceActivity.java'
+      - 'android/app/src/main/java/com/marsx/pool/TechnicalIndicators.java'
       - '.github/workflows/android-hub-regression.yml'
   pull_request:
     paths:
@@ -13,6 +17,10 @@ on:
       - 'android/app/src/main/java/com/marsx/pool/MainActivity.java'
       - 'android/app/src/main/java/com/marsx/pool/TelegramStatusActivity.java'
       - 'scripts/test-android-hub.py'
+      - 'scripts/test_paper_order_safety.py'
+      - 'scripts/test_technical_indicators.py'
+      - 'android/app/src/main/java/com/marsx/pool/FinanceActivity.java'
+      - 'android/app/src/main/java/com/marsx/pool/TechnicalIndicators.java'
       - '.github/workflows/android-hub-regression.yml'
 jobs:
   hub-contract:
@@ -22,5 +30,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
       - name: Verify single-APK navigation contract
         run: python3 scripts/test-android-hub.py
+      - name: Verify demo order safety invariants
+        run: python3 scripts/test_paper_order_safety.py
+      - name: Verify technical indicator calculations
+        run: python3 scripts/test_technical_indicators.py
