@@ -543,7 +543,7 @@ public final class FinanceActivity extends Activity{
  void paperDashboard(){
   StringBuilder out=new StringBuilder("DEMO • yerel cihazda kayıtlı • başlangıç 100.000 USD\n");
   int pendingCount=0,filledCount=0,cancelledCount=0,rejectedCount=0;
-  for(PaperOrder o:paperOrders){if("PENDING".equals(o.status))pendingCount++;else if("FILLED".equals(o.status))filledCount++;else if("CANCELLED".equals(o.status))cancelledCount++;else if("REJECTED".equals(o.status))rejectedCount++;}
+  for(PaperOrder o:paperOrders){if(o==null)continue;if("PENDING".equals(o.status))pendingCount++;else if("FILLED".equals(o.status))filledCount++;else if("CANCELLED".equals(o.status))cancelledCount++;else if("REJECTED".equals(o.status))rejectedCount++;}
   out.append("Açık pozisyonlar: ").append(paperHoldings.values().stream().filter(v->v.signum()>0).count()).append(" • Bekleyen: ").append(pendingCount).append(" • Gerçekleşen: ").append(filledCount).append(" • İptal: ").append(cancelledCount).append(" • Reddedilen: ").append(rejectedCount).append("\n");
   java.math.BigDecimal markedValue=java.math.BigDecimal.ZERO,unrealized=java.math.BigDecimal.ZERO;
   int missingQuotes=0;
