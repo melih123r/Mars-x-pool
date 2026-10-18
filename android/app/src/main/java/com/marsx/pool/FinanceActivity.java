@@ -115,7 +115,7 @@ public final class FinanceActivity extends Activity{
      for(int idx=0;idx<paperOrders.size();idx++)if(!"PENDING".equals(paperOrders.get(idx).status)){removable=idx;break;}
      if(removable<0){qty.setError("En fazla 200 açık demo emri; önce bekleyen emri iptal et");return;}
     }
-    if("SELL".equals(direction)&&paperHoldings.getOrDefault(sym,java.math.BigDecimal.ZERO).compareTo(units)<0){qty.setError("Satış miktarı eldeki demo pozisyonunu aşamaz.");return;}if("BUY".equals(direction)&&paperCash.compareTo(units.multiply(px))<0){qty.setError("Demo nakit bakiyesi yetersiz.");return;}\n    if(kind.startsWith("MARKET")){
+    if("SELL".equals(direction)&&paperHoldings.getOrDefault(sym,java.math.BigDecimal.ZERO).compareTo(units.add(paperOrders.stream().filter(o->"PENDING".equals(o.status)&&"SELL".equals(o.side)&&sym.equals(o.symbol)).map(o->o.qty).reduce(java.math.BigDecimal.ZERO,java.math.BigDecimal::add)))<0){qty.setError("Satış miktarı eldeki demo pozisyonunu aşamaz.");return;}if("BUY".equals(direction)&&paperCash.compareTo(units.multiply(px))<0){qty.setError("Demo nakit bakiyesi yetersiz.");return;}\n    if(kind.startsWith("MARKET")){
      // Market fills must never use an arbitrary user-entered price.
      // A validated quote-based fill is required before MARKET orders can be enabled.
      price.setError("MARKET emirleri güvenli fiyat doğrulaması tamamlanana kadar kapalı. LIMIT seçin.");return;
