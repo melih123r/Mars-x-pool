@@ -76,3 +76,30 @@ test("sends only allowlisted worker ID, never arbitrary worker metadata", async 
 test("rejects API base with path to avoid route confusion", () => {
   assert.throws(() => createNetworkBridge({ ...base, apiBase: "https://example.com/private", hasConsent: () => true }), /HTTPS/);
 });
+
+test("asynchronous consent denial never sends telemetry", async () => {
+  let calls = 0;
+  const bridge = createNetworkBridge({ ...base, hasConsent: async () => false,
+    fetchImpl: async () => { calls++; throw Error("unexpected network"); } });
+  assert.deepEqual(await bridge.heartbeat({ workerId: "abc" }), { ok: false, reason: "consent_required" });
+  assert.equal(calls, 0);
+});
+test("consent callback errors fail closed before and after session lookup", async () => {
+  for (const failOn of [1, 2]) {
+    let consentCalls = 0, networkCalls = 0;
+    const bridge = createNetworkBridge({ ...base, hasConsent: async () => {
+      if (++consentCalls === failOn) throw Error("consent provider unavailable");
+      return true;
+    }, fetchImpl: async () => { networkCalls++; throw Error("unexpected network"); } });
+    assert.deepEqual(await bridge.register({ workerId: "abc" }), { ok: false, reason: "consent_required" });
+    assert.equal(networkCalls, 0);
+  }
+});
+test("session lookup rejection fails closed without leaking error", async () => {
+  let networkCalls = 0;
+  const bridge = createNetworkBridge({ ...base, hasConsent: async () => true,
+    getSession: async () => { throw Error("sensitive credential provider failure"); },
+    fetchImpl: async () => { networkCalls++; throw Error("unexpected network"); } });
+  assert.deepEqual(await bridge.register({ workerId: "abc" }), { ok: false, reason: "license_required" });
+  assert.equal(networkCalls, 0);
+});
