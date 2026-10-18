@@ -62,4 +62,13 @@ public class FinancePaperOrdersTest {
             new FinancePaperOrders.Order("BTC-USD", null,
                 FinancePaperOrders.Type.MARKET, 1, 0, "test-1"), 100).status);
     }
+
+    @Test public void supportsCurrentForexAndSingleLetterSymbols() {
+        assertEquals(FinancePaperOrders.Status.FILLED, FinancePaperOrders.evaluate(
+            new FinancePaperOrders.Order("FX:EUR/USD", FinancePaperOrders.Side.BUY,
+                FinancePaperOrders.Type.MARKET, 1, 0, "fx-1"), 1.08).status);
+        assertEquals(FinancePaperOrders.Status.FILLED, FinancePaperOrders.evaluate(
+            new FinancePaperOrders.Order("C", FinancePaperOrders.Side.BUY,
+                FinancePaperOrders.Type.MARKET, 1, 0, "stock-1"), 100).status);
+    }
 }
