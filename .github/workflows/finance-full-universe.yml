@@ -3,6 +3,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
+      - 'android/app/src/main/java/com/marsx/pool/FinanceActivity.java'
       - 'scripts/market_universe_validation.py'
       - '.github/workflows/finance-full-universe.yml'
 jobs:
