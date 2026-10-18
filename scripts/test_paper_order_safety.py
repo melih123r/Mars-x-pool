@@ -34,6 +34,8 @@ require("do not fill unfinished or future candles", "completedCandleEnd>System.c
 require("reject invalid last-close price", "!Double.isFinite(lastClose)||lastClose<=0" in matching)
 require("ignore null pending order entries", 'if(order==null||!"PENDING".equals(order.status)' in matching)
 require("reject invalid pending order quantity", "order.qty==null||order.price==null||order.qty.signum()<=0||order.price.signum()<=0" in matching)
+require("guard pending buy reservations", 'o!=null&&"PENDING".equals(o.status)&&"BUY".equals(o.side)&&o.qty!=null&&o.price!=null' in dialog)
+require("guard pending sell reservations", 'o!=null&&"PENDING".equals(o.status)&&"SELL".equals(o.side)&&sym.equals(o.symbol)&&o.qty!=null' in dialog)
 require("reject invalid persisted cash", "if(paperCash==null||paperCash.signum()<0)return false;" in source)
 require("reject invalid sell cost basis", "if(oldCost==null||oldCost.signum()<0)return false;" in source)
 require("record executed order status", 'order.status="FILLED"' in matching)
