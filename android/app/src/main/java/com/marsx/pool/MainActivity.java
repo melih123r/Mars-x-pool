@@ -185,6 +185,12 @@ public class MainActivity extends Activity {
         addText(financeCard, "Partner-backed market conversion preview. Read-only beta; trading and withdrawals are locked.", 14);
         button(financeCard, "Open Finance", view -> startActivity(new Intent(this, FinanceActivity.class)));
 
+        LinearLayout commandCard = card(root);
+        addText(commandCard, "MARS-X Telegram Command Center", 18);
+        addText(commandCard, "Read-only status. Backend commands require a separately configured and authorized Telegram service.", 14);
+        button(commandCard, "Open Command Center", view ->
+                startActivity(new Intent(this, TelegramStatusActivity.class)));
+
         LinearLayout vrscCard = card(root);
         addText(vrscCard, "MARS-X", 18);
         addText(vrscCard, "MARS-X kazanç motoru • Beta", 14);
