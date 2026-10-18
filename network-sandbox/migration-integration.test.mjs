@@ -326,3 +326,60 @@ test('consent revocation persists one append-only event for every active session
     await client.end();
   }
 });
+
+
+test('terminal session event links preserve close and revocation winners', { skip: !databaseUrl }, async () => {
+  const client = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  await client.connect();
+  try {
+    await client.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE');
+    for (const name of [
+      '001_mock_device_points.sql',
+      '002_session_consent_lifecycle.sql',
+      '003_atomic_consent_transition.sql',
+      '004_atomic_receipt_api.sql',
+      '005_session_receipt_binding.sql',
+      '006_atomic_session_close.sql',
+      '007_revocation_session_events.sql',
+      '008_terminal_session_event_link.sql'
+    ]) {
+      await client.query(await readFile(new URL(`./sql/${name}`, import.meta.url), 'utf8'));
+    }
+    for (const suffix of ['close', 'revoke']) {
+      await client.query(
+        `INSERT INTO marsx_network_demo.mock_devices
+         (mock_device_id,device_ref_hash,consent_status,consent_version,consented_at)
+         VALUES ($1,$2,'GRANTED','v1',now())`,
+        [`device_terminal_${suffix}`, (suffix === 'close' ? '8' : '9').repeat(64)]
+      );
+      await client.query(
+        `INSERT INTO marsx_network_demo.mock_sessions
+         (session_id,mock_device_id,idempotency_key,consent_version,started_at)
+         VALUES ($1,$2,$3,'v1',now())`,
+        [`session_terminal_${suffix}`, `device_terminal_${suffix}`, `session-terminal-${suffix}`]
+      );
+    }
+    await client.query(
+      'SELECT * FROM marsx_network_demo.close_mock_session($1,$2,$3,$4)',
+      ['session-event-terminal-close', 'session_terminal_close', 'terminal-close-key-01', new Date().toISOString()]
+    );
+    await client.query(
+      'SELECT * FROM marsx_network_demo.record_consent_transition($1,$2,$3,$4,$5,$6)',
+      ['consent-terminal-revoke', 'device_terminal_revoke', 'terminal-revoke-key-01', 'REVOKED', 'v1', new Date().toISOString()]
+    );
+    const links = await client.query(
+      `SELECT s.session_id,s.session_status,e.event_kind
+         FROM marsx_network_demo.mock_sessions s
+         JOIN marsx_network_demo.session_events e
+           ON e.session_event_id=s.terminal_session_event_id
+        ORDER BY s.session_id`
+    );
+    assert.deepEqual(links.rows, [
+      { session_id: 'session_terminal_close', session_status: 'CLOSED', event_kind: 'CLOSED' },
+      { session_id: 'session_terminal_revoke', session_status: 'REVOKED', event_kind: 'REVOKED' }
+    ]);
+  } finally {
+    await client.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE').catch(() => {});
+    await client.end();
+  }
+});
