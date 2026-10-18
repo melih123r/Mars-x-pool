@@ -361,14 +361,22 @@ public class MainActivity extends Activity {
         homePage.setVisibility(selected == 0 ? View.VISIBLE : View.GONE);
         earningsPage.setVisibility(selected == 1 ? View.VISIBLE : View.GONE);
         accountPage.setVisibility(selected == 2 ? View.VISIBLE : View.GONE);
-        int active = Color.rgb(255, 112, 18);
+        int active = PAGE_ACCENTS[selected];
         int inactive = Color.rgb(155, 158, 168);
+        currentPageAccent = active;
+        applyPageAccent(selected == 0 ? homePage : selected == 1 ? earningsPage : accountPage, active);
         homeTab.setSelected(selected == 0);
         earningsTab.setSelected(selected == 1);
         accountTab.setSelected(selected == 2);
         homeTab.setTextColor(selected == 0 ? active : inactive);
         earningsTab.setTextColor(selected == 1 ? active : inactive);
         accountTab.setTextColor(selected == 2 ? active : inactive);
+        homeTab.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                selected == 0 ? Color.rgb(48, 31, 19) : Color.rgb(20, 21, 26)));
+        earningsTab.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                selected == 1 ? Color.rgb(14, 52, 47) : Color.rgb(20, 21, 26)));
+        accountTab.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                selected == 2 ? Color.rgb(43, 31, 66) : Color.rgb(20, 21, 26)));
     }
 
     private void beginGoogleSignIn(boolean silent) {
