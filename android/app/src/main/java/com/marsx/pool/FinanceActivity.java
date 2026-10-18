@@ -69,7 +69,10 @@ public final class FinanceActivity extends Activity{
   final EditText rate=new EditText(this);rate.setHint("Sanal kur: 1 kaynak = ? hedef");rate.setInputType(2|8192);form.addView(rate);
   form.addView(t("Kur elle girilir; canlı veya doğrulanmış fiyat değildir. Demo komisyonu %0,1.",12,MUTED));
   final TextView feedback=t("Henüz demo işlem yapılmadı.",13,Color.WHITE);form.addView(feedback);
-  final AlertDialog dialog=new AlertDialog.Builder(this).setTitle("MARS-X • Demo dönüştür").setView(form).setNegativeButton("Kapat",null).create();
+  final ScrollView conversionScroll=new ScrollView(this);
+  conversionScroll.setFillViewport(false);
+  conversionScroll.addView(form);
+  final AlertDialog dialog=new AlertDialog.Builder(this).setTitle("MARS-X • Demo dönüştür").setView(conversionScroll).setNegativeButton("Kapat",null).create();
   final Button execute=new Button(this);execute.setText("Sanal dönüşüm yap");form.addView(execute);
   execute.setOnClickListener(v->{
    java.util.Map<String,java.math.BigDecimal> before=ledger.snapshot();
