@@ -79,6 +79,27 @@ public class MainActivity extends Activity {
     private Button earningsTab;
     private Button accountTab;
     private static final int MARS_ORANGE = Color.rgb(255, 112, 18);
+    // Page-specific reference accents; dark surfaces and readable typography remain shared.
+    private static final int[] PAGE_ACCENTS = {
+            Color.rgb(255, 112, 18), // Home: Mars orange
+            Color.rgb(34, 197, 170), // Earnings: teal
+            Color.rgb(159, 123, 255) // Account: violet
+    };
+    private int currentPageAccent = PAGE_ACCENTS[0];
+    private void applyPageAccent(View root, int color) {
+        if (root instanceof android.view.ViewGroup) {
+            android.view.ViewGroup group = (android.view.ViewGroup) root;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                View child = group.getChildAt(i);
+                Object tag = child.getTag();
+                if ("page-accent".equals(tag) && child instanceof TextView) {
+                    ((TextView) child).setTextColor(color);
+                }
+                applyPageAccent(child, color);
+            }
+        }
+    }
+
     private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
     private void styleInput(EditText input) {
         input.setTextColor(MARS_TEXT);
@@ -155,6 +176,9 @@ public class MainActivity extends Activity {
     private View buildHomePage() {
         LinearLayout root = pageRoot();
         addTitle(root, "MARS-X");
+        TextView homeAccent = addText(root, "ANA SAYFA  •  MARS TURUNCUSU", 12);
+        homeAccent.setTag("page-accent");
+        homeAccent.setTextColor(PAGE_ACCENTS[0]);
         TextView hero = addText(root, "Mine the Future • Build on Mars", 15);
         hero.setTextColor(MARS_MUTED);
 
@@ -176,6 +200,12 @@ public class MainActivity extends Activity {
         button(vrscCard, "BAŞLAT", view ->
                 startActivity(new Intent(this, VrscPoolActivity.class)));
 
+        LinearLayout financeDemoCard = card(root);
+        addText(financeDemoCard, "MARS-X Finance Demo", 18);
+        addText(financeDemoCard, "Örnek hisse grafiği • gerçek emir ve para transferi kapalı", 13);
+        button(financeDemoCard, "DEMO GRAFİĞİ AÇ", view ->
+                startActivity(new Intent(this, LemonDemoActivity.class)));
+
         LinearLayout deviceCard = card(root);
         addText(deviceCard, getString(R.string.device_title), 14);
         String worker = prefs.getString("worker_id", "");
@@ -190,6 +220,9 @@ public class MainActivity extends Activity {
     private View buildEarningsPage() {
         LinearLayout root = pageRoot();
         addTitle(root, "Kazançlar");
+        TextView earningsAccent = addText(root, "KAZANÇLAR  •  TURKUAZ", 12);
+        earningsAccent.setTag("page-accent");
+        earningsAccent.setTextColor(PAGE_ACCENTS[1]);
         addText(root, getString(R.string.sandbox_balance_disclaimer), 13);
 
         LinearLayout balanceCard = card(root);
@@ -225,6 +258,9 @@ public class MainActivity extends Activity {
     private View buildAccountPage() {
         LinearLayout root = pageRoot();
         addTitle(root, "MARS-X Hesabım");
+        TextView accountAccent = addText(root, "HESAP  •  MOR", 12);
+        accountAccent.setTag("page-accent");
+        accountAccent.setTextColor(PAGE_ACCENTS[2]);
 
         LinearLayout accountCard = card(root);
         accountStatus = addText(accountCard, getString(R.string.google_signed_out), 16);
@@ -325,14 +361,22 @@ public class MainActivity extends Activity {
         homePage.setVisibility(selected == 0 ? View.VISIBLE : View.GONE);
         earningsPage.setVisibility(selected == 1 ? View.VISIBLE : View.GONE);
         accountPage.setVisibility(selected == 2 ? View.VISIBLE : View.GONE);
-        int active = Color.rgb(255, 112, 18);
+        int active = PAGE_ACCENTS[selected];
         int inactive = Color.rgb(155, 158, 168);
+        currentPageAccent = active;
+        applyPageAccent(selected == 0 ? homePage : selected == 1 ? earningsPage : accountPage, active);
         homeTab.setSelected(selected == 0);
         earningsTab.setSelected(selected == 1);
         accountTab.setSelected(selected == 2);
         homeTab.setTextColor(selected == 0 ? active : inactive);
         earningsTab.setTextColor(selected == 1 ? active : inactive);
         accountTab.setTextColor(selected == 2 ? active : inactive);
+        homeTab.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                selected == 0 ? Color.rgb(48, 31, 19) : Color.rgb(20, 21, 26)));
+        earningsTab.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                selected == 1 ? Color.rgb(14, 52, 47) : Color.rgb(20, 21, 26)));
+        accountTab.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                selected == 2 ? Color.rgb(43, 31, 66) : Color.rgb(20, 21, 26)));
     }
 
     private void beginGoogleSignIn(boolean silent) {
