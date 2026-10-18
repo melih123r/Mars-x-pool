@@ -47,9 +47,9 @@ public final class FinanceActivity extends Activity{
     java.math.BigDecimal rateValue=new java.math.BigDecimal(rate.getText().toString().trim());
     String fromAsset=source.getSelectedItem().toString(),toAsset=target.getSelectedItem().toString();
     java.math.BigDecimal received=ledger.convert(fromAsset,toAsset,amountValue,rateValue,new java.math.BigDecimal("0.001"));
-    StringBuilder b=new StringBuilder("SANAL BAKİYELER\\n");
+    StringBuilder b=new StringBuilder("SANAL BAKİYELER\n");
     for(String asset:assets)b.append(asset).append(": ").append(ledger.balance(asset).stripTrailingZeros().toPlainString()).append("  ");
-    balances.setText(b.toString().replace("\\\\n","\\n"));
+    balances.setText(b.toString());
     feedback.setText("DEMO: "+amountValue.toPlainString()+" "+fromAsset+" → "+received.stripTrailingZeros().toPlainString()+" "+toAsset);
    }catch(Exception e){feedback.setText("Demo işlem reddedildi: geçersiz miktar/kur, aynı varlık veya yetersiz sanal bakiye.");}
   });
