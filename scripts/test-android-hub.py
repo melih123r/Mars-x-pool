@@ -17,6 +17,13 @@ class AndroidHubTests(unittest.TestCase):
         cls.manifest = ET.parse(MANIFEST).getroot()
         cls.activities = cls.manifest.findall("./application/activity")
 
+    def test_launcher_brand_and_version_are_consistent(self):
+        application = self.manifest.find("application")
+        self.assertEqual("MARS-X Network", application.get(ANDROID + "label"))
+        main = MAIN.read_text(encoding="utf-8")
+        self.assertIn("APP_VERSION = BuildConfig.VERSION_NAME", main)
+        self.assertNotIn('APP_VERSION = "0.9.0-beta"', main)
+
     def test_exactly_one_launcher_and_it_is_network(self):
         launchers = []
         for activity in self.activities:
