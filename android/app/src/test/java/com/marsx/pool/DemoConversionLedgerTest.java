@@ -126,4 +126,38 @@ public class DemoConversionLedgerTest {
         assertEquals(0, ledger.balance("ETH").compareTo(d("0.999")));
     }
 
+    @Test public void snapshotCannotBeMutatedAndDoesNotChangeAfterConversion() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        java.util.Map<String, BigDecimal> saved = ledger.snapshot();
+        try { saved.put("BTC", d("999")); fail("snapshot must be immutable"); }
+        catch (UnsupportedOperationException expected) { }
+        ledger.convert("BTC", "ETH", d("0.5"), d("10"), BigDecimal.ZERO);
+        assertEquals(0, saved.get("BTC").compareTo(d("1")));
+        assertEquals(0, ledger.balance("BTC").compareTo(d("0.5")));
+    }
+
+    @Test public void restoreRejectsInvalidBalancesWithoutPartialMutation() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        java.util.Map<String, BigDecimal> corrupt = new java.util.HashMap<>();
+        corrupt.put("ETH", d("5"));
+        corrupt.put("USDT", d("-1"));
+        try { ledger.restore(corrupt); fail("negative balance"); }
+        catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("BTC").compareTo(d("1")));
+        assertEquals(0, ledger.balance("ETH").signum());
+    }
+
+    @Test public void restoreNormalizesAndReplacesEntireSnapshot() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        java.util.Map<String, BigDecimal> saved = new java.util.HashMap<>();
+        saved.put(" eth ", d("2.5"));
+        ledger.restore(saved);
+        assertEquals(0, ledger.balance("ETH").compareTo(d("2.5")));
+        assertEquals(0, ledger.balance("BTC").signum());
+        assertEquals(1, ledger.snapshot().size());
+    }
+
 }
