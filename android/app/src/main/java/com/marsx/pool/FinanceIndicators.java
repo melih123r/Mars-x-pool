@@ -154,4 +154,29 @@ public final class FinanceIndicators {
         return result;
     }
 
+    /** Session-reset VWAP. Session IDs must be non-decreasing (e.g. UTC trading day).
+     * Returns NaN until a session has positive cumulative volume.
+     */
+    public static double[] sessionVwap(double[] highs, double[] lows, double[] closes,
+                                       double[] volumes, long[] sessions) {
+        if (sessions == null || closes == null || sessions.length != closes.length)
+            throw new IllegalArgumentException("Invalid VWAP sessions");
+        // Reuse the validated cumulative implementation for OHLC and volume checks.
+        vwap(highs, lows, closes, volumes);
+        double[] out = new double[closes.length];
+        double weighted = 0, total = 0;
+        for (int i = 0; i < closes.length; i++) {
+            if (i > 0 && sessions[i] < sessions[i - 1])
+                throw new IllegalArgumentException("Sessions must be ordered");
+            if (i == 0 || sessions[i] != sessions[i - 1]) {
+                weighted = 0;
+                total = 0;
+            }
+            weighted += (highs[i] + lows[i] + closes[i]) / 3.0 * volumes[i];
+            total += volumes[i];
+            out[i] = total == 0 ? Double.NaN : weighted / total;
+        }
+        return out;
+    }
+
 }
