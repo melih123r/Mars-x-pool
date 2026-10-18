@@ -85,4 +85,22 @@ public class DemoConversionLedgerTest {
         assertEquals(0, ledger.balance("BTC").compareTo(d("0.5")));
         assertEquals(0, ledger.balance("ETH").compareTo(d("5")));
     }
+
+    @Test public void restoredBalancesContinueFromLastConversion() {
+        DemoConversionLedger beforeRestart = new DemoConversionLedger();
+        beforeRestart.setBalance("BTC", d("1"));
+        beforeRestart.setBalance("ETH", d("10"));
+        beforeRestart.convert("BTC", "ETH", d("0.25"), d("20"), d("0.001"));
+        // Mirrors FinanceActivity's SharedPreferences decimal-string round trip.
+        String btcSaved = beforeRestart.balance("BTC").toPlainString();
+        String ethSaved = beforeRestart.balance("ETH").toPlainString();
+        DemoConversionLedger afterRestart = new DemoConversionLedger();
+        afterRestart.setBalance("BTC", new BigDecimal(btcSaved));
+        afterRestart.setBalance("ETH", new BigDecimal(ethSaved));
+        assertEquals(0, afterRestart.balance("BTC").compareTo(d("0.75")));
+        assertEquals(0, afterRestart.balance("ETH").compareTo(d("14.995")));
+        afterRestart.convert("ETH", "BTC", d("1"), d("0.05"), BigDecimal.ZERO);
+        assertEquals(0, afterRestart.balance("BTC").compareTo(d("0.80")));
+        assertEquals(0, afterRestart.balance("ETH").compareTo(d("13.995")));
+    }
 }
