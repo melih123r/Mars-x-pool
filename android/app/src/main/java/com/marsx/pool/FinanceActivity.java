@@ -475,7 +475,7 @@ public final class FinanceActivity extends Activity{
      return;
     }
     if(("STOP_LOSS".equals(kind)||"TAKE_PROFIT".equals(kind))){
-     if(!"SELL".equals(direction)){side.setError("Koruma emirleri yalnızca mevcut uzun demo pozisyonlarını satmak için desteklenir.");return;}
+     if(!"SELL".equals(direction)){price.setError("Koruma emirleri yalnızca mevcut uzun demo pozisyonlarını satmak için desteklenir.");return;}
      java.math.BigDecimal reference=paperLastClose.get(sym);
      if(reference==null||reference.signum()<=0){price.setError("Koruma emri için doğrulanmış son piyasa kapanışı gerekli.");return;}
      int relation=px.compareTo(reference);
