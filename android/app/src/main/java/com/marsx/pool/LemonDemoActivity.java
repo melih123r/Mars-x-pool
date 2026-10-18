@@ -50,7 +50,7 @@ public final class LemonDemoActivity extends Activity {
     chart = new ChartView();
     root.addView(chart,new LinearLayout.LayoutParams(-1,420));
     TextView status = new TextView(this);
-    status.setText("Lemon API: bağlantı doğrulanmadı\\nAlış / Satış: kapalı\\nGrafik: yerel örnek seri");
+    status.setText("Lemon API: bağlantı doğrulanmadı\nAlış / Satış: kapalı\nGrafik: yerel örnek seri");
     status.setTextColor(Color.LTGRAY);status.setPadding(0,22,0,0);
     root.addView(status);
     setContentView(root);
