@@ -80,6 +80,16 @@ class AndroidHubTests(unittest.TestCase):
         self.assertNotIn("setRequestMethod(\"POST\")", discovery)
         self.assertIn("discoverMarkets.setOnClickListener(v->discoverCoinbaseProducts())", code)
 
+    def test_coinbase_market_trades_are_public_read_only_and_scoped(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        section = code.split("void inspectCoinbaseMarketTrades(){", 1)[1].split("void inspectCoinbaseOrderBook(){", 1)[0]
+        self.assertIn("/api/v3/brokerage/market/products/", section)
+        self.assertIn("/ticker?limit=20", section)
+        self.assertIn('product.matches("[A-Z0-9]{2,20}-[A-Z0-9]{2,12}")', section)
+        self.assertIn('payload.optJSONArray("trades")', section)
+        self.assertNotIn("submitOrder(", section)
+        self.assertNotIn("createOrder(", section)
+
     def test_coinbase_orderbook_is_read_only_and_uses_decimal_spread(self):
         code = FINANCE.read_text(encoding="utf-8")
         section = code.split("void inspectCoinbaseOrderBook(){", 1)[1].split("void inspectCoinbaseCandles(){", 1)[0]
