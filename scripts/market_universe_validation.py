@@ -136,6 +136,17 @@ def main():
     workers = max(1, min(4, int(os.getenv("MARKET_API_WORKERS", "2"))))
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
         results = list(pool.map(probe, symbols))
+    # Keep the machine-readable manifest in sync with actual probe results.
+    # PASS means valid candles at probe time, not an executable/tradable market.
+    result_by_symbol = {symbol: (status, detail) for _, symbol, status, detail in results}
+    manifest_path = Path("reports/market-catalog-manifest.json")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    for instrument in manifest["instruments"]:
+        status, detail = result_by_symbol[instrument["symbol"]]
+        instrument["validation_status"] = status
+        instrument["validation_detail"] = detail
+        instrument["tradable"] = False  # Read-only validation cannot authorize real trading.
+    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\\n", encoding="utf-8")
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# MARS-X full Android symbol-universe API validation", "",
              "Catalog count: " + str(len(symbols)) + " unique symbols. Inventory: " + json.dumps(category_counts, sort_keys=True), "",
