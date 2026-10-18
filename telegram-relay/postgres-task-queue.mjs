@@ -55,6 +55,27 @@ export class PostgresTaskQueue {
     );
     return result.rows[0] || null;
   }
+  async appendCommandAudit({ commandId, eventKey, eventKind, laneNumber, actorRefHash = null, metadata = {} }) {
+    if (typeof commandId !== 'string' || !/^telegram-\d+-(chat|task)$/.test(commandId)) throw new Error('invalid_command_id');
+    if (typeof eventKey !== 'string' || !/^[a-zA-Z0-9_-]{16,128}$/.test(eventKey)) throw new Error('invalid_audit_event_key');
+    if (!['RECEIVED','CLAIMED','RETRIED','COMPLETED','FAILED','BLOCKED'].includes(eventKind)) throw new Error('invalid_audit_event_kind');
+    if (!Number.isInteger(laneNumber) || laneNumber < 1 || laneNumber > 10) throw new Error('invalid_audit_lane');
+    if (actorRefHash !== null && (typeof actorRefHash !== 'string' || !/^[a-f0-9]{64}$/.test(actorRefHash)))
+      throw new Error('invalid_actor_ref_hash');
+    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) throw new Error('invalid_audit_metadata');
+    let encoded;
+    try { encoded = JSON.stringify(metadata); } catch { throw new Error('invalid_audit_metadata'); }
+    if (Buffer.byteLength(encoded, 'utf8') > 16000) throw new Error('audit_metadata_too_large');
+    const result = await this.pool.query(
+      `INSERT INTO marsx_telegram.command_audit_log
+         (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,metadata)
+       VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,$3,$4,$5,$6)
+       ON CONFLICT (command_id,event_key) DO NOTHING
+       RETURNING audit_event_id`,
+      [commandId, eventKey, eventKind, laneNumber, actorRefHash, metadata]
+    );
+    return { recorded: result.rowCount === 1 };
+  }
   async claimNextCommand(workerId, leaseSeconds = 60) {
     if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
     if (!Number.isSafeInteger(leaseSeconds) || leaseSeconds < 15 || leaseSeconds > 300) throw new Error('invalid_lease');
