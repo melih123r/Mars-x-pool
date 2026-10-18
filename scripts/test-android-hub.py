@@ -76,6 +76,14 @@ class AndroidHubTests(unittest.TestCase):
         self.assertIn("parseDemoDecimal(qty.getText().toString())", dialog)
         self.assertIn("parseDemoDecimal(rate.getText().toString())", dialog)
 
+    def test_finance_theme_buttons_have_accessible_touch_targets(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        theme = code[code.index("void themePicker()"):code.index("void themePicker()")+850]
+        self.assertIn("b.setMinHeight(56)", theme)
+        self.assertIn("b.setTextSize(12)", theme)
+        self.assertIn("56*getResources().getDisplayMetrics().density", theme)
+        self.assertNotIn("LinearLayout.LayoutParams(0,46,1)", theme)
+
     def test_conversion_dialog_is_scrollable_on_small_screens(self):
         code = FINANCE.read_text(encoding="utf-8")
         start = code.index("void demoConversionDialog()")
