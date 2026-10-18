@@ -449,7 +449,7 @@ public final class FinanceActivity extends Activity{
   if(preferredSymbol==null&&marketAsset.getSelectedItem()!=null)preferredSymbol=marketAsset.getSelectedItem().toString();
   if(preferredSymbol!=null){boolean supported=false;for(int i=0;i<symbol.getCount();i++)if(preferredSymbol.equals(symbol.getItemAtPosition(i).toString())){symbol.setSelection(i);supported=true;break;}if(!supported){new AlertDialog.Builder(this).setTitle("Demo emir desteklenmiyor").setMessage(preferredSymbol+" için demo emir desteği henüz yok. Yanlış sembole emir açılmasını önlemek için işlem durduruldu.").setPositiveButton("Tamam",null).show();return;}}
   Spinner side=spin(new String[]{"BUY","SELL"},0);
-  Spinner type=spin(new String[]{"LIMIT","MARKET (devre dışı)"},0);
+  Spinner type=spin(new String[]{"LIMIT","MARKET (devre dışı)","STOP_LOSS (devre dışı)","TAKE_PROFIT (devre dışı)"},0);
   EditText qty=new EditText(this);qty.setHint("Adet");qty.setInputType(2|8192);
   EditText price=new EditText(this);price.setHint("Demo fiyat (USD)");price.setInputType(2|8192);if(Float.isFinite(preferredPrice)&&preferredPrice>0){price.setText(new java.math.BigDecimal(Float.toString(preferredPrice)).setScale(6,java.math.RoundingMode.HALF_UP).stripTrailingZeros().toPlainString());}
   form.addView(label("Sembol"));form.addView(symbol);form.addView(label("Yön"));form.addView(side);
@@ -470,6 +470,10 @@ public final class FinanceActivity extends Activity{
      if(removable<0){qty.setError("En fazla 200 açık demo emri; önce bekleyen emri iptal et");return;}
     }
     if("SELL".equals(direction)&&paperHoldings.getOrDefault(sym,java.math.BigDecimal.ZERO).compareTo(units.add(paperOrders.stream().filter(o->"PENDING".equals(o.status)&&"SELL".equals(o.side)&&sym.equals(o.symbol)).map(o->o.qty).reduce(java.math.BigDecimal.ZERO,java.math.BigDecimal::add)))<0){qty.setError("Satış miktarı eldeki demo pozisyonunu aşamaz.");return;}if("BUY".equals(direction)&&paperCash.compareTo(units.multiply(px).add(paperOrders.stream().filter(o->"PENDING".equals(o.status)&&"BUY".equals(o.side)).map(o->o.qty.multiply(o.price)).reduce(java.math.BigDecimal.ZERO,java.math.BigDecimal::add)))<0){qty.setError("Bekleyen alış emirleri dahil demo nakit bakiyesi yetersiz.");return;}
+    if(!"LIMIT".equals(kind)){
+     price.setError("Yalnızca LIMIT demo emirleri etkin. MARKET / STOP_LOSS / TAKE_PROFIT güvenli yürütme ve tetikleme testleri tamamlanana kadar kapalı.");
+     return;
+    }
     if(kind.startsWith("MARKET")){
      // Market fills must never use an arbitrary user-entered price.
      // A validated quote-based fill is required before MARKET orders can be enabled.
