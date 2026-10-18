@@ -1,0 +1,26 @@
+name: Android Hub Regression
+on:
+  push:
+    paths:
+      - 'android/app/src/main/AndroidManifest.xml'
+      - 'android/app/src/main/java/com/marsx/pool/MainActivity.java'
+      - 'android/app/src/main/java/com/marsx/pool/TelegramStatusActivity.java'
+      - 'scripts/test-android-hub.py'
+      - '.github/workflows/android-hub-regression.yml'
+  pull_request:
+    paths:
+      - 'android/app/src/main/AndroidManifest.xml'
+      - 'android/app/src/main/java/com/marsx/pool/MainActivity.java'
+      - 'android/app/src/main/java/com/marsx/pool/TelegramStatusActivity.java'
+      - 'scripts/test-android-hub.py'
+      - '.github/workflows/android-hub-regression.yml'
+jobs:
+  hub-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify single-APK navigation contract
+        run: python3 scripts/test-android-hub.py
