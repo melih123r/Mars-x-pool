@@ -175,7 +175,7 @@ public final class FinanceActivity extends Activity{
    while(keys.hasNext()){String key=keys.next();java.math.BigDecimal qty=new java.math.BigDecimal(h.getString(key)),cost=new java.math.BigDecimal(c.getString(key));if(qty.signum()<0||cost.signum()<0)return;holdings.put(key,qty);costs.put(key,cost);}
    JSONArray arr=data.getJSONArray("orders");if(arr.length()>200)return;
    java.util.ArrayList<PaperOrder> restored=new java.util.ArrayList<>();int highest=0;
-   for(int i=0;i<arr.length();i++){JSONObject item=arr.getJSONObject(i);int id=item.getInt("id");if(id<=0)return;String status=item.getString("status");if(!"PENDING".equals(status)&&!"FILLED".equals(status)&&!"CANCELLED".equals(status))return;
+   for(int i=0;i<arr.length();i++){JSONObject item=arr.getJSONObject(i);int id=item.getInt("id");if(id<=0)return;String status=item.getString("status");if(!"PENDING".equals(status)&&!"FILLED".equals(status)&&!"CANCELLED".equals(status)&&!"REJECTED".equals(status))return;
     java.math.BigDecimal qty=new java.math.BigDecimal(item.getString("qty")),price=new java.math.BigDecimal(item.getString("price"));if(qty.signum()<=0||price.signum()<=0)return;
     PaperOrder order=new PaperOrder(id,item.getString("symbol"),item.getString("side"),item.getString("type"),qty,price,status,item.optLong("createdAt",0L));restored.add(order);highest=Math.max(highest,id);
    }
@@ -184,9 +184,9 @@ public final class FinanceActivity extends Activity{
  }
  void paperDashboard(){
   StringBuilder out=new StringBuilder("DEMO • yerel cihazda kayıtlı • başlangıç 100.000 USD\n");
-  int pendingCount=0,filledCount=0,cancelledCount=0;
-  for(PaperOrder o:paperOrders){if("PENDING".equals(o.status))pendingCount++;else if("FILLED".equals(o.status))filledCount++;else if("CANCELLED".equals(o.status))cancelledCount++;}
-  out.append("Açık pozisyonlar: ").append(paperHoldings.values().stream().filter(v->v.signum()>0).count()).append(" • Bekleyen: ").append(pendingCount).append(" • Gerçekleşen: ").append(filledCount).append(" • İptal: ").append(cancelledCount).append("\n");
+  int pendingCount=0,filledCount=0,cancelledCount=0,rejectedCount=0;
+  for(PaperOrder o:paperOrders){if("PENDING".equals(o.status))pendingCount++;else if("FILLED".equals(o.status))filledCount++;else if("CANCELLED".equals(o.status))cancelledCount++;else if("REJECTED".equals(o.status))rejectedCount++;}
+  out.append("Açık pozisyonlar: ").append(paperHoldings.values().stream().filter(v->v.signum()>0).count()).append(" • Bekleyen: ").append(pendingCount).append(" • Gerçekleşen: ").append(filledCount).append(" • İptal: ").append(cancelledCount).append(" • Reddedilen: ").append(rejectedCount).append("\n");
   java.math.BigDecimal markedValue=java.math.BigDecimal.ZERO,unrealized=java.math.BigDecimal.ZERO;
   int missingQuotes=0;
   for(String asset:paperHoldings.keySet()){
