@@ -1,0 +1,27 @@
+name: Telegram Outbox Regression
+on:
+  push:
+    paths:
+      - 'telegram-relay/**'
+      - '.github/workflows/telegram-outbox-regression.yml'
+  pull_request:
+    paths:
+      - 'telegram-relay/**'
+      - '.github/workflows/telegram-outbox-regression.yml'
+permissions:
+  contents: read
+jobs:
+  outbox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check outbox module syntax
+        run: |
+          node --check telegram-relay/outbox-flush.mjs
+          node --check telegram-relay/outbox-flush.test.mjs
+      - name: Run atomic outbox delivery regression tests
+        run: node --test telegram-relay/outbox-flush.test.mjs
