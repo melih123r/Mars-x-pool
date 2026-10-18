@@ -395,7 +395,7 @@ export class PostgresTaskQueue {
          RETURNING t.task_id,t.update_id,t.status`,
         [limit]
       );
-      await client.query(
+      const recoveredCommands = await client.query(
         `WITH expired_commands AS (
            SELECT command_id FROM marsx_telegram.command_inbox
            WHERE status='claimed' AND lease_until <= now()
@@ -405,9 +405,26 @@ export class PostgresTaskQueue {
          SET status=CASE WHEN attempt_count >= 10 THEN 'failed' ELSE 'pending' END,
              worker_id=NULL,lease_until=NULL,retry_at=now(),
              last_error_code='lease_expired',updated_at=now()
-         FROM expired_commands e WHERE c.command_id=e.command_id`,
+         FROM expired_commands e WHERE c.command_id=e.command_id
+         RETURNING c.command_id,c.status,c.attempt_count`,
         [limit]
       );
+      const recoveryActorRefHash = createHash('sha256')
+        .update('lease_recovery', 'utf8')
+        .digest('hex');
+      for (const row of recoveredCommands.rows) {
+        const eventKey = `lease_expired_attempt_${row.attempt_count}_${recoveryActorRefHash.slice(0, 16)}`;
+        const eventKind = row.status === 'failed' ? 'FAILED' : 'RETRIED';
+        await client.query(
+          `INSERT INTO marsx_telegram.command_audit_log
+             (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,error_code,metadata)
+           VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,$3,$4,$5,$6,$7)
+           ON CONFLICT (command_id,event_key) DO NOTHING`,
+          [row.command_id, eventKey, eventKind, 10, recoveryActorRefHash, 'lease_expired', {
+            attemptCount: row.attempt_count
+          }]
+        );
+      }
       // A crashed worker may have exhausted its retries. Reconcile every affected
       // intake so an otherwise completed ten-lane job still produces a report.
       const updateIds = [...new Set(result.rows.filter(row => row.status === 'failed').map(row => row.update_id))];
