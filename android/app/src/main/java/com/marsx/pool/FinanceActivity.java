@@ -22,16 +22,25 @@ public final class FinanceActivity extends Activity{
   Button q=new Button(this);q.setText("Fiyat Teklifi Al (İşlem Yok)");q.setTextSize(18);q.setTypeface(null,Typeface.BOLD);q.setTextColor(Color.BLACK);q.setBackground(round(ACCENT,18));q.setOnClickListener(v->quote());c.addView(q,mp(16));Button demo=new Button(this);demo.setText("Demo bakiyeleri ve çevrim (Sanal)");demo.setOnClickListener(v->demoConversionDialog());c.addView(demo,mp(8));result=t("Bu ekran önizleme modundadır. Gerçek işlem oluşturulmaz.",14,Color.LTGRAY);c.addView(result);
  }
 
- void demoConversionDialog(){
-  final String[] assets={"BTC","ETH","USDT","SOL","BNB","DOGE"};
-  final DemoConversionLedger ledger=new DemoConversionLedger();
-  // Explicitly separate disposable demo funds from actual balances and quote API.
+ final DemoConversionLedger demoConversionLedger=createDemoConversionLedger();
+ static DemoConversionLedger createDemoConversionLedger(){
+  DemoConversionLedger ledger=new DemoConversionLedger();
   ledger.setBalance("BTC",new java.math.BigDecimal("1"));
   ledger.setBalance("ETH",new java.math.BigDecimal("10"));
   ledger.setBalance("USDT",new java.math.BigDecimal("1000"));
+  return ledger;
+ }
+ String demoBalanceSummary(String[] assets){
+  StringBuilder b=new StringBuilder("SANAL BAKİYELER\\n");
+  for(String asset:assets)b.append(asset).append(": ").append(demoConversionLedger.balance(asset).stripTrailingZeros().toPlainString()).append("  ");
+  return b.toString();
+ }
+ void demoConversionDialog(){
+  final String[] assets={"BTC","ETH","USDT","SOL","BNB","DOGE"};
+  final DemoConversionLedger ledger=demoConversionLedger;
   final LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);form.setPadding(22,8,22,8);
-  form.addView(t("SANAL BAKİYE • Her açılışta sıfırlanır; gerçek cüzdan değildir.",13,ACCENT));
-  final TextView balances=t("BTC: 1 | ETH: 10 | USDT: 1000",13,Color.WHITE);form.addView(balances);
+  form.addView(t("SANAL BAKİYE • Uygulama oturumu boyunca saklanır; gerçek cüzdan değildir.",13,ACCENT));
+  final TextView balances=t(demoBalanceSummary(assets),13,Color.WHITE);form.addView(balances);
   final Spinner source=spin(assets,0),target=spin(assets,1);
   form.addView(t("Kaynak",12,MUTED));form.addView(source);
   form.addView(t("Hedef",12,MUTED));form.addView(target);
@@ -47,9 +56,7 @@ public final class FinanceActivity extends Activity{
     java.math.BigDecimal rateValue=new java.math.BigDecimal(rate.getText().toString().trim());
     String fromAsset=source.getSelectedItem().toString(),toAsset=target.getSelectedItem().toString();
     java.math.BigDecimal received=ledger.convert(fromAsset,toAsset,amountValue,rateValue,new java.math.BigDecimal("0.001"));
-    StringBuilder b=new StringBuilder("SANAL BAKİYELER\n");
-    for(String asset:assets)b.append(asset).append(": ").append(ledger.balance(asset).stripTrailingZeros().toPlainString()).append("  ");
-    balances.setText(b.toString());
+    balances.setText(demoBalanceSummary(assets));
     feedback.setText("DEMO: "+amountValue.toPlainString()+" "+fromAsset+" → "+received.stripTrailingZeros().toPlainString()+" "+toAsset);
    }catch(Exception e){feedback.setText("Demo işlem reddedildi: geçersiz miktar/kur, aynı varlık veya yetersiz sanal bakiye.");}
   });
