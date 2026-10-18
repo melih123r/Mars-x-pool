@@ -486,15 +486,18 @@ public final class FinanceActivity extends Activity{
   java.math.BigDecimal value=qty.multiply(px);
   if(value.compareTo(new java.math.BigDecimal("1000000"))>0)return false;
   if(paperCash==null||paperCash.signum()<0)return false;
-  java.math.BigDecimal held=paperHoldings.containsKey(sym)?paperHoldings.get(sym):java.math.BigDecimal.ZERO;
+  java.math.BigDecimal held=paperHoldings.getOrDefault(sym,java.math.BigDecimal.ZERO);
+  if(held==null||held.signum()<0)return false;
+  java.math.BigDecimal storedCost=paperCost.getOrDefault(sym,java.math.BigDecimal.ZERO);
+  if(storedCost==null||storedCost.signum()<0)return false;
   if(side.equals("BUY")){
    if(paperCash.compareTo(value)<0)return false;
    paperCash=paperCash.subtract(value);
    paperHoldings.put(sym,held.add(qty));
-   paperCost.put(sym,(paperCost.containsKey(sym)?paperCost.get(sym):java.math.BigDecimal.ZERO).add(value));
+   paperCost.put(sym,storedCost.add(value));
   }else{
    if(held.compareTo(qty)<0)return false;
-   java.math.BigDecimal oldCost=paperCost.containsKey(sym)?paperCost.get(sym):java.math.BigDecimal.ZERO;
+   java.math.BigDecimal oldCost=storedCost;
    if(oldCost==null||oldCost.signum()<0)return false;
    java.math.BigDecimal remaining=held.subtract(qty);
    paperCash=paperCash.add(value);paperHoldings.put(sym,remaining);
