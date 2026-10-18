@@ -48,4 +48,18 @@ public class FinancePaperOrdersTest {
         assertEquals(FinancePaperOrders.Status.REJECTED, FinancePaperOrders.evaluate(
             order(FinancePaperOrders.Side.BUY, FinancePaperOrders.Type.MARKET, 1, 0), 0).status);
     }
+
+    @Test public void nullsAndInvalidIdentifiersFailClosed() {
+        assertEquals(FinancePaperOrders.Status.REJECTED,
+            FinancePaperOrders.evaluate(null, 100).status);
+        assertEquals(FinancePaperOrders.Status.REJECTED, FinancePaperOrders.evaluate(
+            new FinancePaperOrders.Order("../BTC", FinancePaperOrders.Side.BUY,
+                FinancePaperOrders.Type.MARKET, 1, 0, "test-1"), 100).status);
+        assertEquals(FinancePaperOrders.Status.REJECTED, FinancePaperOrders.evaluate(
+            new FinancePaperOrders.Order("BTC-USD", FinancePaperOrders.Side.BUY,
+                FinancePaperOrders.Type.MARKET, 1, 0, "bad id"), 100).status);
+        assertEquals(FinancePaperOrders.Status.REJECTED, FinancePaperOrders.evaluate(
+            new FinancePaperOrders.Order("BTC-USD", null,
+                FinancePaperOrders.Type.MARKET, 1, 0, "test-1"), 100).status);
+    }
 }
