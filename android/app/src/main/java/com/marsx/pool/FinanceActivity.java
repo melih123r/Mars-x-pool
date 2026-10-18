@@ -42,11 +42,11 @@ public final class FinanceActivity extends Activity{
    }catch(NumberFormatException ignored){/* Corrupt local demo balance: keep initial demo amount. */}
   }
  }
- void saveDemoConversionBalances(){
+ boolean saveDemoConversionBalances(){
   android.content.SharedPreferences.Editor editor=getPreferences(MODE_PRIVATE).edit();
   for(String asset:DEMO_CONVERSION_ASSETS)
    editor.putString("demo_conversion_balance_"+asset,demoConversionLedger.balance(asset).toPlainString());
-  editor.apply();
+  return editor.commit(); // Do not report a persisted demo conversion before the write succeeds.
  }
  String demoBalanceSummary(String[] assets){
   StringBuilder b=new StringBuilder("SANAL BAKİYELER\n");
@@ -73,8 +73,14 @@ public final class FinanceActivity extends Activity{
     java.math.BigDecimal amountValue=new java.math.BigDecimal(qty.getText().toString().trim());
     java.math.BigDecimal rateValue=new java.math.BigDecimal(rate.getText().toString().trim());
     String fromAsset=source.getSelectedItem().toString(),toAsset=target.getSelectedItem().toString();
+    java.math.BigDecimal sourceBefore=ledger.balance(fromAsset),targetBefore=ledger.balance(toAsset);
     java.math.BigDecimal received=ledger.convert(fromAsset,toAsset,amountValue,rateValue,new java.math.BigDecimal("0.001"));
-    saveDemoConversionBalances();
+    if(!saveDemoConversionBalances()){
+     ledger.setBalance(fromAsset,sourceBefore);
+     ledger.setBalance(toAsset,targetBefore);
+     feedback.setText("Demo işlem kaydedilemedi; sanal bakiyeler değiştirilmedi.");
+     return;
+    }
     balances.setText(demoBalanceSummary(assets));
     if(demoWalletSummary!=null)demoWalletSummary.setText(demoBalanceSummary(DEMO_CONVERSION_ASSETS));
     feedback.setText("DEMO: "+amountValue.toPlainString()+" "+fromAsset+" → "+received.stripTrailingZeros().toPlainString()+" "+toAsset);
