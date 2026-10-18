@@ -56,3 +56,34 @@ test('malformed outbox claim fails closed without sending or acknowledging', asy
     assert.equal(acked, 0);
   }
 });
+
+test('invalid or duplicate outbox event blocks the entire batch', async () => {
+  for (const invalid of [
+    { event_id: 'not-a-number', update_id: 10 },
+    { event_id: 8, update_id: -1 },
+    { event_id: 7, update_id: 11 },
+    { event_id: '9007199254740993', update_id: 10 }
+  ]) {
+    let sends = 0;
+    const queue = {
+      async claimOutbox() { return { token, events: [event, invalid] }; },
+      async getUpdateStatus() { throw Error('unexpected lookup'); },
+      async markClaimedOutboxDelivered() { throw Error('unexpected ack'); }
+    };
+    await assert.rejects(flushOutbox({ queue, token: 'bot-token', chatId: 42,
+      send: async () => { sends++; throw Error('unexpected send'); } }), /outbox_event_invalid/);
+    assert.equal(sends, 0);
+  }
+});
+test('PostgreSQL bigint string IDs are accepted when safely representable', async () => {
+  const acknowledged = [];
+  const queue = {
+    async claimOutbox() { return { token, events: [{ event_id: '7', update_id: '10' }] }; },
+    async getUpdateStatus() { return rows; },
+    async markClaimedOutboxDelivered(id) { acknowledged.push(id); return true; }
+  };
+  const result = await flushOutbox({ queue, token: 'bot-token', chatId: 42,
+    send: async () => ({ ok: true, json: async () => ({ ok: true, result: { message_id: 88 } }) }) });
+  assert.deepEqual(acknowledged, [7]);
+  assert.equal(result[0].delivered, true);
+});
