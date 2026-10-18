@@ -64,6 +64,16 @@ class AndroidHubTests(unittest.TestCase):
         self.assertNotIn("n.setMinHeight(96)", code)
         self.assertNotIn("new LinearLayout.LayoutParams(0,96,1)", code)
 
+    def test_expanded_market_symbols_are_unique(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        symbols_section = code.split('marketAsset=spin(new String[]{', 1)[1].split('},0);', 1)[0]
+        symbols = [entry.strip().strip('"') for entry in symbols_section.split(',')]
+        self.assertEqual(len(symbols), 414)
+        self.assertEqual(len(symbols), len(set(symbols)))
+        self.assertIn("FX:USD/TRY", symbols)
+        self.assertIn("INDEX:BIST100", symbols)
+        self.assertIn("CMD:BRENT", symbols)
+
     def test_market_scanner_label_uses_current_universe_size(self):
         code = FINANCE.read_text(encoding="utf-8")
         self.assertIn('marketScanner.setText("Piyasa tarayıcı • "+marketAsset.getCount()+" sembol")', code)
