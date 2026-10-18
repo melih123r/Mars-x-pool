@@ -18,10 +18,23 @@ CASES = {
 
 def fetch(url):
     req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "Mozilla/5.0 MARS-X-API-Smoke/1.0"})
-    with urllib.request.urlopen(req, timeout=20) as response:
-        if response.status != 200:
-            raise ValueError("HTTP " + str(response.status))
-        return json.load(response)
+    # Retry only transient server/rate-limit failures, with a strict request cap.
+    # A missing/delisted symbol (404) must never be retried.
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=12) as response:
+                if response.status != 200:
+                    raise ValueError("HTTP " + str(response.status))
+                return json.load(response)
+        except urllib.error.HTTPError as exc:
+            if exc.code not in (429, 500, 502, 503, 504) or attempt == 2:
+                raise
+            delay = min(4, 2 ** attempt)
+            time.sleep(delay)
+        except (urllib.error.URLError, TimeoutError):
+            if attempt == 2:
+                raise
+            time.sleep(min(4, 2 ** attempt))
 
 def candles(group, symbol):
     if group == "crypto":
