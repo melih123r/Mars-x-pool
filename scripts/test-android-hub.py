@@ -84,7 +84,7 @@ class AndroidHubTests(unittest.TestCase):
         code = FINANCE.read_text(encoding="utf-8")
         symbols_section = code.split('marketAsset=spin(new String[]{', 1)[1].split('},0);', 1)[0]
         symbols = [entry.strip().strip('"') for entry in symbols_section.split(',')]
-        self.assertEqual(len(symbols), 832)
+        self.assertEqual(len(symbols), 1000)
         self.assertEqual(len(symbols), len(set(symbols)))
         self.assertIn("FX:USD/TRY", symbols)
         self.assertIn("INDEX:BIST100", symbols)
