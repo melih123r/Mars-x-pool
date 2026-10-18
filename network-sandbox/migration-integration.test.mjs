@@ -227,7 +227,7 @@ test('session close is idempotent and blocks later session receipts', { skip: !d
        (session_id,mock_device_id,idempotency_key,consent_version,started_at)
        VALUES ('session_close_0001','device_close_00001','session-close-key-001','v1',now())`
     );
-    const eventTime = new Date().toISOString();
+    const eventTime = (await client.query("SELECT now() + interval '1 second' AS event_time")).rows[0].event_time;
     const args = ['session-event-0001', 'session_close_0001', 'session-close-event-01', eventTime];
     const first = await client.query(
       'SELECT * FROM marsx_network_demo.close_mock_session($1,$2,$3,$4)', args
@@ -291,9 +291,10 @@ test('consent revocation persists one append-only event for every active session
         [sessionId, `session-key-${sessionId}`]
       );
     }
+    const revocationTime = (await client.query("SELECT now() + interval '1 second' AS event_time")).rows[0].event_time;
     const args = [
       'consent-revoke-0001', 'device_revoke_0001', 'consent-revoke-key-01',
-      'REVOKED', 'v1', new Date().toISOString()
+      'REVOKED', 'v1', revocationTime
     ];
     const first = await client.query(
       'SELECT * FROM marsx_network_demo.record_consent_transition($1,$2,$3,$4,$5,$6)', args
