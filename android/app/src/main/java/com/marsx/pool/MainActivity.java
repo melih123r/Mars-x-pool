@@ -201,7 +201,7 @@ public class MainActivity extends Activity {
                 startActivity(new Intent(this, VrscPoolActivity.class)));
 
         LinearLayout lemonCard = card(root);
-        addText(lemonCard, "Lemon Brokerage Demo", 18);
+        addText(lemonCard, "MARS-X Finance Demo", 18);
         addText(lemonCard, "Örnek hisse grafiği • gerçek emir ve para transferi kapalı", 13);
         button(lemonCard, "DEMO GRAFİĞİ AÇ", view ->
                 startActivity(new Intent(this, LemonDemoActivity.class)));
