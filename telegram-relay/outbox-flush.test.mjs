@@ -37,3 +37,22 @@ test('no events does not attempt Telegram sends', async () => {
   };
   assert.deepEqual(await flushOutbox({ queue, token: 'bot-token', chatId: 42 }), []);
 });
+
+test('malformed outbox claim fails closed without sending or acknowledging', async () => {
+  for (const invalidClaim of [null, {}, { token: '', events: [event] }, { token, events: null }]) {
+    let sent = 0;
+    let acked = 0;
+    const queue = {
+      async claimOutbox() { return invalidClaim; },
+      async getUpdateStatus() { throw Error('unexpected status lookup'); },
+      async markClaimedOutboxDelivered() { acked++; return true; }
+    };
+    await assert.rejects(
+      flushOutbox({ queue, token: 'bot-token', chatId: 42,
+        send: async () => { sent++; throw Error('unexpected send'); } }),
+      /outbox_claim_invalid/
+    );
+    assert.equal(sent, 0);
+    assert.equal(acked, 0);
+  }
+});
