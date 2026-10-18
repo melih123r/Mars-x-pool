@@ -155,3 +155,61 @@ test('migration checksums are durable and reject altered replays', { skip: !data
     await client.end();
   }
 });
+
+
+test('ordered ingest advances cursor and stores the event atomically', { skip: !databaseUrl }, async () => {
+  const client = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  await client.connect();
+  try {
+    await client.query('DROP SCHEMA IF EXISTS marsx_finance CASCADE');
+    for (const name of [
+      '001_readonly_broker_ledger.sql',
+      '002_ingest_idempotency.sql',
+      '003_atomic_ingest_api.sql',
+      '004_monotonic_stream_cursor.sql',
+      '005_migration_checksum_registry.sql',
+      '006_ordered_ingest_api.sql'
+    ]) {
+      await client.query(await readFile(new URL(`./sql/${name}`, import.meta.url), 'utf8'));
+    }
+    await client.query(
+      `INSERT INTO marsx_finance.provider_accounts
+       (provider_account_id,provider,account_ref_hash,access_mode,kyc_status,aml_status)
+       VALUES ('acct_ordered_0001','demo_exchange',$1,'READ_ONLY','VERIFIED','CLEAR')`,
+      ['3'.repeat(64)]
+    );
+    const args = [
+      'ingest-ordered-0001', 'acct_ordered_0001', 'QUOTE', 12,
+      'source-ordered-event-0001', '4'.repeat(64), new Date().toISOString()
+    ];
+    const first = await client.query(
+      'SELECT * FROM marsx_finance.record_ordered_ingest_event($1,$2,$3,$4,$5,$6,$7)', args
+    );
+    const retry = await client.query(
+      'SELECT * FROM marsx_finance.record_ordered_ingest_event($1,$2,$3,$4,$5,$6,$7)', args
+    );
+    assert.deepEqual(first.rows[0], {
+      ingest_event_id: args[0], inserted: true, cursor_advanced: true
+    });
+    assert.deepEqual(retry.rows[0], {
+      ingest_event_id: args[0], inserted: false, cursor_advanced: false
+    });
+    await assert.rejects(
+      client.query(
+        'SELECT * FROM marsx_finance.record_ordered_ingest_event($1,$2,$3,$4,$5,$6,$7)',
+        ['ingest-ordered-0002', args[1], args[2], 11, 'source-ordered-event-0002', '5'.repeat(64), new Date().toISOString()]
+      ),
+      /finance_stream_cursor_regression/
+    );
+    const counts = await client.query(
+      `SELECT
+         (SELECT count(*)::integer FROM marsx_finance.ingest_events) AS events,
+         (SELECT last_sequence FROM marsx_finance.stream_cursors
+           WHERE provider_account_id='acct_ordered_0001' AND stream_kind='QUOTE') AS sequence`
+    );
+    assert.deepEqual(counts.rows[0], { events: 1, sequence: '12' });
+  } finally {
+    await client.query('DROP SCHEMA IF EXISTS marsx_finance CASCADE').catch(() => {});
+    await client.end();
+  }
+});
