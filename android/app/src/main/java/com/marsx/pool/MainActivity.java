@@ -79,6 +79,27 @@ public class MainActivity extends Activity {
     private Button earningsTab;
     private Button accountTab;
     private static final int MARS_ORANGE = Color.rgb(255, 112, 18);
+    // Page-specific reference accents; dark surfaces and readable typography remain shared.
+    private static final int[] PAGE_ACCENTS = {
+            Color.rgb(255, 112, 18), // Home: Mars orange
+            Color.rgb(34, 197, 170), // Earnings: teal
+            Color.rgb(159, 123, 255) // Account: violet
+    };
+    private int currentPageAccent = PAGE_ACCENTS[0];
+    private void applyPageAccent(View root, int color) {
+        if (root instanceof android.view.ViewGroup) {
+            android.view.ViewGroup group = (android.view.ViewGroup) root;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                View child = group.getChildAt(i);
+                Object tag = child.getTag();
+                if ("page-accent".equals(tag) && child instanceof TextView) {
+                    ((TextView) child).setTextColor(color);
+                }
+                applyPageAccent(child, color);
+            }
+        }
+    }
+
     private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
     private void styleInput(EditText input) {
         input.setTextColor(MARS_TEXT);
@@ -155,6 +176,9 @@ public class MainActivity extends Activity {
     private View buildHomePage() {
         LinearLayout root = pageRoot();
         addTitle(root, "MARS-X");
+        TextView homeAccent = addText(root, "ANA SAYFA  •  MARS TURUNCUSU", 12);
+        homeAccent.setTag("page-accent");
+        homeAccent.setTextColor(PAGE_ACCENTS[0]);
         TextView hero = addText(root, "Mine the Future • Build on Mars", 15);
         hero.setTextColor(MARS_MUTED);
 
@@ -196,6 +220,9 @@ public class MainActivity extends Activity {
     private View buildEarningsPage() {
         LinearLayout root = pageRoot();
         addTitle(root, "Kazançlar");
+        TextView earningsAccent = addText(root, "KAZANÇLAR  •  TURKUAZ", 12);
+        earningsAccent.setTag("page-accent");
+        earningsAccent.setTextColor(PAGE_ACCENTS[1]);
         addText(root, getString(R.string.sandbox_balance_disclaimer), 13);
 
         LinearLayout balanceCard = card(root);
@@ -231,6 +258,9 @@ public class MainActivity extends Activity {
     private View buildAccountPage() {
         LinearLayout root = pageRoot();
         addTitle(root, "MARS-X Hesabım");
+        TextView accountAccent = addText(root, "HESAP  •  MOR", 12);
+        accountAccent.setTag("page-accent");
+        accountAccent.setTextColor(PAGE_ACCENTS[2]);
 
         LinearLayout accountCard = card(root);
         accountStatus = addText(accountCard, getString(R.string.google_signed_out), 16);
