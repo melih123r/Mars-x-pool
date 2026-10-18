@@ -80,6 +80,16 @@ class AndroidHubTests(unittest.TestCase):
         self.assertNotIn("setRequestMethod(\"POST\")", discovery)
         self.assertIn("discoverMarkets.setOnClickListener(v->discoverCoinbaseProducts())", code)
 
+    def test_coinbase_server_time_health_check_is_read_only(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        section = code.split("void inspectCoinbaseServerTime(){", 1)[1].split("void inspectCoinbaseProductDetails(){", 1)[0]
+        self.assertIn("/api/v3/brokerage/time", section)
+        self.assertIn('payload.optString("epochSeconds","")', section)
+        self.assertIn("roundTripMs", section)
+        self.assertIn("clockSkewSeconds", section)
+        self.assertNotIn("submitOrder(", section)
+        self.assertNotIn("createOrder(", section)
+
     def test_coinbase_product_details_are_read_only_and_identity_checked(self):
         code = FINANCE.read_text(encoding="utf-8")
         section = code.split("void inspectCoinbaseProductDetails(){", 1)[1].split("void inspectCoinbaseMarketTrades(){", 1)[0]
