@@ -230,6 +230,14 @@ public final class FinanceActivity extends Activity{
       String raw=input.getText().toString().trim();if(!raw.matches("[0-9]+(\\.[0-9]{1,6})?"))throw new IllegalArgumentException();
       java.math.BigDecimal entered=new java.math.BigDecimal(raw);java.math.BigDecimal newPrice=action==2?selected.price:entered,newQty=action==2?entered:selected.qty;
       if(entered.signum()<=0||newQty.multiply(newPrice).compareTo(new java.math.BigDecimal("1000000"))>0)throw new IllegalArgumentException();
+      java.math.BigDecimal reserved=java.math.BigDecimal.ZERO;
+      if("BUY".equals(selected.side)){
+       for(PaperOrder o:paperOrders)if(o!=selected&&"PENDING".equals(o.status)&&"BUY".equals(o.side))reserved=reserved.add(o.qty.multiply(o.price));
+       if(paperCash.compareTo(reserved.add(newQty.multiply(newPrice)))<0)throw new IllegalArgumentException("Yetersiz demo bakiye");
+      }else if("SELL".equals(selected.side)){
+       for(PaperOrder o:paperOrders)if(o!=selected&&"PENDING".equals(o.status)&&"SELL".equals(o.side)&&selected.symbol.equals(o.symbol))reserved=reserved.add(o.qty);
+       if(paperHoldings.getOrDefault(selected.symbol,java.math.BigDecimal.ZERO).compareTo(reserved.add(newQty))<0)throw new IllegalArgumentException("Yetersiz demo pozisyon");
+      }
       selected.status="CANCELLED";
       paperOrders.add(new PaperOrder(++paperSequence,selected.symbol,selected.side,selected.type,newQty,newPrice,"PENDING"));
       persistPaperState();if(chartView!=null)chartView.invalidate();paperDashboard();
