@@ -80,6 +80,16 @@ class AndroidHubTests(unittest.TestCase):
         self.assertNotIn("setRequestMethod(\"POST\")", discovery)
         self.assertIn("discoverMarkets.setOnClickListener(v->discoverCoinbaseProducts())", code)
 
+    def test_openfigi_identity_lookup_is_read_only_and_scoped(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        lookup = code.split("void lookupOpenFigi(){", 1)[1].split("void discoverCoinbaseProducts(){", 1)[0]
+        self.assertIn("https://api.openfigi.com/v3/mapping", lookup)
+        self.assertIn('conn.setRequestMethod("POST")', lookup)
+        self.assertIn('job.put("exchCode","US")', lookup)
+        self.assertIn('ticker.matches("[A-Z]{1,6}")', lookup)
+        self.assertNotIn("createOrder(", lookup)
+        self.assertNotIn("submitOrder(", lookup)
+
     def test_expanded_market_symbols_are_unique(self):
         code = FINANCE.read_text(encoding="utf-8")
         symbols_section = code.split('marketAsset=spin(new String[]{', 1)[1].split('},0);', 1)[0]
