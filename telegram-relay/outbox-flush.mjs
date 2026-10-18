@@ -9,6 +9,9 @@ export async function flushOutbox({ queue, token, chatId, send = fetch, limit = 
       typeof queue.getUpdateStatus !== 'function' ||
       typeof queue.markClaimedOutboxDelivered !== 'function')
     throw new Error('outbox_storage_required');
+  // Bound the batch before querying storage or sending external messages.
+  if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100)
+    throw new RangeError('outbox_limit_invalid');
   const claim = await queue.claimOutbox(limit);
   // Never deliver if storage did not return a valid atomic claim/lease.
   if (!claim || typeof claim.token !== 'string' || !claim.token.trim() || !Array.isArray(claim.events))
