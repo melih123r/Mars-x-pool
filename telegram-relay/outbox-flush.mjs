@@ -17,10 +17,12 @@ export async function flushOutbox({ queue, token, chatId, send = fetch, limit = 
   // later event must not cause a partially delivered batch.
   const seen = new Set();
   for (const event of claim.events) {
-    if (!event || !Number.isSafeInteger(event.event_id) || event.event_id <= 0 ||
-        !Number.isSafeInteger(event.update_id) || event.update_id < 0 ||
-        seen.has(event.event_id)) throw new Error('outbox_event_invalid');
-    seen.add(event.event_id);
+    const validId = value => (typeof value === 'number' && Number.isSafeInteger(value)) ||
+      (typeof value === 'string' && /^(0|[1-9][0-9]*)$/.test(value) && Number.isSafeInteger(Number(value)));
+    if (!event || !validId(event.event_id) || Number(event.event_id) <= 0 ||
+        !validId(event.update_id) || seen.has(Number(event.event_id)))
+      throw new Error('outbox_event_invalid');
+    seen.add(Number(event.event_id));
   }
   const results = [];
   for (const event of claim.events) {
