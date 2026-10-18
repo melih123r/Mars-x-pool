@@ -1,0 +1,3 @@
+import test from "node:test";import assert from "node:assert/strict";import {HistoricalStore,replayBars} from "../global-engine/history.js";
+test("history is bounded and replay deterministic",()=>{const s=new HistoricalStore({maxBars:2});for(let i=0;i<3;i++)s.append({symbol:"BTC-USD",timeframe:"1m",bar:{time:new Date(1700000000000+i*60000),open:100+i,high:102+i,low:99+i,close:101+i,volume:10}});const b=s.get("BTC-USD","1m");assert.equal(b.length,2);assert.deepEqual(replayBars(b,{from:0,to:1}),[b[0]]);});
+test("invalid OHLCV fails closed",()=>{const s=new HistoricalStore();assert.throws(()=>s.append({symbol:"X",timeframe:"1m",bar:{time:new Date(),open:10,high:9,low:8,close:10,volume:1}}));});

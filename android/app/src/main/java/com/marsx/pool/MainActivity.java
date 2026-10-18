@@ -74,9 +74,13 @@ public class MainActivity extends Activity {
     private FrameLayout contentFrame;
     private View homePage;
     private View earningsPage;
+    private View walletPage;
+    private View invitePage;
     private View accountPage;
     private Button homeTab;
     private Button earningsTab;
+    private Button walletTab;
+    private Button inviteTab;
     private Button accountTab;
     private static final int MARS_ORANGE = Color.rgb(255, 112, 18);
     private int dp(int value) { return Math.round(value * getResources().getDisplayMetrics().density); }
@@ -126,9 +130,13 @@ public class MainActivity extends Activity {
                 LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
         homePage = buildHomePage();
         earningsPage = buildEarningsPage();
+        walletPage = buildWalletPage();
+        invitePage = buildInvitePage();
         accountPage = buildAccountPage();
         contentFrame.addView(homePage);
         contentFrame.addView(earningsPage);
+        contentFrame.addView(walletPage);
+        contentFrame.addView(invitePage);
         contentFrame.addView(accountPage);
 
         LinearLayout tabs = new LinearLayout(this);
@@ -137,7 +145,9 @@ public class MainActivity extends Activity {
         tabs.setBackgroundColor(Color.rgb(14, 15, 19));
         homeTab = tabButton(tabs, getString(R.string.tab_home), view -> showTab(0));
         earningsTab = tabButton(tabs, getString(R.string.tab_earnings), view -> showTab(1));
-        accountTab = tabButton(tabs, getString(R.string.tab_account), view -> showTab(2));
+        walletTab = tabButton(tabs, "Cüzdan", view -> showTab(2));
+        inviteTab = tabButton(tabs, "Davet", view -> showTab(3));
+        accountTab = tabButton(tabs, getString(R.string.tab_account), view -> showTab(4));
         screen.addView(tabs);
         setContentView(screen);
         showTab(0);
@@ -169,6 +179,11 @@ public class MainActivity extends Activity {
         addText(serviceCard, getString(R.string.service_status_title), 14);
         status = addText(serviceCard, getString(R.string.connecting), 18);
         button(serviceCard, getString(R.string.refresh_button), view -> testConnection());
+
+        LinearLayout financeCard = card(root);
+        addText(financeCard, "MARS-X Finance", 18);
+        addText(financeCard, "Partner-backed market conversion preview. Read-only beta; trading and withdrawals are locked.", 14);
+        button(financeCard, "Open Finance", view -> startActivity(new Intent(this, FinanceActivity.class)));
 
         LinearLayout vrscCard = card(root);
         addText(vrscCard, "MARS-X", 18);
@@ -219,6 +234,36 @@ public class MainActivity extends Activity {
         addText(referralCard, getString(R.string.referral_explanation), 14);
         referralStatus = addText(referralCard, getString(R.string.sign_in_to_view_referral), 15);
         button(referralCard, getString(R.string.share_invite_button), view -> shareReferral());
+        return scroll(root);
+    }
+
+    private View buildWalletPage() {
+        LinearLayout root = pageRoot();
+        addTitle(root, "Cüzdan");
+        LinearLayout total = card(root);
+        addText(total, "Toplam Bakiye", 14);
+        addText(total, "—", 30);
+        addText(total, "Gerçek bakiye partner bağlantısı tamamlanınca gösterilecek.", 13);
+        LinearLayout actions = card(root);
+        addText(actions, "Finance / Broker", 18);
+        addText(actions, "ChangeNOW piyasa dönüşüm önizlemesi • READ-ONLY", 14);
+        button(actions, "Finance'i Aç", view -> startActivity(new Intent(this, FinanceActivity.class)));
+        addText(actions, "Gönder • Al • Çek", 15);
+        addText(actions, "Production partner erişimi gelene kadar finansal işlemler kilitli.", 13);
+        LinearLayout history = card(root);
+        addText(history, "Son İşlemler", 18);
+        addText(history, "Henüz gerçek işlem yok.", 14);
+        return scroll(root);
+    }
+
+    private View buildInvitePage() {
+        LinearLayout root = pageRoot();
+        addTitle(root, "Davet Et");
+        LinearLayout hero = card(root);
+        addText(hero, "MARS-X'i arkadaşlarınla paylaş", 20);
+        addText(hero, "Davet bağlantın ve doğrulanmış referral kazançların burada görünür.", 14);
+        referralStatus = addText(hero, getString(R.string.sign_in_to_view_referral), 15);
+        button(hero, "Davet Bağlantısını Paylaş", view -> shareReferral());
         return scroll(root);
     }
 
@@ -324,15 +369,21 @@ public class MainActivity extends Activity {
     private void showTab(int selected) {
         homePage.setVisibility(selected == 0 ? View.VISIBLE : View.GONE);
         earningsPage.setVisibility(selected == 1 ? View.VISIBLE : View.GONE);
-        accountPage.setVisibility(selected == 2 ? View.VISIBLE : View.GONE);
+        walletPage.setVisibility(selected == 2 ? View.VISIBLE : View.GONE);
+        invitePage.setVisibility(selected == 3 ? View.VISIBLE : View.GONE);
+        accountPage.setVisibility(selected == 4 ? View.VISIBLE : View.GONE);
         int active = Color.rgb(255, 112, 18);
         int inactive = Color.rgb(155, 158, 168);
         homeTab.setSelected(selected == 0);
         earningsTab.setSelected(selected == 1);
-        accountTab.setSelected(selected == 2);
+        walletTab.setSelected(selected == 2);
+        inviteTab.setSelected(selected == 3);
+        accountTab.setSelected(selected == 4);
         homeTab.setTextColor(selected == 0 ? active : inactive);
         earningsTab.setTextColor(selected == 1 ? active : inactive);
-        accountTab.setTextColor(selected == 2 ? active : inactive);
+        walletTab.setTextColor(selected == 2 ? active : inactive);
+        inviteTab.setTextColor(selected == 3 ? active : inactive);
+        accountTab.setTextColor(selected == 4 ? active : inactive);
     }
 
     private void beginGoogleSignIn(boolean silent) {
@@ -1055,7 +1106,7 @@ public class MainActivity extends Activity {
         TextView view = new TextView(this);
         view.setText(text);
         view.setTextSize(size);
-        view.setTextColor(Color.rgb(34, 46, 67));
+        view.setTextColor(MARS_TEXT);
         view.setPadding(0, dp(6), 0, dp(9));
         root.addView(view);
         return view;
@@ -1063,7 +1114,7 @@ public class MainActivity extends Activity {
 
     private void addTitle(LinearLayout root, String text) {
         TextView view = addText(root, text, 23);
-        view.setTextColor(Color.rgb(20, 73, 145));
+        view.setTextColor(Color.rgb(245, 174, 70));
     }
 
     private Button button(LinearLayout root, String label, View.OnClickListener listener) {

@@ -1,0 +1,1 @@
+export class AuditLog{constructor({max=10000}={}){this.max=max;this.rows=[];}write(event,data={}){const row=Object.freeze({time:new Date().toISOString(),event:String(event),data});this.rows.push(row);if(this.rows.length>this.max)this.rows.shift();return row;}list({limit=100}={}){return this.rows.slice(-Math.min(Math.max(Number(limit)||100,1),1000));}}

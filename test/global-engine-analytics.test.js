@@ -1,0 +1,5 @@
+import test from "node:test";import assert from "node:assert/strict";import {backtest} from "../global-engine/backtest.js";import {marsxConfidence} from "../global-engine/confidence.js";import {correlationMatrix,stressPortfolio} from "../global-engine/portfolio-analytics.js";
+const bars=[1,2,3].map((x,i)=>({time:String(i),open:100+x,high:102+x,low:99+x,close:101+x,volume:1}));
+test("backtest is quality gated and uses next bar open",()=>{assert.throws(()=>backtest({bars,signal:()=>"BUY",quality:{ok:false}}));const r=backtest({bars,signal:({index})=>index===1?"BUY":"HOLD",quality:{ok:true},feeBps:10,slippageBps:10});assert.equal(r.mode,"PAPER_BACKTEST");assert.equal(r.trades,1);});
+test("confidence is trust gated",()=>{const a=marsxConfidence({liquidity:100,macro:100,momentum:100,positioning:100,volatility:100,risk:100,historicalReliability:100,dataQuality:50,freshness:100});assert.equal(a.rawScore,100);assert.equal(a.score,50);});
+test("portfolio analytics stay simulation-only",()=>{const m=correlationMatrix({A:[1,2,3],B:[2,4,6]});assert.ok(m.matrix[0][1]>.99);assert.equal(stressPortfolio([{symbol:"A",marketValue:1000}],{A:-10}).estimatedPnl,-100);});
