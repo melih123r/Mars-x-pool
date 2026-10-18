@@ -200,10 +200,10 @@ public class MainActivity extends Activity {
         button(vrscCard, "BAŞLAT", view ->
                 startActivity(new Intent(this, VrscPoolActivity.class)));
 
-        LinearLayout lemonCard = card(root);
-        addText(lemonCard, "MARS-X Finance Demo", 18);
-        addText(lemonCard, "Örnek hisse grafiği • gerçek emir ve para transferi kapalı", 13);
-        button(lemonCard, "DEMO GRAFİĞİ AÇ", view ->
+        LinearLayout financeDemoCard = card(root);
+        addText(financeDemoCard, "MARS-X Finance Demo", 18);
+        addText(financeDemoCard, "Örnek hisse grafiği • gerçek emir ve para transferi kapalı", 13);
+        button(financeDemoCard, "DEMO GRAFİĞİ AÇ", view ->
                 startActivity(new Intent(this, LemonDemoActivity.class)));
 
         LinearLayout deviceCard = card(root);
