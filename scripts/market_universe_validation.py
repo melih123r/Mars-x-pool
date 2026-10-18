@@ -27,12 +27,14 @@ def universe():
     return list(dict.fromkeys(symbols))
 
 def classify(symbol):
-    if symbol.endswith("-USD"):
-        return "crypto", symbol
+    """Route FX to forex and never mistake synthetic labels for stock tickers."""
+    if symbol.startswith("FX:"):
+        pair = symbol[3:]
+        if not re.fullmatch(r"[A-Z]{3}/[A-Z]{3}", pair):
+            return "unsupported", symbol
+        base, quote = pair.split("/")
+        return "forex", (quote + "=X" if base == "USD" else base + quote + "=X")
     macro = {
-        "FX:EUR/USD": ("forex", "EURUSD=X"),
-        "FX:GBP/USD": ("forex", "GBPUSD=X"),
-        "FX:USD/JPY": ("forex", "JPY=X"),
         "INDEX:SP500": ("indices", "^GSPC"),
         "INDEX:NASDAQ": ("indices", "^IXIC"),
         "INDEX:DOW": ("indices", "^DJI"),
@@ -40,10 +42,20 @@ def classify(symbol):
         "CMD:SILVER": ("commodities", "SI=F"),
         "CMD:OIL": ("commodities", "CL=F"),
     }
-    return macro.get(symbol, ("stocks", symbol))
+    if symbol in macro:
+        return macro[symbol]
+    if symbol.startswith(("INDEX:", "CMD:")):
+        return "unsupported", symbol
+    if re.fullmatch(r"[A-Z0-9]{2,20}-USD", symbol):
+        return "crypto", symbol
+    if re.fullmatch(r"[A-Z][A-Z0-9.\\-]{0,12}", symbol):
+        return "stocks", symbol
+    return "unsupported", symbol
 
 def probe(symbol):
     group, ticker = classify(symbol)
+    if group == 'unsupported':
+        return (group, symbol, 'UNSUPPORTED', 'No verified provider mapping')
     try:
         count = validate(candles(group, ticker))
         return (group, symbol, "PASS", str(count) + " valid candles")
@@ -61,7 +73,7 @@ def main():
              "| Category | Symbol | Result | Details |", "|---|---|---|---|"]
     lines.extend("| " + " | ".join(row) + " |" for row in results)
     failed = [row for row in results if row[2] == "FAIL"]
-    summary = f"Tested: {len(results)}; PASS: {len(results)-len(failed)}; FAIL: {len(failed)}"
+    summary = f"Tested: {len(results)}; PASS: {sum(row[2] == 'PASS' for row in results)}; FAIL: {len(failed)}"
     REPORT.write_text(summary + "\n\n" + "\n".join(lines) + "\n", encoding="utf-8")
     print(summary, flush=True)
     for row in failed:
@@ -69,7 +81,7 @@ def main():
     if os.getenv("GITHUB_STEP_SUMMARY"):
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
             f.write(summary + "\n\n")
-            for group in ("crypto", "stocks", "forex", "indices", "commodities"):
+            for group in ("crypto", "stocks", "forex", "indices", "commodities", "unsupported"):
                 subset = [r for r in results if r[0] == group]
                 f.write(f"- {group}: {sum(r[2] == 'PASS' for r in subset)}/{len(subset)} PASS\n")
     return 1 if failed else 0
