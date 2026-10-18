@@ -160,4 +160,27 @@ public class DemoConversionLedgerTest {
         assertEquals(1, ledger.snapshot().size());
     }
 
+    @Test public void restoreRejectsDuplicateNormalizedSymbolsAtomically() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("3"));
+        java.util.Map<String, BigDecimal> duplicate = new java.util.HashMap<>();
+        duplicate.put("eth", d("1"));
+        duplicate.put(" ETH ", d("2"));
+        try { ledger.restore(duplicate); fail("duplicate normalized symbol must fail"); }
+        catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("BTC").compareTo(d("3")));
+        assertEquals(0, ledger.balance("ETH").signum());
+    }
+
+    @Test public void restoreRejectsNullAndKeepsExistingBalances() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("USDT", d("42"));
+        java.util.Map<String, BigDecimal> invalid = new java.util.HashMap<>();
+        invalid.put("BTC", null);
+        try { ledger.restore(invalid); fail("null demo balance must fail"); }
+        catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("USDT").compareTo(d("42")));
+        assertEquals(0, ledger.balance("BTC").signum());
+    }
+
 }
