@@ -125,9 +125,13 @@ public final class FinanceActivity extends Activity{
   if("Ana Sayfa".equals(name)||"Piyasalar".equals(name)){final LinearLayout target=body;financeAction(body,"↻ Canlı piyasa fiyatlarını yenile",()->loadPublicPrices(target));loadPublicPrices(body);}
   financeAction(body,"← Ana ekrana dön",()->build());
   LinearLayout screen=new LinearLayout(this);screen.setOrientation(LinearLayout.VERTICAL);screen.setBackgroundColor(BG);screen.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
+  // Scrollable navigation: six sections retain readable tap targets on narrow phones.
+  android.widget.HorizontalScrollView tabScroll=new android.widget.HorizontalScrollView(this);
+  tabScroll.setHorizontalScrollBarEnabled(false);
+  tabScroll.setFillViewport(false);
   LinearLayout tabs=row();String[] sections={"Ana Sayfa","Piyasalar","Trading","Portföy","Cüzdan","Profil"};
-  for(String section:sections){TextView tab=t(section,12,section.equals(name)?Color.WHITE:MUTED);tab.setGravity(Gravity.CENTER);oneLine(tab);tab.setBackground(pill(Color.rgb(8,11,18),section.equals(name)?screenAccent(name):Color.rgb(32,40,56)));LinearLayout.LayoutParams tabParams=new LinearLayout.LayoutParams(0,dp(56),1);tabParams.setMargins(dp(2),0,dp(2),0);tabs.addView(tab,tabParams);tab.setOnClickListener(v->openFinanceScreen(section));}
-  screen.addView(tabs,new LinearLayout.LayoutParams(-1,-2));
+  for(String section:sections){TextView tab=t(section,13,section.equals(name)?Color.WHITE:MUTED);tab.setGravity(Gravity.CENTER);oneLine(tab);tab.setContentDescription(section+" sekmesine geç");tab.setBackground(pill(Color.rgb(8,11,18),section.equals(name)?screenAccent(name):Color.rgb(32,40,56)));LinearLayout.LayoutParams tabParams=new LinearLayout.LayoutParams(dp(104),dp(60));tabParams.setMargins(dp(4),0,dp(4),0);tabs.addView(tab,tabParams);tab.setOnClickListener(v->openFinanceScreen(section));}
+  tabScroll.addView(tabs);screen.addView(tabScroll,new LinearLayout.LayoutParams(-1,dp(64)));
   setContentView(screen);screen.setAlpha(0f);screen.animate().alpha(1f).setDuration(220).start();
  }
  void inspectUnifiedCoinbaseMarket(){
