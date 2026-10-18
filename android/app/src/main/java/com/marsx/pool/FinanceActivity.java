@@ -147,7 +147,9 @@ public final class FinanceActivity extends Activity{
   }
   persistPaperState();return true;
  }
- void matchPaperLimits(String symbol,double lastClose,long completedCandleTime,long completedCandleEnd){if(!Double.isFinite(lastClose)||lastClose<=0)return;java.math.BigDecimal current=java.math.BigDecimal.valueOf(lastClose);boolean changed=false;for(PaperOrder order:paperOrders){if(!"PENDING".equals(order.status)||!"LIMIT".equals(order.type)||!symbol.equals(order.symbol)||completedCandleEnd<=order.createdAtEpochSeconds)continue;boolean crossed="BUY".equals(order.side)?current.compareTo(order.price)<=0:current.compareTo(order.price)>=0;if(!crossed)continue;java.math.BigDecimal simulatedFill="BUY".equals(order.side)?current.min(order.price):current.max(order.price);if(paperFill(order.symbol,order.side,order.qty,simulatedFill)){order.status="FILLED";changed=true;persistPaperState();}}if(changed&&chartView!=null)chartView.invalidate();}
+ void matchPaperLimits(String symbol,double lastClose,long completedCandleTime,long completedCandleEnd){if(!Double.isFinite(lastClose)||lastClose<=0)return;java.math.BigDecimal current=java.math.BigDecimal.valueOf(lastClose);boolean changed=false;for(PaperOrder order:paperOrders){if(!"PENDING".equals(order.status)||!"LIMIT".equals(order.type)||!symbol.equals(order.symbol)||completedCandleEnd<=order.createdAtEpochSeconds)continue;boolean crossed="BUY".equals(order.side)?current.compareTo(order.price)<=0:current.compareTo(order.price)>=0;if(!crossed)continue;// Use the recorded LIMIT price as the conservative simulated execution price.
+ // Filling at a better candle close without storing that execution price corrupts P/L reports.
+ java.math.BigDecimal simulatedFill=order.price;if(paperFill(order.symbol,order.side,order.qty,simulatedFill)){order.status="FILLED";changed=true;persistPaperState();}}if(changed&&chartView!=null)chartView.invalidate();}
  void persistPaperState(){
   try{
    JSONObject data=new JSONObject();data.put("version",1);data.put("cash",paperCash.toPlainString());data.put("sequence",paperSequence);
