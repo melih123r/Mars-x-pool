@@ -466,7 +466,7 @@ public final class FinanceActivity extends Activity{
     if(sym.startsWith("FX:")||sym.startsWith("INDEX:")||sym.startsWith("CMD:")){price.setError("Bu piyasanın para birimi ve sözleşme çarpanı doğrulanmadan demo emir açılamaz.");return;}
     int removable=-1;
     if(paperOrders.size()>=200){
-     for(int idx=0;idx<paperOrders.size();idx++)if(!"PENDING".equals(paperOrders.get(idx).status)){removable=idx;break;}
+     for(int idx=0;idx<paperOrders.size();idx++){PaperOrder existing=paperOrders.get(idx);if(existing==null||!"PENDING".equals(existing.status)){removable=idx;break;}}
      if(removable<0){qty.setError("En fazla 200 açık demo emri; önce bekleyen emri iptal et");return;}
     }
     if("SELL".equals(direction)&&(paperHoldings.get(sym)==null||paperHoldings.get(sym).compareTo(units.add(paperOrders.stream().filter(o->o!=null&&"PENDING".equals(o.status)&&"SELL".equals(o.side)&&sym.equals(o.symbol)&&o.qty!=null&&o.qty.signum()>0).map(o->o.qty).reduce(java.math.BigDecimal.ZERO,java.math.BigDecimal::add)))<0)){qty.setError("Satış miktarı eldeki demo pozisyonunu aşamaz.");return;}if("BUY".equals(direction)&&paperCash.compareTo(units.multiply(px).add(paperOrders.stream().filter(o->o!=null&&"PENDING".equals(o.status)&&"BUY".equals(o.side)&&o.qty!=null&&o.price!=null&&o.qty.signum()>0&&o.price.signum()>0).map(o->o.qty.multiply(o.price)).reduce(java.math.BigDecimal.ZERO,java.math.BigDecimal::add)))<0){qty.setError("Bekleyen alış emirleri dahil demo nakit bakiyesi yetersiz.");return;}
@@ -583,7 +583,7 @@ public final class FinanceActivity extends Activity{
  }
  void paperCancelDialog(){
   java.util.ArrayList<PaperOrder> pending=new java.util.ArrayList<>();
-  for(PaperOrder o:paperOrders)if(o!=null&&"PENDING".equals(o.status))pending.add(o);
+  for(PaperOrder o:paperOrders)if(o!=null&&"PENDING".equals(o.status)&&o.qty!=null&&o.price!=null&&o.qty.signum()>0&&o.price.signum()>0)pending.add(o);
   if(pending.isEmpty()){new AlertDialog.Builder(this).setMessage("Bekleyen demo emir yok.").setPositiveButton("Tamam",null).show();return;}
   String[] names=new String[pending.size()];
   for(int i=0;i<pending.size();i++){PaperOrder o=pending.get(i);names[i]="#"+o.id+" "+o.symbol+" "+o.side+" "+o.qty+" @ "+o.price+" USD • "+o.type;}
