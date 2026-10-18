@@ -193,16 +193,16 @@ public final class FinanceActivity extends Activity{
    java.math.BigDecimal held=paperHoldings.get(asset);
    if(held==null||held.signum()<=0)continue;
    java.math.BigDecimal last=paperLastClose.get(asset);
-   if(last==null||last.signum()<=0){missingQuotes++;continue;}
    java.math.BigDecimal cost=paperCost.get(asset);
+   if(last==null||last.signum()<=0||cost==null||cost.signum()<0){missingQuotes++;continue;}
    markedValue=markedValue.add(held.multiply(last));
-   unrealized=unrealized.add(held.multiply(last).subtract(cost==null?java.math.BigDecimal.ZERO:cost));
+   unrealized=unrealized.add(held.multiply(last).subtract(cost));
   }
   out.append("Gerçekleşmemiş K/Z (fiyatı bulunanlar): $").append(unrealized.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\n");
   if(missingQuotes==0){
    out.append("Tahmini toplam hesap değeri: $").append(paperCash.add(markedValue).setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\n");
   }else{
-   out.append("Toplam hesap değeri hesaplanamadı: ").append(missingQuotes).append(" pozisyon için güncel fiyat yok.\n");
+   out.append("Toplam hesap değeri hesaplanamadı: ").append(missingQuotes).append(" pozisyon için geçerli fiyat veya maliyet bilgisi yok.\n");
   }
   out.append("Not: Son kapanış fiyatları gecikmeli olabilir; komisyon ve spread dahil değildir.\n");
   java.math.BigDecimal realized=java.math.BigDecimal.ZERO,buyNotional=java.math.BigDecimal.ZERO,sellNotional=java.math.BigDecimal.ZERO;int buyFills=0,sellFills=0;for(PaperOrder order:paperOrders){if(!"FILLED".equals(order.status))continue;java.math.BigDecimal amount=order.qty.multiply(order.price);if("BUY".equals(order.side)){buyNotional=buyNotional.add(amount);buyFills++;}else if("SELL".equals(order.side)){sellNotional=sellNotional.add(amount);sellFills++;}}java.math.BigDecimal heldCost=java.math.BigDecimal.ZERO;for(java.math.BigDecimal basis:paperCost.values())if(basis!=null)heldCost=heldCost.add(basis);realized=paperCash.subtract(new java.math.BigDecimal("100000")).add(heldCost);out.append("DEMO PERFORMANS (komisyon/spread hariç)\n");out.append("Gerçekleşmiş K/Z: $").append(realized.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append(" • Açık K/Z: $").append(unrealized.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\n");out.append("Gerçekleşen alış/satış: ").append(buyFills).append("/").append(sellFills).append(" • İşlem hacmi: $").append(buyNotional.add(sellNotional).setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\n");if(missingQuotes==0)out.append("Toplam getiri: ").append(paperCash.add(markedValue).subtract(new java.math.BigDecimal("100000")).multiply(new java.math.BigDecimal("100")).divide(new java.math.BigDecimal("100000"),2,java.math.RoundingMode.HALF_UP).toPlainString()).append("%\n");  java.math.BigDecimal reservedBuy=java.math.BigDecimal.ZERO;for(PaperOrder order:paperOrders)if("PENDING".equals(order.status)&&"BUY".equals(order.side))reservedBuy=reservedBuy.add(order.qty.multiply(order.price));out.append("Nakit: $").append(paperCash.toPlainString()).append("\nBekleyen alış rezervi: $").append(reservedBuy.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\nKullanılabilir nakit: $").append(paperCash.subtract(reservedBuy).setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\n\nPozisyonlar:\n");
