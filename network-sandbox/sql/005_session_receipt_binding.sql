@@ -62,7 +62,7 @@ BEGIN
 
   INSERT INTO marsx_network_demo.receipt_session_links(receipt_id, session_id)
   VALUES (persisted_id, p_session_id)
-  ON CONFLICT (receipt_id) DO NOTHING;
+  ON CONFLICT ON CONSTRAINT receipt_session_links_pkey DO NOTHING;
 
   IF NOT FOUND THEN
     SELECT l.session_id
