@@ -215,3 +215,24 @@ test('command claim and audit event commit in the same transaction', async () =>
   assert.equal(auditCall.params[3], 10);
   assert.match(auditCall.params[4], /^[a-f0-9]{64}$/);
 });
+
+
+test('command retry and audit event commit in the same transaction', async () => {
+  const pool = fakePool();
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  const retried = await queue.retryCommand('telegram-86-chat', 'command_worker', 'temporary_failure', 30);
+  assert.equal(retried.status, 'pending');
+  const begin = pool.calls.findIndex(call => call.sql === 'BEGIN');
+  const update = pool.calls.findIndex(call => call.sql.startsWith('UPDATE marsx_telegram.command_inbox'));
+  const audit = pool.calls.findIndex(call => call.sql.startsWith('INSERT INTO marsx_telegram.command_audit_log'));
+  const commit = pool.calls.findIndex(call => call.sql === 'COMMIT');
+  assert.ok(begin >= 0 && begin < update);
+  assert.ok(audit > update && audit < commit);
+  const auditCall = pool.calls[audit];
+  assert.equal(auditCall.params[0], 'telegram-86-chat');
+  assert.match(auditCall.params[1], /^retry_attempt_1_[a-f0-9]{16}$/);
+  assert.equal(auditCall.params[2], 'RETRIED');
+  assert.equal(auditCall.params[3], 10);
+  assert.match(auditCall.params[4], /^[a-f0-9]{64}$/);
+  assert.equal(auditCall.params[5], 'temporary_failure');
+});
