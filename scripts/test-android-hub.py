@@ -76,6 +76,11 @@ class AndroidHubTests(unittest.TestCase):
         self.assertIn("parseDemoDecimal(qty.getText().toString())", dialog)
         self.assertIn("parseDemoDecimal(rate.getText().toString())", dialog)
 
+    def test_finance_navigation_density_helper_is_defined(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        self.assertIn("int dp(int value){return Math.round(value*getResources().getDisplayMetrics().density);}", code)
+        self.assertIn("n.setMinHeight(dp(64))", code)
+
     def test_finance_theme_buttons_have_accessible_touch_targets(self):
         code = FINANCE.read_text(encoding="utf-8")
         theme = code[code.index("void themePicker()"):code.index("void themePicker()")+850]
