@@ -34,4 +34,33 @@ public class DemoConversionLedgerTest {
         assertEquals(0, ledger.balance("BTC").compareTo(d("1")));
         assertEquals(0, ledger.balance("ETH").signum());
     }
+
+    @Test public void rejectsSameAssetAndInvalidQuantityWithoutMutating() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1.25"));
+        for (BigDecimal quantity : new BigDecimal[] { d("-1"), d("0") }) {
+            try { ledger.convert("BTC", "ETH", quantity, d("10"), BigDecimal.ZERO); fail(); }
+            catch (IllegalArgumentException expected) { }
+        }
+        try { ledger.convert(" btc ", "BTC", d("0.1"), d("10"), BigDecimal.ZERO); fail(); }
+        catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("BTC").compareTo(d("1.25")));
+        assertEquals(0, ledger.balance("ETH").signum());
+    }
+    @Test public void exactBalanceAndRoundingDoNotOverdraw() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("USDT", d("0.000000000001"));
+        BigDecimal received = ledger.convert("USDT", "BTC", d("0.000000000001"), d("1"), BigDecimal.ZERO);
+        assertEquals(0, received.compareTo(d("0.000000000001")));
+        assertEquals(0, ledger.balance("USDT").signum());
+        assertEquals(0, ledger.balance("BTC").compareTo(received));
+    }
+    @Test public void dustConversionIsRejectedAtomically() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        try { ledger.convert("BTC", "ETH", d("0.0000000000001"), d("1"), BigDecimal.ZERO); fail(); }
+        catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("BTC").compareTo(d("1")));
+        assertEquals(0, ledger.balance("ETH").signum());
+    }
 }
