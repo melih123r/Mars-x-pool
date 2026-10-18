@@ -13,13 +13,14 @@
         android:theme="@style/Theme.MarsX"
         android:usesCleartextTraffic="false">
         <activity android:name=".VrscPoolActivity" android:exported="false" />
-        <activity android:name=".FinanceActivity" android:exported="true">
+        <activity android:name=".FinanceActivity" android:exported="false" />
+        <activity android:name=".TelegramStatusActivity" android:exported="false" />
+        <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="false" />
-        <activity android:name=".MainActivity" android:exported="false" />
     </application>
 </manifest>
