@@ -209,9 +209,9 @@ export class PostgresTaskQueue {
         await client.query(
           `INSERT INTO marsx_telegram.command_audit_log
              (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,metadata)
-           VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,'COMPLETED',10,$3,$4)
+           VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,$3,10,$4,$5)
            ON CONFLICT (command_id,event_key) DO NOTHING`,
-          [row.command_id, eventKey, actorRefHash, { attemptCount: row.attempt_count }]
+          [row.command_id, eventKey, 'COMPLETED', actorRefHash, { attemptCount: row.attempt_count }]
         );
       }
       await client.query('COMMIT');
