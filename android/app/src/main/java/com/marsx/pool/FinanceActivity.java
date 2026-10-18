@@ -474,6 +474,8 @@ public final class FinanceActivity extends Activity{
      price.setError("Yalnızca LIMIT demo emirleri etkin. MARKET / STOP_LOSS / TAKE_PROFIT güvenli yürütme ve tetikleme testleri tamamlanana kadar kapalı.");
      return;
     }
+    if("BUY".equals(direction)&&paperCash.subtract(units.multiply(px)).signum()<0){qty.setError("Demo nakit bakiyesi yetersiz.");return;}
+    if("SELL".equals(direction)&&(paperHoldings.get(sym)==null||paperHoldings.get(sym).compareTo(units)<0)){qty.setError("Demo pozisyon bakiyesi yetersiz.");return;}
     if(removable>=0)paperOrders.remove(removable);
     paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,"PENDING"));persistPaperState();
     d.dismiss();if(chartView!=null)chartView.invalidate();paperDashboard();
