@@ -147,7 +147,7 @@ export class PostgresTaskQueue {
     }
   }
   async retryCommand(commandId, workerId, errorCode, delaySeconds) {
-    if (typeof commandId !== 'string' || !/^telegram-\\d+-(chat|task)$/.test(commandId)) throw new Error('invalid_command_id');
+    if (typeof commandId !== 'string' || !/^telegram-\d+-(chat|task)$/.test(commandId)) throw new Error('invalid_command_id');
     if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
     if (typeof errorCode !== 'string' || !/^[a-z0-9_]{1,64}$/.test(errorCode)) throw new Error('invalid_error_code');
     if (!Number.isSafeInteger(delaySeconds) || delaySeconds < 1 || delaySeconds > 3600) throw new Error('invalid_retry_delay');
