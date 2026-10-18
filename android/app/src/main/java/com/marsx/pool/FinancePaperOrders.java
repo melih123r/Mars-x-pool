@@ -1,7 +1,5 @@
 package com.marsx.pool;
 
-import java.util.Locale;
-
 /**
  * Pure, offline paper-order validator. Never sends requests or moves money.
  * A future UI must explicitly label all results as DEMO.
@@ -43,7 +41,7 @@ public final class FinancePaperOrders {
 
     public static Result evaluate(Order order, double lastPrice) {
         if (order == null || order.side == null || order.type == null
-                || order.symbol == null || !order.symbol.matches("[A-Za-z0-9._/-]{2,24}")
+                || !validSymbol(order.symbol)
                 || order.clientOrderId == null || !order.clientOrderId.matches("[A-Za-z0-9_-]{1,64}")
                 || !positive(order.quantity) || !positive(lastPrice)
                 || (order.type != Type.MARKET && !positive(order.triggerPrice))) {
@@ -65,6 +63,11 @@ public final class FinancePaperOrders {
         return fill
                 ? new Result(Status.FILLED, lastPrice, "DEMO_ONLY")
                 : new Result(Status.PENDING, Double.NaN, "WAITING_FOR_DEMO_PRICE");
+    }
+
+    private static boolean validSymbol(String symbol) {
+        return symbol != null
+                && symbol.matches("[A-Za-z0-9](?:[A-Za-z0-9._:/-]{0,22}[A-Za-z0-9])?");
     }
 
     private static boolean positive(double v) {
