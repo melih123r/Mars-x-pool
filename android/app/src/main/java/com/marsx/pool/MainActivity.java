@@ -176,6 +176,12 @@ public class MainActivity extends Activity {
         button(vrscCard, "BAŞLAT", view ->
                 startActivity(new Intent(this, VrscPoolActivity.class)));
 
+        LinearLayout lemonCard = card(root);
+        addText(lemonCard, "Lemon Brokerage Demo", 18);
+        addText(lemonCard, "Örnek hisse grafiği • gerçek emir ve para transferi kapalı", 13);
+        button(lemonCard, "DEMO GRAFİĞİ AÇ", view ->
+                startActivity(new Intent(this, LemonDemoActivity.class)));
+
         LinearLayout deviceCard = card(root);
         addText(deviceCard, getString(R.string.device_title), 14);
         String worker = prefs.getString("worker_id", "");
