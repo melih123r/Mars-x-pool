@@ -220,7 +220,23 @@ public final class FinanceActivity extends Activity{
   if(pending.isEmpty()){new AlertDialog.Builder(this).setMessage("Bekleyen demo emir yok.").setPositiveButton("Tamam",null).show();return;}
   String[] names=new String[pending.size()];
   for(int i=0;i<pending.size();i++){PaperOrder o=pending.get(i);names[i]="#"+o.id+" "+o.symbol+" "+o.side+" "+o.qty;}
-  new AlertDialog.Builder(this).setTitle("İptal edilecek demo emir").setItems(names,(d,index)->{pending.get(index).status="CANCELLED";persistPaperState();if(chartView!=null)chartView.invalidate();paperDashboard();}).setNegativeButton("Vazgeç",null).show();
+  new AlertDialog.Builder(this).setTitle("Bekleyen demo emri yönet").setItems(names,(d,index)->{
+   PaperOrder selected=pending.get(index);
+   new AlertDialog.Builder(this).setTitle("Emir #"+selected.id).setItems(new String[]{"Emri iptal et","Limit fiyatını düzenle"},(dialog,action)->{
+    if(action==0){selected.status="CANCELLED";persistPaperState();if(chartView!=null)chartView.invalidate();paperDashboard();return;}
+    EditText input=new EditText(this);input.setInputType(2|8192);input.setSingleLine(true);input.setText(selected.price.toPlainString());
+    new AlertDialog.Builder(this).setTitle("Yeni LIMIT fiyatı • #"+selected.id).setView(input).setNegativeButton("Vazgeç",null).setPositiveButton("Kaydet",(confirm,which)->{
+     try{
+      String raw=input.getText().toString().trim();if(!raw.matches("[0-9]+(\\\\.[0-9]{1,6})?"))throw new IllegalArgumentException();
+      java.math.BigDecimal newPrice=new java.math.BigDecimal(raw);
+      if(newPrice.signum()<=0||selected.qty.multiply(newPrice).compareTo(new java.math.BigDecimal("1000000"))>0)throw new IllegalArgumentException();
+      selected.status="CANCELLED";
+      paperOrders.add(new PaperOrder(++paperSequence,selected.symbol,selected.side,selected.type,selected.qty,newPrice,"PENDING"));
+      persistPaperState();if(chartView!=null)chartView.invalidate();paperDashboard();
+     }catch(Exception ex){new AlertDialog.Builder(this).setMessage("Geçersiz limit fiyatı; emir değiştirilmedi.").setPositiveButton("Tamam",null).show();}
+    }).show();
+   }).show();
+  }).setNegativeButton("Vazgeç",null).show();
  }
  void financePreview(String title){new AlertDialog.Builder(this).setTitle(title).setMessage("MARS-X Finance arayüz önizlemesi. Gerçek işlem veya hesap değişikliği yapılmaz.").setPositiveButton("Tamam",null).show();}
  void financeLine(LinearLayout parent,String key,String value){LinearLayout r=row();r.setPadding(18,18,18,18);r.setBackground(panel(RAISED,14,Color.rgb(37,48,66)));TextView left=t(key,14,Color.WHITE);r.addView(left,new LinearLayout.LayoutParams(0,-2,1));r.addView(t(value,12,MUTED));parent.addView(r,mp(7));}
