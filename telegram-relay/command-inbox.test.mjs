@@ -25,8 +25,11 @@ function fakePool({ duplicate = false, auditDuplicate = false, auditExisting, ex
         return { rows: [stored] };
       if (sql.includes('WITH available AS'))
         return { rows: [{ ...stored, status: 'claimed', worker_id: params[0], attempt_count: 1 }] };
-      if (sql.startsWith('UPDATE marsx_telegram.command_inbox'))
-        return { rows: [{ ...stored, status: 'pending', worker_id: null, attempt_count: 1 }] };
+      if (sql.startsWith('UPDATE marsx_telegram.command_inbox')) {
+        const completed = sql.includes("SET status='completed'");
+        const status = completed ? 'completed' : stored.attempt_count < 10 ? 'pending' : 'failed';
+        return { rows: [{ ...stored, status, worker_id: null, attempt_count: stored.attempt_count || 1 }] };
+      }
       return { rowCount: 1, rows: [] };
     },
     release() { calls.push({ sql: 'RELEASE' }); }
@@ -235,4 +238,41 @@ test('command retry and audit event commit in the same transaction', async () =>
   assert.equal(auditCall.params[3], 10);
   assert.match(auditCall.params[4], /^[a-f0-9]{64}$/);
   assert.equal(auditCall.params[5], 'temporary_failure');
+});
+
+
+test('command completion and audit event commit in the same transaction', async () => {
+  const pool = fakePool({ existing: {
+    command_id: 'telegram-86-chat', update_id: 86, command_kind: 'chat',
+    project: 'finance', status: 'claimed', attempt_count: 1
+  } });
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  assert.equal(typeof queue.completeCommand, 'function');
+  const completed = await queue.completeCommand('telegram-86-chat', 'command_worker');
+  assert.equal(completed.status, 'completed');
+  const begin = pool.calls.findIndex(call => call.sql === 'BEGIN');
+  const update = pool.calls.findIndex(call =>
+    call.sql.startsWith('UPDATE marsx_telegram.command_inbox') && call.sql.includes("SET status='completed'")
+  );
+  const audit = pool.calls.findIndex(call => call.sql.startsWith('INSERT INTO marsx_telegram.command_audit_log'));
+  const commit = pool.calls.findIndex(call => call.sql === 'COMMIT');
+  assert.ok(begin >= 0 && begin < update);
+  assert.ok(audit > update && audit < commit);
+  assert.equal(pool.calls[audit].params[2], 'COMPLETED');
+  assert.match(pool.calls[audit].params[1], /^complete_attempt_1_[a-f0-9]{16}$/);
+});
+
+test('exhausted command retry records FAILED atomically', async () => {
+  const pool = fakePool({ existing: {
+    command_id: 'telegram-86-chat', update_id: 86, command_kind: 'chat',
+    project: 'finance', status: 'claimed', attempt_count: 10
+  } });
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  const failed = await queue.retryCommand('telegram-86-chat', 'command_worker', 'retry_exhausted', 30);
+  assert.equal(failed.status, 'failed');
+  const audit = pool.calls.find(call => call.sql.startsWith('INSERT INTO marsx_telegram.command_audit_log'));
+  assert.equal(audit.params[2], 'FAILED');
+  assert.equal(audit.params[5], 'retry_exhausted');
+  assert.ok(pool.calls.findIndex(call => call.sql === 'COMMIT') >
+    pool.calls.findIndex(call => call === audit));
 });
