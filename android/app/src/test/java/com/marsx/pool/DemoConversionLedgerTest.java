@@ -103,4 +103,27 @@ public class DemoConversionLedgerTest {
         assertEquals(0, afterRestart.balance("BTC").compareTo(d("0.80")));
         assertEquals(0, afterRestart.balance("ETH").compareTo(d("13.995")));
     }
+    @Test public void failedConversionNeverChangesPreviouslyPersistableBalances() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("USDT", d("1000"));
+        ledger.setBalance("BTC", d("0.1"));
+        String usdtBefore = ledger.balance("USDT").toPlainString();
+        String btcBefore = ledger.balance("BTC").toPlainString();
+        try {
+            ledger.convert("USDT", "BTC", d("1001"), d("0.00002"), d("0.001"));
+            fail("insufficient funds must reject");
+        } catch (IllegalArgumentException expected) { }
+        assertEquals(usdtBefore, ledger.balance("USDT").toPlainString());
+        assertEquals(btcBefore, ledger.balance("BTC").toPlainString());
+    }
+
+    @Test public void demoConversionFeeIsAppliedExactlyOnce() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("USDT", d("100"));
+        BigDecimal received = ledger.convert("USDT", "ETH", d("100"), d("0.01"), d("0.001"));
+        assertEquals(0, received.compareTo(d("0.999")));
+        assertEquals(0, ledger.balance("USDT").compareTo(BigDecimal.ZERO));
+        assertEquals(0, ledger.balance("ETH").compareTo(d("0.999")));
+    }
+
 }
