@@ -80,6 +80,16 @@ class AndroidHubTests(unittest.TestCase):
         self.assertNotIn("setRequestMethod(\"POST\")", discovery)
         self.assertIn("discoverMarkets.setOnClickListener(v->discoverCoinbaseProducts())", code)
 
+    def test_coinbase_candle_inspector_is_public_and_crypto_only(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        inspector = code.split("void inspectCoinbaseCandles(){", 1)[1].split("void lookupOpenFigi(){", 1)[0]
+        self.assertIn("/api/v3/brokerage/market/products/", inspector)
+        self.assertIn("/candles?start=", inspector)
+        self.assertIn("granularity=ONE_HOUR", inspector)
+        self.assertIn('product.matches("[A-Z0-9]{2,20}-[A-Z0-9]{2,12}")', inspector)
+        self.assertNotIn("createOrder(", inspector)
+        self.assertNotIn("submitOrder(", inspector)
+
     def test_openfigi_identity_lookup_is_read_only_and_scoped(self):
         code = FINANCE.read_text(encoding="utf-8")
         lookup = code.split("void lookupOpenFigi(){", 1)[1].split("void discoverCoinbaseProducts(){", 1)[0]
