@@ -59,6 +59,11 @@ class AndroidHubTests(unittest.TestCase):
         self.assertNotIn("n.setMinHeight(96)", code)
         self.assertNotIn("new LinearLayout.LayoutParams(0,96,1)", code)
 
+    def test_market_scanner_label_uses_current_universe_size(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        self.assertIn('marketScanner.setText("Piyasa tarayıcı • "+marketAsset.getCount()+" sembol")', code)
+        self.assertNotIn('marketScanner.setText("Piyasa tarayıcı • 244 sembol")', code)
+
     def test_conversion_dialog_is_scrollable_on_small_screens(self):
         code = FINANCE.read_text(encoding="utf-8")
         start = code.index("void demoConversionDialog()")
