@@ -30,6 +30,7 @@ require("pending sell reservation", '"PENDING".equals(o.status)&&"SELL".equals(o
 require("match only pending LIMIT orders", '"PENDING".equals(order.status)||!"LIMIT".equals(order.type)' in matching)
 require("candle must begin after order creation", "completedCandleTime<order.createdAtEpochSeconds" in matching)
 require("candle end strictly after start", "completedCandleEnd<=completedCandleTime" in matching)
+require("do not fill unfinished or future candles", "completedCandleEnd>System.currentTimeMillis()/1000L" in matching)
 require("reject invalid last-close price", "!Double.isFinite(lastClose)||lastClose<=0" in matching)
 require("record executed order status", 'order.status="FILLED"' in matching)
 require("persist demo state", "persistPaperState()" in matching)
