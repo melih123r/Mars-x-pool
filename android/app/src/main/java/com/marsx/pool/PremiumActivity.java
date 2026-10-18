@@ -6,7 +6,7 @@ public class PremiumActivity extends Activity{
  static final int BG=Color.rgb(2,7,13),CARD=Color.rgb(8,18,27),ORANGE=Color.rgb(255,166,64),ORANGE2=Color.rgb(255,190,92),WHITE=Color.rgb(248,249,252),MUTED=Color.rgb(145,149,158),GREEN=Color.rgb(34,210,104),RED=Color.rgb(245,66,83); static final String MARSX_POOL_ADDRESS=BuildConfig.MARSX_VRSC_POOL_ADDRESS;
 
  // Five distinct page reference colors, retaining the shared dark Mars-X surface.
- static final int[] TAB_COLORS={Color.rgb(255,166,64),Color.rgb(35,204,180),Color.rgb(75,159,255),Color.rgb(183,116,255),Color.rgb(255,191,71)};
+ static final int[] TAB_COLORS={Color.rgb(255,112,18),Color.rgb(26,201,125),Color.rgb(54,151,255),Color.rgb(178,101,255),Color.rgb(255,210,64)};
  int pageAccent=TAB_COLORS[0];
  int pageIndex=0;
  int tabAccent(int index){return TAB_COLORS[Math.max(0,Math.min(index,TAB_COLORS.length-1))];}
