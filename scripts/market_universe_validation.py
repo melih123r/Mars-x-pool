@@ -24,7 +24,9 @@ def universe():
     symbols = re.findall(r'"([^"]+)"', match.group(1))
     if len(symbols) < 200:
         raise RuntimeError("marketAsset universe unexpectedly short: " + str(len(symbols)))
-    return list(dict.fromkeys(symbols))
+    if len(symbols) != len(set(symbols)):
+        raise RuntimeError("Duplicate Android market symbols detected")
+    return symbols
 
 def classify(symbol):
     """Route FX to forex and never mistake synthetic labels for stock tickers."""
@@ -64,11 +66,20 @@ def probe(symbol):
 
 def main():
     symbols = universe()
+    category_counts = {
+        "crypto": sum(s.endswith("-USD") for s in symbols),
+        "forex": sum(s.startswith("FX:") for s in symbols),
+        "indices": sum(s.startswith("INDEX:") for s in symbols),
+        "commodities": sum(s.startswith("CMD:") for s in symbols),
+    }
+    category_counts["other"] = len(symbols) - sum(category_counts.values())
+    print("Catalog inventory:", json.dumps(category_counts, sort_keys=True), flush=True)
     workers = max(1, min(4, int(os.getenv("MARKET_API_WORKERS", "2"))))
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
         results = list(pool.map(probe, symbols))
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# MARS-X full Android symbol-universe API validation", "",
+             "Catalog count: " + str(len(symbols)) + " unique symbols. Inventory: " + json.dumps(category_counts, sort_keys=True), "",
              "Source: Android marketAsset spinner; public, read-only endpoints.", "",
              "| Category | Symbol | Result | Details |", "|---|---|---|---|"]
     lines.extend("| " + " | ".join(row) + " |" for row in results)
