@@ -80,6 +80,16 @@ class AndroidHubTests(unittest.TestCase):
         self.assertNotIn("setRequestMethod(\"POST\")", discovery)
         self.assertIn("discoverMarkets.setOnClickListener(v->discoverCoinbaseProducts())", code)
 
+    def test_coinbase_orderbook_is_read_only_and_uses_decimal_spread(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        section = code.split("void inspectCoinbaseOrderBook(){", 1)[1].split("void inspectCoinbaseCandles(){", 1)[0]
+        self.assertIn("/api/v3/brokerage/market/product_book?product_id=", section)
+        self.assertIn("java.math.BigDecimal", section)
+        self.assertIn("10000", section)
+        self.assertIn('product.matches("[A-Z0-9]{2,20}-[A-Z0-9]{2,12}")', section)
+        self.assertNotIn("createOrder(", section)
+        self.assertNotIn("submitOrder(", section)
+
     def test_coinbase_candle_inspector_is_public_and_crypto_only(self):
         code = FINANCE.read_text(encoding="utf-8")
         inspector = code.split("void inspectCoinbaseCandles(){", 1)[1].split("void lookupOpenFigi(){", 1)[0]
