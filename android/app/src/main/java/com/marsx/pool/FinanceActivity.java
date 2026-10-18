@@ -241,7 +241,7 @@ public final class FinanceActivity extends Activity{
       selected.status="CANCELLED";
       paperOrders.add(new PaperOrder(++paperSequence,selected.symbol,selected.side,selected.type,newQty,newPrice,"PENDING"));
       persistPaperState();if(chartView!=null)chartView.invalidate();paperDashboard();
-     }catch(Exception ex){new AlertDialog.Builder(this).setMessage("Geçersiz fiyat veya miktar; emir değiştirilmedi.").setPositiveButton("Tamam",null).show();}
+     }catch(Exception ex){new AlertDialog.Builder(this).setTitle("Demo emir değiştirilemedi").setMessage(ex instanceof IllegalArgumentException&&ex.getMessage()!=null?ex.getMessage():"Geçersiz fiyat veya miktar; emir değiştirilmedi.").setPositiveButton("Tamam",null).show();}
     }).show();
    }).show();
   }).setNegativeButton("Vazgeç",null).show();
