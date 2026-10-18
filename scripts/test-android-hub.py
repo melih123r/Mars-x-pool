@@ -81,6 +81,16 @@ class AndroidHubTests(unittest.TestCase):
         self.assertIn("parseDemoDecimal(qty.getText().toString())", dialog)
         self.assertIn("parseDemoDecimal(rate.getText().toString())", dialog)
 
+    def test_finance_wallet_exposes_persisted_demo_conversion_balances(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        start = code.index('else if("Cüzdan".equals(name))')
+        end = code.index('else if("Profil".equals(name))', start)
+        wallet = code[start:end]
+        self.assertIn("demoWalletSummary=t(demoBalanceSummary(DEMO_CONVERSION_ASSETS)", wallet)
+        self.assertIn('financeAction(body,"Sanal kripto dönüştür",()->demoConversionDialog())', wallet)
+        self.assertIn("Gerçek bakiyeler bağlı değil", wallet)
+        self.assertNotIn('financeLine(body,coin,"—")', wallet)
+
     def test_finance_subscreens_have_unique_accent_and_dp_navigation(self):
         code = FINANCE.read_text(encoding="utf-8")
         start = code.index("void openFinanceScreen(String name)")
