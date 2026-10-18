@@ -76,6 +76,26 @@ def write_catalog_manifest(symbols):
     destination.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return destination
 
+def self_test_routing():
+    """Offline regression checks for asset-class routing (no API calls)."""
+    cases = {
+        "FX:EUR/USD": ("forex", "EURUSD=X"),
+        "FX:USD/JPY": ("forex", "JPY=X"),
+        "FX:EUR/GBP": ("forex", "EURGBP=X"),
+        "INDEX:SP500": ("indices", "^GSPC"),
+        "CMD:GOLD": ("commodities", "GC=F"),
+        "INDEX:UNKNOWN": ("unsupported", "INDEX:UNKNOWN"),
+        "CMD:UNKNOWN": ("unsupported", "CMD:UNKNOWN"),
+        "BTC-USD": ("crypto", "BTC-USD"),
+        "AAPL": ("stocks", "AAPL"),
+        "FX:INVALID": ("unsupported", "FX:INVALID"),
+    }
+    for symbol, expected in cases.items():
+        actual = classify(symbol)
+        if actual != expected:
+            raise AssertionError(f"{symbol}: expected {expected}, got {actual}")
+    return len(cases)
+
 def probe(symbol):
     group, ticker = classify(symbol)
     if group == 'unsupported':
@@ -87,6 +107,10 @@ def probe(symbol):
         return (group, symbol, "FAIL", str(exc).replace("|", "/").replace("\n", " ")[:120])
 
 def main():
+    checked = self_test_routing()
+    print(f"Offline routing regression checks: {checked} PASS", flush=True)
+    if os.getenv("MARKET_UNIVERSE_OFFLINE_ONLY") == "1":
+        return 0
     symbols = universe()
     category_counts = {
         "crypto": sum(s.endswith("-USD") for s in symbols),
