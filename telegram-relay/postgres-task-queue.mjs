@@ -412,7 +412,7 @@ export class PostgresTaskQueue {
       const recoveryActorRefHash = createHash('sha256')
         .update('lease_recovery', 'utf8')
         .digest('hex');
-      for (const row of recoveredCommands.rows) {
+      for (const row of recoveredCommands.rows || []) {
         const eventKey = `lease_expired_attempt_${row.attempt_count}_${recoveryActorRefHash.slice(0, 16)}`;
         const eventKind = row.status === 'failed' ? 'FAILED' : 'RETRIED';
         await client.query(
