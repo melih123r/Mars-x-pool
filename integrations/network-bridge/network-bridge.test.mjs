@@ -37,3 +37,17 @@ test("notification failures do not invalidate successful API call", async () => 
   const bridge = createNetworkBridge({ ...base, hasConsent: () => true, fetchImpl: async () => ({ ok: true, status: 201 }), onEvent: async () => { throw new Error("mail down"); } });
   assert.equal((await bridge.register({ workerId: "abc" })).ok, true);
 });
+
+test("rejects invalid worker payloads before network access", async () => {
+  let calls = 0;
+  const bridge = createNetworkBridge({ ...base, hasConsent: () => true, fetchImpl: async () => { calls++; return { ok: true, status: 200 }; } });
+  for (const worker of [null, [], {}, { workerId: "" }, { workerId: "../admin" }, { workerId: "x".repeat(129) }]) {
+    assert.deepEqual(await bridge.register(worker), { ok: false, reason: "invalid_worker" });
+  }
+  assert.equal(calls, 0);
+});
+test("rejects invalid request timeout configuration", () => {
+  for (const timeoutMs of [0, -1, 99, 60001, Infinity, NaN, 1.5]) {
+    assert.throws(() => createNetworkBridge({ ...base, hasConsent: () => true, timeoutMs }), /timeoutMs/);
+  }
+});
