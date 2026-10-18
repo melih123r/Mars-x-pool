@@ -485,6 +485,7 @@ public final class FinanceActivity extends Activity{
   if(qty==null||px==null||sym==null||sym.trim().isEmpty()||side==null||qty.signum()<=0||px.signum()<=0||(!"BUY".equals(side)&&!"SELL".equals(side)))return false;
   java.math.BigDecimal value=qty.multiply(px);
   if(value.compareTo(new java.math.BigDecimal("1000000"))>0)return false;
+  if(paperCash==null||paperCash.signum()<0)return false;
   java.math.BigDecimal held=paperHoldings.containsKey(sym)?paperHoldings.get(sym):java.math.BigDecimal.ZERO;
   if(side.equals("BUY")){
    if(paperCash.compareTo(value)<0)return false;
