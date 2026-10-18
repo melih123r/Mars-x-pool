@@ -73,3 +73,66 @@ test('v1 receipts survive upgrade and revocation closes sessions atomically', { 
     await client.end();
   }
 });
+
+
+test('receipt persistence serializes behind consent revocation', { skip: !databaseUrl }, async () => {
+  const setup = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  const revoker = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  const receiver = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  await Promise.all([setup.connect(), revoker.connect(), receiver.connect()]);
+  try {
+    await setup.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE');
+    for (const name of [
+      '001_mock_device_points.sql',
+      '002_session_consent_lifecycle.sql',
+      '003_atomic_consent_transition.sql',
+      '004_atomic_receipt_api.sql'
+    ]) {
+      await setup.query(await readFile(new URL(`./sql/${name}`, import.meta.url), 'utf8'));
+    }
+    await setup.query(
+      `INSERT INTO marsx_network_demo.mock_devices
+       (mock_device_id,device_ref_hash,consent_status,consent_version,consented_at)
+       VALUES ('device_race_000001',$1,'GRANTED','v1',now())`,
+      ['b'.repeat(64)]
+    );
+
+    const receiptArgs = [
+      'receipt_race_0001', 'device_race_000001', 'receipt-race-key-001',
+      1, 'MOCK_HEARTBEAT', 'v1', new Date().toISOString()
+    ];
+    const first = await setup.query(
+      'SELECT * FROM marsx_network_demo.record_test_receipt($1,$2,$3,$4,$5,$6,$7)',
+      receiptArgs
+    );
+    const retry = await setup.query(
+      'SELECT * FROM marsx_network_demo.record_test_receipt($1,$2,$3,$4,$5,$6,$7)',
+      receiptArgs
+    );
+    assert.equal(first.rows[0].inserted, true);
+    assert.equal(retry.rows[0].inserted, false);
+
+    await revoker.query('BEGIN');
+    await revoker.query(
+      'SELECT * FROM marsx_network_demo.record_consent_transition($1,$2,$3,$4,$5,$6)',
+      [
+        'consent_race_0001', 'device_race_000001', 'consent-race-key-001',
+        'REVOKED', 'v1', new Date().toISOString()
+      ]
+    );
+    const blockedReceipt = receiver.query(
+      'SELECT * FROM marsx_network_demo.record_test_receipt($1,$2,$3,$4,$5,$6,$7)',
+      [
+        'receipt_race_0002', 'device_race_000001', 'receipt-race-key-002',
+        1, 'MOCK_RESPONSE', 'v1', new Date().toISOString()
+      ]
+    );
+    await new Promise(resolve => setTimeout(resolve, 50));
+    await revoker.query('COMMIT');
+    await assert.rejects(blockedReceipt, /network_consent_required_for_receipt/);
+  } finally {
+    await revoker.query('ROLLBACK').catch(() => {});
+    await setup.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE').catch(() => {});
+    await Promise.all([setup.end(), revoker.end(), receiver.end()]);
+  }
+});
