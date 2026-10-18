@@ -240,4 +240,20 @@ public class DemoConversionLedgerTest {
         assertEquals(1, ledger.snapshot().size());
     }
 
+    @Test public void failedPersistenceRollbackRestoresAllAssetsAndAllowsRetry() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("2"));
+        ledger.setBalance("ETH", d("3"));
+        ledger.setBalance("USDT", d("100"));
+        java.util.Map<String, BigDecimal> before = ledger.snapshot();
+        ledger.convert("BTC", "ETH", d("0.5"), d("10"), d("0.001"));
+        // Simulate SharedPreferences.commit() failure: Android restores this full snapshot.
+        ledger.restore(before);
+        assertEquals(before, ledger.snapshot());
+        assertEquals(0, ledger.balance("USDT").compareTo(d("100")));
+        ledger.convert("BTC", "ETH", d("0.5"), d("10"), d("0.001"));
+        assertEquals(0, ledger.balance("BTC").compareTo(d("1.5")));
+        assertEquals(0, ledger.balance("USDT").compareTo(d("100")));
+    }
+
 }
