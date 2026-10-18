@@ -136,3 +136,66 @@ test('receipt persistence serializes behind consent revocation', { skip: !databa
     await Promise.all([setup.end(), revoker.end(), receiver.end()]);
   }
 });
+
+
+test('receipts bind idempotently to an active consented session', { skip: !databaseUrl }, async () => {
+  const client = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  await client.connect();
+  try {
+    await client.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE');
+    for (const name of [
+      '001_mock_device_points.sql',
+      '002_session_consent_lifecycle.sql',
+      '003_atomic_consent_transition.sql',
+      '004_atomic_receipt_api.sql',
+      '005_session_receipt_binding.sql'
+    ]) {
+      await client.query(await readFile(new URL(`./sql/${name}`, import.meta.url), 'utf8'));
+    }
+    await client.query(
+      `INSERT INTO marsx_network_demo.mock_devices
+       (mock_device_id,device_ref_hash,consent_status,consent_version,consented_at)
+       VALUES ('device_session_0001',$1,'GRANTED','v1',now())`,
+      ['c'.repeat(64)]
+    );
+    await client.query(
+      `INSERT INTO marsx_network_demo.mock_sessions
+       (session_id,mock_device_id,idempotency_key,consent_version,started_at)
+       VALUES ('session_receipt_001','device_session_0001','session-receipt-key-01','v1',now())`
+    );
+    const recordedAt = new Date().toISOString();
+    const args = [
+      'receipt_session_001', 'session_receipt_001', 'device_session_0001',
+      'receipt-session-key-01', 2, 'MOCK_RESPONSE', 'v1', recordedAt
+    ];
+    const first = await client.query(
+      'SELECT * FROM marsx_network_demo.record_session_receipt($1,$2,$3,$4,$5,$6,$7,$8)', args
+    );
+    const retry = await client.query(
+      'SELECT * FROM marsx_network_demo.record_session_receipt($1,$2,$3,$4,$5,$6,$7,$8)', args
+    );
+    assert.equal(first.rows[0].inserted, true);
+    assert.equal(retry.rows[0].inserted, false);
+    const link = await client.query(
+      'SELECT session_id FROM marsx_network_demo.receipt_session_links WHERE receipt_id=$1',
+      [args[0]]
+    );
+    assert.equal(link.rows[0].session_id, args[1]);
+
+    await client.query(
+      `UPDATE marsx_network_demo.mock_sessions
+          SET session_status='CLOSED',ended_at=now()
+        WHERE session_id='session_receipt_001'`
+    );
+    await assert.rejects(
+      client.query(
+        'SELECT * FROM marsx_network_demo.record_session_receipt($1,$2,$3,$4,$5,$6,$7,$8)',
+        ['receipt_session_002', args[1], args[2], 'receipt-session-key-02', 1, 'MOCK_HEARTBEAT', 'v1', new Date().toISOString()]
+      ),
+      /network_active_session_required_for_receipt/
+    );
+  } finally {
+    await client.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE').catch(() => {});
+    await client.end();
+  }
+});
