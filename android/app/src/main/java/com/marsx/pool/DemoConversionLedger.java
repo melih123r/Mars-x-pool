@@ -49,6 +49,9 @@ public final class DemoConversionLedger {
         BigDecimal received = quantity.multiply(rate)
                 .multiply(BigDecimal.ONE.subtract(fee)).setScale(12, RoundingMode.DOWN);
         if (received.signum() <= 0) throw new IllegalArgumentException("dust conversion");
+        // Demo asset precision is limited to 12 decimal places. Never create a
+        // balance that cannot be represented by the persisted wallet format.
+        if (quantity.stripTrailingZeros().scale() > 12) throw new IllegalArgumentException("quantity precision");
         BigDecimal targetBalance = balances.getOrDefault(to, BigDecimal.ZERO);
         // Calculate both values before committing either update.
         BigDecimal newSource = held.subtract(quantity);
