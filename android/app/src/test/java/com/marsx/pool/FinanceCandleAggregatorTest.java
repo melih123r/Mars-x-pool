@@ -28,6 +28,11 @@ public class FinanceCandleAggregatorTest {
             c(0, 10, 10, 10, 10, 1),
             c(60, 10, 10, 10, 10, 1)), 60, 180).isEmpty());
     }
+    @Test(expected=IllegalArgumentException.class) public void rejectsMissingMiddleSourceBar() {
+        FinanceCandleAggregator.aggregate(Arrays.asList(
+            c(0, 10, 10, 10, 10, 1),
+            c(120, 10, 10, 10, 10, 1)), 60, 180);
+    }
     @Test(expected=IllegalArgumentException.class) public void rejectsOutOfOrder() {
         FinanceCandleAggregator.aggregate(Arrays.asList(
             c(60, 10, 10, 10, 10, 1),
