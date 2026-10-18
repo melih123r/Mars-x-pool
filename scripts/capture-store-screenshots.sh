@@ -13,8 +13,28 @@ adb shell input keyevent KEYCODE_WAKEUP
 adb shell wm dismiss-keyguard
 adb shell input keyevent 82
 adb shell am force-stop com.marsx.finance
-adb shell am start -W -n com.marsx.finance/com.marsx.pool.FinanceActivity
-
+# FinanceActivity is deliberately non-exported. Launch the public entry point
+# and navigate through the same UI a real user sees.
+adb shell am start -W -n com.marsx.finance/com.marsx.pool.MainActivity
+sleep 3
+adb shell uiautomator dump /sdcard/marsx-launch.xml >/dev/null
+adb shell cat /sdcard/marsx-launch.xml > "$output_dir/launch.xml"
+finance_bounds="$(python3 - "$output_dir/launch.xml" <<'PY'
+import sys, xml.etree.ElementTree as ET
+root=ET.parse(sys.argv[1]).getroot()
+for node in root.iter("node"):
+    if node.attrib.get("text") == "Open Finance":
+        print(node.attrib.get("bounds",""))
+        break
+PY
+)"
+if [[ "$finance_bounds" =~ ^\\[([0-9]+),([0-9]+)\\]\\[([0-9]+),([0-9]+)\\]$ ]]; then
+  adb shell input tap "$(( (BASH_REMATCH[1] + BASH_REMATCH[3]) / 2 ))" "$(( (BASH_REMATCH[2] + BASH_REMATCH[4]) / 2 ))"
+else
+  adb logcat -d > "$output_dir/logcat.txt"
+  echo "Open Finance button not visible on launcher" >&2
+  exit 1
+fi
 sleep 2
 adb exec-out screencap -p > "$output_dir/00-launch.png"
 adb shell uiautomator dump /sdcard/marsx-window.xml >/dev/null
