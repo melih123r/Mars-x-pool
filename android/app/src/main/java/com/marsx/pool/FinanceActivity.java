@@ -596,13 +596,13 @@ public final class FinanceActivity extends Activity{
      try{
       String raw=input.getText().toString().trim();if(!raw.matches("[0-9]+(\\.[0-9]{1,6})?"))throw new IllegalArgumentException();
       java.math.BigDecimal entered=new java.math.BigDecimal(raw);java.math.BigDecimal newPrice=action==2?selected.price:entered,newQty=action==2?entered:selected.qty;
-      if(entered.signum()<=0||newQty.multiply(newPrice).compareTo(new java.math.BigDecimal("1000000"))>0)throw new IllegalArgumentException();
+      if(!"PENDING".equals(selected.status)||selected.qty==null||selected.price==null||newQty==null||newPrice==null||newQty.signum()<=0||newPrice.signum()<=0||newQty.multiply(newPrice).compareTo(new java.math.BigDecimal("1000000"))>0)throw new IllegalArgumentException("Emir artık beklemede değil veya miktar/fiyat geçersiz");
       java.math.BigDecimal reserved=java.math.BigDecimal.ZERO;
       if("BUY".equals(selected.side)){
-       for(PaperOrder o:paperOrders)if(o!=selected&&"PENDING".equals(o.status)&&"BUY".equals(o.side))reserved=reserved.add(o.qty.multiply(o.price));
+       for(PaperOrder o:paperOrders)if(o!=null&&o!=selected&&"PENDING".equals(o.status)&&"BUY".equals(o.side)&&o.qty!=null&&o.price!=null&&o.qty.signum()>0&&o.price.signum()>0)reserved=reserved.add(o.qty.multiply(o.price));
        if(paperCash.compareTo(reserved.add(newQty.multiply(newPrice)))<0)throw new IllegalArgumentException("Yetersiz demo bakiye");
       }else if("SELL".equals(selected.side)){
-       for(PaperOrder o:paperOrders)if(o!=selected&&"PENDING".equals(o.status)&&"SELL".equals(o.side)&&selected.symbol.equals(o.symbol))reserved=reserved.add(o.qty);
+       for(PaperOrder o:paperOrders)if(o!=null&&o!=selected&&"PENDING".equals(o.status)&&"SELL".equals(o.side)&&selected.symbol!=null&&selected.symbol.equals(o.symbol)&&o.qty!=null&&o.qty.signum()>0)reserved=reserved.add(o.qty);
        if(paperHoldings.getOrDefault(selected.symbol,java.math.BigDecimal.ZERO).compareTo(reserved.add(newQty))<0)throw new IllegalArgumentException("Yetersiz demo pozisyon");
       }
       selected.status="CANCELLED";
