@@ -513,7 +513,7 @@ public final class FinanceActivity extends Activity{
    for(String key:paperCost.keySet())costs.put(key,paperCost.get(key).toPlainString());
    data.put("holdings",holdings);data.put("costs",costs);
    JSONArray orders=new JSONArray();
-   for(PaperOrder o:paperOrders){JSONObject item=new JSONObject();item.put("id",o.id);item.put("symbol",o.symbol);item.put("side",o.side);item.put("type",o.type);item.put("qty",o.qty.toPlainString());item.put("price",o.price.toPlainString());item.put("status",o.status);item.put("createdAt",o.createdAtEpochSeconds);orders.put(item);}
+   for(PaperOrder o:paperOrders){if(o==null||o.qty==null||o.price==null||o.qty.signum()<=0||o.price.signum()<=0)continue;JSONObject item=new JSONObject();item.put("id",o.id);item.put("symbol",o.symbol);item.put("side",o.side);item.put("type",o.type);item.put("qty",o.qty.toPlainString());item.put("price",o.price.toPlainString());item.put("status",o.status);item.put("createdAt",o.createdAtEpochSeconds);orders.put(item);}
    data.put("orders",orders);
    getPreferences(MODE_PRIVATE).edit().putString("paper_state_v1",data.toString()).apply();
   }catch(Exception ignored){}
