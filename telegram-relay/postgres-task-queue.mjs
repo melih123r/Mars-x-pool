@@ -189,6 +189,40 @@ export class PostgresTaskQueue {
       client.release();
     }
   }
+  async completeCommand(commandId, workerId) {
+    if (typeof commandId !== 'string' || !/^telegram-\d+-(chat|task)$/.test(commandId)) throw new Error('invalid_command_id');
+    if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
+    const actorRefHash = createHash('sha256').update(workerId, 'utf8').digest('hex');
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await client.query(
+        `UPDATE marsx_telegram.command_inbox
+         SET status='completed',worker_id=NULL,lease_until=NULL,last_error_code=NULL,updated_at=now()
+         WHERE command_id=$1 AND worker_id=$2 AND status='claimed' AND lease_until > now()
+         RETURNING command_id,update_id,command_kind,project,status,attempt_count`,
+        [commandId, workerId]
+      );
+      const row = result.rows[0] || null;
+      if (row) {
+        const eventKey = `complete_attempt_${row.attempt_count}_${actorRefHash.slice(0, 16)}`;
+        await client.query(
+          `INSERT INTO marsx_telegram.command_audit_log
+             (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,metadata)
+           VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,'COMPLETED',10,$3,$4)
+           ON CONFLICT (command_id,event_key) DO NOTHING`,
+          [row.command_id, eventKey, actorRefHash, { attemptCount: row.attempt_count }]
+        );
+      }
+      await client.query('COMMIT');
+      return row;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
   async enqueueAtomic({ updateId, tasks }) {
     if (!Number.isSafeInteger(updateId) || updateId < 0 || !Array.isArray(tasks) || tasks.length !== LANES.length) throw new Error('invalid_intake');
     if (typeof tasks[0]?.message !== 'string' || !tasks[0].message.trim() || tasks[0].message.length > 4000) throw new Error('invalid_message');
