@@ -122,3 +122,24 @@ test("worker ID is read once and throwing getters fail closed", async () => {
   assert.equal(reads, 1);
   assert.equal(calls, 1);
 });
+
+test("session getters are read once and throwing getters fail closed", async () => {
+  let calls = 0;
+  const bridge = createNetworkBridge({ ...base, hasConsent: () => true,
+    getSession: async () => Object.defineProperty({}, "token", { get() { throw Error("private"); } }),
+    fetchImpl: async () => { calls++; throw Error("unexpected network"); } });
+  assert.deepEqual(await bridge.register({ workerId: "safe" }), { ok: false, reason: "license_required" });
+  assert.equal(calls, 0);
+  let tokenReads = 0, installReads = 0, captured;
+  const stable = createNetworkBridge({ ...base, hasConsent: () => true,
+    getSession: async () => ({
+      get token() { tokenReads++; return tokenReads === 1 ? "test" : "unsafe\\nheader"; },
+      get installId() { installReads++; return installReads === 1 ? "install" : "unsafe\\nheader"; }
+    }),
+    fetchImpl: async (_, options) => { captured = options.headers; return { ok: true, status: 200 }; } });
+  assert.equal((await stable.heartbeat({ workerId: "safe" })).ok, true);
+  assert.equal(tokenReads, 1);
+  assert.equal(installReads, 1);
+  assert.equal(captured.authorization, "License test");
+  assert.equal(captured["x-install-id"], "install");
+});
