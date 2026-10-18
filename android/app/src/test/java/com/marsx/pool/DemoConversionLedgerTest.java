@@ -7,6 +7,26 @@ import static org.junit.Assert.*;
 public class DemoConversionLedgerTest {
     private static BigDecimal d(String value) { return new BigDecimal(value); }
 
+    @Test public void rejectsUnpersistableBalancePrecisionWithoutMutation() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        try { ledger.setBalance("BTC", d("1.0000000000001")); fail("precision"); }
+        catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("BTC").compareTo(d("1")));
+    }
+
+    @Test public void rejectsUnpersistableRestoreAtomically() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        java.util.Map<String, BigDecimal> saved = new java.util.HashMap<>();
+        saved.put("ETH", d("2"));
+        saved.put("USDT", d("0.0000000000001"));
+        try { ledger.restore(saved); fail("precision"); }
+        catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("BTC").compareTo(d("1")));
+        assertEquals(0, ledger.balance("ETH").signum());
+    }
+
     @Test public void conversionUpdatesBothBalances() {
         DemoConversionLedger ledger = new DemoConversionLedger();
         ledger.setBalance("BTC", d("2"));
