@@ -139,19 +139,23 @@ public final class FinanceActivity extends Activity{
    final java.util.ArrayList<String> products=new java.util.ArrayList<>();
    String error=null;HttpURLConnection connection=null;
    try{
-    connection=(HttpURLConnection)new URL("https://api.coinbase.com/api/v3/brokerage/market/products?limit=250").openConnection();
-    connection.setConnectTimeout(6000);connection.setReadTimeout(8000);connection.setRequestProperty("Accept","application/json");
-    if(connection.getResponseCode()!=200)throw new IOException("HTTP "+connection.getResponseCode());
-    JSONObject payload=new JSONObject(read(connection.getInputStream()));
-    org.json.JSONArray entries=payload.optJSONArray("products");
-    if(entries==null)throw new IOException("Ürün listesi bulunamadı");
     java.util.LinkedHashSet<String> unique=new java.util.LinkedHashSet<>();
-    for(int i=0;i<entries.length();i++){
-     JSONObject item=entries.optJSONObject(i);if(item==null)continue;
-     String id=item.optString("product_id","").trim().toUpperCase(Locale.ROOT);
-     if(!id.matches("[A-Z0-9]{2,20}-[A-Z0-9]{2,12}"))continue;
-     if(item.optBoolean("is_disabled",false)||item.optBoolean("trading_disabled",false))continue;
-     unique.add(id);
+    for(int page=0;page<8;page++){
+     connection=(HttpURLConnection)new URL("https://api.coinbase.com/api/v3/brokerage/market/products?limit=250&offset="+(page*250)).openConnection();
+     connection.setConnectTimeout(6000);connection.setReadTimeout(8000);connection.setRequestProperty("Accept","application/json");
+     if(connection.getResponseCode()!=200)throw new IOException("HTTP "+connection.getResponseCode());
+     JSONObject payload=new JSONObject(read(connection.getInputStream()));
+     org.json.JSONArray entries=payload.optJSONArray("products");
+     if(entries==null)throw new IOException("Ürün listesi bulunamadı");
+     for(int i=0;i<entries.length();i++){
+      JSONObject item=entries.optJSONObject(i);if(item==null)continue;
+      String id=item.optString("product_id","").trim().toUpperCase(Locale.ROOT);
+      if(!id.matches("[A-Z0-9]{2,20}-[A-Z0-9]{2,12}"))continue;
+      if(item.optBoolean("is_disabled",false)||item.optBoolean("trading_disabled",false))continue;
+      unique.add(id);
+     }
+     connection.disconnect();connection=null;
+     if(entries.length()<250)break;
     }
     products.addAll(unique);java.util.Collections.sort(products);
    }catch(Exception e){error="Katalog alınamadı; yerel sembol listesi korunuyor.";}
@@ -159,7 +163,7 @@ public final class FinanceActivity extends Activity{
    final String failure=error;
    runOnUiThread(()->{if(!dialog.isShowing())return;
     if(failure!=null||products.isEmpty()){status.setText(failure!=null?failure:"Doğrulanmış ürün bulunamadı.");return;}
-    status.setText("Coinbase API • "+products.size()+" benzersiz ürün (ilk sayfa, canlı işlem kapalı)");
+    status.setText("Coinbase API • "+products.size()+" benzersiz ürün (en fazla 8 sayfa, canlı işlem kapalı)");
     list.setAdapter(new android.widget.ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,products));
     list.setOnItemClickListener((parent,view,position,id)->{
      String chosen=products.get(position);boolean found=false;
