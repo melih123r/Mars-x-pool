@@ -31,7 +31,7 @@ public final class FinanceActivity extends Activity{
   return ledger;
  }
  String demoBalanceSummary(String[] assets){
-  StringBuilder b=new StringBuilder("SANAL BAKİYELER\\n");
+  StringBuilder b=new StringBuilder("SANAL BAKİYELER\n");
   for(String asset:assets)b.append(asset).append(": ").append(demoConversionLedger.balance(asset).stripTrailingZeros().toPlainString()).append("  ");
   return b.toString();
  }
