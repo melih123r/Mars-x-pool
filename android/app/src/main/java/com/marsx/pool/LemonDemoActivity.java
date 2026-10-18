@@ -49,6 +49,10 @@ public final class LemonDemoActivity extends Activity {
     root.addView(periods);
     chart = new ChartView();
     root.addView(chart,new LinearLayout.LayoutParams(-1,420));
+    TextView legend = new TextView(this);
+    legend.setText("Mumlar: örnek OHLC  •  Mavi çizgi: SMA 3 (demo)");
+    legend.setTextColor(Color.LTGRAY);
+    root.addView(legend);
     TextView status = new TextView(this);
     status.setText("Lemon API: bağlantı doğrulanmadı\nAlış / Satış: kapalı\nGrafik: yerel örnek seri");
     status.setTextColor(Color.LTGRAY);status.setPadding(0,22,0,0);
@@ -86,6 +90,20 @@ public final class LemonDemoActivity extends Activity {
         paint.setStrokeWidth(Math.max(7,(right-left)/count*0.55f));
         canvas.drawLine(x,yOpen,x,yClose,paint);
         paint.setStrokeWidth(3);
+      }
+      // SMA(3) overlay calculated exclusively from offline fixture closes.
+      paint.setColor(Color.rgb(95,190,255));
+      paint.setStrokeWidth(2);
+      paint.setStyle(Paint.Style.STROKE);
+      for(int i=Math.max(first+1,2);i<closes.length;i++){
+        if(i-1<2)continue;
+        double prev=(closes[i-3]+closes[i-2]+closes[i-1])/3.0;
+        double current=(closes[i-2]+closes[i-1]+closes[i])/3.0;
+        float x0=left+(right-left)*(i-1-first+0.5f)/count;
+        float x1=left+(right-left)*(i-first+0.5f)/count;
+        float y0=bottom-(float)((prev-min+0.35)/(span+0.7))*(bottom-top);
+        float y1=bottom-(float)((current-min+0.35)/(span+0.7))*(bottom-top);
+        canvas.drawLine(x0,y0,x1,y1,paint);
       }
       paint.setStyle(Paint.Style.FILL);
     }
