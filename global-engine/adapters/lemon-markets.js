@@ -27,6 +27,10 @@ const validateIdempotencyKey=(value)=>{
   if(typeof value!=="string"||value.length<1||value.length>100||/[\r\n]/.test(value)) throw new Error("invalid idempotency key");
   return value;
 };
+const validateHeaderValue=(value,name,maxLength)=>{
+  if(typeof value!=="string"||value.length<1||value.length>maxLength||/[\r\n]/.test(value)) throw new Error(`invalid ${name}`);
+  return value;
+};
 const nonEmpty=(v,name)=>{ if(!v) throw new Error(`${name} required`); return v; };
 const validateRedirectUri=(value,name,allowedHttpsHosts=new Set())=>{
   nonEmpty(value,name);
@@ -64,13 +68,14 @@ export class LemonBrokerAdapter extends VenueAdapter {
 
   headers({principal,justification,idempotencyKey,body=false}={}) {
     if(!this.apiKey) throw new Error("lemon.markets API credential is not configured");
-    nonEmpty(principal,"privacy principal");
-    nonEmpty(justification,"privacy justification");
+    const safeApiKey=validateHeaderValue(this.apiKey,"API credential",4096);
+    const safePrincipal=validateHeaderValue(principal,"privacy principal",256);
+    const safeJustification=validateHeaderValue(justification,"privacy justification",256);
     return {
-      "Authorization":`Bearer ${this.apiKey}`,
+      "Authorization":`Bearer ${safeApiKey}`,
       "Accept":"application/json",
-      "LMG-Data-Privacy-Access-Principal":String(principal),
-      "LMG-Data-Privacy-Access-Justification":String(justification),
+      "LMG-Data-Privacy-Access-Principal":safePrincipal,
+      "LMG-Data-Privacy-Access-Justification":safeJustification,
       ...(idempotencyKey?{"Idempotency-Key":String(idempotencyKey)}:{}),
       ...(body?{"Content-Type":"application/json"}:{})
     };
