@@ -20,8 +20,12 @@ export function createNetworkBridge({ apiBase, getSession, hasConsent, fetchImpl
     if (consent !== true) return { ok: false, reason: "consent_required" };
     let session;
     try { session = await getSession(); } catch { return { ok: false, reason: "license_required" }; }
-    if (typeof session?.token !== "string" || !/^[A-Za-z0-9._~+\/-]{1,512}$/.test(session.token) ||
-        typeof session?.installId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(session.installId))
+    // Snapshot untrusted session properties once. Getters/proxies can throw or change values.
+    let token, installId;
+    try { token = session?.token; installId = session?.installId; }
+    catch { return { ok: false, reason: "license_required" }; }
+    if (typeof token !== "string" || !/^[A-Za-z0-9._~+\/-]{1,512}$/.test(token) ||
+        typeof installId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(installId))
       return { ok: false, reason: "license_required" };
     try { consent = await hasConsent(); } catch { return { ok: false, reason: "consent_required" }; }
     if (consent !== true) return { ok: false, reason: "consent_required" };
@@ -32,8 +36,8 @@ export function createNetworkBridge({ apiBase, getSession, hasConsent, fetchImpl
         method: "POST", redirect: "error", signal: controller.signal,
         headers: {
           "content-type": "application/json",
-          authorization: "License " + session.token,
-          "x-install-id": session.installId
+          authorization: "License " + token,
+          "x-install-id": installId
         },
         body: JSON.stringify({ workerId })
       });
