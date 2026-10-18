@@ -12,6 +12,7 @@ public final class DemoConversionLedger {
     public synchronized void setBalance(String asset, BigDecimal amount) {
         String key = normalize(asset);
         requireNonnegative(amount, "balance");
+        requirePrecision(amount, "balance");
         balances.put(key, amount);
     }
     public synchronized BigDecimal balance(String asset) {
@@ -28,6 +29,7 @@ public final class DemoConversionLedger {
         for (Map.Entry<String, BigDecimal> entry : saved.entrySet()) {
             String asset = normalize(entry.getKey());
             requireNonnegative(entry.getValue(), "balance");
+            requirePrecision(entry.getValue(), "balance");
             if (checked.put(asset, entry.getValue()) != null)
                 throw new IllegalArgumentException("duplicate asset");
         }
@@ -51,7 +53,7 @@ public final class DemoConversionLedger {
         if (received.signum() <= 0) throw new IllegalArgumentException("dust conversion");
         // Demo asset precision is limited to 12 decimal places. Never create a
         // balance that cannot be represented by the persisted wallet format.
-        if (quantity.stripTrailingZeros().scale() > 12) throw new IllegalArgumentException("quantity precision");
+        requirePrecision(quantity, "quantity");
         BigDecimal targetBalance = balances.getOrDefault(to, BigDecimal.ZERO);
         // Calculate both values before committing either update.
         BigDecimal newSource = held.subtract(quantity);
@@ -59,6 +61,9 @@ public final class DemoConversionLedger {
         balances.put(from, newSource);
         balances.put(to, newTarget);
         return received;
+    }
+    private static void requirePrecision(BigDecimal amount, String field) {
+        if (amount.stripTrailingZeros().scale() > 12) throw new IllegalArgumentException(field + " precision");
     }
     private static String normalize(String asset) {
         if (asset == null || asset.trim().isEmpty()) throw new IllegalArgumentException("asset");
