@@ -259,7 +259,7 @@ test('migration runner records checksums and rolls back failed DDL atomically', 
     const state = await client.query(
       `SELECT
          to_regclass('marsx_finance.runner_probe') IS NOT NULL AS probe_exists,
-         (SELECT count(*)::integer FROM marsx_finance.schema_migrations WHERE migration_version=7) AS broken_registry_rows`
+         (SELECT count(*)::integer FROM marsx_finance.schema_migrations WHERE version=7) AS broken_registry_rows`
     );
     assert.deepEqual(state.rows[0], { probe_exists: true, broken_registry_rows: 0 });
   } finally {
