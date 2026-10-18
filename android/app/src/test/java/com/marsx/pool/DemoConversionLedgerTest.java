@@ -218,4 +218,26 @@ public class DemoConversionLedgerTest {
         assertEquals(0, ledger.balance("BTC").signum());
     }
 
+    @Test public void dustConversionDoesNotDebitSourceBalance() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        try {
+            ledger.convert("BTC", "ETH", d("0.0000000000001"), d("1"), d("0.001"));
+            fail("dust conversion must be rejected");
+        } catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("BTC").compareTo(d("1")));
+        assertEquals(0, ledger.balance("ETH").signum());
+    }
+
+    @Test public void normalizedSameAssetConversionCannotCreateFunds() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        try {
+            ledger.convert(" btc ", "BTC", d("0.5"), d("10"), BigDecimal.ZERO);
+            fail("same asset conversion must be rejected");
+        } catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("BTC").compareTo(d("1")));
+        assertEquals(1, ledger.snapshot().size());
+    }
+
 }
