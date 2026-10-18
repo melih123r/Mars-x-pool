@@ -69,8 +69,10 @@ class AndroidHubTests(unittest.TestCase):
         start = code.index("void discoverCoinbaseProducts()")
         end = code.index("void loadPublicPrices(", start)
         discovery = code[start:end]
-        self.assertIn("/api/v3/brokerage/market/products?limit=250", discovery)
+        self.assertIn("/api/v3/brokerage/market/products?limit=250&offset=", discovery)
         self.assertIn("new java.util.LinkedHashSet<>()", discovery)
+        self.assertIn("page<8", discovery)
+        self.assertIn("entries.length()<250", discovery)
         self.assertIn('connection.setConnectTimeout(6000)', discovery)
         self.assertIn('connection.setReadTimeout(8000)', discovery)
         self.assertIn('item.optBoolean("trading_disabled",false)', discovery)
