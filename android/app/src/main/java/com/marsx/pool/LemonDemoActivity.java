@@ -23,7 +23,7 @@ public final class LemonDemoActivity extends Activity {
     root.setPadding(28,32,28,24);
     root.setBackgroundColor(Color.rgb(15,18,24));
     TextView title = new TextView(this);
-    title.setText("MARS-X Finance  •  Lemon Sandbox");
+    title.setText("MARS-X Finance  •  Demo");
     title.setTextSize(20); title.setTextColor(Color.WHITE);
     root.addView(title);
     TextView warning = new TextView(this);
@@ -65,7 +65,7 @@ public final class LemonDemoActivity extends Activity {
     indicators.setPadding(0,12,0,12);
     root.addView(indicators);
     TextView status = new TextView(this);
-    status.setText("Lemon API: bağlantı doğrulanmadı\nAlış / Satış: kapalı\nGrafik: yerel örnek seri");
+    status.setText("Piyasa veri bağlantısı: doğrulanmadı\nAlış / Satış: kapalı\nGrafik: yerel örnek seri");
     status.setTextColor(Color.LTGRAY);status.setPadding(0,22,0,0);
     root.addView(status);
     setContentView(root);
