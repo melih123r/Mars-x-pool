@@ -551,6 +551,7 @@ public final class FinanceActivity extends Activity{
    markedValue=markedValue.add(held.multiply(last));
    unrealized=unrealized.add(held.multiply(last).subtract(cost));
   }
+  out.append("Fiyatı doğrulanamayan açık pozisyon: ").append(missingQuotes).append(" (toplam hesap değeri ve getiri eksik olabilir)\\n");
   out.append("Gerçekleşmemiş K/Z (fiyatı bulunanlar): $").append(unrealized.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\n");
   if(missingQuotes==0){
    out.append("Tahmini toplam hesap değeri: $").append(paperCash.add(markedValue).setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\n");
