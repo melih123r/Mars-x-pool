@@ -73,7 +73,7 @@ def write_catalog_manifest(symbols):
     }
     destination = Path("reports/market-catalog-manifest.json")
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\\n", encoding="utf-8")
+    destination.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return destination
 
 def probe(symbol):
