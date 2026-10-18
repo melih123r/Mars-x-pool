@@ -53,11 +53,30 @@ public final class LemonDemoActivity extends Activity {
     legend.setText("Mumlar: örnek OHLC  •  Mavi çizgi: SMA 3 (demo)");
     legend.setTextColor(Color.LTGRAY);
     root.addView(legend);
+    TextView indicators = new TextView(this);
+    indicators.setText(String.format(Locale.US, "RSI 5 (örnek): %.1f  •  Hacim: veri yok", rsi(closes, 5)));
+    indicators.setTextColor(Color.rgb(95,190,255));
+    indicators.setPadding(0,12,0,12);
+    root.addView(indicators);
     TextView status = new TextView(this);
     status.setText("Lemon API: bağlantı doğrulanmadı\nAlış / Satış: kapalı\nGrafik: yerel örnek seri");
     status.setTextColor(Color.LTGRAY);status.setPadding(0,22,0,0);
     root.addView(status);
     setContentView(root);
+  }
+  /** RSI based on offline fixture closing prices; no market data or volume is inferred. */
+  static double rsi(double[] values, int period) {
+    if (values == null || period <= 0 || values.length <= period) return 50.0;
+    double gains = 0.0, losses = 0.0;
+    for (int i = values.length - period; i < values.length; i++) {
+      double delta = values[i] - values[i-1];
+      gains += Math.max(0,delta);
+      losses += Math.max(0,-delta);
+    }
+    if (gains == 0 && losses == 0) return 50.0;
+    if (losses == 0) return 100.0;
+    if (gains == 0) return 0.0;
+    return 100.0 - 100.0 / (1.0 + gains / losses);
   }
   private final class ChartView extends View {
     private final Paint paint = new Paint(3);
