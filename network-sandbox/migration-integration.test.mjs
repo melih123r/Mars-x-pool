@@ -257,3 +257,71 @@ test('session close is idempotent and blocks later session receipts', { skip: !d
     await client.end();
   }
 });
+
+
+test('consent revocation persists one append-only event for every active session', { skip: !databaseUrl }, async () => {
+  const client = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  await client.connect();
+  try {
+    await client.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE');
+    for (const name of [
+      '001_mock_device_points.sql',
+      '002_session_consent_lifecycle.sql',
+      '003_atomic_consent_transition.sql',
+      '004_atomic_receipt_api.sql',
+      '005_session_receipt_binding.sql',
+      '006_atomic_session_close.sql',
+      '007_revocation_session_events.sql'
+    ]) {
+      await assert.doesNotReject(async () => {
+        await client.query(await readFile(new URL(`./sql/${name}`, import.meta.url), 'utf8'));
+      });
+    }
+    await client.query(
+      `INSERT INTO marsx_network_demo.mock_devices
+       (mock_device_id,device_ref_hash,consent_status,consent_version,consented_at)
+       VALUES ('device_revoke_0001',$1,'GRANTED','v1',now())`,
+      ['7'.repeat(64)]
+    );
+    for (const sessionId of ['session_revoke_001', 'session_revoke_002']) {
+      await client.query(
+        `INSERT INTO marsx_network_demo.mock_sessions
+         (session_id,mock_device_id,idempotency_key,consent_version,started_at)
+         VALUES ($1,'device_revoke_0001',$2,'v1',now())`,
+        [sessionId, `session-key-${sessionId}`]
+      );
+    }
+    const args = [
+      'consent-revoke-0001', 'device_revoke_0001', 'consent-revoke-key-01',
+      'REVOKED', 'v1', new Date().toISOString()
+    ];
+    const first = await client.query(
+      'SELECT * FROM marsx_network_demo.record_consent_transition($1,$2,$3,$4,$5,$6)', args
+    );
+    const retry = await client.query(
+      'SELECT * FROM marsx_network_demo.record_consent_transition($1,$2,$3,$4,$5,$6)', args
+    );
+    assert.equal(first.rows[0].inserted, true);
+    assert.equal(retry.rows[0].inserted, false);
+    const events = await client.query(
+      `SELECT event_kind,consent_event_id,count(*)::integer AS count
+         FROM marsx_network_demo.session_events
+        GROUP BY event_kind,consent_event_id`
+    );
+    assert.deepEqual(events.rows, [{
+      event_kind: 'REVOKED', consent_event_id: args[0], count: 2
+    }]);
+    await assert.rejects(
+      client.query(
+        `UPDATE marsx_network_demo.session_events
+            SET event_time=event_time + interval '1 second'
+          WHERE consent_event_id=$1`,
+        [args[0]]
+      ),
+      /network_session_events_are_append_only/
+    );
+  } finally {
+    await client.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE').catch(() => {});
+    await client.end();
+  }
+});
