@@ -13,6 +13,15 @@ export async function flushOutbox({ queue, token, chatId, send = fetch, limit = 
   // Never deliver if storage did not return a valid atomic claim/lease.
   if (!claim || typeof claim.token !== 'string' || !claim.token.trim() || !Array.isArray(claim.events))
     throw new Error('outbox_claim_invalid');
+  // Validate the entire batch before any external side effect. A malformed
+  // later event must not cause a partially delivered batch.
+  const seen = new Set();
+  for (const event of claim.events) {
+    if (!event || !Number.isSafeInteger(event.event_id) || event.event_id <= 0 ||
+        !Number.isSafeInteger(event.update_id) || event.update_id < 0 ||
+        seen.has(event.event_id)) throw new Error('outbox_event_invalid');
+    seen.add(event.event_id);
+  }
   const results = [];
   for (const event of claim.events) {
     try {
