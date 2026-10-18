@@ -142,9 +142,21 @@ def main():
              "Source: Android marketAsset spinner; public, read-only endpoints.", "",
              "| Category | Symbol | Result | Details |", "|---|---|---|---|"]
     lines.extend("| " + " | ".join(row) + " |" for row in results)
+    # Publish truthful coverage: unsupported/unverified are never counted as live.
+    status_counts = {status: sum(row[2] == status for row in results)
+                     for status in ("PASS", "FAIL", "UNSUPPORTED")}
+    coverage = round(100 * status_counts["PASS"] / len(results), 2) if results else 0
+    lines.insert(3, f"Verified live candle coverage: {coverage}% ({status_counts['PASS']}/{len(results)}).")
+    lines.insert(4, "UNSUPPORTED instruments are catalog-only; FAIL instruments require provider review.")
     failed = [row for row in results if row[2] == "FAIL"]
     summary = f"Tested: {len(results)}; PASS: {sum(row[2] == 'PASS' for row in results)}; FAIL: {len(failed)}"
     REPORT.write_text(summary + "\n\n" + "\n".join(lines) + "\n", encoding="utf-8")
+    Path("reports/market-coverage-summary.json").write_text(
+        json.dumps({"total": len(results), "verified_live": status_counts["PASS"],
+                    "failed_provider": status_counts["FAIL"],
+                    "unsupported": status_counts["UNSUPPORTED"],
+                    "verified_live_percent": coverage}, indent=2) + "\n",
+        encoding="utf-8")
     print(summary, flush=True)
     for row in failed:
         print("FAIL", row[0], row[1], row[3], flush=True)
