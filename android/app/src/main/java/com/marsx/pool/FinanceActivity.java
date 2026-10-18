@@ -33,14 +33,17 @@ public final class FinanceActivity extends Activity{
  private static final String[] DEMO_CONVERSION_ASSETS={"BTC","ETH","USDT","SOL","BNB","DOGE"};
  void restoreDemoConversionBalances(){
   android.content.SharedPreferences prefs=getPreferences(MODE_PRIVATE);
-  for(String asset:DEMO_CONVERSION_ASSETS){
-   String stored=prefs.getString("demo_conversion_balance_"+asset,null);
-   if(stored==null)continue;
-   try{
+  java.util.Map<String,java.math.BigDecimal> candidate=new java.util.HashMap<>(demoConversionLedger.snapshot());
+  try{
+   for(String asset:DEMO_CONVERSION_ASSETS){
+    String stored=prefs.getString("demo_conversion_balance_"+asset,null);
+    if(stored==null)continue;
     java.math.BigDecimal value=new java.math.BigDecimal(stored);
-    if(value.signum()>=0)demoConversionLedger.setBalance(asset,value);
-   }catch(NumberFormatException ignored){/* Corrupt local demo balance: keep initial demo amount. */}
-  }
+    if(value.signum()<0)throw new IllegalArgumentException("negative saved demo balance");
+    candidate.put(asset,value);
+   }
+   demoConversionLedger.restore(candidate); // All-or-nothing; never partially load corrupted local state.
+  }catch(RuntimeException ignored){/* Preserve initial demo balances on invalid saved state. */}
  }
  boolean saveDemoConversionBalances(){
   android.content.SharedPreferences.Editor editor=getPreferences(MODE_PRIVATE).edit();
@@ -73,11 +76,10 @@ public final class FinanceActivity extends Activity{
     java.math.BigDecimal amountValue=new java.math.BigDecimal(qty.getText().toString().trim());
     java.math.BigDecimal rateValue=new java.math.BigDecimal(rate.getText().toString().trim());
     String fromAsset=source.getSelectedItem().toString(),toAsset=target.getSelectedItem().toString();
-    java.math.BigDecimal sourceBefore=ledger.balance(fromAsset),targetBefore=ledger.balance(toAsset);
+    java.util.Map<String,java.math.BigDecimal> before=ledger.snapshot();
     java.math.BigDecimal received=ledger.convert(fromAsset,toAsset,amountValue,rateValue,new java.math.BigDecimal("0.001"));
     if(!saveDemoConversionBalances()){
-     ledger.setBalance(fromAsset,sourceBefore);
-     ledger.setBalance(toAsset,targetBefore);
+     ledger.restore(before);
      feedback.setText("Demo işlem kaydedilemedi; sanal bakiyeler değiştirilmedi.");
      return;
     }
