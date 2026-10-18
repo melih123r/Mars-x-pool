@@ -19,7 +19,41 @@ public final class FinanceActivity extends Activity{
  void selectors(){LinearLayout c=(LinearLayout)root.getChildAt(root.getChildCount()-1);String[] assets={"BTC · Bitcoin","ETH · Ethereum","USDT · Tether","SOL · Solana","BNB · BNB","DOGE · Dogecoin"};c.addView(label("Gönderilecek Coin"));from=spin(assets,0);c.addView(from);c.addView(label("Dönüştürülecek Miktar"));amount=new EditText(this);amount.setText("0.01");amount.setTextColor(Color.WHITE);amount.setTextSize(29);amount.setTypeface(null,Typeface.BOLD);amount.setInputType(2|8192);amount.setBackground(box());amount.setPadding(22,20,22,20);c.addView(amount,mp(6));c.addView(label("Ağ Seçimi"));fromNet=spin(new String[]{"Bitcoin (BTC)","Ethereum (ERC20)","Solana","BNB Smart Chain"},0);c.addView(fromNet);TextView swap=t("⇅",34,ACCENT);swap.setGravity(Gravity.CENTER);swap.setTypeface(null,Typeface.BOLD);c.addView(swap);c.addView(label("Alınacak Coin"));to=spin(assets,1);c.addView(to);c.addView(label("Ağ Seçimi"));toNet=spin(new String[]{"Ethereum (ERC20)","Bitcoin (BTC)","Solana","BNB Smart Chain"},0);c.addView(toNet);
   LinearLayout stats=row();metricCard(stats,"Piyasa Oranı","—","provider quote");metricCard(stats,"Ağ Ücreti","—","estimate");c.addView(stats,mp(12));LinearLayout stats2=row();metricCard(stats2,"Min. Tutar","—","route gate");metricCard(stats2,"Geçerlilik","10 dk","preview");c.addView(stats2,mp(8));
   fromNet.setEnabled(false);toNet.setEnabled(false);c.addView(t("Ağ seçimi henüz sağlayıcı tarafından doğrulanmadı; yanlış ağa transfer yapılmasını önlemek için devre dışı.",11,MUTED));
-  Button q=new Button(this);q.setText("Fiyat Teklifi Al (İşlem Yok)");q.setTextSize(18);q.setTypeface(null,Typeface.BOLD);q.setTextColor(Color.BLACK);q.setBackground(round(ACCENT,18));q.setOnClickListener(v->quote());c.addView(q,mp(16));result=t("Bu ekran önizleme modundadır. Gerçek işlem oluşturulmaz.",14,Color.LTGRAY);c.addView(result);
+  Button q=new Button(this);q.setText("Fiyat Teklifi Al (İşlem Yok)");q.setTextSize(18);q.setTypeface(null,Typeface.BOLD);q.setTextColor(Color.BLACK);q.setBackground(round(ACCENT,18));q.setOnClickListener(v->quote());c.addView(q,mp(16));Button demo=new Button(this);demo.setText("Demo bakiyeleri ve çevrim (Sanal)");demo.setOnClickListener(v->demoConversionDialog());c.addView(demo,mp(8));result=t("Bu ekran önizleme modundadır. Gerçek işlem oluşturulmaz.",14,Color.LTGRAY);c.addView(result);
+ }
+
+ void demoConversionDialog(){
+  final String[] assets={"BTC","ETH","USDT","SOL","BNB","DOGE"};
+  final DemoConversionLedger ledger=new DemoConversionLedger();
+  // Explicitly separate disposable demo funds from actual balances and quote API.
+  ledger.setBalance("BTC",new java.math.BigDecimal("1"));
+  ledger.setBalance("ETH",new java.math.BigDecimal("10"));
+  ledger.setBalance("USDT",new java.math.BigDecimal("1000"));
+  final LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);form.setPadding(22,8,22,8);
+  form.addView(t("SANAL BAKİYE • Her açılışta sıfırlanır; gerçek cüzdan değildir.",13,ACCENT));
+  final TextView balances=t("BTC: 1 | ETH: 10 | USDT: 1000",13,Color.WHITE);form.addView(balances);
+  final Spinner source=spin(assets,0),target=spin(assets,1);
+  form.addView(t("Kaynak",12,MUTED));form.addView(source);
+  form.addView(t("Hedef",12,MUTED));form.addView(target);
+  final EditText qty=new EditText(this);qty.setHint("Miktar (örn. 0.1)");qty.setInputType(2|8192);form.addView(qty);
+  final EditText rate=new EditText(this);rate.setHint("Sanal kur: 1 kaynak = ? hedef");rate.setInputType(2|8192);form.addView(rate);
+  form.addView(t("Kur elle girilir; canlı veya doğrulanmış fiyat değildir. Demo komisyonu %0,1.",12,MUTED));
+  final TextView feedback=t("Henüz demo işlem yapılmadı.",13,Color.WHITE);form.addView(feedback);
+  final AlertDialog dialog=new AlertDialog.Builder(this).setTitle("MARS-X • Demo dönüştür").setView(form).setNegativeButton("Kapat",null).create();
+  final Button execute=new Button(this);execute.setText("Sanal dönüşüm yap");form.addView(execute);
+  execute.setOnClickListener(v->{
+   try{
+    java.math.BigDecimal amountValue=new java.math.BigDecimal(qty.getText().toString().trim());
+    java.math.BigDecimal rateValue=new java.math.BigDecimal(rate.getText().toString().trim());
+    String fromAsset=source.getSelectedItem().toString(),toAsset=target.getSelectedItem().toString();
+    java.math.BigDecimal received=ledger.convert(fromAsset,toAsset,amountValue,rateValue,new java.math.BigDecimal("0.001"));
+    StringBuilder b=new StringBuilder("SANAL BAKİYELER\\n");
+    for(String asset:assets)b.append(asset).append(": ").append(ledger.balance(asset).stripTrailingZeros().toPlainString()).append("  ");
+    balances.setText(b.toString().replace("\\\\n","\\n"));
+    feedback.setText("DEMO: "+amountValue.toPlainString()+" "+fromAsset+" → "+received.stripTrailingZeros().toPlainString()+" "+toAsset);
+   }catch(Exception e){feedback.setText("Demo işlem reddedildi: geçersiz miktar/kur, aynı varlık veya yetersiz sanal bakiye.");}
+  });
+  dialog.show();
  }
  void quoteInfo(){LinearLayout c=card();c.addView(t("Hizmet Durumu",12,ACCENT));c.addView(t("Dönüşüm fiyat önizlemesi • Gerçek işlem kapalı",12,MUTED));String[] f={"✓ Hizlı işlem","✓ En iyi oranlar","✓ Çoklu ağ","✓ Varlıklar güvende","✓ Kayıt gerektirmez","✓ İşlem kapalı"};for(int i=0;i<3;i++){LinearLayout r=row();feature(r,f[i*2]);feature(r,f[i*2+1]);c.addView(r,mp(4));}root.addView(c,mp(12));}
  void popularPairs(){LinearLayout c=card();c.addView(t("POPÜLER ÇİFTLER",12,ACCENT));String[] pairs={"BTC  ›  ETH","ETH  ›  USDT","BNB  ›  USDT","SOL  ›  USDT","USDT  ›  TRX"};for(String pair:pairs){TextView p=t(pair+"        veri bekleniyor",14,Color.WHITE);p.setBackground(pill(Color.rgb(12,17,27),Color.rgb(35,45,62)));p.setPadding(16,10,16,10);c.addView(p,mp(6));}root.addView(c,mp(12));}
