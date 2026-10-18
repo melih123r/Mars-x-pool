@@ -41,4 +41,19 @@ public class FinanceIndicatorsExtendedTest {
     public void rejectNegativeVolume() {
         FinanceIndicators.vwap(new double[]{2}, new double[]{1}, new double[]{1.5}, new double[]{-1});
     }
+    @Test public void sessionVwapResetsAtBoundary() {
+        double[] result = FinanceIndicators.sessionVwap(
+            new double[]{12, 22, 32}, new double[]{6, 16, 26},
+            new double[]{9, 19, 29}, new double[]{1, 3, 2},
+            new long[]{100, 100, 101});
+        assertEquals(9, result[0], 0.000001);
+        assertEquals(16.5, result[1], 0.000001);
+        assertEquals(29, result[2], 0.000001);
+    }
+    @Test(expected = IllegalArgumentException.class)
+    public void sessionVwapRejectsUnorderedSessions() {
+        FinanceIndicators.sessionVwap(new double[]{2, 2}, new double[]{1, 1},
+            new double[]{1.5, 1.5}, new double[]{1, 1}, new long[]{2, 1});
+    }
+
 }
