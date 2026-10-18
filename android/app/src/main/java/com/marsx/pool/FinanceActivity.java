@@ -219,7 +219,7 @@ public final class FinanceActivity extends Activity{
   for(PaperOrder o:paperOrders)if(o.status.equals("PENDING"))pending.add(o);
   if(pending.isEmpty()){new AlertDialog.Builder(this).setMessage("Bekleyen demo emir yok.").setPositiveButton("Tamam",null).show();return;}
   String[] names=new String[pending.size()];
-  for(int i=0;i<pending.size();i++){PaperOrder o=pending.get(i);names[i]="#"+o.id+" "+o.symbol+" "+o.side+" "+o.qty;}
+  for(int i=0;i<pending.size();i++){PaperOrder o=pending.get(i);names[i]="#"+o.id+" "+o.symbol+" "+o.side+" "+o.qty+" @ "+o.price+" USD • "+o.type;}
   new AlertDialog.Builder(this).setTitle("Bekleyen demo emri yönet").setItems(names,(d,index)->{
    PaperOrder selected=pending.get(index);
    new AlertDialog.Builder(this).setTitle("Emir #"+selected.id).setItems(new String[]{"Emri iptal et","Limit fiyatını düzenle","Miktarı düzenle"},(dialog,action)->{
