@@ -183,4 +183,21 @@ public class DemoConversionLedgerTest {
         assertEquals(0, ledger.balance("BTC").signum());
     }
 
+    @Test public void snapshotIsNotLiveViewWhenBalanceChanges() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("2"));
+        java.util.Map<String, BigDecimal> before = ledger.snapshot();
+        ledger.setBalance("BTC", d("1"));
+        assertEquals(0, before.get("BTC").compareTo(d("2")));
+        assertEquals(0, ledger.balance("BTC").compareTo(d("1")));
+    }
+
+    @Test public void restoreRejectsNullMapAndPreservesWallet() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("ETH", d("4"));
+        try { ledger.restore(null); fail("null wallet"); }
+        catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("ETH").compareTo(d("4")));
+    }
+
 }
