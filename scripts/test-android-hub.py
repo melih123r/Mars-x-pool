@@ -59,6 +59,16 @@ class AndroidHubTests(unittest.TestCase):
         self.assertNotIn("n.setMinHeight(96)", code)
         self.assertNotIn("new LinearLayout.LayoutParams(0,96,1)", code)
 
+    def test_conversion_dialog_is_scrollable_on_small_screens(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        start = code.index("void demoConversionDialog()")
+        end = code.index("void quoteInfo()", start)
+        dialog = code[start:end]
+        self.assertIn("final ScrollView conversionScroll=new ScrollView(this)", dialog)
+        self.assertIn("conversionScroll.addView(form)", dialog)
+        self.assertIn(".setView(conversionScroll)", dialog)
+        self.assertIn("form.addView(execute)", dialog)
+
     def test_telegram_is_explicitly_read_only(self):
         code = TELEGRAM.read_text(encoding="utf-8")
         self.assertIn("NOT CONNECTED", code)
