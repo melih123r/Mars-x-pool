@@ -94,6 +94,13 @@ def self_test_routing():
         actual = classify(symbol)
         if actual != expected:
             raise AssertionError(f"{symbol}: expected {expected}, got {actual}")
+    sample = catalog_quality(list(cases))
+    if len(sample) != len(cases):
+        raise AssertionError("Catalog manifest omitted symbols")
+    if any(row["provider_mapping"] == "UNSUPPORTED" and row["provider_symbol"] is not None for row in sample):
+        raise AssertionError("Unsupported instrument must not have provider ticker")
+    if any(row["provider_mapping"] == "UNVERIFIED" and not row["provider_symbol"] for row in sample):
+        raise AssertionError("Unverified instrument missing candidate provider ticker")
     return len(cases)
 
 def probe(symbol):
@@ -110,6 +117,11 @@ def main():
     checked = self_test_routing()
     print(f"Offline routing regression checks: {checked} PASS", flush=True)
     if os.getenv("MARKET_UNIVERSE_OFFLINE_ONLY") == "1":
+        symbols = universe()
+        if len(symbols) != len(set(symbols)):
+            raise AssertionError("Duplicate symbols")
+        write_catalog_manifest(symbols)
+        print(f"Offline catalog: {len(symbols)} unique entries; manifest exported", flush=True)
         return 0
     symbols = universe()
     category_counts = {
