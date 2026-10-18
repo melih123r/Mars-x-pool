@@ -61,6 +61,8 @@ public final class FinanceCandleAggregator {
             close = c.close;
             volume += c.volume;
             count++;
+            if (c.time != firstTime + (count - 1L) * sourceSeconds)
+                throw new IllegalArgumentException("Missing source bar inside aggregation bucket");
             if (count > required) throw new IllegalArgumentException("Duplicate bucket data");
         }
         if (bucket >= 0 && count == required && firstTime == bucket)
