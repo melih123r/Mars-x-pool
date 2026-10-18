@@ -17,6 +17,23 @@ public final class DemoConversionLedger {
     public synchronized BigDecimal balance(String asset) {
         return balances.getOrDefault(normalize(asset), BigDecimal.ZERO);
     }
+    /** An immutable point-in-time balance view for consistent demo UI and persistence. */
+    public synchronized Map<String, BigDecimal> snapshot() {
+        return java.util.Collections.unmodifiableMap(new HashMap<>(balances));
+    }
+    /** Replace all demo balances atomically after validating every entry. */
+    public synchronized void restore(Map<String, BigDecimal> saved) {
+        if (saved == null) throw new IllegalArgumentException("saved");
+        Map<String, BigDecimal> checked = new HashMap<>();
+        for (Map.Entry<String, BigDecimal> entry : saved.entrySet()) {
+            String asset = normalize(entry.getKey());
+            requireNonnegative(entry.getValue(), "balance");
+            if (checked.put(asset, entry.getValue()) != null)
+                throw new IllegalArgumentException("duplicate asset");
+        }
+        balances.clear();
+        balances.putAll(checked);
+    }
     /** rate = target units per source unit; fee is fraction [0,1). */
     public synchronized BigDecimal convert(String source, String target,
                                            BigDecimal quantity, BigDecimal rate,
