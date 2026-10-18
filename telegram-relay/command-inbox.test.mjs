@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { PostgresTaskQueue } from './postgres-task-queue.mjs';
 
-function fakePool({ duplicate = false, auditDuplicate = false, existing } = {}) {
+function fakePool({ duplicate = false, auditDuplicate = false, auditExisting, existing } = {}) {
   const calls = [];
   const stored = existing || {
     command_id: 'telegram-86-chat', update_id: 86, command_kind: 'chat',
@@ -15,7 +15,12 @@ function fakePool({ duplicate = false, auditDuplicate = false, existing } = {}) 
       if (sql.startsWith('INSERT INTO marsx_telegram.command_inbox'))
         return { rowCount: duplicate ? 0 : 1 };
       if (sql.startsWith('INSERT INTO marsx_telegram.command_audit_log'))
-        return { rowCount: auditDuplicate ? 0 : 1, rows: auditDuplicate ? [] : [{ audit_id: '42' }] };
+        return { rowCount: auditDuplicate ? 0 : 1, rows: auditDuplicate ? [] : [{ audit_event_id: 'audit_test' }] };
+      if (sql.startsWith('SELECT event_kind,lane_number,actor_ref_hash,metadata'))
+        return { rows: [auditExisting || {
+          event_kind: 'CLAIMED', lane_number: 10, actor_ref_hash: 'a'.repeat(64),
+          metadata: { worker: 'command_worker' }
+        }] };
       if (sql.startsWith('SELECT command_id,update_id,command_kind'))
         return { rows: [stored] };
       if (sql.includes('WITH available AS'))
@@ -163,4 +168,30 @@ test('command audit rejects unsafe lanes, identifiers and oversized metadata bef
     /audit_metadata_too_large/
   );
   assert.equal(pool.calls.length, 0);
+});
+
+
+test('audit retry rejects the same event key when immutable fields differ', async () => {
+  const pool = fakePool({
+    auditDuplicate: true,
+    auditExisting: {
+      event_kind: 'FAILED',
+      lane_number: 10,
+      actor_ref_hash: 'a'.repeat(64),
+      metadata: { worker: 'command_worker' }
+    }
+  });
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  await assert.rejects(
+    queue.appendCommandAudit({
+      commandId: 'telegram-86-chat',
+      eventKey: 'worker-claim-0001',
+      eventKind: 'CLAIMED',
+      laneNumber: 10,
+      actorRefHash: 'a'.repeat(64),
+      metadata: { worker: 'command_worker' }
+    }),
+    /audit_idempotency_conflict/
+  );
+  assert.ok(pool.calls.some(call => call.sql === 'ROLLBACK'));
 });
