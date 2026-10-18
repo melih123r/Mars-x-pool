@@ -63,4 +63,26 @@ public class DemoConversionLedgerTest {
         assertEquals(0, ledger.balance("BTC").compareTo(d("1")));
         assertEquals(0, ledger.balance("ETH").signum());
     }
+
+    @Test public void consecutiveConversionsPreserveUpdatedBalances() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        ledger.setBalance("ETH", d("2"));
+        assertEquals(0, ledger.convert("BTC", "ETH", d("0.25"), d("20"), BigDecimal.ZERO).compareTo(d("5")));
+        assertEquals(0, ledger.convert("ETH", "BTC", d("2"), d("0.05"), BigDecimal.ZERO).compareTo(d("0.1")));
+        assertEquals(0, ledger.balance("BTC").compareTo(d("0.85")));
+        assertEquals(0, ledger.balance("ETH").compareTo(d("5")));
+    }
+
+    @Test public void failedSecondConversionKeepsFirstConversion() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        ledger.convert("BTC", "ETH", d("0.5"), d("10"), BigDecimal.ZERO);
+        try {
+            ledger.convert("BTC", "ETH", d("0.6"), d("10"), BigDecimal.ZERO);
+            fail("must reject overdraw");
+        } catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("BTC").compareTo(d("0.5")));
+        assertEquals(0, ledger.balance("ETH").compareTo(d("5")));
+    }
 }
