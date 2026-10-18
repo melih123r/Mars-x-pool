@@ -42,11 +42,17 @@ public final class LemonDemoActivity extends Activity {
       final int period = i;
       Button choice = new Button(this);
       choice.setText(labels[i]);
-      choice.setTextColor(Color.WHITE);
+      choice.setTextColor(Color.rgb(255,166,64));
+      choice.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(30,24,21)));
       choice.setOnClickListener(v -> { selectedPeriod = period; chart.invalidate(); });
       periods.addView(choice,new LinearLayout.LayoutParams(0,110,1));
     }
     root.addView(periods);
+    TextView themeLabel = new TextView(this);
+    themeLabel.setText("MARS-X • Turuncu / Siyah • Demo");
+    themeLabel.setTextColor(Color.rgb(255,166,64));
+    themeLabel.setPadding(0,12,0,12);
+    root.addView(themeLabel);
     chart = new ChartView();
     root.addView(chart,new LinearLayout.LayoutParams(-1,420));
     TextView legend = new TextView(this);
