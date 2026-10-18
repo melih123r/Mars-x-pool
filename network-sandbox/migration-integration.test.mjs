@@ -199,3 +199,61 @@ test('receipts bind idempotently to an active consented session', { skip: !datab
     await client.end();
   }
 });
+
+
+test('session close is idempotent and blocks later session receipts', { skip: !databaseUrl }, async () => {
+  const client = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  await client.connect();
+  try {
+    await client.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE');
+    for (const name of [
+      '001_mock_device_points.sql',
+      '002_session_consent_lifecycle.sql',
+      '003_atomic_consent_transition.sql',
+      '004_atomic_receipt_api.sql',
+      '005_session_receipt_binding.sql',
+      '006_atomic_session_close.sql'
+    ]) {
+      await client.query(await readFile(new URL(`./sql/${name}`, import.meta.url), 'utf8'));
+    }
+    await client.query(
+      `INSERT INTO marsx_network_demo.mock_devices
+       (mock_device_id,device_ref_hash,consent_status,consent_version,consented_at)
+       VALUES ('device_close_00001',$1,'GRANTED','v1',now())`,
+      ['6'.repeat(64)]
+    );
+    await client.query(
+      `INSERT INTO marsx_network_demo.mock_sessions
+       (session_id,mock_device_id,idempotency_key,consent_version,started_at)
+       VALUES ('session_close_0001','device_close_00001','session-close-key-001','v1',now())`
+    );
+    const eventTime = new Date().toISOString();
+    const args = ['session-event-0001', 'session_close_0001', 'session-close-event-01', eventTime];
+    const first = await client.query(
+      'SELECT * FROM marsx_network_demo.close_mock_session($1,$2,$3,$4)', args
+    );
+    const retry = await client.query(
+      'SELECT * FROM marsx_network_demo.close_mock_session($1,$2,$3,$4)', args
+    );
+    assert.deepEqual(first.rows[0], { session_event_id: args[0], inserted: true });
+    assert.deepEqual(retry.rows[0], { session_event_id: args[0], inserted: false });
+    await assert.rejects(
+      client.query(
+        'SELECT * FROM marsx_network_demo.record_session_receipt($1,$2,$3,$4,$5,$6,$7,$8)',
+        ['receipt_close_0001', args[1], 'device_close_00001', 'receipt-close-key-001', 1, 'MOCK_HEARTBEAT', 'v1', new Date().toISOString()]
+      ),
+      /network_active_session_required_for_receipt/
+    );
+    const state = await client.query(
+      `SELECT s.session_status,count(e.*)::integer AS event_count
+         FROM marsx_network_demo.mock_sessions s
+         JOIN marsx_network_demo.session_events e USING (session_id)
+        WHERE s.session_id=$1 GROUP BY s.session_status`,
+      [args[1]]
+    );
+    assert.deepEqual(state.rows[0], { session_status: 'CLOSED', event_count: 1 });
+  } finally {
+    await client.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE').catch(() => {});
+    await client.end();
+  }
+});
