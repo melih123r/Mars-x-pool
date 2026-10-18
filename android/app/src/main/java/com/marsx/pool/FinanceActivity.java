@@ -571,16 +571,17 @@ public final class FinanceActivity extends Activity{
   }
   out.append("\nEmirler (LIMIT yalnızca tamamlanmış yeni mum kapanışında kontrol edilir):\n");
   out.append("Emir yürütme uyarısı: Simülasyon yalnızca kapanmış mumlarla çalışır; gerçek emir, anlık likidite veya garanti edilen dolum değildir.\n");
-  out.append("Bekleyen satış rezervleri:\n");java.util.HashMap<String,java.math.BigDecimal> reservedSell=new java.util.HashMap<>();for(PaperOrder order:paperOrders)if("PENDING".equals(order.status)&&"SELL".equals(order.side))reservedSell.put(order.symbol,reservedSell.getOrDefault(order.symbol,java.math.BigDecimal.ZERO).add(order.qty));if(reservedSell.isEmpty())out.append("Yok\n");else for(String asset:reservedSell.keySet()){java.math.BigDecimal held=paperHoldings.getOrDefault(asset,java.math.BigDecimal.ZERO);out.append(asset).append(": ").append(reservedSell.get(asset).toPlainString()).append(" rezerve • ").append(held.subtract(reservedSell.get(asset)).toPlainString()).append(" kullanılabilir\n");}
+  out.append("Bekleyen satış rezervleri:\n");java.util.HashMap<String,java.math.BigDecimal> reservedSell=new java.util.HashMap<>();for(PaperOrder order:paperOrders)if(order!=null&&"PENDING".equals(order.status)&&"SELL".equals(order.side)&&order.symbol!=null&&order.qty!=null&&order.qty.signum()>0)reservedSell.put(order.symbol,reservedSell.getOrDefault(order.symbol,java.math.BigDecimal.ZERO).add(order.qty));if(reservedSell.isEmpty())out.append("Yok\n");else for(String asset:reservedSell.keySet()){java.math.BigDecimal held=paperHoldings.getOrDefault(asset,java.math.BigDecimal.ZERO);out.append(asset).append(": ").append(reservedSell.get(asset).toPlainString()).append(" rezerve • ").append(held.subtract(reservedSell.get(asset)).toPlainString()).append(" kullanılabilir\n");}
   for(int i=paperOrders.size()-1;i>=0;i--){
    PaperOrder o=paperOrders.get(i);
+   if(o==null)continue;
    out.append("#").append(o.id).append(" ").append(o.symbol).append(" ").append(o.side).append(" ").append(o.type).append(" ").append(o.qty).append(" × $").append(o.price).append(" ").append(o.status).append("\n");
   }
   new AlertDialog.Builder(this).setTitle("DEMO portföy").setMessage(out.toString()).setPositiveButton("Kapat",null).setNeutralButton("Bekleyen emri iptal et",(d,w)->paperCancelDialog()).show();
  }
  void paperCancelDialog(){
   java.util.ArrayList<PaperOrder> pending=new java.util.ArrayList<>();
-  for(PaperOrder o:paperOrders)if(o.status.equals("PENDING"))pending.add(o);
+  for(PaperOrder o:paperOrders)if(o!=null&&"PENDING".equals(o.status))pending.add(o);
   if(pending.isEmpty()){new AlertDialog.Builder(this).setMessage("Bekleyen demo emir yok.").setPositiveButton("Tamam",null).show();return;}
   String[] names=new String[pending.size()];
   for(int i=0;i<pending.size();i++){PaperOrder o=pending.get(i);names[i]="#"+o.id+" "+o.symbol+" "+o.side+" "+o.qty+" @ "+o.price+" USD • "+o.type;}
