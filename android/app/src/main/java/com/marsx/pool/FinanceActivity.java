@@ -474,6 +474,13 @@ public final class FinanceActivity extends Activity{
      price.setError("MARKET demo emirleri henüz etkin değil.");
      return;
     }
+    if(("STOP_LOSS".equals(kind)||"TAKE_PROFIT".equals(kind))){
+     java.math.BigDecimal reference=paperLastClose.get(sym);
+     if(reference==null||reference.signum()<=0){price.setError("Koruma emri için doğrulanmış son piyasa kapanışı gerekli.");return;}
+     int relation=px.compareTo(reference);
+     boolean validDirection="STOP_LOSS".equals(kind)?("SELL".equals(direction)?relation<0:relation>0):("SELL".equals(direction)?relation>0:relation<0);
+     if(!validDirection){price.setError("Tetik seviyesi son kapanışın yanlış tarafında. STOP_LOSS satışta aşağıda, TAKE_PROFIT satışta yukarıda olmalı.");return;}
+    }
     if("BUY".equals(direction)&&paperCash.subtract(units.multiply(px)).signum()<0){qty.setError("Demo nakit bakiyesi yetersiz.");return;}
     if("SELL".equals(direction)&&(paperHoldings.get(sym)==null||paperHoldings.get(sym).compareTo(units)<0)){qty.setError("Demo pozisyon bakiyesi yetersiz.");return;}
     if(removable>=0)paperOrders.remove(removable);
