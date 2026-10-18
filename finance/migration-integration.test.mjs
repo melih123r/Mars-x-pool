@@ -213,3 +213,57 @@ test('ordered ingest advances cursor and stores the event atomically', { skip: !
     await client.end();
   }
 });
+
+
+test('migration runner records checksums and rolls back failed DDL atomically', { skip: !databaseUrl }, async () => {
+  let applyFinanceMigration;
+  await assert.doesNotReject(async () => {
+    ({ applyFinanceMigration } = await import('./migration-runner.mjs'));
+  });
+  const client = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  await client.connect();
+  try {
+    await client.query('DROP SCHEMA IF EXISTS marsx_finance CASCADE');
+    for (const name of [
+      '001_readonly_broker_ledger.sql',
+      '002_ingest_idempotency.sql',
+      '003_atomic_ingest_api.sql',
+      '004_monotonic_stream_cursor.sql',
+      '005_migration_checksum_registry.sql'
+    ]) {
+      await client.query(await readFile(new URL(`./sql/${name}`, import.meta.url), 'utf8'));
+    }
+
+    const migration = {
+      version: 6,
+      name: '006_runner_probe.sql',
+      sql: 'CREATE TABLE marsx_finance.runner_probe (probe_id integer PRIMARY KEY)'
+    };
+    assert.deepEqual(await applyFinanceMigration(client, migration), {
+      version: 6, name: migration.name, applied: true
+    });
+    assert.deepEqual(await applyFinanceMigration(client, migration), {
+      version: 6, name: migration.name, applied: false
+    });
+    await assert.rejects(
+      applyFinanceMigration(client, { ...migration, sql: migration.sql + ' /* changed */' }),
+      /finance_migration_checksum_conflict/
+    );
+    await assert.rejects(
+      applyFinanceMigration(client, {
+        version: 7,
+        name: '007_broken_probe.sql',
+        sql: 'CREATE TABLE marsx_finance.broken_probe ('
+      })
+    );
+    const state = await client.query(
+      `SELECT
+         to_regclass('marsx_finance.runner_probe') IS NOT NULL AS probe_exists,
+         (SELECT count(*)::integer FROM marsx_finance.schema_migrations WHERE migration_version=7) AS broken_registry_rows`
+    );
+    assert.deepEqual(state.rows[0], { probe_exists: true, broken_registry_rows: 0 });
+  } finally {
+    await client.query('DROP SCHEMA IF EXISTS marsx_finance CASCADE').catch(() => {});
+    await client.end();
+  }
+});
