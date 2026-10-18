@@ -72,11 +72,11 @@ public final class FinanceActivity extends Activity{
   final AlertDialog dialog=new AlertDialog.Builder(this).setTitle("MARS-X • Demo dönüştür").setView(form).setNegativeButton("Kapat",null).create();
   final Button execute=new Button(this);execute.setText("Sanal dönüşüm yap");form.addView(execute);
   execute.setOnClickListener(v->{
+   java.util.Map<String,java.math.BigDecimal> before=ledger.snapshot();
    try{
     java.math.BigDecimal amountValue=new java.math.BigDecimal(qty.getText().toString().trim());
     java.math.BigDecimal rateValue=new java.math.BigDecimal(rate.getText().toString().trim());
     String fromAsset=source.getSelectedItem().toString(),toAsset=target.getSelectedItem().toString();
-    java.util.Map<String,java.math.BigDecimal> before=ledger.snapshot();
     java.math.BigDecimal received=ledger.convert(fromAsset,toAsset,amountValue,rateValue,new java.math.BigDecimal("0.001"));
     if(!saveDemoConversionBalances()){
      ledger.restore(before);
@@ -86,7 +86,12 @@ public final class FinanceActivity extends Activity{
     balances.setText(demoBalanceSummary(assets));
     if(demoWalletSummary!=null)demoWalletSummary.setText(demoBalanceSummary(DEMO_CONVERSION_ASSETS));
     feedback.setText("DEMO: "+amountValue.toPlainString()+" "+fromAsset+" → "+received.stripTrailingZeros().toPlainString()+" "+toAsset);
-   }catch(Exception e){feedback.setText("Demo işlem reddedildi: geçersiz miktar/kur, aynı varlık veya yetersiz sanal bakiye.");}
+   }catch(Exception e){
+    ledger.restore(before); // Exception-safe rollback, including SharedPreferences failures.
+    balances.setText(demoBalanceSummary(assets));
+    if(demoWalletSummary!=null)demoWalletSummary.setText(demoBalanceSummary(DEMO_CONVERSION_ASSETS));
+    feedback.setText("Demo işlem reddedildi veya kaydedilemedi; sanal bakiyeler korunuyor.");
+   }
   });
   dialog.show();
  }
