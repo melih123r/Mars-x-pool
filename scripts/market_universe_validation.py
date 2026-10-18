@@ -54,6 +54,28 @@ def classify(symbol):
         return "stocks", symbol
     return "unsupported", symbol
 
+def catalog_quality(symbols):
+    """Separate catalog presence from provider verification and live availability."""
+    rows = []
+    for symbol in symbols:
+        group, ticker = classify(symbol)
+        rows.append({"symbol": symbol, "group": group, "provider_symbol": ticker if group != "unsupported" else None,
+                     "provider_mapping": "UNVERIFIED" if group != "unsupported" else "UNSUPPORTED"})
+    return rows
+
+def write_catalog_manifest(symbols):
+    manifest = {
+        "schema_version": 1,
+        "total_symbols": len(symbols),
+        "unique_symbols": len(set(symbols)),
+        "notice": "Catalog entries are not evidence of live market data or tradability.",
+        "instruments": catalog_quality(symbols),
+    }
+    destination = Path("reports/market-catalog-manifest.json")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\\n", encoding="utf-8")
+    return destination
+
 def probe(symbol):
     group, ticker = classify(symbol)
     if group == 'unsupported':
@@ -74,6 +96,7 @@ def main():
     }
     category_counts["other"] = len(symbols) - sum(category_counts.values())
     print("Catalog inventory:", json.dumps(category_counts, sort_keys=True), flush=True)
+    print("Catalog manifest:", write_catalog_manifest(symbols), flush=True)
     workers = max(1, min(4, int(os.getenv("MARKET_API_WORKERS", "2"))))
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
         results = list(pool.map(probe, symbols))
