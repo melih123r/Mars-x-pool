@@ -227,7 +227,7 @@ public final class FinanceActivity extends Activity{
     EditText input=new EditText(this);input.setInputType(2|8192);input.setSingleLine(true);input.setText(selected.price.toPlainString());
     new AlertDialog.Builder(this).setTitle("Yeni LIMIT fiyatı • #"+selected.id).setView(input).setNegativeButton("Vazgeç",null).setPositiveButton("Kaydet",(confirm,which)->{
      try{
-      String raw=input.getText().toString().trim();if(!raw.matches("[0-9]+(\\\\.[0-9]{1,6})?"))throw new IllegalArgumentException();
+      String raw=input.getText().toString().trim();if(!raw.matches("[0-9]+(\\.[0-9]{1,6})?"))throw new IllegalArgumentException();
       java.math.BigDecimal newPrice=new java.math.BigDecimal(raw);
       if(newPrice.signum()<=0||selected.qty.multiply(newPrice).compareTo(new java.math.BigDecimal("1000000"))>0)throw new IllegalArgumentException();
       selected.status="CANCELLED";
