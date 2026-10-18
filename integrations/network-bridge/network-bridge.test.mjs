@@ -103,3 +103,22 @@ test("session lookup rejection fails closed without leaking error", async () => 
   assert.deepEqual(await bridge.register({ workerId: "abc" }), { ok: false, reason: "license_required" });
   assert.equal(networkCalls, 0);
 });
+
+test("worker ID is read once and throwing getters fail closed", async () => {
+  let calls = 0;
+  const bridge = createNetworkBridge({ ...base, hasConsent: () => true,
+    fetchImpl: async (_, options) => {
+      calls++;
+      assert.deepEqual(JSON.parse(options.body), { workerId: "safe" });
+      return { ok: true, status: 200 };
+    } });
+  const hostile = Object.defineProperty({}, "workerId", { get() { throw Error("private"); } });
+  assert.deepEqual(await bridge.register(hostile), { ok: false, reason: "invalid_worker" });
+  let reads = 0;
+  const changing = Object.defineProperty({}, "workerId", {
+    get() { reads++; return reads === 1 ? "safe" : "../unexpected"; }
+  });
+  assert.equal((await bridge.heartbeat(changing)).ok, true);
+  assert.equal(reads, 1);
+  assert.equal(calls, 1);
+});
