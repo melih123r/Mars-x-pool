@@ -10,12 +10,17 @@ export function createNetworkBridge({ apiBase, getSession, hasConsent, fetchImpl
   async function send(path, worker) {
     if (!ALLOWED_PATHS.has(path)) return { ok: false, reason: "invalid_path" };
     if (!worker || typeof worker !== "object" || Array.isArray(worker) || typeof worker.workerId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(worker.workerId)) return { ok: false, reason: "invalid_worker" };
-    if (!hasConsent()) return { ok: false, reason: "consent_required" };
-    const session = await getSession();
+    // Treat failed consent/session callbacks as denial; never attempt a request.
+    let consent;
+    try { consent = await hasConsent(); } catch { return { ok: false, reason: "consent_required" }; }
+    if (consent !== true) return { ok: false, reason: "consent_required" };
+    let session;
+    try { session = await getSession(); } catch { return { ok: false, reason: "license_required" }; }
     if (typeof session?.token !== "string" || !/^[A-Za-z0-9._~+\/-]{1,512}$/.test(session.token) ||
         typeof session?.installId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(session.installId))
       return { ok: false, reason: "license_required" };
-    if (!hasConsent()) return { ok: false, reason: "consent_required" };
+    try { consent = await hasConsent(); } catch { return { ok: false, reason: "consent_required" }; }
+    if (consent !== true) return { ok: false, reason: "consent_required" };
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
