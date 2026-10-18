@@ -200,4 +200,22 @@ public class DemoConversionLedgerTest {
         assertEquals(0, ledger.balance("ETH").compareTo(d("4")));
     }
 
+    @Test public void feeAtOneHundredPercentDoesNotDebitWallet() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        try { ledger.convert("BTC", "ETH", d("0.5"), d("10"), BigDecimal.ONE); fail("invalid fee"); }
+        catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("BTC").compareTo(d("1")));
+        assertEquals(0, ledger.balance("ETH").signum());
+    }
+
+    @Test public void zeroRateDoesNotDebitWallet() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("USDT", d("100"));
+        try { ledger.convert("USDT", "BTC", d("50"), BigDecimal.ZERO, d("0.001")); fail("zero rate"); }
+        catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("USDT").compareTo(d("100")));
+        assertEquals(0, ledger.balance("BTC").signum());
+    }
+
 }
