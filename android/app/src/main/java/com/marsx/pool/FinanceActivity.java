@@ -6,7 +6,7 @@ public final class FinanceActivity extends Activity{
  LinearLayout root; TextView result,status,brokerStatus,marketPrice,marketProviders; ChartView chartView; final ArrayList<ChartView> comparisonCharts=new ArrayList<>(); Spinner marketAsset,marketTimeframe; EditText amount; Spinner from,to,fromNet,toNet; int ACCENT=Color.rgb(255,106,0),BG=Color.rgb(4,7,12),CARD=Color.rgb(10,14,22),RAISED=Color.rgb(15,20,31),MUTED=Color.rgb(158,169,188); final int[] THEMES={Color.rgb(0,194,255),Color.rgb(50,134,255),Color.rgb(185,60,255),Color.rgb(255,182,55),Color.rgb(42,207,129)}; int themeIndex=0; final Handler refreshHandler=new Handler(Looper.getMainLooper()); boolean screenActive=false; boolean tradingScreenVisible=false; String displayedChartKey="";int chartRequestGeneration=0; int quoteRequestGeneration=0; int marketListRequestGeneration=0; final Runnable refreshTick=new Runnable(){public void run(){if(screenActive&&tradingScreenVisible){chartSnapshot();for(ChartView extra:comparisonCharts)if(!extra.drawingSymbol.isEmpty())loadComparisonCrypto(extra,extra.drawingSymbol);refreshHandler.postDelayed(this,60000);}}};
  @Override protected void onResume(){super.onResume();screenActive=true;refreshHandler.removeCallbacks(refreshTick);if(tradingScreenVisible){refreshHandler.postDelayed(refreshTick,60000);if(chartView!=null){chartSnapshot();for(ChartView extra:comparisonCharts)if(!extra.drawingSymbol.isEmpty())loadComparisonCrypto(extra,extra.drawingSymbol);}}}
  @Override protected void onPause(){screenActive=false;chartRequestGeneration++;quoteRequestGeneration++;marketListRequestGeneration++;refreshHandler.removeCallbacks(refreshTick);super.onPause();}
- @Override public void onCreate(Bundle b){super.onCreate(b);requestWindowFeature(Window.FEATURE_NO_TITLE);getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);themeIndex=getPreferences(MODE_PRIVATE).getInt("theme",0);if(themeIndex<0||themeIndex>=THEMES.length)themeIndex=0;ACCENT=THEMES[themeIndex];build();}
+ @Override public void onCreate(Bundle b){super.onCreate(b);requestWindowFeature(Window.FEATURE_NO_TITLE);getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);themeIndex=getPreferences(MODE_PRIVATE).getInt("theme",0);if(themeIndex<0||themeIndex>=THEMES.length)themeIndex=0;ACCENT=THEMES[themeIndex];restorePaperState();build();}
  void build(){displayedChartKey="";comparisonCharts.clear();tradingScreenVisible=true;chartRequestGeneration++;quoteRequestGeneration++;marketListRequestGeneration++;refreshHandler.removeCallbacks(refreshTick);if(screenActive)refreshHandler.postDelayed(refreshTick,60000);if(root!=null)root=null;ScrollView s=new ScrollView(this);root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(28,24,28,34);root.setBackgroundColor(BG);
   rowTitle(); themePicker(); visualHero(); balanceCard(); cardHeader(); selectors(); quoteInfo(); popularPairs(); marketCard(); brokerCard(); nav(); s.addView(root);setContentView(s); health(); brokerHealth(); marketProviders(); chartSnapshot();
  }
@@ -78,8 +78,9 @@ public final class FinanceActivity extends Activity{
   final int id;final String symbol,side,type;final java.math.BigDecimal qty,price;
   final long createdAtEpochSeconds;
   String status;
-  PaperOrder(int id,String symbol,String side,String type,java.math.BigDecimal qty,java.math.BigDecimal price,String status){
-   this.id=id;this.symbol=symbol;this.side=side;this.type=type;this.qty=qty;this.price=price;this.status=status;this.createdAtEpochSeconds=System.currentTimeMillis()/1000L;
+  PaperOrder(int id,String symbol,String side,String type,java.math.BigDecimal qty,java.math.BigDecimal price,String status){this(id,symbol,side,type,qty,price,status,System.currentTimeMillis()/1000L);}
+  PaperOrder(int id,String symbol,String side,String type,java.math.BigDecimal qty,java.math.BigDecimal price,String status,long createdAt){
+   this.id=id;this.symbol=symbol;this.side=side;this.type=type;this.qty=qty;this.price=price;this.status=status;this.createdAtEpochSeconds=createdAt;
   }
  }
  void paperOrderDialog(){paperOrderDialog(null,Float.NaN);}
@@ -120,7 +121,7 @@ public final class FinanceActivity extends Activity{
      price.setError("MARKET emirleri güvenli fiyat doğrulaması tamamlanana kadar kapalı. LIMIT seçin.");return;
     }
     if(removable>=0)paperOrders.remove(removable);
-    paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,"PENDING"));
+    paperOrders.add(new PaperOrder(++paperSequence,sym,direction,kind,units,px,"PENDING"));persistPaperState();
     d.dismiss();if(chartView!=null)chartView.invalidate();paperDashboard();
    }catch(IllegalArgumentException e){qty.setError("Pozitif adet ve fiyat gir; maksimum 1 milyon USD");}
   }));
@@ -143,11 +144,43 @@ public final class FinanceActivity extends Activity{
    paperCash=paperCash.add(value);paperHoldings.put(sym,remaining);
    paperCost.put(sym,remaining.signum()==0?java.math.BigDecimal.ZERO:oldCost.multiply(remaining).divide(held,16,java.math.RoundingMode.HALF_UP));
   }
-  return true;
+  persistPaperState();return true;
  }
- void matchPaperLimits(String symbol,double lastClose,long completedCandleTime,long completedCandleEnd){if(!Double.isFinite(lastClose)||lastClose<=0)return;java.math.BigDecimal current=java.math.BigDecimal.valueOf(lastClose);boolean changed=false;for(PaperOrder order:paperOrders){if(!"PENDING".equals(order.status)||!"LIMIT".equals(order.type)||!symbol.equals(order.symbol)||completedCandleEnd<=order.createdAtEpochSeconds)continue;boolean crossed="BUY".equals(order.side)?current.compareTo(order.price)<=0:current.compareTo(order.price)>=0;if(!crossed)continue;java.math.BigDecimal simulatedFill="BUY".equals(order.side)?current.min(order.price):current.max(order.price);if(paperFill(order.symbol,order.side,order.qty,simulatedFill)){order.status="FILLED";changed=true;}}if(changed&&chartView!=null)chartView.invalidate();}
+ void matchPaperLimits(String symbol,double lastClose,long completedCandleTime,long completedCandleEnd){if(!Double.isFinite(lastClose)||lastClose<=0)return;java.math.BigDecimal current=java.math.BigDecimal.valueOf(lastClose);boolean changed=false;for(PaperOrder order:paperOrders){if(!"PENDING".equals(order.status)||!"LIMIT".equals(order.type)||!symbol.equals(order.symbol)||completedCandleEnd<=order.createdAtEpochSeconds)continue;boolean crossed="BUY".equals(order.side)?current.compareTo(order.price)<=0:current.compareTo(order.price)>=0;if(!crossed)continue;java.math.BigDecimal simulatedFill="BUY".equals(order.side)?current.min(order.price):current.max(order.price);if(paperFill(order.symbol,order.side,order.qty,simulatedFill)){order.status="FILLED";changed=true;persistPaperState();}}if(changed&&chartView!=null)chartView.invalidate();}
+ void persistPaperState(){
+  try{
+   JSONObject data=new JSONObject();data.put("version",1);data.put("cash",paperCash.toPlainString());data.put("sequence",paperSequence);
+   JSONObject holdings=new JSONObject(),costs=new JSONObject();
+   for(String key:paperHoldings.keySet())holdings.put(key,paperHoldings.get(key).toPlainString());
+   for(String key:paperCost.keySet())costs.put(key,paperCost.get(key).toPlainString());
+   data.put("holdings",holdings);data.put("costs",costs);
+   JSONArray orders=new JSONArray();
+   for(PaperOrder o:paperOrders){JSONObject item=new JSONObject();item.put("id",o.id);item.put("symbol",o.symbol);item.put("side",o.side);item.put("type",o.type);item.put("qty",o.qty.toPlainString());item.put("price",o.price.toPlainString());item.put("status",o.status);item.put("createdAt",o.createdAtEpochSeconds);orders.put(item);}
+   data.put("orders",orders);
+   getPreferences(MODE_PRIVATE).edit().putString("paper_state_v1",data.toString()).apply();
+  }catch(Exception ignored){}
+ }
+ void restorePaperState(){
+  try{
+   String raw=getPreferences(MODE_PRIVATE).getString("paper_state_v1",null);if(raw==null)return;
+   JSONObject data=new JSONObject(raw);if(data.optInt("version")!=1)return;
+   java.math.BigDecimal cash=new java.math.BigDecimal(data.getString("cash"));
+   if(cash.signum()<0||cash.compareTo(new java.math.BigDecimal("100000000"))>0)return;
+   java.util.HashMap<String,java.math.BigDecimal> holdings=new java.util.HashMap<>(),costs=new java.util.HashMap<>();
+   JSONObject h=data.getJSONObject("holdings"),c=data.getJSONObject("costs");
+   java.util.Iterator<String> keys=h.keys();
+   while(keys.hasNext()){String key=keys.next();java.math.BigDecimal qty=new java.math.BigDecimal(h.getString(key)),cost=new java.math.BigDecimal(c.getString(key));if(qty.signum()<0||cost.signum()<0)return;holdings.put(key,qty);costs.put(key,cost);}
+   JSONArray arr=data.getJSONArray("orders");if(arr.length()>200)return;
+   java.util.ArrayList<PaperOrder> restored=new java.util.ArrayList<>();int highest=0;
+   for(int i=0;i<arr.length();i++){JSONObject item=arr.getJSONObject(i);int id=item.getInt("id");if(id<=0)return;String status=item.getString("status");if(!"PENDING".equals(status)&&!"FILLED".equals(status)&&!"CANCELLED".equals(status))return;
+    java.math.BigDecimal qty=new java.math.BigDecimal(item.getString("qty")),price=new java.math.BigDecimal(item.getString("price"));if(qty.signum()<=0||price.signum()<=0)return;
+    PaperOrder order=new PaperOrder(id,item.getString("symbol"),item.getString("side"),item.getString("type"),qty,price,status,item.optLong("createdAt",0L));restored.add(order);highest=Math.max(highest,id);
+   }
+   paperCash=cash;paperHoldings.clear();paperHoldings.putAll(holdings);paperCost.clear();paperCost.putAll(costs);paperOrders.clear();paperOrders.addAll(restored);paperSequence=Math.max(highest,data.optInt("sequence"));
+  }catch(Exception ignored){}
+ }
  void paperDashboard(){
-  StringBuilder out=new StringBuilder("DEMO • yalnızca açık uygulama oturumu • başlangıç 100.000 USD\\n");
+  StringBuilder out=new StringBuilder("DEMO • yerel cihazda kayıtlı • başlangıç 100.000 USD\\n");
   int pendingCount=0,filledCount=0,cancelledCount=0;
   for(PaperOrder o:paperOrders){if("PENDING".equals(o.status))pendingCount++;else if("FILLED".equals(o.status))filledCount++;else if("CANCELLED".equals(o.status))cancelledCount++;}
   out.append("Açık pozisyonlar: ").append(paperHoldings.values().stream().filter(v->v.signum()>0).count()).append(" • Bekleyen: ").append(pendingCount).append(" • Gerçekleşen: ").append(filledCount).append(" • İptal: ").append(cancelledCount).append("\\n");
@@ -187,7 +220,7 @@ public final class FinanceActivity extends Activity{
   if(pending.isEmpty()){new AlertDialog.Builder(this).setMessage("Bekleyen demo emir yok.").setPositiveButton("Tamam",null).show();return;}
   String[] names=new String[pending.size()];
   for(int i=0;i<pending.size();i++){PaperOrder o=pending.get(i);names[i]="#"+o.id+" "+o.symbol+" "+o.side+" "+o.qty;}
-  new AlertDialog.Builder(this).setTitle("İptal edilecek demo emir").setItems(names,(d,index)->{pending.get(index).status="CANCELLED";if(chartView!=null)chartView.invalidate();paperDashboard();}).setNegativeButton("Vazgeç",null).show();
+  new AlertDialog.Builder(this).setTitle("İptal edilecek demo emir").setItems(names,(d,index)->{pending.get(index).status="CANCELLED";persistPaperState();if(chartView!=null)chartView.invalidate();paperDashboard();}).setNegativeButton("Vazgeç",null).show();
  }
  void financePreview(String title){new AlertDialog.Builder(this).setTitle(title).setMessage("MARS-X Finance arayüz önizlemesi. Gerçek işlem veya hesap değişikliği yapılmaz.").setPositiveButton("Tamam",null).show();}
  void financeLine(LinearLayout parent,String key,String value){LinearLayout r=row();r.setPadding(18,18,18,18);r.setBackground(panel(RAISED,14,Color.rgb(37,48,66)));TextView left=t(key,14,Color.WHITE);r.addView(left,new LinearLayout.LayoutParams(0,-2,1));r.addView(t(value,12,MUTED));parent.addView(r,mp(7));}
