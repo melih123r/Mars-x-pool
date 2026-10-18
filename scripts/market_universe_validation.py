@@ -146,7 +146,7 @@ def main():
         instrument["validation_status"] = status
         instrument["validation_detail"] = detail
         instrument["tradable"] = False  # Read-only validation cannot authorize real trading.
-    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\\n", encoding="utf-8")
+    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# MARS-X full Android symbol-universe API validation", "",
              "Catalog count: " + str(len(symbols)) + " unique symbols. Inventory: " + json.dumps(category_counts, sort_keys=True), "",
