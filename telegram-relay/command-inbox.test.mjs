@@ -195,3 +195,23 @@ test('audit retry rejects the same event key when immutable fields differ', asyn
   );
   assert.ok(pool.calls.some(call => call.sql === 'ROLLBACK'));
 });
+
+
+test('command claim and audit event commit in the same transaction', async () => {
+  const pool = fakePool();
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  const claimed = await queue.claimNextCommand('command_worker', 60);
+  assert.equal(claimed.status, 'claimed');
+  const begin = pool.calls.findIndex(call => call.sql === 'BEGIN');
+  const claim = pool.calls.findIndex(call => call.sql.includes('WITH available AS'));
+  const audit = pool.calls.findIndex(call => call.sql.startsWith('INSERT INTO marsx_telegram.command_audit_log'));
+  const commit = pool.calls.findIndex(call => call.sql === 'COMMIT');
+  assert.ok(begin >= 0 && begin < claim);
+  assert.ok(audit > claim && audit < commit);
+  const auditCall = pool.calls[audit];
+  assert.equal(auditCall.params[0], 'telegram-86-chat');
+  assert.match(auditCall.params[1], /^claim_attempt_1_[a-f0-9]{16}$/);
+  assert.equal(auditCall.params[2], 'CLAIMED');
+  assert.equal(auditCall.params[3], 10);
+  assert.match(auditCall.params[4], /^[a-f0-9]{64}$/);
+});
