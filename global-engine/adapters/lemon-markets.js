@@ -28,7 +28,8 @@ const validateIdempotencyKey=(value)=>{
   return value;
 };
 const validateHeaderValue=(value,name,maxLength)=>{
-  if(typeof value!=="string"||value.length<1||value.length>maxLength||/[\r\n]/.test(value)) throw new Error(`invalid ${name}`);
+  if(value===undefined||value===null||value==="") throw new Error(`${name} required`);
+  if(typeof value!=="string"||value.length>maxLength||/[\r\n]/.test(value)) throw new Error(`invalid ${name}`);
   return value;
 };
 const nonEmpty=(v,name)=>{ if(!v) throw new Error(`${name} required`); return v; };
