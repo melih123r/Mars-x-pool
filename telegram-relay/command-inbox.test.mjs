@@ -112,7 +112,7 @@ test('expired command lease recovery and audit commit in one transaction', async
   assert.equal(pool.calls[audit].params[0], 'telegram-86-chat');
   assert.match(pool.calls[audit].params[1], /^lease_expired_attempt_1_[a-f0-9]{16}$/);
   assert.equal(pool.calls[audit].params[2], 'RETRIED');
-  assert.equal(pool.calls[audit].params[5], 'lease_expired');
+  assert.equal(pool.calls[audit].params[4], 'lease_expired');
 });
 
 const auditMigrationUrl = new URL('./sql/004_command_audit_log.sql', import.meta.url);
