@@ -9,6 +9,7 @@ ANDROID = "{http://schemas.android.com/apk/res/android}"
 MANIFEST = ROOT / "android/app/src/main/AndroidManifest.xml"
 MAIN = ROOT / "android/app/src/main/java/com/marsx/pool/MainActivity.java"
 TELEGRAM = ROOT / "android/app/src/main/java/com/marsx/pool/TelegramStatusActivity.java"
+FINANCE = ROOT / "android/app/src/main/java/com/marsx/pool/FinanceActivity.java"
 
 
 class AndroidHubTests(unittest.TestCase):
@@ -45,6 +46,11 @@ class AndroidHubTests(unittest.TestCase):
         code = MAIN.read_text(encoding="utf-8")
         for target in ("FinanceActivity.class", "TelegramStatusActivity.class"):
             self.assertIn("startActivity(new Intent(this, " + target + "))", code)
+
+    def test_finance_network_tab_returns_to_network_home(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        self.assertIn('if("Network".equals(name)){startActivity(new Intent(this,MainActivity.class));return;}', code)
+        self.assertNotIn('if("Network".equals(name)){startActivity(new Intent(this,PremiumActivity.class));return;}', code)
 
     def test_telegram_is_explicitly_read_only(self):
         code = TELEGRAM.read_text(encoding="utf-8")
