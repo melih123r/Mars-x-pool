@@ -64,6 +64,20 @@ class AndroidHubTests(unittest.TestCase):
         self.assertNotIn("n.setMinHeight(96)", code)
         self.assertNotIn("new LinearLayout.LayoutParams(0,96,1)", code)
 
+    def test_coinbase_public_discovery_is_read_only_and_deduplicated(self):
+        code = FINANCE.read_text(encoding="utf-8")
+        start = code.index("void discoverCoinbaseProducts()")
+        end = code.index("void loadPublicPrices(", start)
+        discovery = code[start:end]
+        self.assertIn("/api/v3/brokerage/market/products?limit=250", discovery)
+        self.assertIn("new java.util.LinkedHashSet<>()", discovery)
+        self.assertIn('connection.setConnectTimeout(6000)', discovery)
+        self.assertIn('connection.setReadTimeout(8000)', discovery)
+        self.assertIn('item.optBoolean("trading_disabled",false)', discovery)
+        self.assertIn("runOnUiThread(", discovery)
+        self.assertNotIn("setRequestMethod(\"POST\")", discovery)
+        self.assertIn("discoverMarkets.setOnClickListener(v->discoverCoinbaseProducts())", code)
+
     def test_expanded_market_symbols_are_unique(self):
         code = FINANCE.read_text(encoding="utf-8")
         symbols_section = code.split('marketAsset=spin(new String[]{', 1)[1].split('},0);', 1)[0]
