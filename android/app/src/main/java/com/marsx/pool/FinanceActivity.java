@@ -56,6 +56,14 @@ public final class FinanceActivity extends Activity{
   for(String asset:assets)b.append(asset).append(": ").append(demoConversionLedger.balance(asset).stripTrailingZeros().toPlainString()).append("  ");
   return b.toString();
  }
+ static java.math.BigDecimal parseDemoDecimal(String raw){
+  if(raw==null)throw new IllegalArgumentException("missing demo decimal");
+  String value=raw.trim();
+  if(value.isEmpty()||value.indexOf(',')>=0&&value.indexOf('.')>=0)throw new IllegalArgumentException("ambiguous demo decimal");
+  if(value.indexOf(',')>=0)value=value.replace(',', '.');
+  if(!value.matches("[+-]?[0-9]+(\\.[0-9]+)?"))throw new IllegalArgumentException("invalid demo decimal");
+  return new java.math.BigDecimal(value);
+ }
  void demoConversionDialog(){
   final String[] assets={"BTC","ETH","USDT","SOL","BNB","DOGE"};
   final DemoConversionLedger ledger=demoConversionLedger;
@@ -77,8 +85,8 @@ public final class FinanceActivity extends Activity{
   execute.setOnClickListener(v->{
    java.util.Map<String,java.math.BigDecimal> before=ledger.snapshot();
    try{
-    java.math.BigDecimal amountValue=new java.math.BigDecimal(qty.getText().toString().trim());
-    java.math.BigDecimal rateValue=new java.math.BigDecimal(rate.getText().toString().trim());
+    java.math.BigDecimal amountValue=parseDemoDecimal(qty.getText().toString());
+    java.math.BigDecimal rateValue=parseDemoDecimal(rate.getText().toString());
     String fromAsset=source.getSelectedItem().toString(),toAsset=target.getSelectedItem().toString();
     java.math.BigDecimal received=ledger.convert(fromAsset,toAsset,amountValue,rateValue,new java.math.BigDecimal("0.001"));
     if(!saveDemoConversionBalances()){
