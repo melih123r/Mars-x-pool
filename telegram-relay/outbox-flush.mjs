@@ -10,6 +10,9 @@ export async function flushOutbox({ queue, token, chatId, send = fetch, limit = 
       typeof queue.markClaimedOutboxDelivered !== 'function')
     throw new Error('outbox_storage_required');
   const claim = await queue.claimOutbox(limit);
+  // Never deliver if storage did not return a valid atomic claim/lease.
+  if (!claim || typeof claim.token !== 'string' || !claim.token.trim() || !Array.isArray(claim.events))
+    throw new Error('outbox_claim_invalid');
   const results = [];
   for (const event of claim.events) {
     try {
