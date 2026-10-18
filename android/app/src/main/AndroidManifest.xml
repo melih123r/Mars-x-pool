@@ -8,7 +8,7 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/ref3_launcher"
         android:roundIcon="@drawable/ref3_launcher"
-        android:label="MARS-X Network"
+        android:label="MARS-X Finance + Network"
         android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
         android:theme="@style/Theme.MarsX"
