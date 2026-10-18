@@ -9,7 +9,11 @@ export function createNetworkBridge({ apiBase, getSession, hasConsent, fetchImpl
   const base = origin.href.replace(/\/$/, "");
   async function send(path, worker) {
     if (!ALLOWED_PATHS.has(path)) return { ok: false, reason: "invalid_path" };
-    if (!worker || typeof worker !== "object" || Array.isArray(worker) || typeof worker.workerId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(worker.workerId)) return { ok: false, reason: "invalid_worker" };
+    // Read once: hostile getters/proxies must not throw or mutate the identifier between validation and serialization.
+    let workerId;
+    try { workerId = worker && typeof worker === "object" && !Array.isArray(worker) ? worker.workerId : undefined; }
+    catch { return { ok: false, reason: "invalid_worker" }; }
+    if (typeof workerId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(workerId)) return { ok: false, reason: "invalid_worker" };
     // Treat failed consent/session callbacks as denial; never attempt a request.
     let consent;
     try { consent = await hasConsent(); } catch { return { ok: false, reason: "consent_required" }; }
@@ -31,7 +35,7 @@ export function createNetworkBridge({ apiBase, getSession, hasConsent, fetchImpl
           authorization: "License " + session.token,
           "x-install-id": session.installId
         },
-        body: JSON.stringify({ workerId: worker.workerId })
+        body: JSON.stringify({ workerId })
       });
       if (!response.ok) return { ok: false, status: response.status };
       // Best effort; notification failures must not turn successful registration into failure.
