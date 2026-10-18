@@ -256,4 +256,15 @@ public class DemoConversionLedgerTest {
         assertEquals(0, ledger.balance("USDT").compareTo(d("100")));
     }
 
+
+    @Test public void subPrecisionQuantityCannotSilentlyDebitDemoWallet() {
+        DemoConversionLedger ledger = new DemoConversionLedger();
+        ledger.setBalance("BTC", d("1"));
+        try {
+            ledger.convert("BTC", "ETH", d("0.0000000000001"), d("10000000000000"), BigDecimal.ZERO);
+            fail("wallet cannot persist sub-12-decimal source debit");
+        } catch (IllegalArgumentException expected) { }
+        assertEquals(0, ledger.balance("BTC").compareTo(d("1")));
+        assertEquals(0, ledger.balance("ETH").signum());
+    }
 }
