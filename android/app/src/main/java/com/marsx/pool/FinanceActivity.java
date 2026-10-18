@@ -169,7 +169,7 @@ public final class FinanceActivity extends Activity{
    runOnUiThread(()->{if(dialog.isShowing())info.setText(output);});
   }).start();
  }
- JSONObject fetchCoinbasePublicJson(String endpoint)throws IOException,JSONException{
+ JSONObject fetchCoinbasePublicJson(String endpoint)throws Exception{
   HttpURLConnection conn=null;
   try{
    conn=(HttpURLConnection)new URL(endpoint).openConnection();
