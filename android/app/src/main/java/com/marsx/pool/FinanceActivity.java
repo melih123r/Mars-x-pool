@@ -222,18 +222,18 @@ public final class FinanceActivity extends Activity{
   for(int i=0;i<pending.size();i++){PaperOrder o=pending.get(i);names[i]="#"+o.id+" "+o.symbol+" "+o.side+" "+o.qty;}
   new AlertDialog.Builder(this).setTitle("Bekleyen demo emri yönet").setItems(names,(d,index)->{
    PaperOrder selected=pending.get(index);
-   new AlertDialog.Builder(this).setTitle("Emir #"+selected.id).setItems(new String[]{"Emri iptal et","Limit fiyatını düzenle"},(dialog,action)->{
+   new AlertDialog.Builder(this).setTitle("Emir #"+selected.id).setItems(new String[]{"Emri iptal et","Limit fiyatını düzenle","Miktarı düzenle"},(dialog,action)->{
     if(action==0){selected.status="CANCELLED";persistPaperState();if(chartView!=null)chartView.invalidate();paperDashboard();return;}
-    EditText input=new EditText(this);input.setInputType(2|8192);input.setSingleLine(true);input.setText(selected.price.toPlainString());
-    new AlertDialog.Builder(this).setTitle("Yeni LIMIT fiyatı • #"+selected.id).setView(input).setNegativeButton("Vazgeç",null).setPositiveButton("Kaydet",(confirm,which)->{
+    EditText input=new EditText(this);input.setInputType(2|8192);input.setSingleLine(true);input.setText((action==2?selected.qty:selected.price).toPlainString());
+    new AlertDialog.Builder(this).setTitle((action==2?"Yeni miktar":"Yeni LIMIT fiyatı")+" • #"+selected.id).setView(input).setNegativeButton("Vazgeç",null).setPositiveButton("Kaydet",(confirm,which)->{
      try{
       String raw=input.getText().toString().trim();if(!raw.matches("[0-9]+(\\.[0-9]{1,6})?"))throw new IllegalArgumentException();
-      java.math.BigDecimal newPrice=new java.math.BigDecimal(raw);
-      if(newPrice.signum()<=0||selected.qty.multiply(newPrice).compareTo(new java.math.BigDecimal("1000000"))>0)throw new IllegalArgumentException();
+      java.math.BigDecimal entered=new java.math.BigDecimal(raw);java.math.BigDecimal newPrice=action==2?selected.price:entered,newQty=action==2?entered:selected.qty;
+      if(entered.signum()<=0||newQty.multiply(newPrice).compareTo(new java.math.BigDecimal("1000000"))>0)throw new IllegalArgumentException();
       selected.status="CANCELLED";
-      paperOrders.add(new PaperOrder(++paperSequence,selected.symbol,selected.side,selected.type,selected.qty,newPrice,"PENDING"));
+      paperOrders.add(new PaperOrder(++paperSequence,selected.symbol,selected.side,selected.type,newQty,newPrice,"PENDING"));
       persistPaperState();if(chartView!=null)chartView.invalidate();paperDashboard();
-     }catch(Exception ex){new AlertDialog.Builder(this).setMessage("Geçersiz limit fiyatı; emir değiştirilmedi.").setPositiveButton("Tamam",null).show();}
+     }catch(Exception ex){new AlertDialog.Builder(this).setMessage("Geçersiz fiyat veya miktar; emir değiştirilmedi.").setPositiveButton("Tamam",null).show();}
     }).show();
    }).show();
   }).setNegativeButton("Vazgeç",null).show();
