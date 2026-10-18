@@ -151,6 +151,24 @@ public final class FinanceActivity extends Activity{
   int pendingCount=0,filledCount=0,cancelledCount=0;
   for(PaperOrder o:paperOrders){if("PENDING".equals(o.status))pendingCount++;else if("FILLED".equals(o.status))filledCount++;else if("CANCELLED".equals(o.status))cancelledCount++;}
   out.append("Açık pozisyonlar: ").append(paperHoldings.values().stream().filter(v->v.signum()>0).count()).append(" • Bekleyen: ").append(pendingCount).append(" • Gerçekleşen: ").append(filledCount).append(" • İptal: ").append(cancelledCount).append("\\n");
+  java.math.BigDecimal markedValue=java.math.BigDecimal.ZERO,unrealized=java.math.BigDecimal.ZERO;
+  int missingQuotes=0;
+  for(String asset:paperHoldings.keySet()){
+   java.math.BigDecimal held=paperHoldings.get(asset);
+   if(held==null||held.signum()<=0)continue;
+   java.math.BigDecimal last=paperLastClose.get(asset);
+   if(last==null||last.signum()<=0){missingQuotes++;continue;}
+   java.math.BigDecimal cost=paperCost.get(asset);
+   markedValue=markedValue.add(held.multiply(last));
+   unrealized=unrealized.add(held.multiply(last).subtract(cost==null?java.math.BigDecimal.ZERO:cost));
+  }
+  out.append("Gerçekleşmemiş K/Z (fiyatı bulunanlar): $").append(unrealized.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\\n");
+  if(missingQuotes==0){
+   out.append("Tahmini toplam hesap değeri: $").append(paperCash.add(markedValue).setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\\n");
+  }else{
+   out.append("Toplam hesap değeri hesaplanamadı: ").append(missingQuotes).append(" pozisyon için güncel fiyat yok.\\n");
+  }
+  out.append("Not: Son kapanış fiyatları gecikmeli olabilir; komisyon ve spread dahil değildir.\\n");
   out.append("Nakit: $").append(paperCash.toPlainString()).append("\\n\\nPozisyonlar:\\n");
   for(String sym:paperHoldings.keySet()){
    java.math.BigDecimal qty=paperHoldings.get(sym);
