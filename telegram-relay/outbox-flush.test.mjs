@@ -87,3 +87,16 @@ test('PostgreSQL bigint string IDs are accepted when safely representable', asyn
   assert.deepEqual(acknowledged, [7]);
   assert.equal(result[0].delivered, true);
 });
+
+test('invalid batch limits are rejected before claiming events', async () => {
+  for (const limit of [0, -1, 101, 1.5, NaN, Infinity, '20']) {
+    let claims = 0;
+    const queue = {
+      async claimOutbox() { claims++; return { token, events: [] }; },
+      async getUpdateStatus() { throw Error('unexpected'); },
+      async markClaimedOutboxDelivered() { throw Error('unexpected'); }
+    };
+    await assert.rejects(flushOutbox({ queue, token: 'bot-token', chatId: 42, limit }), /outbox_limit_invalid/);
+    assert.equal(claims, 0);
+  }
+});
