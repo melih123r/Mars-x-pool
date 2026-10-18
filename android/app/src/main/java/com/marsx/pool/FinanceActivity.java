@@ -52,19 +52,9 @@ public final class FinanceActivity extends Activity{
  void financeAction(LinearLayout parent,String title,Runnable action){Button b=new Button(this);b.setText(title+"   →");b.setTextSize(14);b.setAllCaps(false);b.setTextColor(Color.WHITE);b.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);b.setPadding(24,12,16,12);b.setBackground(panel(RAISED,16,Color.rgb(37,48,66)));b.setOnClickListener(v->action.run());parent.addView(b,mp(8));}
  void financeThemeDialog(){String[] names={"Klasik • Buz Mavisi","Uzay • Kozmik Mavi","Neon • Mor","Altın • Mars","Orman • Yeşil"};new AlertDialog.Builder(this).setTitle("Renk Teması").setSingleChoiceItems(names,themeIndex,(dialog,selected)->{themeIndex=selected;ACCENT=THEMES[selected];getPreferences(MODE_PRIVATE).edit().putInt("theme",selected).apply();dialog.dismiss();build();root.setAlpha(0f);root.animate().alpha(1f).setDuration(260).start();}).setNegativeButton("Vazgeç",null).show();}
  void brokerDemo(){
-  LinearLayout box=new LinearLayout(this);box.setOrientation(LinearLayout.VERTICAL);box.setPadding(24,8,24,8);
-  EditText qty=new EditText(this);qty.setHint("Adet");qty.setInputType(2|8192);box.addView(qty);
-  EditText price=new EditText(this);price.setHint("Örnek fiyat (USD)");price.setInputType(2|8192);box.addView(price);
-  AlertDialog dialog=new AlertDialog.Builder(this).setTitle("Broker demo hesaplayıcı").setMessage("Bu bir emir değildir. Borsaya bağlanmaz.").setView(box).setNegativeButton("Kapat",null).setPositiveButton("Hesapla",null).create();
-  dialog.setOnShowListener(v->dialog.getButton(-1).setOnClickListener(w->{
-   try{
-    java.math.BigDecimal q=new java.math.BigDecimal(qty.getText().toString().trim());
-    java.math.BigDecimal p=new java.math.BigDecimal(price.getText().toString().trim());
-    if(q.signum()<=0||p.signum()<=0||q.multiply(p).compareTo(new java.math.BigDecimal("1000000"))>0)throw new NumberFormatException();
-    new AlertDialog.Builder(this).setTitle("Demo nominal tutar").setMessage(q.multiply(p).toPlainString()+" USD. Gerçek emir gönderilmedi.").setPositiveButton("Tamam",null).show();
-   }catch(IllegalArgumentException e){qty.setError("Pozitif sayı ve toplam en fazla 1 milyon USD olmalı");}
-  }));
-  dialog.show();
+  // Single paper-order entry point: broker demo and chart trading use the same ledger.
+  // This avoids showing a disconnected calculator that never records an order.
+  paperOrderDialog();
  }
 
  final java.util.ArrayList<PaperOrder> paperOrders=new java.util.ArrayList<>();
