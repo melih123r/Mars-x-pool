@@ -5,14 +5,18 @@ on:
       - 'android/app/src/main/AndroidManifest.xml'
       - 'android/app/src/main/java/com/marsx/pool/MainActivity.java'
       - 'android/app/src/main/java/com/marsx/pool/TelegramStatusActivity.java'
+      - 'android/app/src/main/java/com/marsx/pool/TechnicalIndicators.java'
       - 'scripts/test-android-hub.py'
+      - 'scripts/test_technical_indicators.py'
       - '.github/workflows/android-hub-regression.yml'
   pull_request:
     paths:
       - 'android/app/src/main/AndroidManifest.xml'
       - 'android/app/src/main/java/com/marsx/pool/MainActivity.java'
       - 'android/app/src/main/java/com/marsx/pool/TelegramStatusActivity.java'
+      - 'android/app/src/main/java/com/marsx/pool/TechnicalIndicators.java'
       - 'scripts/test-android-hub.py'
+      - 'scripts/test_technical_indicators.py'
       - '.github/workflows/android-hub-regression.yml'
 jobs:
   hub-contract:
@@ -22,5 +26,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
       - name: Verify single-APK navigation contract
         run: python3 scripts/test-android-hub.py
+      - name: Verify Finance technical indicator calculations
+        run: python3 scripts/test_technical_indicators.py
