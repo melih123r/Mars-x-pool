@@ -18,6 +18,11 @@ class AndroidHubTests(unittest.TestCase):
         cls.manifest = ET.parse(MANIFEST).getroot()
         cls.activities = cls.manifest.findall("./application/activity")
 
+    def test_release_policy_uses_buildconfig_version(self):
+        release = (ROOT / "scripts/check-release.py").read_text(encoding="utf-8")
+        self.assertIn("BuildConfig", release)
+        self.assertNotIn('if \'APP_VERSION = "0.9.0-beta"\' not in main_activity:', release)
+
     def test_launcher_brand_and_version_are_consistent(self):
         application = self.manifest.find("application")
         self.assertEqual("MARS-X Network", application.get(ANDROID + "label"))
