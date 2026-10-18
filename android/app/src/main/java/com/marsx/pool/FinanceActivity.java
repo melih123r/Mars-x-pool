@@ -494,6 +494,7 @@ public final class FinanceActivity extends Activity{
   }else{
    if(held.compareTo(qty)<0)return false;
    java.math.BigDecimal oldCost=paperCost.containsKey(sym)?paperCost.get(sym):java.math.BigDecimal.ZERO;
+   if(oldCost==null||oldCost.signum()<0)return false;
    java.math.BigDecimal remaining=held.subtract(qty);
    paperCash=paperCash.add(value);paperHoldings.put(sym,remaining);
    paperCost.put(sym,remaining.signum()==0?java.math.BigDecimal.ZERO:oldCost.multiply(remaining).divide(held,16,java.math.RoundingMode.HALF_UP));
