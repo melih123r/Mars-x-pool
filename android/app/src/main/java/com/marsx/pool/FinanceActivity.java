@@ -180,10 +180,10 @@ public final class FinanceActivity extends Activity{
   }catch(Exception ignored){}
  }
  void paperDashboard(){
-  StringBuilder out=new StringBuilder("DEMO • yerel cihazda kayıtlı • başlangıç 100.000 USD\\n");
+  StringBuilder out=new StringBuilder("DEMO • yerel cihazda kayıtlı • başlangıç 100.000 USD\n");
   int pendingCount=0,filledCount=0,cancelledCount=0;
   for(PaperOrder o:paperOrders){if("PENDING".equals(o.status))pendingCount++;else if("FILLED".equals(o.status))filledCount++;else if("CANCELLED".equals(o.status))cancelledCount++;}
-  out.append("Açık pozisyonlar: ").append(paperHoldings.values().stream().filter(v->v.signum()>0).count()).append(" • Bekleyen: ").append(pendingCount).append(" • Gerçekleşen: ").append(filledCount).append(" • İptal: ").append(cancelledCount).append("\\n");
+  out.append("Açık pozisyonlar: ").append(paperHoldings.values().stream().filter(v->v.signum()>0).count()).append(" • Bekleyen: ").append(pendingCount).append(" • Gerçekleşen: ").append(filledCount).append(" • İptal: ").append(cancelledCount).append("\n");
   java.math.BigDecimal markedValue=java.math.BigDecimal.ZERO,unrealized=java.math.BigDecimal.ZERO;
   int missingQuotes=0;
   for(String asset:paperHoldings.keySet()){
@@ -195,22 +195,22 @@ public final class FinanceActivity extends Activity{
    markedValue=markedValue.add(held.multiply(last));
    unrealized=unrealized.add(held.multiply(last).subtract(cost==null?java.math.BigDecimal.ZERO:cost));
   }
-  out.append("Gerçekleşmemiş K/Z (fiyatı bulunanlar): $").append(unrealized.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\\n");
+  out.append("Gerçekleşmemiş K/Z (fiyatı bulunanlar): $").append(unrealized.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\n");
   if(missingQuotes==0){
-   out.append("Tahmini toplam hesap değeri: $").append(paperCash.add(markedValue).setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\\n");
+   out.append("Tahmini toplam hesap değeri: $").append(paperCash.add(markedValue).setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\n");
   }else{
-   out.append("Toplam hesap değeri hesaplanamadı: ").append(missingQuotes).append(" pozisyon için güncel fiyat yok.\\n");
+   out.append("Toplam hesap değeri hesaplanamadı: ").append(missingQuotes).append(" pozisyon için güncel fiyat yok.\n");
   }
-  out.append("Not: Son kapanış fiyatları gecikmeli olabilir; komisyon ve spread dahil değildir.\\n");
-  java.math.BigDecimal realized=java.math.BigDecimal.ZERO,buyNotional=java.math.BigDecimal.ZERO,sellNotional=java.math.BigDecimal.ZERO;int buyFills=0,sellFills=0;for(PaperOrder order:paperOrders){if(!"FILLED".equals(order.status))continue;java.math.BigDecimal amount=order.qty.multiply(order.price);if("BUY".equals(order.side)){buyNotional=buyNotional.add(amount);buyFills++;}else if("SELL".equals(order.side)){sellNotional=sellNotional.add(amount);sellFills++;}}java.math.BigDecimal heldCost=java.math.BigDecimal.ZERO;for(java.math.BigDecimal basis:paperCost.values())if(basis!=null)heldCost=heldCost.add(basis);realized=paperCash.subtract(new java.math.BigDecimal("100000")).add(heldCost);out.append("DEMO PERFORMANS (komisyon/spread hariç)\\n");out.append("Gerçekleşmiş K/Z: $").append(realized.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append(" • Açık K/Z: $").append(unrealized.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\\n");out.append("Gerçekleşen alış/satış: ").append(buyFills).append("/").append(sellFills).append(" • İşlem hacmi: $").append(buyNotional.add(sellNotional).setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\\n");if(missingQuotes==0)out.append("Toplam getiri: ").append(paperCash.add(markedValue).subtract(new java.math.BigDecimal("100000")).multiply(new java.math.BigDecimal("100")).divide(new java.math.BigDecimal("100000"),2,java.math.RoundingMode.HALF_UP).toPlainString()).append("%\\n");  out.append("Nakit: $").append(paperCash.toPlainString()).append("\\n\\nPozisyonlar:\\n");
+  out.append("Not: Son kapanış fiyatları gecikmeli olabilir; komisyon ve spread dahil değildir.\n");
+  java.math.BigDecimal realized=java.math.BigDecimal.ZERO,buyNotional=java.math.BigDecimal.ZERO,sellNotional=java.math.BigDecimal.ZERO;int buyFills=0,sellFills=0;for(PaperOrder order:paperOrders){if(!"FILLED".equals(order.status))continue;java.math.BigDecimal amount=order.qty.multiply(order.price);if("BUY".equals(order.side)){buyNotional=buyNotional.add(amount);buyFills++;}else if("SELL".equals(order.side)){sellNotional=sellNotional.add(amount);sellFills++;}}java.math.BigDecimal heldCost=java.math.BigDecimal.ZERO;for(java.math.BigDecimal basis:paperCost.values())if(basis!=null)heldCost=heldCost.add(basis);realized=paperCash.subtract(new java.math.BigDecimal("100000")).add(heldCost);out.append("DEMO PERFORMANS (komisyon/spread hariç)\n");out.append("Gerçekleşmiş K/Z: $").append(realized.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append(" • Açık K/Z: $").append(unrealized.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\n");out.append("Gerçekleşen alış/satış: ").append(buyFills).append("/").append(sellFills).append(" • İşlem hacmi: $").append(buyNotional.add(sellNotional).setScale(2,java.math.RoundingMode.HALF_UP).toPlainString()).append("\n");if(missingQuotes==0)out.append("Toplam getiri: ").append(paperCash.add(markedValue).subtract(new java.math.BigDecimal("100000")).multiply(new java.math.BigDecimal("100")).divide(new java.math.BigDecimal("100000"),2,java.math.RoundingMode.HALF_UP).toPlainString()).append("%\n");  out.append("Nakit: $").append(paperCash.toPlainString()).append("\n\nPozisyonlar:\n");
   for(String sym:paperHoldings.keySet()){
    java.math.BigDecimal qty=paperHoldings.get(sym);
-   if(qty.signum()>0){out.append(sym).append(": ").append(qty.toPlainString()).append(" adet • maliyet $").append(paperCost.get(sym).toPlainString());java.math.BigDecimal quote=paperLastClose.get(sym);if(quote!=null){java.math.BigDecimal marketValue=qty.multiply(quote),pnl=marketValue.subtract(paperCost.get(sym));out.append(" • son kapanış $").append(quote.toPlainString()).append(" • gerçekleşmemiş K/Z $").append(pnl.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString());}else out.append(" • K/Z: fiyat bekleniyor");out.append("\\n");}
+   if(qty.signum()>0){out.append(sym).append(": ").append(qty.toPlainString()).append(" adet • maliyet $").append(paperCost.get(sym).toPlainString());java.math.BigDecimal quote=paperLastClose.get(sym);if(quote!=null){java.math.BigDecimal marketValue=qty.multiply(quote),pnl=marketValue.subtract(paperCost.get(sym));out.append(" • son kapanış $").append(quote.toPlainString()).append(" • gerçekleşmemiş K/Z $").append(pnl.setScale(2,java.math.RoundingMode.HALF_UP).toPlainString());}else out.append(" • K/Z: fiyat bekleniyor");out.append("\n");}
   }
-  out.append("\\nEmirler (LIMIT yalnızca tamamlanmış yeni mum kapanışında kontrol edilir):\\n");
+  out.append("\nEmirler (LIMIT yalnızca tamamlanmış yeni mum kapanışında kontrol edilir):\n");
   for(int i=paperOrders.size()-1;i>=0;i--){
    PaperOrder o=paperOrders.get(i);
-   out.append("#").append(o.id).append(" ").append(o.symbol).append(" ").append(o.side).append(" ").append(o.type).append(" ").append(o.qty).append(" × $").append(o.price).append(" ").append(o.status).append("\\n");
+   out.append("#").append(o.id).append(" ").append(o.symbol).append(" ").append(o.side).append(" ").append(o.type).append(" ").append(o.qty).append(" × $").append(o.price).append(" ").append(o.status).append("\n");
   }
   new AlertDialog.Builder(this).setTitle("DEMO portföy").setMessage(out.toString()).setPositiveButton("Kapat",null).setNeutralButton("Bekleyen emri iptal et",(d,w)->paperCancelDialog()).show();
  }
