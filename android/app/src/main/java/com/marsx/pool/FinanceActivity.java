@@ -6,7 +6,7 @@ public final class FinanceActivity extends Activity{
  LinearLayout root; TextView result,status,brokerStatus,marketPrice,marketProviders; ChartView chartView; final ArrayList<ChartView> comparisonCharts=new ArrayList<>(); Spinner marketAsset,marketTimeframe; EditText amount; Spinner from,to,fromNet,toNet; int ACCENT=Color.rgb(255,106,0),BG=Color.rgb(4,7,12),CARD=Color.rgb(10,14,22),RAISED=Color.rgb(15,20,31),MUTED=Color.rgb(158,169,188); final int[] THEMES={Color.rgb(0,194,255),Color.rgb(50,134,255),Color.rgb(185,60,255),Color.rgb(255,182,55),Color.rgb(42,207,129)}; int themeIndex=0; final Handler refreshHandler=new Handler(Looper.getMainLooper()); boolean screenActive=false; boolean tradingScreenVisible=false; String displayedChartKey="";int chartRequestGeneration=0; int quoteRequestGeneration=0; int marketListRequestGeneration=0; final Runnable refreshTick=new Runnable(){public void run(){if(screenActive&&tradingScreenVisible){chartSnapshot();for(ChartView extra:comparisonCharts)if(!extra.drawingSymbol.isEmpty())loadComparisonCrypto(extra,extra.drawingSymbol);refreshHandler.postDelayed(this,60000);}}};
  @Override protected void onResume(){super.onResume();screenActive=true;refreshHandler.removeCallbacks(refreshTick);if(tradingScreenVisible){refreshHandler.postDelayed(refreshTick,60000);if(chartView!=null){chartSnapshot();for(ChartView extra:comparisonCharts)if(!extra.drawingSymbol.isEmpty())loadComparisonCrypto(extra,extra.drawingSymbol);}}}
  @Override protected void onPause(){screenActive=false;chartRequestGeneration++;quoteRequestGeneration++;marketListRequestGeneration++;refreshHandler.removeCallbacks(refreshTick);super.onPause();}
- @Override public void onCreate(Bundle b){super.onCreate(b);requestWindowFeature(Window.FEATURE_NO_TITLE);getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);themeIndex=getPreferences(MODE_PRIVATE).getInt("theme",0);if(themeIndex<0||themeIndex>=THEMES.length)themeIndex=0;ACCENT=THEMES[themeIndex];restorePaperState();build();}
+ @Override public void onCreate(Bundle b){super.onCreate(b);requestWindowFeature(Window.FEATURE_NO_TITLE);getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);themeIndex=getPreferences(MODE_PRIVATE).getInt("theme",0);if(themeIndex<0||themeIndex>=THEMES.length)themeIndex=0;ACCENT=THEMES[themeIndex];restorePaperState();restoreDemoConversionBalances();build();}
  void build(){displayedChartKey="";comparisonCharts.clear();tradingScreenVisible=true;chartRequestGeneration++;quoteRequestGeneration++;marketListRequestGeneration++;refreshHandler.removeCallbacks(refreshTick);if(screenActive)refreshHandler.postDelayed(refreshTick,60000);if(root!=null)root=null;ScrollView s=new ScrollView(this);root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(28,24,28,34);root.setBackgroundColor(BG);
   rowTitle(); themePicker(); visualHero(); balanceCard(); cardHeader(); selectors(); quoteInfo(); popularPairs(); marketCard(); brokerCard(); nav(); s.addView(root);setContentView(s); health(); brokerHealth(); marketProviders(); chartSnapshot();
  }
@@ -30,6 +30,24 @@ public final class FinanceActivity extends Activity{
   ledger.setBalance("USDT",new java.math.BigDecimal("1000"));
   return ledger;
  }
+ private static final String[] DEMO_CONVERSION_ASSETS={"BTC","ETH","USDT","SOL","BNB","DOGE"};
+ void restoreDemoConversionBalances(){
+  android.content.SharedPreferences prefs=getPreferences(MODE_PRIVATE);
+  for(String asset:DEMO_CONVERSION_ASSETS){
+   String stored=prefs.getString("demo_conversion_balance_"+asset,null);
+   if(stored==null)continue;
+   try{
+    java.math.BigDecimal value=new java.math.BigDecimal(stored);
+    if(value.signum()>=0)demoConversionLedger.setBalance(asset,value);
+   }catch(NumberFormatException ignored){/* Corrupt local demo balance: keep initial demo amount. */}
+  }
+ }
+ void saveDemoConversionBalances(){
+  android.content.SharedPreferences.Editor editor=getPreferences(MODE_PRIVATE).edit();
+  for(String asset:DEMO_CONVERSION_ASSETS)
+   editor.putString("demo_conversion_balance_"+asset,demoConversionLedger.balance(asset).toPlainString());
+  editor.apply();
+ }
  String demoBalanceSummary(String[] assets){
   StringBuilder b=new StringBuilder("SANAL BAKİYELER\n");
   for(String asset:assets)b.append(asset).append(": ").append(demoConversionLedger.balance(asset).stripTrailingZeros().toPlainString()).append("  ");
@@ -39,7 +57,7 @@ public final class FinanceActivity extends Activity{
   final String[] assets={"BTC","ETH","USDT","SOL","BNB","DOGE"};
   final DemoConversionLedger ledger=demoConversionLedger;
   final LinearLayout form=new LinearLayout(this);form.setOrientation(LinearLayout.VERTICAL);form.setPadding(22,8,22,8);
-  form.addView(t("SANAL BAKİYE • Uygulama oturumu boyunca saklanır; gerçek cüzdan değildir.",13,ACCENT));
+  form.addView(t("SANAL BAKİYE • Bu cihazda saklanır; gerçek cüzdan değildir.",13,ACCENT));
   final TextView balances=t(demoBalanceSummary(assets),13,Color.WHITE);form.addView(balances);
   final Spinner source=spin(assets,0),target=spin(assets,1);
   form.addView(t("Kaynak",12,MUTED));form.addView(source);
@@ -56,6 +74,7 @@ public final class FinanceActivity extends Activity{
     java.math.BigDecimal rateValue=new java.math.BigDecimal(rate.getText().toString().trim());
     String fromAsset=source.getSelectedItem().toString(),toAsset=target.getSelectedItem().toString();
     java.math.BigDecimal received=ledger.convert(fromAsset,toAsset,amountValue,rateValue,new java.math.BigDecimal("0.001"));
+    saveDemoConversionBalances();
     balances.setText(demoBalanceSummary(assets));
     feedback.setText("DEMO: "+amountValue.toPlainString()+" "+fromAsset+" → "+received.stripTrailingZeros().toPlainString()+" "+toAsset);
    }catch(Exception e){feedback.setText("Demo işlem reddedildi: geçersiz miktar/kur, aynı varlık veya yetersiz sanal bakiye.");}
