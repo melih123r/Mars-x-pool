@@ -104,3 +104,54 @@ test('stream cursors advance monotonically and reject stale provider data', { sk
     await client.end();
   }
 });
+
+
+test('migration checksums are durable and reject altered replays', { skip: !databaseUrl }, async () => {
+  const client = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  await client.connect();
+  try {
+    await client.query('DROP SCHEMA IF EXISTS marsx_finance CASCADE');
+    for (const name of [
+      '001_readonly_broker_ledger.sql',
+      '002_ingest_idempotency.sql',
+      '003_atomic_ingest_api.sql',
+      '004_monotonic_stream_cursor.sql',
+      '005_migration_checksum_registry.sql'
+    ]) {
+      await client.query(await readFile(new URL(`./sql/${name}`, import.meta.url), 'utf8'));
+    }
+    await client.query(
+      `INSERT INTO marsx_finance.provider_accounts
+       (provider_account_id,provider,account_ref_hash,access_mode,kyc_status,aml_status)
+       VALUES ('acct_checksum_001','demo_broker',$1,'READ_ONLY','VERIFIED','CLEAR')`,
+      ['f'.repeat(64)]
+    );
+    await client.query(
+      `INSERT INTO marsx_finance.quotes
+       (quote_id,provider_account_id,idempotency_key,symbol,last_price,source_time,expires_at)
+       VALUES ('quote_checksum_001','acct_checksum_001','quote-key-checksum-001','ETH/EUR',20,now(),now()+interval '1 minute')`
+    );
+
+    const args = [4, '004_monotonic_stream_cursor.sql', '1'.repeat(64)];
+    const first = await client.query(
+      'SELECT * FROM marsx_finance.register_schema_migration($1,$2,$3)', args
+    );
+    const retry = await client.query(
+      'SELECT * FROM marsx_finance.register_schema_migration($1,$2,$3)', args
+    );
+    assert.equal(first.rows[0].inserted, true);
+    assert.equal(retry.rows[0].inserted, false);
+    await assert.rejects(
+      client.query(
+        'SELECT * FROM marsx_finance.register_schema_migration($1,$2,$3)',
+        [args[0], args[1], '2'.repeat(64)]
+      ),
+      /finance_migration_checksum_conflict/
+    );
+    const preserved = await client.query('SELECT count(*)::integer AS count FROM marsx_finance.quotes');
+    assert.equal(preserved.rows[0].count, 1);
+  } finally {
+    await client.query('DROP SCHEMA IF EXISTS marsx_finance CASCADE').catch(() => {});
+    await client.end();
+  }
+});
