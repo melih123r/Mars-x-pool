@@ -23,6 +23,8 @@ function fakePool({ duplicate = false, auditDuplicate = false, auditExisting, ex
         }] };
       if (sql.startsWith('SELECT command_id,update_id,command_kind'))
         return { rows: [stored] };
+      if (sql.includes('WITH expired_commands AS'))
+        return { rows: [{ ...stored, status: stored.attempt_count >= 10 ? 'failed' : 'pending', attempt_count: stored.attempt_count || 1 }] };
       if (sql.includes('WITH available AS'))
         return { rows: [{ ...stored, status: 'claimed', worker_id: params[0], attempt_count: 1 }] };
       if (sql.startsWith('UPDATE marsx_telegram.command_inbox')) {
@@ -94,14 +96,23 @@ test('command claim and retry use a bounded atomic lease', async () => {
   await assert.rejects(queue.retryCommand('telegram-86-chat', 'worker', 'bad code!', 30), /invalid_error_code/);
 });
 
-test('expired command leases are recovered for bounded retry', async () => {
+test('expired command lease recovery and audit commit in one transaction', async () => {
   const pool = fakePool();
   const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
   await queue.recoverExpired(25);
-  const recovery = pool.calls.find(call => call.sql.includes('UPDATE marsx_telegram.command_inbox'));
-  assert.ok(recovery);
-  assert.match(recovery.sql, /attempt_count >= 10 THEN 'failed' ELSE 'pending'/);
-  assert.match(recovery.sql, /FOR UPDATE SKIP LOCKED/);
+  const begin = pool.calls.findIndex(call => call.sql === 'BEGIN');
+  const recovery = pool.calls.findIndex(call => call.sql.includes('WITH expired_commands AS'));
+  const audit = pool.calls.findIndex((call, index) =>
+    index > recovery && call.sql.startsWith('INSERT INTO marsx_telegram.command_audit_log'));
+  const commit = pool.calls.findIndex(call => call.sql === 'COMMIT');
+  assert.ok(begin >= 0 && begin < recovery);
+  assert.match(pool.calls[recovery].sql, /attempt_count >= 10 THEN 'failed' ELSE 'pending'/);
+  assert.match(pool.calls[recovery].sql, /FOR UPDATE SKIP LOCKED/);
+  assert.ok(audit > recovery && audit < commit);
+  assert.equal(pool.calls[audit].params[0], 'telegram-86-chat');
+  assert.match(pool.calls[audit].params[1], /^lease_expired_attempt_1_[a-f0-9]{16}$/);
+  assert.equal(pool.calls[audit].params[2], 'RETRIED');
+  assert.equal(pool.calls[audit].params[5], 'lease_expired');
 });
 
 const auditMigrationUrl = new URL('./sql/004_command_audit_log.sql', import.meta.url);
