@@ -267,3 +267,50 @@ test('migration runner records checksums and rolls back failed DDL atomically', 
     await client.end();
   }
 });
+
+
+test('migration batches are ordered, serialized and replay-safe', { skip: !databaseUrl }, async () => {
+  const { applyFinanceMigrations } = await import('./migration-runner.mjs');
+  assert.equal(typeof applyFinanceMigrations, 'function');
+  const client = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  await client.connect();
+  try {
+    await client.query('DROP SCHEMA IF EXISTS marsx_finance CASCADE');
+    for (const name of [
+      '001_readonly_broker_ledger.sql',
+      '002_ingest_idempotency.sql',
+      '003_atomic_ingest_api.sql',
+      '004_monotonic_stream_cursor.sql',
+      '005_migration_checksum_registry.sql'
+    ]) {
+      await client.query(await readFile(new URL(`./sql/${name}`, import.meta.url), 'utf8'));
+    }
+    const migrations = [
+      {
+        version: 6,
+        name: '006_batch_parent.sql',
+        sql: 'CREATE TABLE marsx_finance.batch_parent (parent_id integer PRIMARY KEY)'
+      },
+      {
+        version: 7,
+        name: '007_batch_child.sql',
+        sql: 'CREATE TABLE marsx_finance.batch_child (child_id integer PRIMARY KEY, parent_id integer REFERENCES marsx_finance.batch_parent(parent_id))'
+      }
+    ];
+    assert.deepEqual(await applyFinanceMigrations(client, migrations), [
+      { version: 6, name: migrations[0].name, applied: true },
+      { version: 7, name: migrations[1].name, applied: true }
+    ]);
+    assert.deepEqual(await applyFinanceMigrations(client, migrations), [
+      { version: 6, name: migrations[0].name, applied: false },
+      { version: 7, name: migrations[1].name, applied: false }
+    ]);
+    await assert.rejects(
+      applyFinanceMigrations(client, [migrations[1], migrations[0]]),
+      /finance_migrations_not_strictly_ordered/
+    );
+  } finally {
+    await client.query('DROP SCHEMA IF EXISTS marsx_finance CASCADE').catch(() => {});
+    await client.end();
+  }
+});
