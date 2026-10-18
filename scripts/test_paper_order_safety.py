@@ -32,6 +32,7 @@ require("candle must begin after order creation", "completedCandleTime<order.cre
 require("candle end strictly after start", "completedCandleEnd<=completedCandleTime" in matching)
 require("do not fill unfinished or future candles", "completedCandleEnd>System.currentTimeMillis()/1000L" in matching)
 require("reject invalid last-close price", "!Double.isFinite(lastClose)||lastClose<=0" in matching)
+require("reject invalid pending order quantity", "order.qty==null||order.price==null||order.qty.signum()<=0||order.price.signum()<=0" in matching)
 require("record executed order status", 'order.status="FILLED"' in matching)
 require("persist demo state", "persistPaperState()" in matching)
 print("PASS: all static demo safety invariants")
