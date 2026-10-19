@@ -31,6 +31,12 @@ export async function applyFinanceMigrations(client, migrations) {
       'SELECT pg_advisory_xact_lock(hashtext($1))',
       ['marsx_finance_schema_migrations']
     );
+    const registry = await client.query(
+      'SELECT max(version)::integer AS max_version FROM marsx_finance.schema_migrations'
+    );
+    const maxVersion = registry.rows[0]?.max_version ?? null;
+    if (maxVersion !== null && checked[0].version > maxVersion + 1)
+      throw new Error('finance_migration_registry_gap');
     const results = [];
     for (const migration of checked) {
       const registration = await client.query(
