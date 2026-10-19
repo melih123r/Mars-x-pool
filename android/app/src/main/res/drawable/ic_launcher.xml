@@ -2,11 +2,13 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#0A1120" android:pathData="M0,0h108v108h-108z"/>
-    <path android:fillColor="#16263C" android:pathData="M10,10h88v88h-88z"/>
-    <path android:fillColor="#FF7439" android:pathData="M18,75 L29,29 L44,53 L57,29 L71,53 L82,29 L92,75 L77,75 L74,52 L60,78 L44,54 L36,75 Z"/>
-    <path android:strokeColor="#50C8FF" android:strokeWidth="3"
+    <!-- MARS-X Network: distinct rounded dark tile, orange M and blue network orbit -->
+    <path android:fillColor="#0B1323" android:pathData="M0,0h108v108h-108z"/>
+    <path android:fillColor="#14253A" android:pathData="M13,13h82v82h-82z"/>
+    <path android:fillColor="#FF703A" android:pathData="M24,77 L31,34 L53,58 L76,34 L84,77 L70,77 L67,56 L53,74 L40,56 L37,77 Z"/>
+    <path android:strokeColor="#49C6FF" android:strokeWidth="3.5"
         android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M16,22 C36,9 73,9 91,23"/>
-    <path android:fillColor="#50C8FF" android:pathData="M90,19a5,5 0,1 0,0.1 0z"/>
+        android:pathData="M18,30 C40,10 73,11 91,30"/>
+    <path android:fillColor="#49C6FF" android:pathData="M89,25a5,5 0,1 0,0.1 0z"/>
+    <path android:fillColor="#FFB15B" android:pathData="M20,80a4,4 0,1 0,0.1 0z"/>
 </vector>
