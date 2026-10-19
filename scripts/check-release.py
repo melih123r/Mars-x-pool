@@ -65,7 +65,7 @@ if not (legacy_version or network_version):
 if network_version:
     if 'android:name=".NetworkHomeActivity"' not in manifest:
         raise SystemExit("Network test launcher activity is missing")
-    if not re.search(r'<activity\\s+android:name="\\.NetworkHomeActivity"[^>]*>[\\s\\S]*?android.intent.action.MAIN[\\s\\S]*?android.intent.category.LAUNCHER', manifest):
+    if not re.search(r'<activity\s+android:name="\.NetworkHomeActivity"[^>]*>[\s\S]*?android.intent.action.MAIN[\s\S]*?android.intent.category.LAUNCHER', manifest):
         raise SystemExit("Network test must launch NetworkHomeActivity")
 if '"version": "0.9.0"' not in package:
     raise SystemExit("Package version must match Beta 0.9.0")
