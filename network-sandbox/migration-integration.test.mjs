@@ -522,7 +522,7 @@ test('revocation committed first remains the only terminal event under concurren
     );
     await new Promise(resolve => setTimeout(resolve, 50));
     await revoker.query('COMMIT');
-    await assert.rejects(close, /network_active_session_required_for_close/);
+    await assert.rejects(close, /network_session_event_idempotency_conflict/);
     const winner = await setup.query(
       `SELECT s.session_status,e.event_kind,count(*) OVER ()::integer AS terminal_count
          FROM marsx_network_demo.mock_sessions s
