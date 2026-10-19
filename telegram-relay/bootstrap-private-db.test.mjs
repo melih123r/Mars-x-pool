@@ -42,6 +42,33 @@ test('real PostgreSQL: restricted setup, concurrent duplicate intake and ten tru
     runtime.username = 'marsx_telegram_relay';
     runtime.password = password;
     queue = new PostgresTaskQueue({ connectionString: runtime.href, encryptionKeyHex: randomBytes(32).toString('hex') });
+    await queue.storeCommandAtomic({
+      updateId: 124, kind: 'chat', project: 'finance', message: 'recovery guard test'
+    });
+    await assert.rejects(
+      queue.pool.query(
+        `INSERT INTO marsx_telegram.command_audit_log
+         (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,error_code,metadata)
+         VALUES ('audit_recovery_guard_001','telegram-124-chat','lease_expired_bad_001','RETRIED',10,$1,'lease_expired',$2)`,
+        ['d'.repeat(64), { attemptCount: 9 }]
+      ),
+      /telegram_recovery_audit_state_mismatch/
+    );
+    await queue.pool.query(
+      `UPDATE marsx_telegram.command_inbox
+          SET status='claimed',worker_id='expired_worker',
+              lease_until=now()-interval '1 second',attempt_count=1
+        WHERE command_id='telegram-124-chat'`
+    );
+    await queue.recoverExpired(10);
+    const recoveryAudit = await queue.pool.query(
+      `SELECT event_kind,error_code,metadata
+         FROM marsx_telegram.command_audit_log
+        WHERE command_id='telegram-124-chat' AND error_code='lease_expired'`
+    );
+    assert.deepEqual(recoveryAudit.rows, [{
+      event_kind: 'RETRIED', error_code: 'lease_expired', metadata: { attemptCount: 1 }
+    }]);
     await assert.rejects(queue.pool.query('SELECT * FROM public.existing_pool_data'), { code: '42501' });
     await assert.rejects(queue.pool.query('DELETE FROM marsx_telegram.intakes'), { code: '42501' });
     const message = 'MARS-X test';
