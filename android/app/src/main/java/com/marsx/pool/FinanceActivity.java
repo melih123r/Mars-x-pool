@@ -53,7 +53,7 @@ public final class FinanceActivity extends Activity{
    JSONArray history=new JSONArray(prefs.getString("finance_paper_history","[]"));
    JSONObject item=new JSONObject();item.put("time",System.currentTimeMillis());item.put("symbol",symbol);
    item.put("side",side.name());item.put("quantity",quantity);
-   item.put("status",orderResult.status.name());item.put("price",orderResult.fillPrice);
+   item.put("status",orderResult.status.name());item.put("price",Double.isFinite(orderResult.fillPrice)?orderResult.fillPrice:JSONObject.NULL);
    history.put(item);
    JSONArray limited=new JSONArray();for(int i=Math.max(0,history.length()-100);i<history.length();i++)limited.put(history.getJSONObject(i));
    prefs.edit().putString("finance_paper_history",limited.toString()).apply();
