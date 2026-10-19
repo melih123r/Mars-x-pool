@@ -21,6 +21,8 @@ export async function applyFinanceMigrations(client, migrations) {
   for (let index = 1; index < checked.length; index += 1) {
     if (checked[index].version <= checked[index - 1].version)
       throw new Error('finance_migrations_not_strictly_ordered');
+    if (checked[index].version !== checked[index - 1].version + 1)
+      throw new Error('finance_migration_gap');
   }
 
   await client.query('BEGIN');
