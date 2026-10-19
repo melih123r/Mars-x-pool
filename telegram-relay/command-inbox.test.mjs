@@ -287,3 +287,20 @@ test('exhausted command retry records FAILED atomically', async () => {
   assert.ok(pool.calls.findIndex(call => call.sql === 'COMMIT') >
     pool.calls.findIndex(call => call === audit));
 });
+
+
+test('lease recovery rejects conflicting immutable audit replay', async () => {
+  const pool = fakePool({
+    auditDuplicate: true,
+    auditExisting: {
+      event_kind: 'FAILED',
+      lane_number: 10,
+      actor_ref_hash: '0'.repeat(64),
+      error_code: 'different_error',
+      metadata: { attemptCount: 9 }
+    }
+  });
+  const queue = new PostgresTaskQueue({ pool, encryptionKeyHex: 'ab'.repeat(32) });
+  await assert.rejects(queue.recoverExpired(25), /recovery_audit_idempotency_conflict/);
+  assert.ok(pool.calls.some(call => call.sql === 'ROLLBACK'));
+});
