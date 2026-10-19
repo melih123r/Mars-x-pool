@@ -138,6 +138,7 @@ public class MainActivity extends Activity {
         homeTab = tabButton(tabs, getString(R.string.tab_home), view -> showTab(0));
         earningsTab = tabButton(tabs, getString(R.string.tab_earnings), view -> showTab(1));
         accountTab = tabButton(tabs, getString(R.string.tab_account), view -> showTab(2));
+        tabButton(tabs, "Network", view -> startActivity(new Intent(this, NetworkWebsiteActivity.class)));
         screen.addView(tabs);
         setContentView(screen);
         showTab(0);
