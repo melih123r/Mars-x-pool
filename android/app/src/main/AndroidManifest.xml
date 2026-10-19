@@ -12,15 +12,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MarsX"
         android:usesCleartextTraffic="false">
-        <activity android:name=".NetworkHomeActivity" android:exported="false" />
-        <activity android:name=".NetworkWebsiteActivity" android:exported="false" />
-        <activity android:name=".VrscPoolActivity" android:exported="false" />
-        <activity android:name=".MainActivity" android:exported="false" />
-        <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="true">
+        <activity android:name=".NetworkHomeActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".NetworkWebsiteActivity" android:exported="false" />
+        <activity android:name=".VrscPoolActivity" android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="false" />
+        <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="true" />
     </application>
 </manifest>
