@@ -31,10 +31,10 @@ public final class NetworkHomeActivity extends Activity {
         page.setPadding(dp(20),dp(32),dp(20),dp(24));
         scroll.addView(page);
         setContentView(scroll);
-        text(page,"MARS-X  NETWORK",24,WHITE,true);
-        text(page,"Basit ve güvenli test sürümü",14,MUTED,false);
+        text(page,"MARS-X NETWORK",24,WHITE,true);
+        text(page,"Ağ • Kazanç • Cüzdan",14,MUTED,false);
         LinearLayout card=card();
-        text(card,"Ağ durumu",18,WHITE,true);
+        text(card,"1  •  AĞ",18,WHITE,true);
         status=text(card,"",15,MUTED,false);
         consentButton=button(card,"İzin ver");
         consentButton.setOnClickListener(v->{
@@ -45,18 +45,15 @@ public final class NetworkHomeActivity extends Activity {
         text(card,"Not: İzin vermek internet paylaşımını başlatmaz. Gerçek ağ SDK'sı henüz bağlı değil.",12,MUTED,false);
         refresh();
         LinearLayout earnings=card();
-        text(earnings,"Kazancım",18,WHITE,true);
+        text(earnings,"2  •  KAZANÇ",18,WHITE,true);
         text(earnings,"0,00 USDC",30,ORANGE,true);
         text(earnings,"Henüz doğrulanmış kazanç yok",13,MUTED,false);
         LinearLayout wallet=card();
-        text(wallet,"Cüzdan",18,WHITE,true);
+        text(wallet,"3  •  CÜZDAN",18,WHITE,true);
         text(wallet,"USDC ödeme bağlantısı henüz hazır değil.",14,MUTED,false);
         Button withdraw=button(wallet,"Para çek  •  Yakında");
         withdraw.setEnabled(false);
-        LinearLayout info=card();
-        text(info,"Nasıl çalışacak?",18,WHITE,true);
-        text(info,"1. İzin ver\n2. Onaylı ağ ortağı bağlanınca paylaşımı başlat\n3. Gerçekleşen kazancı takip et",14,MUTED,false);
-        text(page,"Test modu  •  Ağ paylaşımı kapalı  •  Gerçek ödeme yok",12,MUTED,false);
+        text(page,"TEST SÜRÜMÜ  •  Ağ paylaşımı ve ödeme kapalı",12,MUTED,false);
     }
     private void refresh(){
         boolean consent=prefs.getBoolean("consented",false);
