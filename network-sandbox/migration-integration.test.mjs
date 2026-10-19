@@ -482,3 +482,60 @@ test('concurrent manual close remains the persisted winner over later revocation
     await Promise.all([setup.end(), closer.end(), revoker.end()]);
   }
 });
+
+
+test('revocation committed first remains the only terminal event under concurrent close', { skip: !databaseUrl }, async () => {
+  const setup = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  const revoker = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  const closer = new pg.Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5000 });
+  await Promise.all([setup.connect(), revoker.connect(), closer.connect()]);
+  try {
+    await setup.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE');
+    for (const name of [
+      '001_mock_device_points.sql','002_session_consent_lifecycle.sql',
+      '003_atomic_consent_transition.sql','004_atomic_receipt_api.sql',
+      '005_session_receipt_binding.sql','006_atomic_session_close.sql',
+      '007_revocation_session_events.sql','008_terminal_session_event_link.sql',
+      '009_deferred_terminal_event_constraint.sql','010_single_terminal_event.sql'
+    ]) {
+      await setup.query(await readFile(new URL(`./sql/${name}`, import.meta.url), 'utf8'));
+    }
+    await setup.query(
+      `INSERT INTO marsx_network_demo.mock_devices
+       (mock_device_id,device_ref_hash,consent_status,consent_version,consented_at)
+       VALUES ('device_revoke_race',$1,'GRANTED','v1',now())`,
+      ['c'.repeat(64)]
+    );
+    await setup.query(
+      `INSERT INTO marsx_network_demo.mock_sessions
+       (session_id,mock_device_id,idempotency_key,consent_version,started_at)
+       VALUES ('session_revoke_race','device_revoke_race','session-revoke-race','v1',now())`
+    );
+    await revoker.query('BEGIN');
+    await revoker.query(
+      'SELECT * FROM marsx_network_demo.record_consent_transition($1,$2,$3,$4,$5,$6)',
+      ['consent-event-race-first','device_revoke_race','revoke-first-race-01','REVOKED','v1',new Date().toISOString()]
+    );
+    const close = closer.query(
+      'SELECT * FROM marsx_network_demo.close_mock_session($1,$2,$3,$4)',
+      ['session-event-race-late','session_revoke_race','late-close-race-001',new Date().toISOString()]
+    );
+    await new Promise(resolve => setTimeout(resolve, 50));
+    await revoker.query('COMMIT');
+    await assert.rejects(close, /network_active_session_required_for_close/);
+    const winner = await setup.query(
+      `SELECT s.session_status,e.event_kind,count(*) OVER ()::integer AS terminal_count
+         FROM marsx_network_demo.mock_sessions s
+         JOIN marsx_network_demo.session_events e
+           ON e.session_event_id=s.terminal_session_event_id
+        WHERE s.session_id='session_revoke_race'`
+    );
+    assert.deepEqual(winner.rows[0], {
+      session_status: 'REVOKED', event_kind: 'REVOKED', terminal_count: 1
+    });
+  } finally {
+    await revoker.query('ROLLBACK').catch(() => {});
+    await setup.query('DROP SCHEMA IF EXISTS marsx_network_demo CASCADE').catch(() => {});
+    await Promise.all([setup.end(), revoker.end(), closer.end()]);
+  }
+});
