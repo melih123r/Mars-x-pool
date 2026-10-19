@@ -48,12 +48,14 @@ jobs:
         run: gradle -p android :app:lintRelease --no-daemon
       - name: Build debug APK
         run: gradle -p android :app:assembleDebug --no-daemon
-      - name: Build release AAB
-        run: gradle -p android :app:bundleRelease --no-daemon
-      - uses: actions/upload-artifact@v4
+      - name: Publish debug APK immediately
+        uses: actions/upload-artifact@v4
         with:
           name: marsx-network-v15-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+      - name: Build release AAB
+        run: gradle -p android :app:bundleRelease --no-daemon
       - uses: actions/upload-artifact@v4
         with:
           name: marsx-network-v15-release-aab-unsigned
