@@ -24,8 +24,57 @@ public final class FinanceActivity extends Activity{
  void quoteInfo(){LinearLayout c=card();c.addView(t("Hizmet Durumu",12,ACCENT));c.addView(t("ChangeNOW read-only quote • Broker kapıları kilitli • KYC/SCA olmadan gerçek işlem yok",12,MUTED));String[] f={"✓ Hizlı işlem","✓ En iyi oranlar","✓ Çoklu ağ","✓ Varlıklar güvende","✓ Kayıt gerektirmez","✓ İşlem kapalı"};for(int i=0;i<3;i++){LinearLayout r=row();feature(r,f[i*2]);feature(r,f[i*2+1]);c.addView(r,mp(4));}root.addView(c,mp(12));}
  void popularPairs(){LinearLayout c=card();c.addView(t("POPÜLER ÇİFTLER",12,ACCENT));String[] pairs={"BTC  ›  ETH","ETH  ›  USDT","BNB  ›  USDT","SOL  ›  USDT","USDT  ›  TRX"};for(String pair:pairs){TextView p=t(pair+"        veri bekleniyor",14,Color.WHITE);p.setBackground(pill(Color.rgb(12,17,27),Color.rgb(35,45,62)));p.setPadding(16,10,16,10);c.addView(p,mp(6));}root.addView(c,mp(12));}
  void brokerCard(){LinearLayout c=card();c.addView(t("SİSTEM DURUMU",12,ACCENT));brokerStatus=t("Broker durumu kontrol ediliyor…",13,MUTED);c.addView(brokerStatus);c.addView(t("İşlem modu: Önizleme • canlı emir ve çekim kapalı",12,MUTED));root.addView(c,mp(12));}
- void marketCard(){LinearLayout c=card();c.addView(t("PİYASA ÖZETİ",12,ACCENT));marketPrice=t("BTC / USD     —     veri bekleniyor",18,Color.WHITE);marketPrice.setTypeface(null,Typeface.BOLD);oneLine(marketPrice);c.addView(marketPrice);marketAsset=spin(new String[]{"BTC-USD","ETH-USD","SOL-USD","DOGE-USD","LTC-USD","AVAX-USD"},0);c.addView(marketAsset);marketTimeframe=spin(new String[]{"1m","5m","15m","1h","6h","1D"},0);c.addView(marketTimeframe);marketAsset.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int i,long id){if(chartView!=null)chartSnapshot();}});marketTimeframe.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int i,long id){if(chartView!=null)chartSnapshot();}});chartView=new ChartView(this);chartView.accent=ACCENT;chartView.setContentDescription("BTC USD mum grafiği; veri bekleniyor");c.addView(chartView,new LinearLayout.LayoutParams(-1,420));LinearLayout controls=row();Button zoomIn=new Button(this);zoomIn.setText("＋ Yakınlaştır");zoomIn.setAllCaps(false);zoomIn.setOnClickListener(v->chartView.zoom(-1));controls.addView(zoomIn,new LinearLayout.LayoutParams(0,54,1));Button zoomOut=new Button(this);zoomOut.setText("－ Uzaklaştır");zoomOut.setAllCaps(false);zoomOut.setOnClickListener(v->chartView.zoom(1));controls.addView(zoomOut,new LinearLayout.LayoutParams(0,54,1));c.addView(controls);c.addView(t("Mum grafik • hacim • salt okunur veri",12,MUTED));marketProviders=t("Piyasa verisi: Coinbase + Kraken + Bybit hazırlanıyor",12,MUTED);c.addView(marketProviders);root.addView(c,mp(12));}
- void nav(){LinearLayout r=row();String[] items={"Ana Sayfa","Piyasalar","Trading","Portföy","Cüzdan","Profil"};for(String item:items){TextView n=t(item,10,MUTED);n.setGravity(Gravity.CENTER);oneLine(n);n.setBackground(pill(Color.rgb(8,11,18),item.equals("Trading")?ACCENT:Color.rgb(32,40,56)));LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,52,1);p.setMargins(2,0,2,0);r.addView(n,p);n.setOnClickListener(v->openFinanceScreen(item));}root.addView(r,mp(20));}
+ void marketCard(){LinearLayout c=card();c.addView(t("PİYASA ÖZETİ",12,ACCENT));marketPrice=t("BTC / USD     —     veri bekleniyor",18,Color.WHITE);marketPrice.setTypeface(null,Typeface.BOLD);oneLine(marketPrice);c.addView(marketPrice);marketAsset=spin(new String[]{"BTC-USD","ETH-USD","SOL-USD","DOGE-USD","LTC-USD","AVAX-USD"},0);c.addView(marketAsset);Button scannerButton=new Button(this);scannerButton.setText("🔎 Piyasa tarayıcı • 24s");scannerButton.setAllCaps(false);scannerButton.setOnClickListener(v->scanMarketSnapshots());c.addView(scannerButton,new LinearLayout.LayoutParams(-1,54));marketTimeframe=spin(new String[]{"1m","5m","15m","1h","6h","1D"},0);c.addView(marketTimeframe);marketAsset.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int i,long id){if(chartView!=null){chartView.loadDrawing(getPreferences(MODE_PRIVATE),marketAsset.getSelectedItem().toString());chartSnapshot();}}});marketTimeframe.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int i,long id){if(chartView!=null)chartSnapshot();}});chartView=new ChartView(this);chartView.accent=ACCENT;chartView.loadDrawing(getPreferences(MODE_PRIVATE),marketAsset.getSelectedItem().toString());chartView.setContentDescription("BTC USD mum grafiği; veri bekleniyor");c.addView(chartView,new LinearLayout.LayoutParams(-1,420));LinearLayout controls=row();Button zoomIn=new Button(this);zoomIn.setText("＋ Yakınlaştır");zoomIn.setAllCaps(false);zoomIn.setOnClickListener(v->chartView.zoom(-1));controls.addView(zoomIn,new LinearLayout.LayoutParams(0,54,1));Button zoomOut=new Button(this);zoomOut.setText("－ Uzaklaştır");zoomOut.setAllCaps(false);zoomOut.setOnClickListener(v->chartView.zoom(1));controls.addView(zoomOut,new LinearLayout.LayoutParams(0,54,1));c.addView(controls);LinearLayout replayControls=row();Button replayStart=new Button(this);replayStart.setText("▶ Replay başlat");replayStart.setAllCaps(false);replayStart.setOnClickListener(v->{if(chartView.startReplay())replayStart.setText("↺ Baştan");else android.widget.Toast.makeText(this,"Replay için mum verisi gerekli",android.widget.Toast.LENGTH_SHORT).show();});replayControls.addView(replayStart,new LinearLayout.LayoutParams(0,54,1));Button replayStep=new Button(this);replayStep.setText("Sonraki mum ›");replayStep.setAllCaps(false);replayStep.setOnClickListener(v->{if(!chartView.stepReplay())android.widget.Toast.makeText(this,"Replay başlatın veya son muma ulaşıldı",android.widget.Toast.LENGTH_SHORT).show();});replayControls.addView(replayStep,new LinearLayout.LayoutParams(0,54,1));Button replayExit=new Button(this);replayExit.setText("Bitir");replayExit.setAllCaps(false);replayExit.setOnClickListener(v->{chartView.stopReplay();replayStart.setText("▶ Replay başlat");});replayControls.addView(replayExit,new LinearLayout.LayoutParams(0,54,1));c.addView(replayControls);LinearLayout drawingControls=row();Button lineStart=new Button(this);lineStart.setText("Çizgi başlangıcı");lineStart.setAllCaps(false);lineStart.setOnClickListener(v->{if(chartView.markDrawingStart())android.widget.Toast.makeText(this,"Başlangıç kaydedildi; bitiş için dokunun",android.widget.Toast.LENGTH_SHORT).show();else android.widget.Toast.makeText(this,"Önce mum verisi yüklenmeli",android.widget.Toast.LENGTH_SHORT).show();});drawingControls.addView(lineStart,new LinearLayout.LayoutParams(0,54,1));Button lineEnd=new Button(this);lineEnd.setText("Çizgiyi kaydet");lineEnd.setAllCaps(false);lineEnd.setOnClickListener(v->{if(chartView.saveDrawing(getPreferences(MODE_PRIVATE),marketAsset.getSelectedItem().toString()))android.widget.Toast.makeText(this,"Çizim kaydedildi",android.widget.Toast.LENGTH_SHORT).show();else android.widget.Toast.makeText(this,"Grafikte başlangıç ve bitiş seçin",android.widget.Toast.LENGTH_SHORT).show();});drawingControls.addView(lineEnd,new LinearLayout.LayoutParams(0,54,1));Button lineDelete=new Button(this);lineDelete.setText("Çizimi sil");lineDelete.setAllCaps(false);lineDelete.setOnClickListener(v->chartView.deleteDrawing(getPreferences(MODE_PRIVATE),marketAsset.getSelectedItem().toString()));drawingControls.addView(lineDelete,new LinearLayout.LayoutParams(0,54,1));c.addView(drawingControls);c.addView(t("Çizim: başlangıca dokun → bitişe dokun → kaydet. Sembol başına son çizgi saklanır.",12,MUTED));LinearLayout paperControls=row();Button paperBuy=new Button(this);paperBuy.setText("DEMO AL");paperBuy.setAllCaps(false);paperBuy.setOnClickListener(v->placeChartPaperOrder(FinancePaperOrders.Side.BUY));paperControls.addView(paperBuy,new LinearLayout.LayoutParams(0,56,1));Button paperSell=new Button(this);paperSell.setText("DEMO SAT");paperSell.setAllCaps(false);paperSell.setOnClickListener(v->placeChartPaperOrder(FinancePaperOrders.Side.SELL));paperControls.addView(paperSell,new LinearLayout.LayoutParams(0,56,1));c.addView(paperControls);Button paperHistory=new Button(this);paperHistory.setText("DEMO emir geçmişi");paperHistory.setAllCaps(false);paperHistory.setOnClickListener(v->showPaperHistory());c.addView(paperHistory,new LinearLayout.LayoutParams(-1,54));c.addView(t("Demo emirleri yalnızca cihazda değerlendirilir. Gerçek emir gönderilmez.",12,MUTED));c.addView(t("Replay: geçmiş mumları adım adım gösterir; canlı emir oluşturmaz.",12,MUTED));c.addView(t("Mum grafik • hacim • salt okunur veri",12,MUTED));marketProviders=t("Piyasa verisi: Coinbase + Kraken + Bybit hazırlanıyor",12,MUTED);c.addView(marketProviders);root.addView(c,mp(12));}
+ void placeChartPaperOrder(FinancePaperOrders.Side side){
+  if(chartView==null||marketAsset==null||chartView.candles.isEmpty()){
+   new AlertDialog.Builder(this).setTitle("DEMO").setMessage("Geçerli mum fiyatı bulunamadı; emir oluşturulmadı.").setPositiveButton("Tamam",null).show();return;
+  }
+  float last=chartView.candles.get(chartView.candles.size()-1)[3];
+  if(!Float.isFinite(last)||last<=0)return;
+  final String symbol=marketAsset.getSelectedItem().toString();
+  final EditText qty=new EditText(this);qty.setInputType(8194);qty.setText("0.01");
+  new AlertDialog.Builder(this).setTitle("DEMO "+(side==FinancePaperOrders.Side.BUY?"AL":"SAT")+" • "+symbol)
+   .setMessage("Son mum kapanışı: "+String.format(Locale.ROOT,"%.4f",last)+"\\nSadece simülasyon; fiyat ve gerçekleşme garantisi yok.\\nMiktar:")
+   .setView(qty).setNegativeButton("Vazgeç",null).setPositiveButton("Demo emrini değerlendir",(dialog,which)->{
+    double quantity;
+    try{quantity=Double.parseDouble(qty.getText().toString().trim());}catch(Exception ex){quantity=Double.NaN;}
+    FinancePaperOrders.Order order=new FinancePaperOrders.Order(symbol,side,FinancePaperOrders.Type.MARKET,quantity,0,"chart_"+SystemClock.uptimeMillis());
+    FinancePaperOrders.Result result=FinancePaperOrders.evaluate(order,last);
+    savePaperOrder(symbol,side,quantity,result);
+    String outcome=result.status==FinancePaperOrders.Status.FILLED
+      ?"DEMO gerçekleşti • "+String.format(Locale.ROOT,"%.4f",result.fillPrice)
+      :"DEMO reddedildi • "+result.reason;
+    new AlertDialog.Builder(this).setTitle("DEMO SONUCU").setMessage(outcome+"\\nBu işlem gerçek portföyünüzü değiştirmez.").setPositiveButton("Tamam",null).show();
+   }).show();
+ }
+ void savePaperOrder(String symbol,FinancePaperOrders.Side side,double quantity,FinancePaperOrders.Result orderResult){
+  try{
+   android.content.SharedPreferences prefs=getPreferences(MODE_PRIVATE);
+   JSONArray history=new JSONArray(prefs.getString("finance_paper_history","[]"));
+   JSONObject item=new JSONObject();item.put("time",System.currentTimeMillis());item.put("symbol",symbol);
+   item.put("side",side.name());item.put("quantity",quantity);
+   item.put("status",orderResult.status.name());item.put("price",Double.isFinite(orderResult.fillPrice)?orderResult.fillPrice:JSONObject.NULL);
+   history.put(item);
+   JSONArray limited=new JSONArray();for(int i=Math.max(0,history.length()-100);i<history.length();i++)limited.put(history.getJSONObject(i));
+   prefs.edit().putString("finance_paper_history",limited.toString()).apply();
+  }catch(Exception e){android.util.Log.e("MARSX-FINANCE","Demo history save failed",e);}
+ }
+ void showPaperHistory(){
+  StringBuilder report=new StringBuilder("Yalnızca simülasyon • gerçek portföy değildir.\\n");
+  try{
+   JSONArray history=new JSONArray(getPreferences(MODE_PRIVATE).getString("finance_paper_history","[]"));
+   if(history.length()==0)report.append("Henüz demo emri yok.");
+   for(int i=history.length()-1;i>=Math.max(0,history.length()-20);i--){
+    JSONObject o=history.getJSONObject(i);
+    report.append("\\n").append(o.optString("symbol")).append("  ").append(o.optString("side"))
+     .append("  ").append(o.optString("status")).append("  ").append(o.optDouble("quantity"))
+     .append(" @ ").append(o.optDouble("price"));
+   }
+  }catch(Exception e){report.append("Emir geçmişi okunamadı.");}
+  new AlertDialog.Builder(this).setTitle("DEMO Emir Geçmişi").setMessage(report.toString())
+   .setPositiveButton("Kapat",null).show();
+ }
+  void nav(){LinearLayout r=row();String[] items={"Ana Sayfa","Piyasalar","Trading","Portföy","Cüzdan","Profil"};for(String item:items){TextView n=t(item,10,MUTED);n.setGravity(Gravity.CENTER);oneLine(n);n.setBackground(pill(Color.rgb(8,11,18),item.equals("Trading")?ACCENT:Color.rgb(32,40,56)));LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(0,52,1);p.setMargins(2,0,2,0);r.addView(n,p);n.setOnClickListener(v->openFinanceScreen(item));}root.addView(r,mp(20));}
  void openFinanceScreen(String name){
   if("Trading".equals(name)){build();return;}
   final int white=Color.WHITE;ScrollView scroll=new ScrollView(this);LinearLayout body=new LinearLayout(this);body.setOrientation(LinearLayout.VERTICAL);body.setPadding(26,24,26,26);body.setBackgroundColor(BG);scroll.addView(body);
@@ -50,6 +99,33 @@ public final class FinanceActivity extends Activity{
  void health(){new Thread(()->{try{JSONObject j=get("/convert/health");boolean ok=j.optBoolean("configured",false);runOnUiThread(()->{status.setText(ok?"● Fiyat API hazır":"● Bağlantı Bekleniyor");status.setTextColor(ok?Color.rgb(0,220,160):Color.LTGRAY);});}catch(Exception e){runOnUiThread(()->status.setText("● Hizmet Bekleniyor"));}}).start();}
  void brokerHealth(){new Thread(()->{try{JSONObject j=get("/broker/health");JSONArray p=j.optJSONArray("providers");JSONObject b=p==null||p.length()==0?null:p.optJSONObject(0);boolean configured=b!=null&&b.optBoolean("configured",false);JSONObject prod=j.optJSONObject("production");boolean trading=prod!=null&&prod.optBoolean("liveTrading",false);String text=(configured?"lemon bağlantısı hazır":"lemon API anahtarı bekleniyor")+" • "+(trading?"production review hazır":"güvenlik kapıları kilitli");runOnUiThread(()->{brokerStatus.setText(text);brokerStatus.setTextColor(trading?Color.rgb(0,220,160):(configured?Color.rgb(255,190,90):Color.LTGRAY));});}catch(Exception e){runOnUiThread(()->brokerStatus.setText("Broker durumu alınamadı. Paper mod korunuyor."));}}).start();}
  void marketProviders(){new Thread(()->{try{JSONObject j=get("/market/providers");JSONArray p=j.optJSONArray("providers");ArrayList<String> ready=new ArrayList<>();if(p!=null)for(int i=0;i<p.length();i++){JSONObject x=p.optJSONObject(i);if(x!=null&&"DATA_READY".equals(x.optString("status")))ready.add(x.optString("id"));}String label=ready.isEmpty()?"Coinbase public feed • backend provider listesi boş":"Backend providers: "+String.join(" + ",ready);runOnUiThread(()->{if(marketProviders!=null)marketProviders.setText(label);});}catch(Exception e){runOnUiThread(()->{if(marketProviders!=null)marketProviders.setText("Coinbase public feed • backend provider listesi erişilemiyor");});}}).start();}
+ void scanMarketSnapshots(){
+  final String[] symbols={"BTC-USD","ETH-USD","SOL-USD","DOGE-USD","LTC-USD","AVAX-USD"};
+  android.widget.Toast.makeText(this,"Piyasa taranıyor…",android.widget.Toast.LENGTH_SHORT).show();
+  new Thread(()->{
+   ArrayList<FinanceMarketScanner.Snapshot> snapshots=new ArrayList<>();
+   for(String symbol:symbols)try{
+    JSONArray candles=getPublicCoinbaseCandles(symbol,3600);
+    if(candles.length()<25)continue;
+    JSONObject latest=candles.getJSONObject(candles.length()-1);
+    long age=System.currentTimeMillis()/1000L-latest.getLong("time");
+    if(age<0||age>7200)continue;
+    double volume=0;
+    for(int i=candles.length()-24;i<candles.length();i++)volume+=candles.getJSONObject(i).getDouble("volume");
+    snapshots.add(new FinanceMarketScanner.Snapshot(symbol,latest.getDouble("close"),
+      candles.getJSONObject(candles.length()-25).getDouble("close"),volume));
+   }catch(Exception ignored){}
+   List<FinanceMarketScanner.Match> matches=FinanceMarketScanner.scan(snapshots,0,0,6);
+   StringBuilder report=new StringBuilder("24 saatlik fiyat hareketi • salt okunur\\n");
+   if(matches.isEmpty())report.append("Güncel veri alınamadı.");
+   for(FinanceMarketScanner.Match m:matches)report.append("\\n").append(m.symbol)
+    .append("   ").append(String.format(Locale.ROOT,"%+.2f%%",m.changePercent))
+    .append("   ").append(String.format(Locale.ROOT,"%.4f",m.lastPrice));
+   runOnUiThread(()->{if(!isFinishing())new AlertDialog.Builder(this)
+    .setTitle("MARS-X Piyasa Tarayıcı").setMessage(report.toString())
+    .setPositiveButton("Kapat",null).show();});
+  }).start();
+ }
  void chartSnapshot(){if(!screenActive||marketAsset==null||marketTimeframe==null||chartView==null)return;final String symbol=marketAsset.getSelectedItem().toString(),tf=marketTimeframe.getSelectedItem().toString();final int seconds=new int[]{60,300,900,3600,21600,86400}[marketTimeframe.getSelectedItemPosition()];marketPrice.setText(symbol+" • yükleniyor");new Thread(()->{try{JSONArray candles=getPublicCoinbaseCandles(symbol,seconds);if(candles.length()==0)throw new IOException("No candles");long candleTime=candles.getJSONObject(candles.length()-1).getLong("time");long now=System.currentTimeMillis()/1000L;if(candleTime>now+120L||now-candleTime>Math.max(900L,3L*seconds))throw new IOException("Stale candles");double close=candles.getJSONObject(candles.length()-1).getDouble("close");runOnUiThread(()->{if(marketAsset==null||!symbol.equals(marketAsset.getSelectedItem().toString())||!tf.equals(marketTimeframe.getSelectedItem().toString()))return;chartView.setCandles(candles);marketPrice.setText(symbol+"     "+String.format(Locale.ROOT,"%,.2f",close)+"     Coinbase • "+tf);marketProviders.setText("Coinbase Exchange • "+tf+" • salt okunur");});}catch(Exception e){runOnUiThread(()->{if(marketAsset!=null&&symbol.equals(marketAsset.getSelectedItem().toString())){marketPrice.setText(symbol+" • veri alınamadı");marketProviders.setText("Canlı piyasa bağlantısı başarısız • yeniden seçim yaparak dene");chartView.clear();}});}}).start();}
  JSONArray getPublicCoinbaseCandles(String symbol,int granularity)throws Exception{HttpURLConnection c=(HttpURLConnection)new URL("https://api.exchange.coinbase.com/products/"+enc(symbol)+"/candles?granularity="+granularity).openConnection();c.setConnectTimeout(9000);c.setReadTimeout(9000);c.setRequestProperty("Accept","application/json");c.setRequestProperty("User-Agent","MARS-X-Finance/0.9");int code=c.getResponseCode();if(code!=200){c.disconnect();throw new IOException("Coinbase HTTP "+code);}JSONArray raw;try(InputStream stream=c.getInputStream()){raw=new JSONArray(read(stream));}finally{c.disconnect();}JSONArray candles=new JSONArray();for(int i=raw.length()-1;i>=0;i--){JSONArray x=raw.getJSONArray(i);JSONObject item=new JSONObject();item.put("time",x.getLong(0));item.put("open",x.getDouble(3));item.put("high",x.getDouble(2));item.put("low",x.getDouble(1));item.put("close",x.getDouble(4));item.put("volume",x.getDouble(5));candles.put(item);}return candles;}
  void quote(){String f=asset(from),tt=asset(to),a=amount.getText().toString().trim(),fn=net(fromNet),tn=net(toNet);if(!a.matches("[0-9]+(\\.[0-9]{1,12})?")){result.setText("Geçerli bir miktar gir.");return;}result.setText("Minimum tutar ve fiyat hesaplanıyor…");new Thread(()->{try{String route="fromCurrency="+enc(f)+"&toCurrency="+enc(tt)+"&fromNetwork="+enc(fn)+"&toNetwork="+enc(tn)+"&flow=standard";JSONObject m=get("/convert/min-amount?"+route);JSONObject md=m.optJSONObject("data");double min=md==null?Double.NaN:md.optDouble("minAmount",Double.NaN);if(Double.isFinite(min)&&Double.parseDouble(a)<min){String msg="Minimum tutar: "+min+" "+f.toUpperCase(Locale.ROOT)+"\nSeçilen ağ: "+fn.toUpperCase(Locale.ROOT)+" → "+tn.toUpperCase(Locale.ROOT)+"\nİşlem oluşturulmadı.";runOnUiThread(()->result.setText(msg));return;}JSONObject j=get("/convert/quote?"+route+"&fromAmount="+enc(a));JSONObject d=j.optJSONObject("data");String est=d==null?"—":d.optString("toAmount",d.optString("estimatedAmount","—"));String fee=d==null?"—":d.optString("fee",d.optString("networkFee","—"));String minText=Double.isFinite(min)?String.valueOf(min):"—";String out="Minimum tutar: "+minText+" "+f.toUpperCase(Locale.ROOT)+"\nTahmini alacağın miktar: "+est+" "+tt.toUpperCase(Locale.ROOT)+"\nAğ/komisyon: "+fee+"\nİşlem oluşturulmadı.";runOnUiThread(()->result.setText(out));}catch(ApiException e){runOnUiThread(()->result.setText(errorMessage(e)));}catch(Exception e){runOnUiThread(()->result.setText("Fiyat servisi şu anda kullanılamıyor. İşlem oluşturulmadı."));}}).start();}
@@ -66,9 +142,29 @@ public final class FinanceActivity extends Activity{
  LinearLayout.LayoutParams mp(int top){LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=top;return p;}GradientDrawable round(int col,int rad){GradientDrawable g=new GradientDrawable();g.setColor(col);g.setCornerRadius(rad);return g;}GradientDrawable pill(int col,int stroke){GradientDrawable g=round(col,999);g.setStroke(1,stroke);return g;}GradientDrawable panel(int col,int rad,int stroke){GradientDrawable g=round(col,rad);g.setStroke(2,stroke);return g;}GradientDrawable box(){GradientDrawable g=round(Color.rgb(16,23,34),16);g.setStroke(1,Color.rgb(56,32,82));return g;}
  static final class ChartView extends View{
   final Paint p=new Paint(3); final ArrayList<float[]> candles=new ArrayList<>(); int accent=Color.rgb(255,112,0);
-  int visibleCount=48,scrollBack=0;float downX,downY;boolean dragging=false;
+  int visibleCount=48,scrollBack=0;float downX,downY;boolean dragging=false;int replayEnd=-1;
+  float[] drawing=null;float[] drawingDraft=null;boolean selectingDrawing=false;
+  boolean markDrawingStart(){if(candles.isEmpty())return false;drawingDraft=null;selectingDrawing=true;invalidate();return true;}
+  boolean saveDrawing(android.content.SharedPreferences prefs,String symbol){
+   if(drawingDraft==null||drawingDraft.length!=4)return false;
+   drawing=drawingDraft.clone();drawingDraft=null;selectingDrawing=false;
+   prefs.edit().putString("finance_drawing_"+symbol,drawing[0]+","+drawing[1]+","+drawing[2]+","+drawing[3]).apply();invalidate();return true;
+  }
+  void loadDrawing(android.content.SharedPreferences prefs,String symbol){
+   drawing=null;drawingDraft=null;selectingDrawing=false;
+   String saved=prefs.getString("finance_drawing_"+symbol,"");
+   try{String[] a=saved.split(",");if(a.length==4){float[] d=new float[4];for(int i=0;i<4;i++){d[i]=Float.parseFloat(a[i]);if(!Float.isFinite(d[i])||d[i]<0||d[i]>1)throw new IllegalArgumentException();}drawing=d;}}catch(Exception ignored){}
+   invalidate();
+  }
+  void deleteDrawing(android.content.SharedPreferences prefs,String symbol){
+   drawing=null;drawingDraft=null;selectingDrawing=false;
+   prefs.edit().remove("finance_drawing_"+symbol).apply();invalidate();
+  }
+  boolean startReplay(){if(candles.isEmpty())return false;replayEnd=1;scrollBack=0;invalidate();return true;}
+  boolean stepReplay(){if(replayEnd<0||replayEnd>=candles.size())return false;replayEnd++;invalidate();return true;}
+  void stopReplay(){replayEnd=-1;scrollBack=0;invalidate();}
   ChartView(Context context){super(context);setBackgroundColor(Color.rgb(7,12,19));}
-  void clear(){candles.clear();scrollBack=0;invalidate();setContentDescription("Piyasa verisi bekleniyor");}
+  void clear(){candles.clear();scrollBack=0;replayEnd=-1;invalidate();setContentDescription("Piyasa verisi bekleniyor");}
   void setCandles(JSONArray raw){
    ArrayList<float[]> valid=new ArrayList<>();long lastTime=Long.MIN_VALUE;
    for(int i=0;i<raw.length();i++)try{
@@ -77,12 +173,12 @@ public final class FinanceActivity extends Activity{
     if(time<=lastTime||!Double.isFinite(o)||!Double.isFinite(h)||!Double.isFinite(l)||!Double.isFinite(close)||!Double.isFinite(vol)||l<=0||o<=0||close<=0||h<Math.max(o,close)||l>Math.min(o,close)||vol<0)continue;
     valid.add(new float[]{(float)o,(float)h,(float)l,(float)close,(float)vol});lastTime=time;
    }catch(Exception ignored){}
-   candles.clear();candles.addAll(valid);scrollBack=0;invalidate();
+   candles.clear();candles.addAll(valid);scrollBack=0;replayEnd=-1;invalidate();
    setContentDescription(valid.isEmpty()?"Piyasa verisi bekleniyor":valid.size()+" mum; yakınlaştırma ve yatay kaydırma destekleniyor");
   }
   void zoom(int direction){visibleCount=Math.max(12,Math.min(120,visibleCount+direction*12));scrollBack=Math.min(scrollBack,Math.max(0,candles.size()-visibleCount));invalidate();}
   @Override public boolean onTouchEvent(android.view.MotionEvent event){
-   if(event.getActionMasked()==android.view.MotionEvent.ACTION_DOWN){downX=event.getX();downY=event.getY();dragging=true;return true;}
+   if(event.getActionMasked()==android.view.MotionEvent.ACTION_DOWN){downX=event.getX();downY=event.getY();if(selectingDrawing){float x=Math.max(0,Math.min(1,event.getX()/Math.max(1,getWidth()))),y=Math.max(0,Math.min(1,event.getY()/Math.max(1,getHeight())));if(drawingDraft==null)drawingDraft=new float[]{x,y,x,y};else{drawingDraft[2]=x;drawingDraft[3]=y;selectingDrawing=false;}invalidate();return true;}dragging=true;return true;}
    if(event.getActionMasked()==android.view.MotionEvent.ACTION_MOVE&&dragging){float dx=event.getX()-downX;float cell=Math.max(4,getWidth()/(float)Math.max(12,visibleCount));int shift=(int)(dx/cell);if(shift!=0){scrollBack=Math.max(0,Math.min(Math.max(0,candles.size()-visibleCount),scrollBack+shift));downX=event.getX();invalidate();}return true;}
    if(event.getActionMasked()==android.view.MotionEvent.ACTION_UP){dragging=false;performClick();return true;}
    if(event.getActionMasked()==android.view.MotionEvent.ACTION_CANCEL){dragging=false;return true;}
@@ -95,7 +191,7 @@ public final class FinanceActivity extends Activity{
    p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(1);p.setColor(Color.rgb(36,46,59));
    for(int k=0;k<=4;k++){float y=top+plotH*k/4f;canvas.drawLine(left,y,w-right,y,p);}
    if(candles.isEmpty()){p.setStyle(Paint.Style.FILL);p.setTextSize(26);p.setTextAlign(Paint.Align.CENTER);p.setColor(Color.LTGRAY);canvas.drawText("VERİ BEKLENİYOR",w/2f,h/2f,p);p.setTextAlign(Paint.Align.LEFT);return;}
-   int end=Math.max(0,candles.size()-scrollBack),start=Math.max(0,end-visibleCount),count=end-start;if(count<=0)return;
+   int end=Math.max(0,(replayEnd<0?candles.size():replayEnd)-scrollBack),start=Math.max(0,end-visibleCount),count=end-start;if(count<=0)return;
    float high=Float.NEGATIVE_INFINITY,low=Float.POSITIVE_INFINITY,maxVol=1;
    for(int i=start;i<end;i++){float[] a=candles.get(i);high=Math.max(high,a[1]);low=Math.min(low,a[2]);maxVol=Math.max(maxVol,a[4]);}
    float range=Math.max(.000001f,high-low);high+=range*.04f;low=Math.max(0,low-range*.04f);
@@ -110,7 +206,7 @@ public final class FinanceActivity extends Activity{
     if(i>=19){double sum=0;for(int j=i-19;j<=i;j++)sum+=candles.get(j)[3];float sy=y((float)(sum/20),high,low,top,plotH);if(!started){sma.moveTo(cx,sy);started=true;}else sma.lineTo(cx,sy);}
    }
    p.setStyle(Paint.Style.STROKE);p.setColor(accent);p.setStrokeWidth(2.5f);canvas.drawPath(sma,p);
-   p.setStyle(Paint.Style.FILL);p.setColor(Color.LTGRAY);p.setTextSize(22);canvas.drawText("SMA 20",left+6,top+22,p);canvas.drawText("VOL",left+6,h-8,p);
+   float[] line=drawingDraft!=null?drawingDraft:drawing;if(line!=null){p.setStyle(Paint.Style.STROKE);p.setColor(Color.YELLOW);p.setStrokeWidth(3);canvas.drawLine(line[0]*w,line[1]*h,line[2]*w,line[3]*h,p);}p.setStyle(Paint.Style.FILL);p.setColor(Color.LTGRAY);p.setTextSize(22);canvas.drawText("SMA 20",left+6,top+22,p);canvas.drawText("VOL",left+6,h-8,p);
   }
   float y(float value,float high,float low,int top,int height){return top+(high-value)/Math.max(.000001f,high-low)*height;}
  }

@@ -36,8 +36,8 @@ android {
         applicationId "com.marsx.finance"
         minSdk 26
         targetSdk 36
-        versionCode 15
-        versionName "0.9.2-beta-demo"
+        versionCode 1000
+        versionName "0.10.0-beta"
         buildConfigField "String", "QONVERSION_PROJECT_KEY", "\"${escapedQonversionProjectKey}\""
         buildConfigField "String", "QONVERSION_PRODUCT_PRO", "\"pro_monthly\""
         buildConfigField "String", "QONVERSION_PRODUCT_FARM", "\"farm_monthly\""
