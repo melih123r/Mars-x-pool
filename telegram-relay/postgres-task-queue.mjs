@@ -413,15 +413,32 @@ export class PostgresTaskQueue {
       for (const command of recoveredCommands.rows || []) {
         const eventKey = `lease_expired_attempt_${command.attempt_count}_${recoveryActorHash.slice(0, 16)}`;
         const eventKind = command.status === 'failed' ? 'FAILED' : 'RETRIED';
-        await client.query(
+        const metadata = { attemptCount: command.attempt_count };
+        const auditInsert = await client.query(
           `INSERT INTO marsx_telegram.command_audit_log
              (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,error_code,metadata)
            VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,$3,10,$4,$5,$6)
-           ON CONFLICT (command_id,event_key) DO NOTHING`,
-          [command.command_id, eventKey, eventKind, recoveryActorHash, 'lease_expired', {
-            attemptCount: command.attempt_count
-          }]
+           ON CONFLICT (command_id,event_key) DO NOTHING
+           RETURNING audit_event_id`,
+          [command.command_id, eventKey, eventKind, recoveryActorHash, 'lease_expired', metadata]
         );
+        if (auditInsert.rowCount === 0) {
+          const existingAudit = await client.query(
+            `SELECT event_kind,lane_number,actor_ref_hash,metadata,error_code
+               FROM marsx_telegram.command_audit_log
+              WHERE command_id=$1 AND event_key=$2 FOR UPDATE`,
+            [command.command_id, eventKey]
+          );
+          const existing = existingAudit.rows[0];
+          if (!existing
+              || existing.event_kind !== eventKind
+              || existing.lane_number !== 10
+              || existing.actor_ref_hash !== recoveryActorHash
+              || existing.error_code !== 'lease_expired'
+              || JSON.stringify(existing.metadata) !== JSON.stringify(metadata)) {
+            throw new Error('recovery_audit_idempotency_conflict');
+          }
+        }
       }
       // A crashed worker may have exhausted its retries. Reconcile every affected
       // intake so an otherwise completed ten-lane job still produces a report.
