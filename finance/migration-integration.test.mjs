@@ -316,6 +316,14 @@ test('migration batches are ordered, serialized and replay-safe', { skip: !datab
       ]),
       /finance_migration_gap/
     );
+    await assert.rejects(
+      applyFinanceMigrations(client, [{
+        version: 9,
+        name: '009_registry_gap.sql',
+        sql: 'CREATE TABLE marsx_finance.registry_gap (id integer PRIMARY KEY)'
+      }]),
+      /finance_migration_registry_gap/
+    );
   } finally {
     await client.query('DROP SCHEMA IF EXISTS marsx_finance CASCADE').catch(() => {});
     await client.end();
