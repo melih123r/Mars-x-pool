@@ -16,7 +16,8 @@ export async function bootstrapPrivateDatabase({ adminUrl, password, approved, a
   const migrations = await Promise.all([
     readFile(new URL('./sql/001_durable_queue.sql', import.meta.url), 'utf8'),
     readFile(new URL('./sql/003_command_inbox.sql', import.meta.url), 'utf8'),
-    readFile(new URL('./sql/004_command_audit_log.sql', import.meta.url), 'utf8')
+    readFile(new URL('./sql/004_command_audit_log.sql', import.meta.url), 'utf8'),
+    readFile(new URL('./sql/005_command_recovery_audit_guard.sql', import.meta.url), 'utf8')
   ]);
   // The migrations are already transactional; keep them inside our larger transaction.
   const migration = migrations.map(sql => sql.replace(/^BEGIN;\s*$/m, '').replace(/^COMMIT;\s*$/m, '')).join('\n');
