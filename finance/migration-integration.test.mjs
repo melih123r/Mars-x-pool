@@ -309,6 +309,13 @@ test('migration batches are ordered, serialized and replay-safe', { skip: !datab
       applyFinanceMigrations(client, [migrations[1], migrations[0]]),
       /finance_migrations_not_strictly_ordered/
     );
+    await assert.rejects(
+      applyFinanceMigrations(client, [
+        migrations[0],
+        { ...migrations[1], version: 8, name: '008_batch_child.sql' }
+      ]),
+      /finance_migration_gap/
+    );
   } finally {
     await client.query('DROP SCHEMA IF EXISTS marsx_finance CASCADE').catch(() => {});
     await client.end();
