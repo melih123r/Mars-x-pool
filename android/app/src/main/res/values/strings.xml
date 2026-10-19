@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">MARS-X Pool Beta</string>
-    <string name="app_title" translatable="false">MARS-X POOL</string>
+    <string name="app_name" translatable="false">MARS-X Network Test</string>
+    <string name="app_title" translatable="false">MARS-X NETWORK</string>
     <string name="beta_label">Beta 0.8.4 • serverless licensed sandbox</string>
     <string name="product_disclaimer">Remote node/pool management prototype. This version does not mine on the phone, run hidden computing or guarantee earnings.</string>
     <string name="worker_identity_title">Worker ID for this device</string>
