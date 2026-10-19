@@ -70,8 +70,8 @@ elif version_name.group(1) != "0.9.0-beta" or int(version_code.group(1)) != 13:
     raise SystemExit("Pool beta 0.9.0 Android version is required")
 if '"version": "0.9.0"' not in package:
     raise SystemExit("Package version must match Beta 0.9.0")
-if 'APP_VERSION = "0.9.0-beta"' not in main_activity:
-    raise SystemExit("Android runtime version must match Beta 0.9.0")
+if not re.search(r"APP_VERSION\s*=\s*BuildConfig\.VERSION_NAME\s*;", main_activity):
+    raise SystemExit("Android runtime version must derive from BuildConfig.VERSION_NAME")
 for runtime in (
     ROOT / "server.js",
     ROOT / "cloudflare/src/worker.js",

@@ -36,7 +36,7 @@ import java.util.UUID;
 public class MainActivity extends Activity {
     private static final String DEFAULT_URL = BuildConfig.MARSX_API_BASE_URL;
     private static final String TERMS_VERSION = "2026-09-27-v3";
-    private static final String APP_VERSION = "0.9.0-beta";
+    private static final String APP_VERSION = BuildConfig.VERSION_NAME;
     private static final String TESTER_URL = "https://play.google.com/apps/testing/com.marsx.pool";
     private static final int[] TASKS = {
             R.string.task_app_opens,
@@ -184,6 +184,12 @@ public class MainActivity extends Activity {
         addText(financeCard, "MARS-X Finance", 18);
         addText(financeCard, "Partner-backed market conversion preview. Read-only beta; trading and withdrawals are locked.", 14);
         button(financeCard, "Open Finance", view -> startActivity(new Intent(this, FinanceActivity.class)));
+
+        LinearLayout commandCard = card(root);
+        addText(commandCard, "MARS-X Telegram Command Center", 18);
+        addText(commandCard, "Read-only status. Backend commands require a separately configured and authorized Telegram service.", 14);
+        button(commandCard, "Open Command Center", view ->
+                startActivity(new Intent(this, TelegramStatusActivity.class)));
 
         LinearLayout vrscCard = card(root);
         addText(vrscCard, "MARS-X", 18);
