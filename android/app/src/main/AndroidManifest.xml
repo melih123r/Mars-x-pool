@@ -6,14 +6,15 @@
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/ic_launcher"
-        android:label="MARS-X Network"
+        android:icon="@drawable/ref3_launcher"
+        android:roundIcon="@drawable/ref3_launcher"
+        android:label="MARS-X Finance + Network"
         android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
         android:theme="@style/Theme.MarsX"
         android:usesCleartextTraffic="false">
         <activity android:name=".VrscPoolActivity" android:exported="false" />
-        <activity android:name=".FinanceActivity" android:exported="false" />
+        <activity android:name=".FinanceActivity" android:configChanges="orientation|screenSize" android:exported="false" />
         <activity android:name=".TelegramStatusActivity" android:exported="false" />
         <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="true">

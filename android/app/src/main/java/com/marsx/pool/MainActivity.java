@@ -37,7 +37,7 @@ public class MainActivity extends Activity {
     private static final String DEFAULT_URL = BuildConfig.MARSX_API_BASE_URL;
     private static final String TERMS_VERSION = "2026-09-27-v3";
     private static final String APP_VERSION = BuildConfig.VERSION_NAME;
-    private static final String TESTER_URL = "https://play.google.com/apps/testing/com.marsx.pool";
+    private static final String TESTER_URL = "https://play.google.com/apps/testing/com.marsx.finance";
     private static final int[] TASKS = {
             R.string.task_app_opens,
             R.string.task_licence_screen,
@@ -120,7 +120,7 @@ public class MainActivity extends Activity {
         LinearLayout header = new LinearLayout(this);
         header.setOrientation(LinearLayout.VERTICAL);
         header.setPadding(dp(20), dp(20), dp(20), dp(10));
-        addTitle(header, getString(R.string.app_title));
+        addTitle(header, "MARS-X Finance + Network");
         TextView beta = addText(header, getString(R.string.simple_beta_label), 13);
         beta.setTextColor(Color.rgb(255, 122, 24));
         screen.addView(header);
@@ -183,7 +183,7 @@ public class MainActivity extends Activity {
         LinearLayout financeCard = card(root);
         addText(financeCard, "MARS-X Finance", 18);
         addText(financeCard, "Partner-backed market conversion preview. Read-only beta; trading and withdrawals are locked.", 14);
-        button(financeCard, "Open Finance", view -> startActivity(new Intent(this, FinanceActivity.class)));
+        button(financeCard, "FINANCE • Aç", view -> startActivity(new Intent(this, FinanceActivity.class)));
 
         LinearLayout commandCard = card(root);
         addText(commandCard, "MARS-X Telegram Command Center", 18);
@@ -194,7 +194,7 @@ public class MainActivity extends Activity {
         LinearLayout vrscCard = card(root);
         addText(vrscCard, "MARS-X", 18);
         addText(vrscCard, "MARS-X kazanç motoru • Beta", 14);
-        button(vrscCard, "BAŞLAT", view ->
+        button(vrscCard, "Network • Gelişmiş mod", view ->
                 startActivity(new Intent(this, VrscPoolActivity.class)));
 
         LinearLayout deviceCard = card(root);
