@@ -2,79 +2,91 @@ package com.marsx.pool;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.graphics.Color;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-/** Network-only, offline-first UI. No SDK, payouts, mining or proxy is started. */
+/** Simple, offline Network test dashboard. No proxy/SDK or payouts are enabled. */
 public final class NetworkHomeActivity extends Activity {
-    private LinearLayout root;
+    private static final int BG=Color.rgb(9,14,24), PANEL=Color.rgb(23,31,46);
+    private static final int WHITE=Color.WHITE, MUTED=Color.rgb(171,183,201), ORANGE=Color.rgb(255,128,43);
     private SharedPreferences prefs;
-    private TextView consentState;
-    private final int white=Color.rgb(245,247,250), muted=Color.rgb(162,171,183);
+    private LinearLayout page;
+    private TextView status;
+    private Button consentButton;
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         prefs=getSharedPreferences("network_consent_v1",MODE_PRIVATE);
         ScrollView scroll=new ScrollView(this);
         scroll.setFillViewport(true);
-        scroll.setBackgroundColor(Color.rgb(9,14,23));
-        root=new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(28,40,28,36);
-        scroll.addView(root);
+        scroll.setBackgroundColor(BG);
+        page=new LinearLayout(this);
+        page.setOrientation(LinearLayout.VERTICAL);
+        page.setPadding(dp(20),dp(32),dp(20),dp(24));
+        scroll.addView(page);
         setContentView(scroll);
-        label("MARS-X NETWORK",26,white);
-        label("EARLY TEST • No real bandwidth sharing or USDC payouts",13,muted);
-        section("Network");
-        label("Opt-in bandwidth sharing will be available only after a licensed/approved SDK partner is integrated.",15,white);
-        consentState=label("",15,muted);
-        Button consent=button("Record consent for future testing");
-        consent.setOnClickListener(v->{
-            prefs.edit().putBoolean("consented",true).putLong("consent_time",System.currentTimeMillis()).apply();
-            updateConsent();
+        text(page,"MARS-X  NETWORK",24,WHITE,true);
+        text(page,"Basit ve güvenli test sürümü",14,MUTED,false);
+        LinearLayout card=card();
+        text(card,"Ağ durumu",18,WHITE,true);
+        status=text(card,"",15,MUTED,false);
+        consentButton=button(card,"İzin ver");
+        consentButton.setOnClickListener(v->{
+            boolean next=!prefs.getBoolean("consented",false);
+            prefs.edit().putBoolean("consented",next).apply();
+            refresh();
         });
-        Button revoke=button("Revoke consent");
-        revoke.setOnClickListener(v->{
-            prefs.edit().putBoolean("consented",false).remove("consent_time").apply();
-            updateConsent();
-        });
-        updateConsent();
-        section("Earnings");
-        label("Pending: —     Settled: —     Available: —",17,white);
-        label("No verified revenue source is connected. No USDC is held by this app.",13,muted);
-        section("USDC wallet");
-        label("Enter a self-custody address for future withdrawals. Address stays on this device in this test.",13,muted);
-        EditText address=new EditText(this);
-        address.setTextColor(white);
-        address.setHintTextColor(muted);
-        address.setHint("Wallet address (not connected)");
-        address.setSingleLine(true);
-        root.addView(address);
-        section("Withdrawals");
-        label("Supported networks and minimum 1 USDC target are subject to written provider approval.",14,muted);
-        Button payout=button("Withdraw — unavailable in test");
-        payout.setEnabled(false);
-        section("History");
-        label("No settled transactions or payouts.",14,muted);
-        section("Settings");
-        label("Network sharing OFF. No background sharing service runs in this build.",14,white);
+        text(card,"Not: İzin vermek internet paylaşımını başlatmaz. Gerçek ağ SDK'sı henüz bağlı değil.",12,MUTED,false);
+        refresh();
+        LinearLayout earnings=card();
+        text(earnings,"Kazancım",18,WHITE,true);
+        text(earnings,"0,00 USDC",30,ORANGE,true);
+        text(earnings,"Henüz doğrulanmış kazanç yok",13,MUTED,false);
+        LinearLayout wallet=card();
+        text(wallet,"Cüzdan",18,WHITE,true);
+        text(wallet,"USDC ödeme bağlantısı henüz hazır değil.",14,MUTED,false);
+        Button withdraw=button(wallet,"Para çek  •  Yakında");
+        withdraw.setEnabled(false);
+        LinearLayout info=card();
+        text(info,"Nasıl çalışacak?",18,WHITE,true);
+        text(info,"1. İzin ver\n2. Onaylı ağ ortağı bağlanınca paylaşımı başlat\n3. Gerçekleşen kazancı takip et",14,MUTED,false);
+        text(page,"Test modu  •  Ağ paylaşımı kapalı  •  Gerçek ödeme yok",12,MUTED,false);
     }
-    private void updateConsent() {
-        boolean yes=prefs.getBoolean("consented",false);
-        consentState.setText(yes?"Consent recorded for future testing; sharing remains OFF.":"No consent recorded; sharing OFF.");
+    private void refresh(){
+        boolean consent=prefs.getBoolean("consented",false);
+        status.setText(consent?"İzin kaydedildi • Paylaşım kapalı":"Paylaşım kapalı");
+        consentButton.setText(consent?"İzni kaldır":"İzin ver");
     }
-    private void section(String name) {label(name,21,Color.rgb(255,163,69)).setPadding(0,26,0,8);}
-    private TextView label(String text,int sp,int color) {
-        TextView t=new TextView(this);t.setText(text);t.setTextSize(sp);t.setTextColor(color);
-        t.setPadding(0,6,0,8);root.addView(t);return t;
+    private LinearLayout card(){
+        LinearLayout box=new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(18),dp(14),dp(18),dp(18));
+        GradientDrawable bg=new GradientDrawable();
+        bg.setColor(PANEL);bg.setCornerRadius(dp(20));
+        box.setBackground(bg);
+        LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);
+        lp.setMargins(0,dp(18),0,0);
+        page.addView(box,lp);
+        return box;
     }
-    private Button button(String text) {
-        Button b=new Button(this);b.setText(text);root.addView(b);return b;
+    private TextView text(LinearLayout parent,String value,int size,int color,boolean bold){
+        TextView t=new TextView(this);
+        t.setText(value);t.setTextSize(size);t.setTextColor(color);
+        if(bold)t.setTypeface(null,Typeface.BOLD);
+        t.setPadding(0,dp(5),0,dp(6));
+        parent.addView(t);
+        return t;
     }
+    private Button button(LinearLayout parent,String label){
+        Button b=new Button(this);b.setText(label);b.setAllCaps(false);
+        parent.addView(b,new LinearLayout.LayoutParams(-1,dp(54)));
+        return b;
+    }
+    private int dp(int value){return (int)(value*getResources().getDisplayMetrics().density+0.5f);}
 }
