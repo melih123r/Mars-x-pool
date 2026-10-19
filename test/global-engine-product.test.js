@@ -1,0 +1,4 @@
+import test from "node:test";import assert from "node:assert/strict";import {blackScholes} from "../global-engine/options-analytics.js";import {evaluateAlerts,screen} from "../global-engine/terminal-tools.js";import {authorize} from "../global-engine/api-auth.js";
+test("options analytics returns finite Greeks",()=>{const x=blackScholes({spot:100,strike:100,years:1,vol:.2,rate:.03});for(const k of ["price","delta","gamma","vega","theta"])assert.ok(Number.isFinite(x[k]));});
+test("alerts and screener are deterministic",()=>{assert.equal(evaluateAlerts([{field:"price",op:">",value:10}],{price:11}).length,1);assert.equal(screen([{price:9},{price:11}],[{field:"price",op:">",value:10}]).length,1);});
+test("api auth fails closed when configured",()=>{assert.equal(authorize({headers:{"x-api-key":"bad"}},{keys:["good"]}).ok,false);assert.equal(authorize({headers:{"x-api-key":"good"}},{keys:["good"]}).ok,true);});

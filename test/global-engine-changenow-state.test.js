@@ -1,0 +1,4 @@
+import test from "node:test";import assert from "node:assert/strict";import {normalizeChangeNowStatus,changeNowTimeline,changeNowLedgerPreview} from "../global-engine/changenow-state.js";
+test("ChangeNOW status normalization is fail closed",()=>{assert.equal(normalizeChangeNowStatus({id:"x",status:"finished"}).terminal,true);assert.equal(normalizeChangeNowStatus({id:"x",status:"mystery"}).status,"unknown");});
+test("ChangeNOW timeline deduplicates status events",()=>{const a=changeNowTimeline([{id:"x",status:"waiting",updatedAt:"2026-01-01T00:00:00Z"},{id:"x",status:"waiting",updatedAt:"2026-01-01T00:00:00Z"}]);assert.equal(a.length,1);});
+test("ChangeNOW ledger preview never invents settlement",()=>{assert.equal(changeNowLedgerPreview({id:"x",status:"waiting",fromAmount:"1"}).settled,false);assert.equal(changeNowLedgerPreview({id:"x",status:"finished",toAmount:"2"}).settled,true);assert.throws(()=>changeNowLedgerPreview({}),/transaction id/);});

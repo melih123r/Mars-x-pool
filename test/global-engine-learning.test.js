@@ -1,0 +1,7 @@
+import test from "node:test";import assert from "node:assert/strict";import {detectRegime} from "../global-engine/regime.js";import {brierScore} from "../global-engine/calibration.js";import {providerReliability} from "../global-engine/provider-reliability.js";import {walkForward} from "../global-engine/walk-forward.js";import {riskBudget} from "../global-engine/risk-budget.js";import {monteCarloStress} from "../global-engine/monte-carlo.js";
+test("regime flags liquidity stress",()=>assert.equal(detectRegime({closes:[100,101,102],liquidity:20}).regime,"LIQUIDITY_STRESS"));
+test("perfect calibration outcomes have zero Brier",()=>assert.equal(brierScore([{probability:1,outcome:1},{probability:0,outcome:0}]),0));
+test("provider failures reduce reliability",()=>assert.ok(providerReliability({requests:100,success:80,stale:10}).score<80));
+test("walk forward never overlaps train with its test",()=>{const bars=Array.from({length:12},(_,i)=>({time:i}));const r=walkForward({bars,train:6,test:3,evaluate:({training,testing})=>training.at(-1).time<testing[0].time});assert.equal(r.windows.every(x=>x.result),true);});
+test("risk budget caps requested risk at three percent",()=>assert.equal(riskBudget({equity:1000000,maxRiskPct:9,stopDistancePct:5,confidence:100}).riskCash,30000));
+test("monte carlo is deterministic for same seed",()=>assert.deepEqual(monteCarloStress({returns:[-.01,.01],paths:20,horizon:5,seed:7}),monteCarloStress({returns:[-.01,.01],paths:20,horizon:5,seed:7})));

@@ -1,0 +1,3 @@
+import test from "node:test";import assert from "node:assert/strict";import {MARSX_FINANCE_DESIGN,financeScreenModel} from "../global-engine/finance-design.js";
+test("finance design follows MARS-X ecosystem visual language",()=>{assert.equal(MARSX_FINANCE_DESIGN.brand.name,"MARS-X FINANCE");assert.match(MARSX_FINANCE_DESIGN.brand.accent,/^#/);assert.equal(MARSX_FINANCE_DESIGN.navigation.length,5);});
+test("finance screen is safe with unavailable portfolio data",()=>{const x=financeScreenModel();assert.equal(x.hero.value,null);assert.equal(x.header.badge,"READ_ONLY");assert.ok(x.sections.some(s=>s.component==="marsx-chart"));});
