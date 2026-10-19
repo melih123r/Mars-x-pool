@@ -64,7 +64,7 @@ version_code = re.search(r'versionCode\s+(\d+)', gradle)
 if not app_id or not version_name or not version_code:
     raise SystemExit("Android application ID and version fields are required")
 if app_id.group(1) == "com.marsx.finance":
-    if not re.fullmatch(r"0\.9\.[0-9]+-beta(?:-demo)?", version_name.group(1)) or int(version_code.group(1)) < 13:
+    if not re.fullmatch(r"(?:0\.9\.[0-9]+-beta(?:-demo)?|0\.10\.[0-9]+-beta(?:-demo)?)", version_name.group(1)) or int(version_code.group(1)) < 13:
         raise SystemExit("Finance beta version is invalid")
 elif version_name.group(1) != "0.9.0-beta" or int(version_code.group(1)) != 13:
     raise SystemExit("Pool beta 0.9.0 Android version is required")
