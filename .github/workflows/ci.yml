@@ -24,6 +24,8 @@ jobs:
       - run: npm run cf:db:local
       - run: python3 scripts/check-translations.py
       - run: python3 scripts/check-release.py
+      - name: Network Android UI safety contract
+        run: python3 scripts/check-network-home-ui.py
 
   android:
     runs-on: ubuntu-latest
