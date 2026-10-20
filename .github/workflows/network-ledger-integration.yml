@@ -40,5 +40,5 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Network reservation integration
-        run: node --test network/src/wallet/payout-reservation.integration.test.mjs
+      - name: Network ledger integration
+        run: node --test network/src/wallet/*.integration.test.mjs
