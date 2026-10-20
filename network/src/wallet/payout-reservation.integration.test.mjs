@@ -79,6 +79,26 @@ test('reservation is concurrency-safe, retryable and rollback restores available
       occurredAt: '2026-10-20T13:00:00.000Z'
     });
 
+    const incompleteReservation = await pool.connect();
+    try {
+      await incompleteReservation.query('BEGIN');
+      await incompleteReservation.query(
+        `INSERT INTO network_payout_requests
+         (request_id,user_id,idempotency_key,currency,amount_minor,asset,chain,
+          destination_address,status)
+         VALUES('direct-without-ledger','user-1','direct-without-ledger-idem',
+                'EUR',1,'USDC','base',$1,'reserved')`,
+        ['0x' + 'f'.repeat(40)]
+      );
+      await assert.rejects(
+        incompleteReservation.query('COMMIT'),
+        /network_payout_reservation_ledger_required/
+      );
+    } finally {
+      await incompleteReservation.query('ROLLBACK').catch(() => {});
+      incompleteReservation.release();
+    }
+
     for (const [chain, destinationAddress] of [
       ['base', '0x1234'],
       ['polygon', 'not-an-evm-address'],
