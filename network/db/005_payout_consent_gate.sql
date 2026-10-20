@@ -11,6 +11,12 @@ DECLARE
   account_consent_at TIMESTAMPTZ;
   account_revoked_at TIMESTAMPTZ;
 BEGIN
+  -- Serialize direct SQL inserts with the consent service's grant/revoke transaction.
+  -- PostgreSQL holds this transaction-scoped lock until INSERT commit/rollback.
+  PERFORM pg_advisory_xact_lock(
+    hashtextextended('network-consent:' || NEW.user_id, 0)
+  );
+
   SELECT consent_at, revoked_at
     INTO account_consent_at, account_revoked_at
     FROM network_accounts
