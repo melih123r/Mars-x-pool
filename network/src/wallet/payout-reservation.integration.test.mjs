@@ -43,6 +43,18 @@ test('reservation is concurrency-safe, retryable and rollback restores available
       VALUES ('receipt-1:user-1','user-1','receipt-1','receipt:receipt-1:user-1','EUR',200,'settled_credit')
     `);
 
+    await assert.rejects(
+      pool.query(
+        `INSERT INTO network_payout_requests
+         (request_id,user_id,idempotency_key,currency,amount_minor,asset,chain,
+          destination_address,status)
+         VALUES('direct-without-consent','user-1','direct-without-consent-idem',
+                'EUR',1,'USDC','base',$1,'reserved')`,
+        ['0x' + 'd'.repeat(40)]
+      ),
+      /network_active_consent_required/
+    );
+
     const consentProtectedRequest = {
       requestId: 'request-without-consent',
       idempotencyKey: 'reserve-without-consent',
