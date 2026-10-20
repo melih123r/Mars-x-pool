@@ -108,6 +108,17 @@ export async function reservePayout(pool, rawInput) {
       return { duplicate: true, requestId: existing.rows[0].request_id, input };
     }
 
+    const consent = await client.query(
+      `SELECT consent_at,revoked_at
+       FROM network_accounts WHERE user_id=$1 FOR UPDATE`,
+      [input.userId]
+    );
+    if (consent.rowCount === 0 ||
+        consent.rows[0].consent_at == null ||
+        consent.rows[0].revoked_at != null) {
+      throw new Error('active network consent required');
+    }
+
     const balance = await getNetworkBalance(client, input);
     if (balance.availableMinor < input.amountMinor) {
       throw new Error('insufficient available balance');
