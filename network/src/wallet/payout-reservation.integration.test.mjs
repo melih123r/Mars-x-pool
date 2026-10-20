@@ -8,6 +8,7 @@ import {
   releasePayoutReservation,
   reservePayout
 } from './payout-reservation.mjs';
+import { recordConsentDecision } from './consent.mjs';
 
 const databaseUrl = process.env.NETWORK_LEDGER_DATABASE_URL;
 
@@ -25,8 +26,10 @@ test('reservation is concurrency-safe, retryable and rollback restores available
   try {
     const migration001 = await readFile(new URL('../../db/001_network_ledger.sql', import.meta.url), 'utf8');
     const migration002 = await readFile(new URL('../../db/002_payout_reservation_audit.sql', import.meta.url), 'utf8');
+    const migration004 = await readFile(new URL('../../db/004_consent_audit.sql', import.meta.url), 'utf8');
     await pool.query(migration001);
     await pool.query(migration002);
+    await pool.query(migration004);
 
     await pool.query(`INSERT INTO network_accounts(user_id) VALUES('user-1')`);
     await pool.query(`
@@ -39,6 +42,28 @@ test('reservation is concurrency-safe, retryable and rollback restores available
         (entry_id,user_id,receipt_id,idempotency_key,currency,amount_minor,entry_type)
       VALUES ('receipt-1:user-1','user-1','receipt-1','receipt:receipt-1:user-1','EUR',200,'settled_credit')
     `);
+
+    const consentProtectedRequest = {
+      requestId: 'request-without-consent',
+      idempotencyKey: 'reserve-without-consent',
+      userId: 'user-1',
+      currency: 'EUR',
+      amountMinor: 1,
+      chain: 'base',
+      destinationAddress: '0x' + 'c'.repeat(40)
+    };
+    await assert.rejects(
+      reservePayout(pool, consentProtectedRequest),
+      /active network consent required/
+    );
+    await recordConsentDecision(pool, {
+      eventId: 'payout-consent-grant',
+      idempotencyKey: 'payout-consent-grant-idem',
+      userId: 'user-1',
+      consentVersion: 'network-v1',
+      decision: 'granted',
+      occurredAt: '2026-10-20T13:00:00.000Z'
+    });
 
     for (const [chain, destinationAddress] of [
       ['base', '0x1234'],
@@ -110,6 +135,23 @@ test('reservation is concurrency-safe, retryable and rollback restores available
     assert.deepEqual(
       await getNetworkBalance(pool, { userId: 'user-1', currency: 'EUR' }),
       { pendingMinor: 0, settledMinor: 200, reservedMinor: 0, availableMinor: 200 }
+    );
+
+    await recordConsentDecision(pool, {
+      eventId: 'payout-consent-revoke',
+      idempotencyKey: 'payout-consent-revoke-idem',
+      userId: 'user-1',
+      consentVersion: 'network-v1',
+      decision: 'revoked',
+      occurredAt: '2026-10-20T13:10:00.000Z'
+    });
+    await assert.rejects(
+      reservePayout(pool, {
+        ...consentProtectedRequest,
+        requestId: 'request-after-revoke',
+        idempotencyKey: 'reserve-after-revoke'
+      }),
+      /active network consent required/
     );
 
     const audit = await pool.query(
