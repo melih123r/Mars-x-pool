@@ -40,6 +40,25 @@ test('reservation is concurrency-safe, retryable and rollback restores available
       VALUES ('receipt-1:user-1','user-1','receipt-1','receipt:receipt-1:user-1','EUR',200,'settled_credit')
     `);
 
+    for (const [chain, destinationAddress] of [
+      ['base', '0x1234'],
+      ['polygon', 'not-an-evm-address'],
+      ['solana', '0OIl']
+    ]) {
+      await assert.rejects(
+        reservePayout(pool, {
+          requestId: 'invalid-' + chain,
+          idempotencyKey: 'invalid-address-' + chain,
+          userId: 'user-1',
+          currency: 'EUR',
+          amountMinor: 1,
+          chain,
+          destinationAddress
+        }),
+        /invalid (EVM|Solana) address format/
+      );
+    }
+
     const initial = await getNetworkBalance(pool, { userId: 'user-1', currency: 'EUR' });
     assert.deepEqual(initial, { pendingMinor: 0, settledMinor: 200, reservedMinor: 0, availableMinor: 200 });
 
