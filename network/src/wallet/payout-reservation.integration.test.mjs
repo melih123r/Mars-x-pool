@@ -179,3 +179,78 @@ test('reservation is concurrency-safe, retryable and rollback restores available
     await admin.end();
   }
 });
+
+
+test('direct SQL payout insert is serialized with concurrent consent revocation', {
+  skip: !databaseUrl
+}, async () => {
+  const admin = new pg.Pool({ connectionString: databaseUrl });
+  const schema = 'network_consent_race_' + randomUUID().replaceAll('-', '');
+  await admin.query(`CREATE SCHEMA "${schema}"`);
+  const pool = new pg.Pool({
+    connectionString: databaseUrl,
+    options: `-c search_path=${schema},public`
+  });
+  let revokeClient;
+  let insertClient;
+
+  try {
+    for (const file of [
+      '../../db/001_network_ledger.sql',
+      '../../db/002_payout_reservation_audit.sql',
+      '../../db/004_consent_audit.sql',
+      '../../db/005_payout_consent_gate.sql'
+    ]) {
+      await pool.query(await readFile(new URL(file, import.meta.url), 'utf8'));
+    }
+    await pool.query(
+      `INSERT INTO network_accounts(user_id,consent_version,consent_at)
+       VALUES('race-user','network-v1','2026-10-20T15:00:00.000Z')`
+    );
+
+    revokeClient = await pool.connect();
+    insertClient = await pool.connect();
+    await revokeClient.query('BEGIN');
+    await revokeClient.query(
+      'SELECT pg_advisory_xact_lock(hashtextextended($1,0))',
+      ['network-consent:race-user']
+    );
+    await revokeClient.query(
+      `UPDATE network_accounts
+       SET revoked_at='2026-10-20T15:01:00.000Z'
+       WHERE user_id='race-user'`
+    );
+
+    const insertResult = insertClient.query(
+      `INSERT INTO network_payout_requests
+       (request_id,user_id,idempotency_key,currency,amount_minor,asset,chain,
+        destination_address,status)
+       VALUES('race-request','race-user','race-request-idem','EUR',1,'USDC',
+              'base',$1,'reserved')`,
+      ['0x' + 'e'.repeat(40)]
+    ).then(
+      () => ({ status: 'fulfilled' }),
+      error => ({ status: 'rejected', error })
+    );
+
+    const early = await Promise.race([
+      insertResult,
+      new Promise(resolve => setTimeout(() => resolve({ status: 'pending' }), 150))
+    ]);
+    assert.equal(early.status, 'pending');
+
+    await revokeClient.query('COMMIT');
+    const final = await insertResult;
+    assert.equal(final.status, 'rejected');
+    assert.match(final.error.message, /network_active_consent_required/);
+  } finally {
+    if (revokeClient) {
+      await revokeClient.query('ROLLBACK').catch(() => {});
+      revokeClient.release();
+    }
+    if (insertClient) insertClient.release();
+    await pool.end();
+    await admin.query(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`);
+    await admin.end();
+  }
+});
