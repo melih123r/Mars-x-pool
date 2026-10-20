@@ -11,6 +11,19 @@ function requireAmount(value) {
   return value;
 }
 
+function validateDestinationAddress(chain, address) {
+  if (chain === 'solana') {
+    if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address)) {
+      throw new Error('invalid Solana address format');
+    }
+    return address;
+  }
+  if (!/^0x[0-9a-fA-F]{40}$/.test(address)) {
+    throw new Error('invalid EVM address format');
+  }
+  return address;
+}
+
 function validateReservation(input) {
   if (!input || typeof input !== 'object') throw new Error('invalid reservation');
   const normalized = {
@@ -24,6 +37,7 @@ function validateReservation(input) {
   };
   if (!SUPPORTED_CURRENCIES.has(normalized.currency)) throw new Error('unsupported currency');
   if (!SUPPORTED_CHAINS.has(normalized.chain)) throw new Error('unsupported chain');
+  validateDestinationAddress(normalized.chain, normalized.destinationAddress);
   return normalized;
 }
 
