@@ -28,10 +28,12 @@ test('reservation is concurrency-safe, retryable and rollback restores available
     const migration002 = await readFile(new URL('../../db/002_payout_reservation_audit.sql', import.meta.url), 'utf8');
     const migration004 = await readFile(new URL('../../db/004_consent_audit.sql', import.meta.url), 'utf8');
     const migration005 = await readFile(new URL('../../db/005_payout_consent_gate.sql', import.meta.url), 'utf8');
+    const migration006 = await readFile(new URL('../../db/006_payout_reservation_consistency.sql', import.meta.url), 'utf8');
     await pool.query(migration001);
     await pool.query(migration002);
     await pool.query(migration004);
     await pool.query(migration005);
+    await pool.query(migration006);
 
     await pool.query(`INSERT INTO network_accounts(user_id) VALUES('user-1')`);
     await pool.query(`
@@ -219,7 +221,8 @@ test('direct SQL payout insert is serialized with concurrent consent revocation'
       '../../db/001_network_ledger.sql',
       '../../db/002_payout_reservation_audit.sql',
       '../../db/004_consent_audit.sql',
-      '../../db/005_payout_consent_gate.sql'
+      '../../db/005_payout_consent_gate.sql',
+      '../../db/006_payout_reservation_consistency.sql'
     ]) {
       await pool.query(await readFile(new URL(file, import.meta.url), 'utf8'));
     }
