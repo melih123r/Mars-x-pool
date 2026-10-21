@@ -24,6 +24,12 @@ def open_demo_db():
     BEGIN
       SELECT RAISE(ABORT, 'verified receipt cannot be deleted');
     END;
+    CREATE TRIGGER prevent_reserved_withdrawal_delete
+    BEFORE DELETE ON withdrawals
+    WHEN OLD.state='reserved'
+    BEGIN
+      SELECT RAISE(ABORT, 'reserved withdrawal must transition to cancelled');
+    END;
     CREATE TRIGGER prevent_withdrawal_identity_edit
     BEFORE UPDATE ON withdrawals
     WHEN NEW.withdrawal_id != OLD.withdrawal_id
@@ -101,8 +107,14 @@ def demo():
             raise AssertionError("pending withdrawal identity was mutated")
         except sqlite3.IntegrityError:
             pass
+    try:
+        with db:
+            db.execute("DELETE FROM withdrawals WHERE withdrawal_id='pending'")
+        raise AssertionError("pending withdrawal deleted without cancellation")
+    except sqlite3.IntegrityError:
+        pass
     with db:
-        db.execute("DELETE FROM withdrawals WHERE withdrawal_id='pending'")
+        assert db.execute("UPDATE withdrawals SET state='cancelled' WHERE withdrawal_id='pending' AND state='reserved'").rowcount == 1
     # A paid withdrawal cannot transition back into a reserved or cancelled state.
     with db:
         db.execute("INSERT INTO withdrawals VALUES (?,?,?,?)", ("w2", "a", 1000, "reserved"))
@@ -139,7 +151,7 @@ def demo():
         except sqlite3.IntegrityError:
             pass
     assert db.execute("SELECT amount_cents FROM receipts WHERE receipt_id='r1'").fetchone()[0] == 1500
-    assert db.execute("SELECT COUNT(*) FROM withdrawals").fetchone()[0] == 2
+    assert db.execute("SELECT COUNT(*) FROM withdrawals").fetchone()[0] == 3
     print("Offline SQLite settlement constraints: PASS")
 
 
