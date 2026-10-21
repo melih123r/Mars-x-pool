@@ -129,32 +129,42 @@ public final class NetworkHomeActivity extends Activity {
 
         Button walletAddress=button(earnings,"Cüzdan adresi ekle");
         walletAddress.setOnClickListener(v -> {
-            EditText input=new EditText(this);
-            input.setSingleLine(true);
-            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-            input.setHint("USDC alıcı adresi (Solana / Base / Polygon)");
-            input.setText(prefs.getString("usdc_address",""));
+            final String[] chains={"Solana","Base","Polygon"};
             new AlertDialog.Builder(this)
-                .setTitle("USDC cüzdan adresi")
-                .setMessage("Yalnızca herkese açık alıcı adresini girin. Özel anahtar veya kurtarma kelimelerini asla girmeyin. Ağ ve adres uyumluluğu doğrulanmadan transfer yapılmaz.")
-                .setView(input)
-                .setNegativeButton("Vazgeç",null)
-                .setNeutralButton("Adresi sil",(d,w)->{
-                    prefs.edit().remove("usdc_address").apply();
-                    walletAddress.setText("Cüzdan adresi ekle");
-                })
-                .setPositiveButton("Kaydet",(d,w)->{
-                    String address=input.getText().toString().trim();
-                    if(address.length()<25 || address.length()>100 || !address.matches("[A-Za-z0-9]+")) {
-                        android.widget.Toast.makeText(this,"Geçersiz adres biçimi. Kaydedilmedi.",android.widget.Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    prefs.edit().putString("usdc_address",address).apply();
-                    walletAddress.setText("Cüzdan adresi • "+address.substring(0,6)+"…"+address.substring(address.length()-4));
+                .setTitle("USDC ağı seç")
+                .setItems(chains,(dialog,selected)->{
+                    String chain=chains[selected];
+                    EditText input=new EditText(this);
+                    input.setSingleLine(true);
+                    input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+                    input.setHint(chain+" alıcı adresi");
+                    input.setText(prefs.getString("usdc_address",""));
+                    new AlertDialog.Builder(this)
+                        .setTitle("USDC • "+chain)
+                        .setMessage("Yalnızca herkese açık alıcı adresini girin. Özel anahtar veya kurtarma kelimesi girmeyin. Bu testte transfer yapılmaz.")
+                        .setView(input)
+                        .setNegativeButton("Vazgeç",null)
+                        .setNeutralButton("Adresi sil",(d,w)->{
+                            prefs.edit().remove("usdc_address").remove("usdc_chain").apply();
+                            walletAddress.setText("Cüzdan adresi ekle");
+                        })
+                        .setPositiveButton("Kaydet",(d,w)->{
+                            String address=input.getText().toString().trim();
+                            boolean valid=selected==0
+                                ?address.length()>=32 && address.length()<=44 && address.matches("[1-9A-HJ-NP-Za-km-z]+")
+                                :address.matches("0x[0-9a-fA-F]{40}");
+                            if(!valid){
+                                android.widget.Toast.makeText(this,"Seçilen ağ için adres biçimi geçersiz.",android.widget.Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            prefs.edit().putString("usdc_address",address).putString("usdc_chain",chain).apply();
+                            walletAddress.setText(chain+" • "+address.substring(0,6)+"…"+address.substring(address.length()-4));
+                        }).show();
                 }).show();
         });
         String savedAddress=prefs.getString("usdc_address","");
-        if(!savedAddress.isEmpty())walletAddress.setText("Cüzdan adresi • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
+        if(!savedAddress.isEmpty() && savedAddress.length()>=10)
+            walletAddress.setText(prefs.getString("usdc_chain","Ağ seçilmedi")+" • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
 
         LinearLayout history=card("3  •  ÇEKİM GEÇMİŞİ");
         text(history,"Henüz çekim talebi yok. Canlı transfer yapılmadı.",13,MUTED,false);
