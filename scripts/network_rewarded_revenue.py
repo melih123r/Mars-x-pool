@@ -93,4 +93,15 @@ if __name__ == "__main__":
             raise AssertionError("Invalid withdrawal quote accepted")
         except ValueError:
             pass
+    for gross in range(1000, 20001):
+        q = quote_withdrawal(gross, available_cents=gross)
+        assert q.fee_cents == (gross * 5 + 99) // 100
+        assert q.net_cents + q.fee_cents == gross
+        assert q.net_cents > 0
+    for bad in (-1, 1000.0, True, "1000"):
+        try:
+            quote_withdrawal(bad, available_cents=10000)
+            raise AssertionError("Invalid gross cents accepted")
+        except ValueError:
+            pass
     print("Rewarded ads allocation and withdrawal quote tests: PASS")
