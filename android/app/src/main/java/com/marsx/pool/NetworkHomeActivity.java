@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
+import android.net.TrafficStats;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -32,6 +33,7 @@ public final class NetworkHomeActivity extends Activity {
     private Button consentButton;
     private TextView monitorStatus;
     private long monitorStart;
+    private long startRx=-1, startTx=-1;
     private final Handler monitorHandler=new Handler(Looper.getMainLooper());
     private final Runnable monitorTick=new Runnable(){
         @Override public void run(){
@@ -40,7 +42,10 @@ public final class NetworkHomeActivity extends Activity {
                 NetworkCapabilities nc=cm.getNetworkCapabilities(cm.getActiveNetwork());
                 String kind=nc==null?"Bağlantı yok":nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)?"Wi-Fi":nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)?"Mobil veri":"Diğer ağ";
                 long seconds=(SystemClock.elapsedRealtime()-monitorStart)/1000;
-                monitorStatus.setText("Bağlantı: "+kind+" • İzleme: "+(seconds/60)+" dk "+(seconds%60)+" sn\nGerçek paylaşım: KAPALI • Doğrulanmış trafik: 0 GB");
+                long rx=TrafficStats.getUidRxBytes(android.os.Process.myUid());
+                long tx=TrafficStats.getUidTxBytes(android.os.Process.myUid());
+                String usage=(rx<0 || tx<0 || startRx<0 || startTx<0)?"ölçüm desteklenmiyor":String.format(java.util.Locale.US,"%.3f MB",((Math.max(0,rx-startRx)+Math.max(0,tx-startTx))/1048576.0));
+                monitorStatus.setText("Bağlantı: "+kind+" • İzleme: "+(seconds/60)+" dk "+(seconds%60)+" sn\nUygulamanın veri kullanımı: "+usage+"\nPaylaşılan trafik: 0 GB • Kazanç: €0,00");
                 monitorHandler.postDelayed(this,1000);
             }
         }
@@ -168,6 +173,8 @@ public final class NetworkHomeActivity extends Activity {
     private void startMonitor(){
         stopMonitor();
         monitorStart=SystemClock.elapsedRealtime();
+        startRx=TrafficStats.getUidRxBytes(android.os.Process.myUid());
+        startTx=TrafficStats.getUidTxBytes(android.os.Process.myUid());
         monitorHandler.post(monitorTick);
     }
     private void stopMonitor(){
