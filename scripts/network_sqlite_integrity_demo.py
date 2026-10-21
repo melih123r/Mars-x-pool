@@ -36,6 +36,23 @@ def demo():
         updated = db.execute("UPDATE withdrawals SET state='paid' WHERE withdrawal_id='w1' AND user_id='a' AND state='reserved'").rowcount
     assert updated == 0
     assert db.execute("SELECT state FROM withdrawals WHERE withdrawal_id='w1'").fetchone()[0] == "cancelled"
+    # Owner mismatch and duplicate state transitions cannot mutate settled records.
+    with db:
+        assert db.execute("UPDATE withdrawals SET state='paid' WHERE withdrawal_id='w1' AND user_id='b' AND state='reserved'").rowcount == 0
+        assert db.execute("UPDATE withdrawals SET state='cancelled' WHERE withdrawal_id='w1' AND user_id='a' AND state='reserved'").rowcount == 0
+    for sql, params in (
+        ("INSERT INTO receipts VALUES (?,?,?,?)", ("test-provider", "bad", "a", -1)),
+        ("INSERT INTO withdrawals VALUES (?,?,?,?)", ("bad", "a", 999, "reserved")),
+        ("INSERT INTO withdrawals VALUES (?,?,?,?)", ("bad", "a", 1000, "unknown")),
+    ):
+        try:
+            with db:
+                db.execute(sql, params)
+            raise AssertionError("invalid database record accepted")
+        except sqlite3.IntegrityError:
+            pass
+    assert db.execute("SELECT COUNT(*) FROM receipts").fetchone()[0] == 1
+    assert db.execute("SELECT COUNT(*) FROM withdrawals").fetchone()[0] == 1
     print("Offline SQLite settlement constraints: PASS")
 
 
