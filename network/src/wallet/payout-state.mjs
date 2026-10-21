@@ -13,6 +13,14 @@ function eventKey(requestId, eventKind, idempotencyKey) {
   return 'payout:' + requestId + ':' + eventKind + ':' + idempotencyKey;
 }
 
+async function rollbackQuietly(client) {
+  try {
+    await client.query('ROLLBACK');
+  } catch {
+    // Preserve the transaction's original error when the connection is already broken.
+  }
+}
+
 async function exactAuditExists(client, key) {
   const result = await client.query(
     'SELECT 1 FROM network_payout_audit WHERE event_key=$1',
@@ -80,7 +88,7 @@ export async function recordPayoutSubmission(pool, rawInput) {
     await client.query('COMMIT');
     return { duplicate: false, requestId, providerReference };
   } catch (error) {
-    await client.query('ROLLBACK');
+    await rollbackQuietly(client);
     throw error;
   } finally {
     client.release();
@@ -140,7 +148,7 @@ export async function recordPayoutOutcome(pool, rawInput) {
     await client.query('COMMIT');
     return { duplicate: false, requestId, outcome };
   } catch (error) {
-    await client.query('ROLLBACK');
+    await rollbackQuietly(client);
     throw error;
   } finally {
     client.release();
