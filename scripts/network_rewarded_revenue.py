@@ -98,6 +98,9 @@ if __name__ == "__main__":
         assert q.fee_cents == (gross * 5 + 99) // 100
         assert q.net_cents + q.fee_cents == gross
         assert q.net_cents > 0
+    for gross in (1000, 1001, 1999, 9999, 10000, 10001, 999999):
+        q = quote_withdrawal(gross, available_cents=gross, external_network_fee_cents=1)
+        assert q.net_cents + q.fee_cents + q.external_network_fee_cents == gross
     for bad in (-1, 1000.0, True, "1000"):
         try:
             quote_withdrawal(bad, available_cents=10000)
