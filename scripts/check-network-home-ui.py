@@ -60,6 +60,12 @@ for marker in ("70% MARS-X / 30% user", "0%", "floor(net_cents * 30 / 100)", "wr
     if marker not in contract:
         raise SystemExit("Missing rewarded-ad settlement gate: " + marker)
 
+# A checklist is necessary for real-device acceptance; it is not proof of a passed device test.
+acceptance = Path("docs/network-partner-onboarding-checklist.md").read_text(encoding="utf-8")
+for marker in ("Release acceptance", "latest artifact", "Revoke test consent", "legacy Pool"):
+    if marker not in acceptance:
+        raise SystemExit("Missing device acceptance requirement: " + marker)
+
 import subprocess
 import sys
 result = subprocess.run([sys.executable, "scripts/network_rewarded_revenue.py"], capture_output=True, text=True)
