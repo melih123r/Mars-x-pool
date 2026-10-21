@@ -33,5 +33,15 @@
 - [ ] Verify app icon and package/version match Network release, not legacy Pool.
 - [ ] Capture device model, Android version, APK SHA-256, build run URL, screenshots and test outcomes.
 
+## Settlement and withdrawal implementation contract
+- Separate **bandwidth traffic revenue** from **rewarded-video advertising revenue**: do not combine receipts or assume a bandwidth SDK authorizes cash video rewards.
+- Never use client-reported views, bytes or earnings as a source of monetary truth.
+- Each eligible provider receipt must have a unique immutable ID, provider signature verification, reconciliation status and currency; reject duplicates.
+- Account for pending, settled, reversed and paid balances separately. User available balance may not exceed settled, non-reversed entitlement.
+- Calculate allocations in integer minor units, record any rounding remainder deterministically, and avoid floating-point ledger balances.
+- Withdrawal request must atomically reserve funds, verify owner and payee eligibility, prevent replay/double spend, and record external fees before final confirmation.
+- Refunds, rejected payouts, disputes and chargebacks require audited reversing entries rather than editing old transactions.
+- Keep production payments and SDK traffic behind server-controlled launch flags; client test consent is never production authorization.
+
 ## Safety
 All real network routing, ad SDK requests, monetary credits and withdrawals remain disabled until documented approval and verification. A green GitHub CI run does not prove device acceptance or partner approval.
