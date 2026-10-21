@@ -76,4 +76,8 @@ ledger_test = subprocess.run([sys.executable, "scripts/network_settlement_demo.p
 if ledger_test.returncode:
     raise SystemExit("Offline settlement simulation failed: " + ledger_test.stdout + ledger_test.stderr)
 print(ledger_test.stdout.strip())
+sqlite_test = subprocess.run([sys.executable, "scripts/network_sqlite_integrity_demo.py"], capture_output=True, text=True)
+if sqlite_test.returncode:
+    raise SystemExit("SQLite integrity simulation failed: " + sqlite_test.stdout + sqlite_test.stderr)
+print(sqlite_test.stdout.strip())
 print("Network UI contract: PASS")
