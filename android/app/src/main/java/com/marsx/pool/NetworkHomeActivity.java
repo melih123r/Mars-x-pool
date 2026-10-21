@@ -1,6 +1,7 @@
 package com.marsx.pool;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -39,9 +40,20 @@ public final class NetworkHomeActivity extends Activity {
         consentStatus=text(network,"",15,MUTED,false);
         consentButton=button(network,"Açık rıza ver");
         consentButton.setOnClickListener(v->{
-            boolean next=!prefs.getBoolean("consented",false);
-            prefs.edit().putBoolean("consented",next).apply();
-            refreshConsent();
+            if (prefs.getBoolean("consented",false)) {
+                prefs.edit().putBoolean("consented",false).apply();
+                refreshConsent();
+            } else {
+                new AlertDialog.Builder(this)
+                    .setTitle("Açık rıza • yalnızca TEST")
+                    .setMessage("MARS-X Network, ileride onaylı bir partnerle cihazınızın internet bağlantısını üçüncü taraf müşteri trafiği için paylaşmayı hedefler. Bu işlem veri kotanızı, pilinizi ve bağlantınızı etkileyebilir; ağınızın IP adresi partnerin müşterileri tarafından kullanılabilir. Gelir veya trafik garantisi yoktur. Şu anda gerçek paylaşım yapılmaz. Rızayı istediğiniz an iptal edebilirsiniz. Devam etmek yalnızca test tercihini kaydeder.")
+                    .setNegativeButton("Vazgeç", (dialog, which) -> dialog.dismiss())
+                    .setPositiveButton("Test rızasını kaydet", (dialog, which) -> {
+                        prefs.edit().putBoolean("consented",true).apply();
+                        refreshConsent();
+                    })
+                    .show();
+            }
         });
         Button start=button(network,"Network'ü aç • SDK bekleniyor");
         start.setEnabled(false);
@@ -66,6 +78,7 @@ public final class NetworkHomeActivity extends Activity {
         text(settings,"Yalnız Wi-Fi: AÇIK\nPil koruması: AÇIK\nDüşük pil / ısınma durdurma: AÇIK\nİzin iptalinde çalışma: KAPALI",13,MUTED,false);
 
         text(page,"TEST SÜRÜMÜ • Ödeme, proxy, kripto transferi ve gerçek Network SDK kapalı",12,MUTED,false);
+        text(page,"Uyarı: Test rızası gelecekteki gerçek ağ paylaşımı için geçerli değildir. Gerçek SDK devreye alınmadan önce yeniden ve ayrı açık onay gerekir.",12,ORANGE,false);
     }
 
     private void refreshConsent(){
