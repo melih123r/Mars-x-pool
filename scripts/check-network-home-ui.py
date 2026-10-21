@@ -11,34 +11,26 @@ required = [
     "Bekleyen fiat:",
     "Kesinleşmiş fiat:",
     "Çekilebilir fiat:",
-    "NONCUSTODIAL USDC CÜZDANI",
-    "Solana: PARTNER BEKLENİYOR",
-    "Base: PARTNER BEKLENİYOR",
-    "Polygon: PARTNER BEKLENİYOR",
-    "Net teklif: Kullanılamıyor",
-    "Para çek • TEST / DEVRE DIŞI",
+    "Cüzdan adresi ekle",
+    "usdc_address",
     "ÇEKİM GEÇMİŞİ",
     "AYARLAR",
     "1.000 kullanıcı pilotu",
     "10.000+ ölçek hedefi",
-    "REKLAM ALANI / TEST",
-    "Reklam isteği: 0",
-    "Reklam geliri: €0,00",
-    "MARS-X %70 / kullanıcı %30",
-    "Ek ücret %0",
-    "Puan sistemi yok",
-    "Kullanıcı reklam bakiyesi: €0,00",
-    "bakiyeye para yazılmaz",
-    "Çekim komisyonu: %5",
-    "Minimum çekim: €10,00",
-    "fee €5,00",
-    "Network paylaşım onayı reklam kişiselleştirme onayı değildir",
+    "FrameLayout adSlot",
+    "adSlot.setVisibility(View.GONE)",
     "Açık rıza • yalnızca TEST",
     "IP adresi",
     "veri kotanızı",
     "Test rızasını kaydet",
     "Test rızası gelecekteki gerçek ağ paylaşımı için geçerli değildir",
 ]
+for hidden in ("card(\"3  •  NONCUSTODIAL USDC CÜZDANI\")", "card(\"6  •  REKLAM ALANI / TEST\")"):
+    # Legacy commented code is ignored by stripping block comments below.
+    import re
+    active_source = re.sub(r"/\\*.*?\\*/", "", source, flags=re.S)
+    if hidden in active_source:
+        raise SystemExit("Legacy user-facing section must remain hidden: " + hidden)
 missing = [value for value in required if value not in source]
 if missing:
     raise SystemExit("Network UI contract missing: " + ", ".join(missing))
@@ -49,8 +41,8 @@ if source.index('new AlertDialog.Builder(this)') > source.index('putBoolean("con
     raise SystemExit("Consent must follow disclosure dialog")
 if source.count('putBoolean("consented",true)') != 1:
     raise SystemExit("Consent must be recorded in exactly one confirmed path")
-if source.count("setEnabled(false)") < 2:
-    raise SystemExit("Network and withdrawal controls must fail closed")
+if source.count("setEnabled(false)") < 1:
+    raise SystemExit("Network start control must fail closed")
 for forbidden in ("MobileAds.initialize(", "loadAd(", "AdRequest.Builder(", "startForegroundService(", "sendTransaction(", "withdrawUsdc(", "Proxy.start("):
     if forbidden in source:
         raise SystemExit("Unsafe live action in Network test UI: " + forbidden)
