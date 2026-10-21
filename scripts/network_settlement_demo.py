@@ -14,6 +14,7 @@ class DemoLedger:
     receipt_ids: Set[str] = field(default_factory=set)
     withdrawal_ids: Set[str] = field(default_factory=set)
     reservations: Dict[str, tuple] = field(default_factory=dict)
+    paid_cents: Dict[str, int] = field(default_factory=dict)
 
     def credit_settled(self, user_id: str, receipt_id: str, amount_cents: int,
                        *, provider_verified: bool, partner_approved: bool) -> None:
@@ -43,6 +44,18 @@ class DemoLedger:
         self.reservations[withdrawal_id] = (user_id, gross_cents)
         self.reserved_cents[user_id] = self.reserved_cents.get(user_id, 0) + gross_cents
 
+
+    def confirm_demo_payout(self, user_id: str, withdrawal_id: str,
+                            *, payout_verified: bool) -> None:
+        """Finalize a verified demo payout exactly once; never call a real provider."""
+        if not payout_verified:
+            raise PermissionError("verified payout confirmation required")
+        if self.reservations.get(withdrawal_id, (None,))[0] != user_id:
+            raise ValueError("reservation not found or owner mismatch")
+        owner, gross_cents = self.reservations.pop(withdrawal_id)
+        self.reserved_cents[owner] -= gross_cents
+        self.settled_cents[owner] -= gross_cents
+        self.paid_cents[owner] = self.paid_cents.get(owner, 0) + gross_cents
 
     def cancel_reservation(self, user_id: str, withdrawal_id: str) -> None:
         """Release a failed demo payout; preserve ID history against replay."""
@@ -116,6 +129,24 @@ if __name__ == "__main__":
     try:
         ledger.reserve_withdrawal("a", "withdraw-1", 1000, payee_verified=True)
         raise AssertionError("withdrawal replay accepted")
+    except ValueError:
+        pass
+    ledger.reserve_withdrawal("a", "withdraw-4", 1000, payee_verified=True)
+    try:
+        ledger.confirm_demo_payout("a", "withdraw-4", payout_verified=False)
+        raise AssertionError("unverified payout accepted")
+    except PermissionError:
+        pass
+    try:
+        ledger.confirm_demo_payout("b", "withdraw-4", payout_verified=True)
+        raise AssertionError("cross-user payout accepted")
+    except ValueError:
+        pass
+    ledger.confirm_demo_payout("a", "withdraw-4", payout_verified=True)
+    assert ledger.available("a") == 500 and ledger.paid_cents["a"] == 1000
+    try:
+        ledger.confirm_demo_payout("a", "withdraw-4", payout_verified=True)
+        raise AssertionError("duplicate payout accepted")
     except ValueError:
         pass
     print("Offline Network settlement simulation: PASS")
