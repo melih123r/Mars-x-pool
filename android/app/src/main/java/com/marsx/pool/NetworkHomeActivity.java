@@ -37,6 +37,7 @@ public final class NetworkHomeActivity extends Activity {
     private long sessionBytes;
     private long totalSessionBytes;
     private long totalSessionSeconds;
+    private boolean wifiOnly=true;
     private long monitorStart;
     private long startRx=-1, startTx=-1;
     private final Handler monitorHandler=new Handler(Looper.getMainLooper());
@@ -109,6 +110,12 @@ public final class NetworkHomeActivity extends Activity {
                     android.widget.Toast.makeText(this,"Önce test bilgilendirmesini okuyup onaylayın.",android.widget.Toast.LENGTH_LONG).show();
                     return;
                 }
+                ConnectivityManager connectivity=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkCapabilities caps=connectivity.getNetworkCapabilities(connectivity.getActiveNetwork());
+                if(caps==null || !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) || (wifiOnly && !caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))){
+                    android.widget.Toast.makeText(this,"İzleme için Wi-Fi internet bağlantısı gerekiyor.",android.widget.Toast.LENGTH_LONG).show();
+                    return;
+                }
                 new AlertDialog.Builder(this)
                     .setTitle("MARS-X Network")
                     .setMessage("Bağlantı durumunu izlemeyi başlat. Bu testte internetin başkalarıyla paylaşılmaz ve kazanç oluşmaz. İstediğin zaman durdurabilirsin.")
@@ -172,7 +179,7 @@ public final class NetworkHomeActivity extends Activity {
         updateHistory();
 
         LinearLayout settings=card("4  •  AYARLAR");
-        text(settings,"Yerel test: yalnızca uygulama trafiği izlenir.\nWi-Fi zorunluluğu: YOK\nPil / ısınma otomatik koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI",13,MUTED,false);
+        text(settings,"Yerel test: yalnızca uygulama trafiği izlenir.\nWi-Fi zorunluluğu: AÇIK (başlatırken kontrol edilir)\nPil / ısınma otomatik koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI",13,MUTED,false);
 
         // Dedicated advertising slot. Remains hidden until an approved ad SDK
         // loads an actual ad view into it; do not show internal ad revenue or fill metrics.
