@@ -9,6 +9,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.view.View;
 import android.text.InputType;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -110,6 +112,15 @@ public final class NetworkHomeActivity extends Activity {
 
         LinearLayout settings=card("4  •  AYARLAR");
         text(settings,"Yalnız Wi-Fi: AÇIK\nPil koruması: AÇIK\nDüşük pil / ısınma durdurma: AÇIK\nİzin iptalinde çalışma: KAPALI",13,MUTED,false);
+
+        // Dedicated advertising slot. Remains hidden until an approved ad SDK
+        // loads an actual ad view into it; do not show internal ad revenue or fill metrics.
+        FrameLayout adSlot=new FrameLayout(this);
+        adSlot.setId(View.generateViewId());
+        adSlot.setVisibility(View.GONE);
+        LinearLayout.LayoutParams adParams=new LinearLayout.LayoutParams(-1,dp(60));
+        adParams.setMargins(0,dp(12),0,dp(8));
+        page.addView(adSlot,adParams);
 
         text(page,"TEST SÜRÜMÜ • Ödeme, proxy, kripto transferi ve gerçek Network SDK kapalı",12,MUTED,false);
         text(page,"Uyarı: Test rızası gelecekteki gerçek ağ paylaşımı için geçerli değildir. Gerçek SDK devreye alınmadan önce yeniden ve ayrı açık onay gerekir.",12,ORANGE,false);
