@@ -69,4 +69,18 @@ if __name__ == "__main__":
         except ValueError:
             pass
     assert ledger.available("a") == 500
+    # Cross-user receipt replay must be blocked globally, not only per account.
+    try:
+        ledger.credit_settled("b", "receipt-1", 500, provider_verified=True, partner_approved=True)
+        raise AssertionError("cross-user receipt replay accepted")
+    except ValueError:
+        pass
+    # Invalid amounts and missing identifiers must not mutate balances.
+    for uid, rid, amount in (("", "receipt-2", 100), ("a", "", 100), ("a", "receipt-2", 0), ("a", "receipt-2", True)):
+        try:
+            ledger.credit_settled(uid, rid, amount, provider_verified=True, partner_approved=True)
+            raise AssertionError("invalid credit accepted")
+        except ValueError:
+            pass
+    assert ledger.available("a") == 500 and ledger.available("b") == 0
     print("Offline Network settlement simulation: PASS")
