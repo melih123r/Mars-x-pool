@@ -72,4 +72,8 @@ result = subprocess.run([sys.executable, "scripts/network_rewarded_revenue.py"],
 if result.returncode:
     raise SystemExit("Rewarded revenue allocation tests failed: " + result.stdout + result.stderr)
 print(result.stdout.strip())
+ledger_test = subprocess.run([sys.executable, "scripts/network_settlement_demo.py"], capture_output=True, text=True)
+if ledger_test.returncode:
+    raise SystemExit("Offline settlement simulation failed: " + ledger_test.stdout + ledger_test.stderr)
+print(ledger_test.stdout.strip())
 print("Network UI contract: PASS")
