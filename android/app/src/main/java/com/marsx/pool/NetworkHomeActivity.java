@@ -33,6 +33,8 @@ public final class NetworkHomeActivity extends Activity {
     private Button consentButton;
     private TextView monitorStatus;
     private Button monitorButton;
+    private TextView historyStatus;
+    private long sessionBytes;
     private long monitorStart;
     private long startRx=-1, startTx=-1;
     private final Handler monitorHandler=new Handler(Looper.getMainLooper());
@@ -46,6 +48,7 @@ public final class NetworkHomeActivity extends Activity {
                 long rx=TrafficStats.getUidRxBytes(android.os.Process.myUid());
                 long tx=TrafficStats.getUidTxBytes(android.os.Process.myUid());
                 String usage=(rx<0 || tx<0 || startRx<0 || startTx<0)?"ölçüm desteklenmiyor":String.format(java.util.Locale.US,"%.3f MB",((Math.max(0,rx-startRx)+Math.max(0,tx-startTx))/1048576.0));
+                if(rx>=0 && tx>=0 && startRx>=0 && startTx>=0)sessionBytes=Math.max(0,rx-startRx)+Math.max(0,tx-startTx);
                 monitorStatus.setText("Bağlantı: "+kind+" • İzleme: "+(seconds/60)+" dk "+(seconds%60)+" sn\nUygulamanın veri kullanımı: "+usage+"\nPaylaşılan trafik: 0 GB • Kazanç: €0,00");
                 monitorHandler.postDelayed(this,1000);
             }
@@ -157,6 +160,8 @@ public final class NetworkHomeActivity extends Activity {
 
         LinearLayout history=card("3  •  ÇEKİM GEÇMİŞİ");
         text(history,"Henüz çekim talebi yok. Canlı transfer yapılmadı.",13,MUTED,false);
+        historyStatus=text(history,"",13,MUTED,false);
+        updateHistory();
 
         LinearLayout settings=card("4  •  AYARLAR");
         text(settings,"Yalnız Wi-Fi: AÇIK\nPil koruması: AÇIK\nDüşük pil / ısınma durdurma: AÇIK\nİzin iptalinde çalışma: KAPALI",13,MUTED,false);
@@ -177,14 +182,30 @@ public final class NetworkHomeActivity extends Activity {
     private void startMonitor(){
         stopMonitor();
         monitorStart=SystemClock.elapsedRealtime();
+        sessionBytes=0;
         startRx=TrafficStats.getUidRxBytes(android.os.Process.myUid());
         startTx=TrafficStats.getUidTxBytes(android.os.Process.myUid());
         monitorHandler.post(monitorTick);
     }
     private void stopMonitor(){
+        if(monitorStart>0){
+            long rx=TrafficStats.getUidRxBytes(android.os.Process.myUid());
+            long tx=TrafficStats.getUidTxBytes(android.os.Process.myUid());
+            if(rx>=0 && tx>=0 && startRx>=0 && startTx>=0)sessionBytes=Math.max(0,rx-startRx)+Math.max(0,tx-startTx);
+            long seconds=Math.max(0,(SystemClock.elapsedRealtime()-monitorStart)/1000);
+            prefs.edit().putLong("last_session_seconds",seconds).putLong("last_session_bytes",sessionBytes).apply();
+            updateHistory();
+        }
         monitorHandler.removeCallbacks(monitorTick);
         monitorStart=0;
         if(monitorStatus!=null)monitorStatus.setText("Bağlantı izleme kapalı • Gerçek paylaşım: KAPALI");
+    }
+    private void updateHistory(){
+        if(historyStatus!=null){
+            long seconds=prefs.getLong("last_session_seconds",0);
+            long bytes=prefs.getLong("last_session_bytes",0);
+            historyStatus.setText("Son izleme oturumu: "+seconds+" sn • Uygulama verisi: "+String.format(java.util.Locale.US,"%.3f MB",bytes/1048576.0)+"\nBu ölçüm gelir veya paylaşılan bant genişliği değildir.");
+        }
     }
     @Override protected void onStop(){
         prefs.edit().putBoolean("monitor_active",false).apply();
