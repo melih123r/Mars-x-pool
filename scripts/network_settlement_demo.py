@@ -82,5 +82,13 @@ if __name__ == "__main__":
             raise AssertionError("invalid credit accepted")
         except ValueError:
             pass
+    # No double reservation under sequential replay or attempts to exceed available balance.
+    for i in range(10):
+        try:
+            ledger.reserve_withdrawal("a", f"retry-{i}", 1000, payee_verified=True)
+            raise AssertionError("overspend accepted")
+        except ValueError:
+            pass
+    assert ledger.reserved_cents["a"] == 1000
     assert ledger.available("a") == 500 and ledger.available("b") == 0
     print("Offline Network settlement simulation: PASS")
