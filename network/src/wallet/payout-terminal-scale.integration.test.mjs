@@ -11,7 +11,9 @@ const migrations = [
   '../../db/004_consent_audit.sql',
   '../../db/005_payout_consent_gate.sql',
   '../../db/006_payout_reservation_consistency.sql',
-  '../../db/007_payout_terminal_state.sql'
+  '../../db/007_payout_terminal_state.sql',
+  '../../db/008_payout_transition_audit.sql',
+  '../../db/009_payout_audit_lookup_index.sql'
 ];
 
 test('10,000 payout records preserve terminal state and audit invariants', {
@@ -81,6 +83,19 @@ test('10,000 payout records preserve terminal state and audit invariants', {
         FROM generate_series(1,10000) AS users(n)
       `);
       await client.query(`
+        INSERT INTO network_payout_audit
+          (audit_id,request_id,event_key,event_kind,actor_kind,details)
+        SELECT 'terminal-scale-request-' || n || ':submitted',
+               'terminal-scale-request-' || n,
+               'payout:terminal-scale-request-' || n || ':submitted',
+               'submitted','approved_partner',
+               jsonb_build_object(
+                 'providerReference',
+                 'isolated-provider:terminal-scale-request-' || n
+               )
+        FROM generate_series(1,10000) AS users(n)
+      `);
+      await client.query(`
         UPDATE network_payout_requests
         SET status='submitted',
             provider_reference='isolated-provider:' || request_id,
@@ -117,6 +132,8 @@ test('10,000 payout records preserve terminal state and audit invariants', {
         (SELECT count(*)::int FROM network_payout_audit
           WHERE event_kind='reserved') AS reserved_audits,
         (SELECT count(*)::int FROM network_payout_audit
+          WHERE event_kind='submitted') AS submitted_audits,
+        (SELECT count(*)::int FROM network_payout_audit
           WHERE event_kind='settled') AS settled_audits,
         (SELECT count(*)::int FROM network_ledger_entries
           WHERE entry_type='payout_reservation') AS reservation_entries
@@ -125,6 +142,7 @@ test('10,000 payout records preserve terminal state and audit invariants', {
       settled_requests: 10000,
       provider_references: 10000,
       reserved_audits: 10000,
+      submitted_audits: 10000,
       settled_audits: 10000,
       reservation_entries: 10000
     });
@@ -160,6 +178,20 @@ test('10,000 payout records preserve terminal state and audit invariants', {
     assert.match(
       JSON.stringify(explain.rows[0]['QUERY PLAN']),
       /network_payout_status_time/
+    );
+
+    const auditExplain = await pool.query(`
+      EXPLAIN (FORMAT JSON)
+      SELECT event_key
+      FROM network_payout_audit
+      WHERE request_id='terminal-scale-request-5000'
+        AND event_kind='submitted'
+      ORDER BY event_key
+      LIMIT 1
+    `);
+    assert.match(
+      JSON.stringify(auditExplain.rows[0]['QUERY PLAN']),
+      /network_payout_audit_request_kind/
     );
   } finally {
     await pool.end();
