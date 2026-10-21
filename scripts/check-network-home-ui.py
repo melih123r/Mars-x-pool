@@ -29,6 +29,9 @@ required = [
     "Puan sistemi yok",
     "Kullanıcı reklam bakiyesi: €0,00",
     "bakiyeye para yazılmaz",
+    "Çekim komisyonu: %5",
+    "Minimum çekim: €10,00",
+    "fee €5,00",
     "Network paylaşım onayı reklam kişiselleştirme onayı değildir",
     "Açık rıza • yalnızca TEST",
     "IP adresi",
@@ -53,7 +56,7 @@ for forbidden in ("MobileAds.initialize(", "loadAd(", "AdRequest.Builder(", "sta
         raise SystemExit("Unsafe live action in Network test UI: " + forbidden)
 
 contract = Path("docs/network-rewarded-ads-70-30.md").read_text(encoding="utf-8")
-for marker in ("70% MARS-X / 30% user", "0%", "floor(net_cents * 30 / 100)", "written partner approval"):
+for marker in ("70% MARS-X / 30% user", "0%", "floor(net_cents * 30 / 100)", "written partner approval", "5% of requested gross withdrawal", "EUR 10.00"):
     if marker not in contract:
         raise SystemExit("Missing rewarded-ad settlement gate: " + marker)
 
