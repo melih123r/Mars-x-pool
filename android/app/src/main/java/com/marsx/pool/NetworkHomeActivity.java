@@ -47,6 +47,13 @@ public final class NetworkHomeActivity extends Activity {
                 ConnectivityManager cm=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkCapabilities nc=cm.getNetworkCapabilities(cm.getActiveNetwork());
                 String kind=nc==null?"Bağlantı yok":nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)?"Wi-Fi":nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)?"Mobil veri":"Diğer ağ";
+                if(nc==null || !nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) || !nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)){
+                    prefs.edit().putBoolean("monitor_active",false).apply();
+                    stopMonitor();
+                    if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
+                    android.widget.Toast.makeText(NetworkHomeActivity.this,"Wi-Fi bağlantısı kesildi; izleme durduruldu.",android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 long seconds=(SystemClock.elapsedRealtime()-monitorStart)/1000;
                 long rx=TrafficStats.getUidRxBytes(android.os.Process.myUid());
                 long tx=TrafficStats.getUidTxBytes(android.os.Process.myUid());
