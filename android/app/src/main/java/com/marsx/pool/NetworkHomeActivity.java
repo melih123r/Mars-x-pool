@@ -59,8 +59,24 @@ public final class NetworkHomeActivity extends Activity {
                     .show();
             }
         });
-        Button start=button(network,"Network'ü aç • SDK bekleniyor");
-        start.setEnabled(false);
+        Button start=button(network,"Başlat • bağlantıyı izle");
+        start.setOnClickListener(v -> {
+            boolean active=prefs.getBoolean("monitor_active",false);
+            if (active) {
+                prefs.edit().putBoolean("monitor_active",false).apply();
+                start.setText("Başlat • bağlantıyı izle");
+            } else {
+                new AlertDialog.Builder(this)
+                    .setTitle("MARS-X Network")
+                    .setMessage("Bağlantı durumunu izlemeyi başlat. Bu testte internetin başkalarıyla paylaşılmaz ve kazanç oluşmaz. İstediğin zaman durdurabilirsin.")
+                    .setNegativeButton("Vazgeç",null)
+                    .setPositiveButton("Başlat",(d,w)->{
+                        prefs.edit().putBoolean("monitor_active",true).apply();
+                        start.setText("Durdur • bağlantı izleme");
+                    }).show();
+            }
+        });
+        prefs.edit().putBoolean("monitor_active",false).apply();
         text(network,"Bağlantı: ÇEVRİMDIŞI TEST\nForeground service: KAPALI\nGerçek trafik ve arka plan paylaşımı: KAPALI",13,MUTED,false);
         refreshConsent();
 
