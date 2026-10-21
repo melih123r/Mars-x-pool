@@ -11,7 +11,8 @@ const migrations = [
   '../../db/003_pending_earnings.sql',
   '../../db/004_consent_audit.sql',
   '../../db/005_payout_consent_gate.sql',
-  '../../db/006_payout_reservation_consistency.sql'
+  '../../db/006_payout_reservation_consistency.sql',
+  '../../db/007_payout_terminal_state.sql'
 ];
 
 async function applyMigrations(pool) {
