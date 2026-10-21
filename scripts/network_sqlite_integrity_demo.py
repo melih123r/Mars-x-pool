@@ -24,6 +24,14 @@ def open_demo_db():
     BEGIN
       SELECT RAISE(ABORT, 'verified receipt cannot be deleted');
     END;
+    CREATE TRIGGER prevent_withdrawal_identity_edit
+    BEFORE UPDATE ON withdrawals
+    WHEN NEW.withdrawal_id != OLD.withdrawal_id
+      OR NEW.user_id != OLD.user_id
+      OR NEW.gross_cents != OLD.gross_cents
+    BEGIN
+      SELECT RAISE(ABORT, 'withdrawal identity and amount are immutable');
+    END;
     CREATE TRIGGER prevent_terminal_withdrawal_mutation
     BEFORE UPDATE ON withdrawals
     WHEN OLD.state IN ('paid', 'cancelled')
@@ -79,6 +87,22 @@ def demo():
             pass
     assert db.execute("SELECT COUNT(*) FROM receipts").fetchone()[0] == 1
     assert db.execute("SELECT COUNT(*) FROM withdrawals").fetchone()[0] == 1
+    # Even a pending reservation cannot be reassigned or inflated.
+    with db:
+        db.execute("INSERT INTO withdrawals VALUES (?,?,?,?)", ("pending", "a", 1000, "reserved"))
+    for sql in (
+        "UPDATE withdrawals SET user_id='b' WHERE withdrawal_id='pending'",
+        "UPDATE withdrawals SET gross_cents=2000 WHERE withdrawal_id='pending'",
+        "UPDATE withdrawals SET withdrawal_id='renamed' WHERE withdrawal_id='pending'",
+    ):
+        try:
+            with db:
+                db.execute(sql)
+            raise AssertionError("pending withdrawal identity was mutated")
+        except sqlite3.IntegrityError:
+            pass
+    with db:
+        db.execute("DELETE FROM withdrawals WHERE withdrawal_id='pending'")
     # A paid withdrawal cannot transition back into a reserved or cancelled state.
     with db:
         db.execute("INSERT INTO withdrawals VALUES (?,?,?,?)", ("w2", "a", 1000, "reserved"))
