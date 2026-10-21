@@ -3,6 +3,12 @@ package com.marsx.pool;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -24,6 +30,21 @@ public final class NetworkHomeActivity extends Activity {
     private LinearLayout page;
     private TextView consentStatus;
     private Button consentButton;
+    private TextView monitorStatus;
+    private long monitorStart;
+    private final Handler monitorHandler=new Handler(Looper.getMainLooper());
+    private final Runnable monitorTick=new Runnable(){
+        @Override public void run(){
+            if(monitorStatus!=null && monitorStart>0){
+                ConnectivityManager cm=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkCapabilities nc=cm.getNetworkCapabilities(cm.getActiveNetwork());
+                String kind=nc==null?"Bağlantı yok":nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)?"Wi-Fi":nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)?"Mobil veri":"Diğer ağ";
+                long seconds=(SystemClock.elapsedRealtime()-monitorStart)/1000;
+                monitorStatus.setText("Bağlantı: "+kind+" • İzleme: "+(seconds/60)+" dk "+(seconds%60)+" sn\nGerçek paylaşım: KAPALI • Doğrulanmış trafik: 0 GB");
+                monitorHandler.postDelayed(this,1000);
+            }
+        }
+    };
 
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
@@ -65,6 +86,7 @@ public final class NetworkHomeActivity extends Activity {
             if (active) {
                 prefs.edit().putBoolean("monitor_active",false).apply();
                 start.setText("Başlat • bağlantıyı izle");
+                stopMonitor();
             } else {
                 new AlertDialog.Builder(this)
                     .setTitle("MARS-X Network")
@@ -73,11 +95,12 @@ public final class NetworkHomeActivity extends Activity {
                     .setPositiveButton("Başlat",(d,w)->{
                         prefs.edit().putBoolean("monitor_active",true).apply();
                         start.setText("Durdur • bağlantı izleme");
+                        startMonitor();
                     }).show();
             }
         });
         prefs.edit().putBoolean("monitor_active",false).apply();
-        text(network,"Bağlantı: ÇEVRİMDIŞI TEST\nForeground service: KAPALI\nGerçek trafik ve arka plan paylaşımı: KAPALI",13,MUTED,false);
+        monitorStatus=text(network,"Bağlantı izleme kapalı • Gerçek paylaşım: KAPALI",13,MUTED,false);
         refreshConsent();
 
         LinearLayout earnings=card("2  •  KAZANÇ");
@@ -140,6 +163,21 @@ public final class NetworkHomeActivity extends Activity {
 
         text(page,"TEST SÜRÜMÜ • Ödeme, proxy, kripto transferi ve gerçek Network SDK kapalı",12,MUTED,false);
         text(page,"Uyarı: Test rızası gelecekteki gerçek ağ paylaşımı için geçerli değildir. Gerçek SDK devreye alınmadan önce yeniden ve ayrı açık onay gerekir.",12,ORANGE,false);
+    }
+
+    private void startMonitor(){
+        stopMonitor();
+        monitorStart=SystemClock.elapsedRealtime();
+        monitorHandler.post(monitorTick);
+    }
+    private void stopMonitor(){
+        monitorHandler.removeCallbacks(monitorTick);
+        monitorStart=0;
+        if(monitorStatus!=null)monitorStatus.setText("Bağlantı izleme kapalı • Gerçek paylaşım: KAPALI");
+    }
+    @Override protected void onDestroy(){
+        stopMonitor();
+        super.onDestroy();
     }
 
     private void refreshConsent(){
