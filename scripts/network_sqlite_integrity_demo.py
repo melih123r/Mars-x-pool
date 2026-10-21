@@ -167,6 +167,16 @@ def demo():
         except sqlite3.IntegrityError:
             pass
     assert db.execute("SELECT amount_cents FROM receipts WHERE receipt_id='r1'").fetchone()[0] == 1500
+    # Database savepoint rollback must leave no partial settlement record.
+    before = db.execute("SELECT COUNT(*) FROM receipts").fetchone()[0]
+    try:
+        with db:
+            db.execute("INSERT INTO receipts VALUES (?,?,?,?)", ("test-provider", "rollback-test", "a", 100))
+            db.execute("INSERT INTO receipts VALUES (?,?,?,?)", ("test-provider", "r1", "a", 100))
+        raise AssertionError("duplicate receipt did not abort transaction")
+    except sqlite3.IntegrityError:
+        pass
+    assert db.execute("SELECT COUNT(*) FROM receipts").fetchone()[0] == before
     assert db.execute("SELECT COUNT(*) FROM withdrawals").fetchone()[0] == 3
     print("Offline SQLite settlement constraints: PASS")
 
