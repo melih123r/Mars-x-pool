@@ -1,5 +1,5 @@
 import pg from 'pg';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { encryptMessage, decryptMessage, loadEncryptionKey } from './message-crypto.mjs';
 import { LANES, planLaneTasks } from './lane-planner.mjs';
 
@@ -11,6 +11,217 @@ export class PostgresTaskQueue {
     if (!pool && (!connectionString || typeof connectionString !== 'string')) throw new Error('database_url_required');
     this.key = loadEncryptionKey(encryptionKeyHex);
     this.pool = pool || new pg.Pool({ connectionString, max: 3, connectionTimeoutMillis: 5000, idleTimeoutMillis: 10000, ssl: connectionString?.includes('render.com') ? { rejectUnauthorized: true } : undefined });
+  }
+  async storeCommandAtomic({ updateId, kind, project, message }) {
+    if (!Number.isSafeInteger(updateId) || updateId < 0) throw new Error('invalid_update_id');
+    if (!['chat', 'task'].includes(kind)) throw new Error('invalid_command_kind');
+    if (typeof project !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,31}$/.test(project)) throw new Error('invalid_project');
+    if (typeof message !== 'string' || !message.trim() || message.length > 3500) throw new Error('invalid_message');
+    const commandId = `telegram-${updateId}-${kind}`;
+    const encrypted = encryptMessage(JSON.stringify({ kind, project, message }), this.key, updateId);
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const inserted = await client.query(
+        `INSERT INTO marsx_telegram.command_inbox
+           (command_id,update_id,command_kind,project,payload_ciphertext,encryption_key_version)
+         VALUES ($1,$2,$3,$4,$5,1) ON CONFLICT (update_id) DO NOTHING`,
+        [commandId, updateId, kind, project, encrypted]
+      );
+      const result = await client.query(
+        `SELECT command_id,update_id,command_kind,project,status,attempt_count
+         FROM marsx_telegram.command_inbox WHERE update_id=$1 FOR UPDATE`,
+        [updateId]
+      );
+      const row = result.rows[0];
+      if (!row) throw new Error('command_insert_not_visible');
+      if (row.command_id !== commandId || row.command_kind !== kind || row.project !== project)
+        throw new Error('update_id_conflict');
+      await client.query('COMMIT');
+      return { commandId: row.command_id, status: row.status, duplicate: inserted.rowCount === 0 };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  async getCommandStatus(commandId) {
+    if (typeof commandId !== 'string' || !/^telegram-\d+-(chat|task)$/.test(commandId)) throw new Error('invalid_command_id');
+    const result = await this.pool.query(
+      `SELECT command_id,command_kind,project,status,attempt_count,created_at,updated_at
+       FROM marsx_telegram.command_inbox WHERE command_id=$1`,
+      [commandId]
+    );
+    return result.rows[0] || null;
+  }
+  async appendCommandAudit({ commandId, eventKey, eventKind, laneNumber, actorRefHash = null, metadata = {} }) {
+    if (typeof commandId !== 'string' || !/^telegram-\d+-(chat|task)$/.test(commandId)) throw new Error('invalid_command_id');
+    if (typeof eventKey !== 'string' || !/^[a-zA-Z0-9_-]{16,128}$/.test(eventKey)) throw new Error('invalid_audit_event_key');
+    if (!['RECEIVED','CLAIMED','RETRIED','COMPLETED','FAILED','BLOCKED'].includes(eventKind)) throw new Error('invalid_audit_event_kind');
+    if (!Number.isInteger(laneNumber) || laneNumber < 1 || laneNumber > 10) throw new Error('invalid_audit_lane');
+    if (actorRefHash !== null && (typeof actorRefHash !== 'string' || !/^[a-f0-9]{64}$/.test(actorRefHash)))
+      throw new Error('invalid_actor_ref_hash');
+    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) throw new Error('invalid_audit_metadata');
+    let encoded;
+    try { encoded = JSON.stringify(metadata); } catch { throw new Error('invalid_audit_metadata'); }
+    if (Buffer.byteLength(encoded, 'utf8') > 16000) throw new Error('audit_metadata_too_large');
+
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const inserted = await client.query(
+        `INSERT INTO marsx_telegram.command_audit_log
+           (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,metadata)
+         VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,$3,$4,$5,$6)
+         ON CONFLICT (command_id,event_key) DO NOTHING
+         RETURNING audit_event_id`,
+        [commandId, eventKey, eventKind, laneNumber, actorRefHash, metadata]
+      );
+      if (inserted.rowCount === 1) {
+        await client.query('COMMIT');
+        return { recorded: true };
+      }
+
+      const existing = await client.query(
+        `SELECT event_kind,lane_number,actor_ref_hash,metadata
+           FROM marsx_telegram.command_audit_log
+          WHERE command_id=$1 AND event_key=$2 FOR UPDATE`,
+        [commandId, eventKey]
+      );
+      const row = existing.rows[0];
+      if (!row) throw new Error('audit_insert_not_visible');
+      if (row.event_kind !== eventKind
+          || row.lane_number !== laneNumber
+          || row.actor_ref_hash !== actorRefHash
+          || JSON.stringify(row.metadata) !== encoded) {
+        throw new Error('audit_idempotency_conflict');
+      }
+      await client.query('COMMIT');
+      return { recorded: false };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  async claimNextCommand(workerId, leaseSeconds = 60) {
+    if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
+    if (!Number.isSafeInteger(leaseSeconds) || leaseSeconds < 15 || leaseSeconds > 300) throw new Error('invalid_lease');
+    const actorRefHash = createHash('sha256').update(workerId, 'utf8').digest('hex');
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await client.query(
+        `WITH available AS (
+           SELECT command_id FROM marsx_telegram.command_inbox
+           WHERE status='pending' AND retry_at <= now() AND attempt_count < 10
+           ORDER BY created_at,command_id FOR UPDATE SKIP LOCKED LIMIT 1
+         )
+         UPDATE marsx_telegram.command_inbox c
+         SET status='claimed',worker_id=$1,lease_until=now()+($2::integer * interval '1 second'),
+             attempt_count=c.attempt_count+1,updated_at=now()
+         FROM available a WHERE c.command_id=a.command_id
+         RETURNING c.command_id,c.update_id,c.command_kind,c.project,c.status,c.worker_id,c.attempt_count`,
+        [workerId, leaseSeconds]
+      );
+      const row = result.rows[0] || null;
+      if (row) {
+        const eventKey = `claim_attempt_${row.attempt_count}_${actorRefHash.slice(0, 16)}`;
+        await client.query(
+          `INSERT INTO marsx_telegram.command_audit_log
+             (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,metadata)
+           VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,$3,$4,$5,$6)
+           ON CONFLICT (command_id,event_key) DO NOTHING`,
+          [row.command_id, eventKey, 'CLAIMED', 10, actorRefHash, { attemptCount: row.attempt_count }]
+        );
+      }
+      await client.query('COMMIT');
+      return row;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  async retryCommand(commandId, workerId, errorCode, delaySeconds) {
+    if (typeof commandId !== 'string' || !/^telegram-\d+-(chat|task)$/.test(commandId)) throw new Error('invalid_command_id');
+    if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
+    if (typeof errorCode !== 'string' || !/^[a-z0-9_]{1,64}$/.test(errorCode)) throw new Error('invalid_error_code');
+    if (!Number.isSafeInteger(delaySeconds) || delaySeconds < 1 || delaySeconds > 3600) throw new Error('invalid_retry_delay');
+    const actorRefHash = createHash('sha256').update(workerId, 'utf8').digest('hex');
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await client.query(
+        `UPDATE marsx_telegram.command_inbox
+         SET status=CASE WHEN attempt_count < 10 THEN 'pending' ELSE 'failed' END,
+             worker_id=NULL,lease_until=NULL,
+             retry_at=CASE WHEN attempt_count < 10 THEN now()+($4::integer * interval '1 second') ELSE retry_at END,
+             last_error_code=$3,updated_at=now()
+         WHERE command_id=$1 AND worker_id=$2 AND status='claimed' AND lease_until > now()
+         RETURNING command_id,update_id,command_kind,project,status,attempt_count`,
+        [commandId, workerId, errorCode, delaySeconds]
+      );
+      const row = result.rows[0] || null;
+      if (row) {
+        const eventKey = `retry_attempt_${row.attempt_count}_${actorRefHash.slice(0, 16)}`;
+        const eventKind = row.status === 'failed' ? 'FAILED' : 'RETRIED';
+        await client.query(
+          `INSERT INTO marsx_telegram.command_audit_log
+             (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,error_code,metadata)
+           VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,$3,$4,$5,$6,$7)
+           ON CONFLICT (command_id,event_key) DO NOTHING`,
+          [row.command_id, eventKey, eventKind, 10, actorRefHash, errorCode, {
+            attemptCount: row.attempt_count,
+            delaySeconds
+          }]
+        );
+      }
+      await client.query('COMMIT');
+      return row;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+  async completeCommand(commandId, workerId) {
+    if (typeof commandId !== 'string' || !/^telegram-\d+-(chat|task)$/.test(commandId)) throw new Error('invalid_command_id');
+    if (typeof workerId !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(workerId)) throw new Error('invalid_worker_id');
+    const actorRefHash = createHash('sha256').update(workerId, 'utf8').digest('hex');
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const result = await client.query(
+        `UPDATE marsx_telegram.command_inbox
+         SET status='completed',worker_id=NULL,lease_until=NULL,last_error_code=NULL,updated_at=now()
+         WHERE command_id=$1 AND worker_id=$2 AND status='claimed' AND lease_until > now()
+         RETURNING command_id,update_id,command_kind,project,status,attempt_count`,
+        [commandId, workerId]
+      );
+      const row = result.rows[0] || null;
+      if (row) {
+        const eventKey = `complete_attempt_${row.attempt_count}_${actorRefHash.slice(0, 16)}`;
+        await client.query(
+          `INSERT INTO marsx_telegram.command_audit_log
+             (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,metadata)
+           VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,$3,10,$4,$5)
+           ON CONFLICT (command_id,event_key) DO NOTHING`,
+          [row.command_id, eventKey, 'COMPLETED', actorRefHash, { attemptCount: row.attempt_count }]
+        );
+      }
+      await client.query('COMMIT');
+      return row;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
   async enqueueAtomic({ updateId, tasks }) {
     if (!Number.isSafeInteger(updateId) || updateId < 0 || !Array.isArray(tasks) || tasks.length !== LANES.length) throw new Error('invalid_intake');
@@ -184,6 +395,51 @@ export class PostgresTaskQueue {
          RETURNING t.task_id,t.update_id,t.status`,
         [limit]
       );
+      const recoveredCommands = await client.query(
+        `WITH expired_commands AS (
+           SELECT command_id FROM marsx_telegram.command_inbox
+           WHERE status='claimed' AND lease_until <= now()
+           ORDER BY lease_until FOR UPDATE SKIP LOCKED LIMIT $1
+         )
+         UPDATE marsx_telegram.command_inbox c
+         SET status=CASE WHEN attempt_count >= 10 THEN 'failed' ELSE 'pending' END,
+             worker_id=NULL,lease_until=NULL,retry_at=now(),
+             last_error_code='lease_expired',updated_at=now()
+         FROM expired_commands e WHERE c.command_id=e.command_id
+         RETURNING c.command_id,c.status,c.attempt_count`,
+        [limit]
+      );
+      const recoveryActorHash = createHash('sha256').update('lease_recovery', 'utf8').digest('hex');
+      for (const command of recoveredCommands.rows || []) {
+        const eventKey = `lease_expired_attempt_${command.attempt_count}_${recoveryActorHash.slice(0, 16)}`;
+        const eventKind = command.status === 'failed' ? 'FAILED' : 'RETRIED';
+        const metadata = { attemptCount: command.attempt_count };
+        const auditInsert = await client.query(
+          `INSERT INTO marsx_telegram.command_audit_log
+             (audit_event_id,command_id,event_key,event_kind,lane_number,actor_ref_hash,error_code,metadata)
+           VALUES ('audit_' || md5($1 || ':' || $2),$1,$2,$3,10,$4,$5,$6)
+           ON CONFLICT (command_id,event_key) DO NOTHING
+           RETURNING audit_event_id`,
+          [command.command_id, eventKey, eventKind, recoveryActorHash, 'lease_expired', metadata]
+        );
+        if (auditInsert.rowCount === 0) {
+          const existingAudit = await client.query(
+            `SELECT event_kind,lane_number,actor_ref_hash,metadata,error_code
+               FROM marsx_telegram.command_audit_log
+              WHERE command_id=$1 AND event_key=$2 FOR UPDATE`,
+            [command.command_id, eventKey]
+          );
+          const existing = existingAudit.rows[0];
+          if (!existing
+              || existing.event_kind !== eventKind
+              || existing.lane_number !== 10
+              || existing.actor_ref_hash !== recoveryActorHash
+              || existing.error_code !== 'lease_expired'
+              || JSON.stringify(existing.metadata) !== JSON.stringify(metadata)) {
+            throw new Error('recovery_audit_idempotency_conflict');
+          }
+        }
+      }
       // A crashed worker may have exhausted its retries. Reconcile every affected
       // intake so an otherwise completed ten-lane job still produces a report.
       const updateIds = [...new Set(result.rows.filter(row => row.status === 'failed').map(row => row.update_id))];

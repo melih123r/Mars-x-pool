@@ -35,7 +35,8 @@ async function reportDatabaseReadiness() {
     const rows = await durableQueue.pool.query(`SELECT
       to_regclass('marsx_telegram.intakes') IS NOT NULL AS intakes,
       to_regclass('marsx_telegram.tasks') IS NOT NULL AS tasks,
-      to_regclass('marsx_telegram.outbox') IS NOT NULL AS outbox`);
+      to_regclass('marsx_telegram.outbox') IS NOT NULL AS outbox,
+      to_regclass('marsx_telegram.command_inbox') IS NOT NULL AS command_inbox`);
     console.log(JSON.stringify({ event: 'marsx_db_readiness', status: 'checked', tables: rows.rows[0] }));
   } catch (error) {
     console.warn(JSON.stringify({ event: 'marsx_db_readiness', status: 'connection_failed', code: error.code || 'unknown' }));
@@ -156,6 +157,7 @@ const server = http.createServer(async (req, res) => {
       await durableQueue.pool.query('SELECT 1 FROM marsx_telegram.intakes LIMIT 1');
       await durableQueue.pool.query('SELECT 1 FROM marsx_telegram.tasks LIMIT 1');
       await durableQueue.pool.query('SELECT 1 FROM marsx_telegram.outbox LIMIT 1');
+      await durableQueue.pool.query('SELECT 1 FROM marsx_telegram.command_inbox LIMIT 1');
       return send(res, 200, { ready: true, mode: 'postgres_intake', agents_connected: false });
     } catch (error) {
       console.error('PostgreSQL readiness check failed:', error.message);
@@ -196,6 +198,18 @@ const server = http.createServer(async (req, res) => {
     try {
     if (content === '/status' || content === '/start' || content === '/help') {
       answer = 'MARS-X Telegram aktif. Gemini: ' + (geminiApiKey ? 'anahtar tanımlı (API yanıtı ayrıca test edilmeli)' : 'GEMINI_API_KEY eksik') + '. Görev yürütücüleri bağlı değil.';
+    } else if (content.startsWith('/status ')) {
+      const commandId = content.slice('/status '.length).trim();
+      if (!/^telegram-\d+-(chat|task)$/.test(commandId)) {
+        answer = 'MARS-X: kullanım /status <telegram-ID-chat|task>';
+      } else if (!durableMode) {
+        answer = 'MARS-X: kalıcı komut deposu etkin değil.';
+      } else {
+        const command = await durableQueue.getCommandStatus(commandId);
+        answer = command
+          ? `MARS-X ${command.command_kind} ${command.command_id}: ${command.status}; proje: ${command.project}; deneme: ${command.attempt_count}`
+          : 'MARS-X: kayıt bulunamadı.';
+      }
     } else if (content === '/lanes' || content === '/tasks') {
       answer = 'MARS-X 10 görev alanı (henüz yürütücü bağlı değil):\n' + lanes.map((lane, index) => `${index + 1}. ${lane}`).join('\n') + '\nGörevler henüz otomatik çalıştırılmıyor.';
     } else if (content.startsWith('/enqueue ')) {
@@ -225,6 +239,22 @@ const server = http.createServer(async (req, res) => {
       }
     } else if (content === '/queue') {
       answer = durableMode ? 'MARS-X: şifreli PostgreSQL kuyruğu yapılandırıldı. /ready sunucu kontrolünü kullan; görevlerin yürütülmesi henüz etkin değil.' : 'MARS-X: PostgreSQL görev kuyruğu etkin değil; mevcut mod yalnızca GitHub meta verisi saklar.';
+    } else if (content.startsWith('/chat ') || content.startsWith('/task ')) {
+      const match = content.match(/^\/(chat|task)\s+([a-z0-9][a-z0-9_-]{0,31})\s+([\s\S]+)$/);
+      const kind = content.startsWith('/chat ') ? 'chat' : 'task';
+      if (!match || !match[3].trim() || match[3].length > 3500) {
+        answer = `MARS-X: kullanım /${kind} <proje> <1-3500 karakter mesaj>`;
+      } else if (!durableMode) {
+        answer = kind === 'chat'
+          ? 'MARS-X: kalıcı gelen kutusu etkin değil. DATABASE_URL ve PostgreSQL modu gerekli.'
+          : 'MARS-X: güvenli görev deposu etkin değil. DATABASE_URL ve PostgreSQL modu gerekli.';
+      } else {
+        const stored = await durableQueue.storeCommandAtomic({
+          updateId, kind, project: match[2], message: match[3].trim()
+        });
+        console.log(JSON.stringify({ event: 'command_inbox_committed', updateId, kind, project: match[2], duplicate: stored.duplicate }));
+        answer = `MARS-X: ${kind} kaydı ${stored.duplicate ? 'zaten mevcut' : 'atomik olarak kaydedildi'}. Takip: ${stored.commandId}. Durum: ${stored.status}.`;
+      }
     } else if (content.startsWith('/')) {
       answer = 'MARS-X: bilinmeyen komut. /status ile bağlantıyı kontrol et. Komut GitHub görev kaydına alınmadı.';
     } else if (geminiApiKey) {
