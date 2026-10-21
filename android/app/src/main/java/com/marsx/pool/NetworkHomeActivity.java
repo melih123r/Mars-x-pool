@@ -148,16 +148,6 @@ public final class NetworkHomeActivity extends Activity {
         String savedAddress=prefs.getString("usdc_address","");
         if(!savedAddress.isEmpty())walletAddress.setText("Cüzdan adresi • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
 
-        /* Wallet and withdrawal operations remain disabled until partner approval.
-           Address entry is a local display preference only; no transfer occurs. */
-        /* LinearLayout wallet=card("3  •  NONCUSTODIAL USDC CÜZDANI");
-        text(wallet,"Kayıtlı adres yok • Özel anahtar uygulamada tutulmaz",13,MUTED,false);
-        text(wallet,"Solana: PARTNER BEKLENİYOR\nBase: PARTNER BEKLENİYOR\nPolygon: PARTNER BEKLENİYOR",13,MUTED,false);
-        text(wallet,"Net teklif: Kullanılamıyor • ücret/kur teklifi alınmadı",13,MUTED,false);
-        text(wallet,"Çekim komisyonu: %5 • Minimum çekim: €10,00 • Örnek €100,00 → fee €5,00 → net €95,00 (harici ağ masrafı hariç).",12,ORANGE,false);
-        Button withdraw=button(wallet,"Para çek • TEST / DEVRE DIŞI");
-        withdraw.setEnabled(false); */
-
         LinearLayout history=card("3  •  ÇEKİM GEÇMİŞİ");
         text(history,"Henüz çekim talebi yok. Canlı transfer yapılmadı.",13,MUTED,false);
         historyStatus=text(history,"",13,MUTED,false);
