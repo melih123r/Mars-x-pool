@@ -42,4 +42,17 @@ if __name__ == "__main__":
         raise AssertionError("unverified receipt must be rejected")
     except PermissionError:
         pass
+    for bad in (-1, 1.5, True, "100"):
+        try:
+            allocate_verified_revenue(bad, partner_cash_rewards_approved=True,
+                                      receipt_verified=True)
+            raise AssertionError("Invalid cents accepted: " + repr(bad))
+        except ValueError:
+            pass
+    for cents in range(10001):
+        result = allocate_verified_revenue(cents, partner_cash_rewards_approved=True,
+                                           receipt_verified=True)
+        assert result.user_cents + result.platform_cents == cents
+        assert result.user_cents == cents * 30 // 100
+        assert result.fee_cents == 0
     print("Rewarded ads allocation tests: PASS")
