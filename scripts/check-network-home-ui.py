@@ -57,4 +57,10 @@ for marker in ("70% MARS-X / 30% user", "0%", "floor(net_cents * 30 / 100)", "wr
     if marker not in contract:
         raise SystemExit("Missing rewarded-ad settlement gate: " + marker)
 
+import subprocess
+import sys
+result = subprocess.run([sys.executable, "scripts/network_rewarded_revenue.py"], capture_output=True, text=True)
+if result.returncode:
+    raise SystemExit("Rewarded revenue allocation tests failed: " + result.stdout + result.stderr)
+print(result.stdout.strip())
 print("Network UI contract: PASS")
