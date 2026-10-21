@@ -22,5 +22,16 @@
 - [ ] Provider contract, eligibility/KYC requirements, payout rails, fraud controls, reconciliation and refund handling.
 - [ ] Live transfers explicitly enabled only after all gates pass and end-to-end tests succeed.
 
+## Release acceptance — Android device checklist
+- [ ] Install the **latest artifact from the current Network branch** (do not reuse an older Pool APK).
+- [ ] Cold launch and relaunch after force-stop; confirm Network home renders without crashes.
+- [ ] Deny consent: confirm no routing, no foreground service, no ad requests and zero balances.
+- [ ] Grant **test-only** consent: confirm it does **not** start real traffic or silently grant advertising consent.
+- [ ] Revoke test consent and restart: confirm revocation persists and the UI reflects it.
+- [ ] Rotate portrait/landscape, background/foreground, airplane mode and low battery: no unexpected starts.
+- [ ] Withdrawal button stays disabled; EUR 10 minimum and 5% fee disclosed; no actual transfers.
+- [ ] Verify app icon and package/version match Network release, not legacy Pool.
+- [ ] Capture device model, Android version, APK SHA-256, build run URL, screenshots and test outcomes.
+
 ## Safety
 All real network routing, ad SDK requests, monetary credits and withdrawals remain disabled until documented approval and verification. A green GitHub CI run does not prove device acceptance or partner approval.
