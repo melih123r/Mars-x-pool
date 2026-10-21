@@ -3,6 +3,9 @@
 -- It performs no provider call, transfer, signing, conversion or live payout.
 BEGIN;
 
+CREATE INDEX IF NOT EXISTS network_payout_status_time
+  ON network_payout_requests(status,updated_at,request_id);
+
 CREATE OR REPLACE FUNCTION network_guard_payout_state_transition()
 RETURNS trigger
 LANGUAGE plpgsql
