@@ -1,4 +1,25 @@
 const OUTCOMES = new Set(['settled', 'failed']);
+const LOCK_TIMEOUT_MS = boundedTimeout(
+  process.env.NETWORK_PAYOUT_LOCK_TIMEOUT_MS,
+  2500,
+  100,
+  30000
+);
+const STATEMENT_TIMEOUT_MS = boundedTimeout(
+  process.env.NETWORK_PAYOUT_STATEMENT_TIMEOUT_MS,
+  15000,
+  1000,
+  120000
+);
+
+function boundedTimeout(rawValue, fallback, minimum, maximum) {
+  if (rawValue == null || rawValue === '') return fallback;
+  const value = Number(rawValue);
+  if (!Number.isInteger(value) || value < minimum || value > maximum) {
+    return fallback;
+  }
+  return value;
+}
 
 function requireText(value, name) {
   if (typeof value !== 'string' || !value.trim()) throw new Error('invalid ' + name);
@@ -11,6 +32,15 @@ function requirePool(pool) {
 
 function eventKey(requestId, eventKind, idempotencyKey) {
   return 'payout:' + requestId + ':' + eventKind + ':' + idempotencyKey;
+}
+
+async function configureTransaction(client) {
+  await client.query(
+    `SELECT
+       set_config('lock_timeout',$1,true),
+       set_config('statement_timeout',$2,true)`,
+    [LOCK_TIMEOUT_MS + 'ms', STATEMENT_TIMEOUT_MS + 'ms']
+  );
 }
 
 async function rollbackQuietly(client) {
@@ -49,6 +79,7 @@ export async function recordPayoutSubmission(pool, rawInput) {
 
   try {
     await client.query('BEGIN');
+    await configureTransaction(client);
     const result = await client.query(
       `SELECT request_id,status,provider_reference
        FROM network_payout_requests
@@ -106,6 +137,7 @@ export async function recordPayoutOutcome(pool, rawInput) {
 
   try {
     await client.query('BEGIN');
+    await configureTransaction(client);
     const result = await client.query(
       `SELECT request_id,status
        FROM network_payout_requests
