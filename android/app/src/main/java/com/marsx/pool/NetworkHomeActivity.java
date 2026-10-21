@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.TrafficStats;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -80,6 +81,7 @@ public final class NetworkHomeActivity extends Activity {
         consentButton.setOnClickListener(v->{
             if (prefs.getBoolean("consented",false)) {
                 prefs.edit().putBoolean("consented",false).putBoolean("monitor_active",false).apply();
+                stopService(new Intent(this,NetworkMonitorService.class));
                 stopMonitor();
                 if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
                 refreshConsent();
@@ -102,6 +104,7 @@ public final class NetworkHomeActivity extends Activity {
             if (active) {
                 prefs.edit().putBoolean("monitor_active",false).apply();
                 start.setText("Başlat • bağlantıyı izle");
+                stopService(new Intent(this,NetworkMonitorService.class));
                 stopMonitor();
             } else {
                 new AlertDialog.Builder(this)
@@ -111,7 +114,17 @@ public final class NetworkHomeActivity extends Activity {
                     .setPositiveButton("Başlat",(d,w)->{
                         prefs.edit().putBoolean("monitor_active",true).apply();
                         start.setText("Durdur • bağlantı izleme");
-                        startMonitor();
+                        try {
+                            Intent service=new Intent(this,NetworkMonitorService.class);
+                            service.setAction(NetworkMonitorService.ACTION_START);
+                            startForegroundService(service);
+                            startMonitor();
+                        } catch(RuntimeException error){
+                            prefs.edit().putBoolean("monitor_active",false).apply();
+                            start.setText("Başlat • bağlantıyı izle");
+                            stopMonitor();
+                            android.widget.Toast.makeText(this,"Arka plan izleme başlatılamadı",android.widget.Toast.LENGTH_LONG).show();
+                        }
                     }).show();
             }
         });
@@ -182,7 +195,7 @@ public final class NetworkHomeActivity extends Activity {
         monitorHandler.post(monitorTick);
     }
     private void stopMonitor(){
-        if(monitorStart>0){
+        if(monitorStart>0 && false){
             long rx=TrafficStats.getUidRxBytes(android.os.Process.myUid());
             long tx=TrafficStats.getUidTxBytes(android.os.Process.myUid());
             if(rx>=0 && tx>=0 && startRx>=0 && startTx>=0)sessionBytes=Math.max(0,rx-startRx)+Math.max(0,tx-startTx);
@@ -204,10 +217,18 @@ public final class NetworkHomeActivity extends Activity {
         }
     }
     @Override protected void onStop(){
-        prefs.edit().putBoolean("monitor_active",false).apply();
-        stopMonitor();
-        if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
+        monitorHandler.removeCallbacks(monitorTick);
         super.onStop();
+    }
+    @Override protected void onStart(){
+        super.onStart();
+        boolean active=prefs.getBoolean("monitor_active",false);
+        if(monitorButton!=null)monitorButton.setText(active?"Durdur • bağlantı izleme":"Başlat • bağlantıyı izle");
+        totalSessionBytes=prefs.getLong("total_session_bytes",0);
+        totalSessionSeconds=prefs.getLong("total_session_seconds",0);
+        updateHistory();
+        if(active && monitorStart==0)startMonitor();
+        else if(active)monitorHandler.post(monitorTick);
     }
     @Override protected void onDestroy(){
         stopMonitor();
