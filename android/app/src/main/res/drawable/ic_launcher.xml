@@ -2,13 +2,29 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <!-- MARS-X Network: distinct rounded dark tile, orange M and blue network orbit -->
-    <path android:fillColor="#0B1323" android:pathData="M0,0h108v108h-108z"/>
-    <path android:fillColor="#14253A" android:pathData="M13,13h82v82h-82z"/>
-    <path android:fillColor="#FF703A" android:pathData="M24,77 L31,34 L53,58 L76,34 L84,77 L70,77 L67,56 L53,74 L40,56 L37,77 Z"/>
-    <path android:strokeColor="#49C6FF" android:strokeWidth="3.5"
-        android:strokeLineCap="round" android:fillColor="@android:color/transparent"
-        android:pathData="M18,30 C40,10 73,11 91,30"/>
-    <path android:fillColor="#49C6FF" android:pathData="M89,25a5,5 0,1 0,0.1 0z"/>
-    <path android:fillColor="#FFB15B" android:pathData="M20,80a4,4 0,1 0,0.1 0z"/>
+    <!-- MARS-X Network: orange/black REF-inspired launcher icon. -->
+    <path android:fillColor="#07090D" android:pathData="M0,0h108v108h-108z"/>
+    <path android:fillColor="#121821" android:pathData="M8,8h92v92h-92z"/>
+    <!-- Mars disc and dark network globe -->
+    <path android:fillColor="#92310F" android:pathData="M54,13a36,36 0,1 0,0.01 0z"/>
+    <path android:fillColor="#E86B21" android:pathData="M54,17a31,31 0,1 0,0.01 0z"/>
+    <path android:fillColor="#AC3B13" android:pathData="M40,25a9,5 0,1 0,0.01 0z M72,31a7,4 0,1 0,0.01 0z M61,48a11,6 0,1 0,0.01 0z"/>
+    <path android:fillColor="#0C111B" android:pathData="M4,76 Q54,45 104,76 L104,104 L4,104 Z"/>
+    <!-- Metallic orange M: high-contrast and legible at launcher size -->
+    <path android:fillColor="#080B11" android:pathData="M18,76 L25,28 L54,52 L83,28 L91,76 L74,76 L70,52 L54,67 L38,52 L34,76 Z"/>
+    <path android:fillColor="#FF8A19" android:pathData="M21,72 L28,29 L54,52 L80,29 L87,72 L76,72 L73,48 L54,65 L35,48 L32,72 Z"/>
+    <path android:fillColor="#FFBC63" android:pathData="M28,29 L54,52 L54,58 L32,40 L29,67 L26,67 Z"/>
+    <path android:fillColor="#343B47" android:pathData="M54,52 L80,29 L87,72 L76,72 L73,48 L54,65 Z"/>
+    <path android:fillColor="#FF8A19" android:pathData="M54,60 L73,44 L76,50 L54,69 Z"/>
+    <!-- Orbit and connectivity accents -->
+    <path android:fillColor="@android:color/transparent" android:strokeColor="#FF8A19"
+        android:strokeWidth="2.7" android:strokeLineCap="round"
+        android:pathData="M10,64 C24,83 74,79 99,39"/>
+    <path android:fillColor="#FFD07A" android:pathData="M14,68a3,3 0,1 0,0.01 0z M94,39a3,3 0,1 0,0.01 0z"/>
+    <path android:fillColor="@android:color/transparent" android:strokeColor="#E66A15"
+        android:strokeWidth="1.1" android:pathData="M13,85 Q54,67 95,85 M27,80 L40,91 M54,76 L54,94 M80,80 L69,91"/>
+    <path android:fillColor="#FF9B2F" android:pathData="M27,80a2,2 0,1 0,0.01 0z M54,76a2,2 0,1 0,0.01 0z M80,80a2,2 0,1 0,0.01 0z"/>
+    <!-- Orange frame -->
+    <path android:fillColor="@android:color/transparent" android:strokeColor="#FF7D12"
+        android:strokeWidth="2.5" android:pathData="M9,2 L99,2 Q106,2 106,9 L106,99 Q106,106 99,106 L9,106 Q2,106 2,99 L2,9 Q2,2 9,2 Z"/>
 </vector>
