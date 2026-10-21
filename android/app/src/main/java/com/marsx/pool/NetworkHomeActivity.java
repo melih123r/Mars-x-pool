@@ -77,6 +77,11 @@ public final class NetworkHomeActivity extends Activity {
         LinearLayout settings=card("5  •  AYARLAR");
         text(settings,"Yalnız Wi-Fi: AÇIK\nPil koruması: AÇIK\nDüşük pil / ısınma durdurma: AÇIK\nİzin iptalinde çalışma: KAPALI",13,MUTED,false);
 
+        LinearLayout advertising=card("6  •  REKLAM ALANI / TEST");
+        text(advertising,"Banner reklam konumu hazır • Gerçek reklam yüklenmiyor",14,WHITE,true);
+        text(advertising,"Reklam geliri: €0,00\\nReklam ağı: BAĞLI DEĞİL\\nReklam isteği: 0\\nÖdüllü video: KAPALI",13,MUTED,false);
+        text(advertising,"AdMob kimliği ve EEA gizlilik/onay akışı doğrulanmadan reklam SDK'sı başlatılmaz. Network paylaşım onayı reklam kişiselleştirme onayı değildir.",12,ORANGE,false);
+
         text(page,"TEST SÜRÜMÜ • Ödeme, proxy, kripto transferi ve gerçek Network SDK kapalı",12,MUTED,false);
         text(page,"Uyarı: Test rızası gelecekteki gerçek ağ paylaşımı için geçerli değildir. Gerçek SDK devreye alınmadan önce yeniden ve ayrı açık onay gerekir.",12,ORANGE,false);
     }
