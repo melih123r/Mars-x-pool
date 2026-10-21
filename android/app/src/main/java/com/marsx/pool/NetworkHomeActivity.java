@@ -35,6 +35,7 @@ public final class NetworkHomeActivity extends Activity {
     private Button monitorButton;
     private TextView historyStatus;
     private long sessionBytes;
+    private long totalSessionBytes;
     private long monitorStart;
     private long startRx=-1, startTx=-1;
     private final Handler monitorHandler=new Handler(Looper.getMainLooper());
@@ -58,6 +59,7 @@ public final class NetworkHomeActivity extends Activity {
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         prefs=getSharedPreferences("network_consent_v1",MODE_PRIVATE);
+        totalSessionBytes=prefs.getLong("total_session_bytes",0);
         ScrollView scroll=new ScrollView(this);
         scroll.setFillViewport(true);
         scroll.setBackgroundColor(BG);
@@ -183,7 +185,8 @@ public final class NetworkHomeActivity extends Activity {
             long tx=TrafficStats.getUidTxBytes(android.os.Process.myUid());
             if(rx>=0 && tx>=0 && startRx>=0 && startTx>=0)sessionBytes=Math.max(0,rx-startRx)+Math.max(0,tx-startTx);
             long seconds=Math.max(0,(SystemClock.elapsedRealtime()-monitorStart)/1000);
-            prefs.edit().putLong("last_session_seconds",seconds).putLong("last_session_bytes",sessionBytes).apply();
+            totalSessionBytes+=sessionBytes;
+            prefs.edit().putLong("last_session_seconds",seconds).putLong("last_session_bytes",sessionBytes).putLong("total_session_bytes",totalSessionBytes).apply();
             updateHistory();
         }
         monitorHandler.removeCallbacks(monitorTick);
@@ -194,7 +197,7 @@ public final class NetworkHomeActivity extends Activity {
         if(historyStatus!=null){
             long seconds=prefs.getLong("last_session_seconds",0);
             long bytes=prefs.getLong("last_session_bytes",0);
-            historyStatus.setText("Son izleme oturumu: "+seconds+" sn • Uygulama verisi: "+String.format(java.util.Locale.US,"%.3f MB",bytes/1048576.0)+"\nBu ölçüm gelir veya paylaşılan bant genişliği değildir.");
+            historyStatus.setText("Son izleme oturumu: "+seconds+" sn • Uygulama verisi: "+String.format(java.util.Locale.US,"%.3f MB",bytes/1048576.0)+"\nToplam kayıtlı uygulama trafiği: "+String.format(java.util.Locale.US,"%.3f MB",totalSessionBytes/1048576.0)+"\nBu ölçüm gelir veya paylaşılan bant genişliği değildir.");
         }
     }
     @Override protected void onStop(){
