@@ -6,11 +6,11 @@ def open_demo_db():
     db = sqlite3.connect(":memory:")
     db.execute("PRAGMA foreign_keys=ON")
     db.executescript("""
-    CREATE TABLE receipts (provider TEXT NOT NULL, receipt_id TEXT NOT NULL,
-      user_id TEXT NOT NULL, amount_cents INTEGER NOT NULL CHECK(typeof(amount_cents)='integer' AND amount_cents>0),
+    CREATE TABLE receipts (provider TEXT NOT NULL CHECK(length(trim(provider))>0), receipt_id TEXT NOT NULL CHECK(length(trim(receipt_id))>0),
+      user_id TEXT NOT NULL CHECK(length(trim(user_id))>0), amount_cents INTEGER NOT NULL CHECK(typeof(amount_cents)='integer' AND amount_cents>0),
       PRIMARY KEY(provider, receipt_id));
-    CREATE TABLE withdrawals (withdrawal_id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL, gross_cents INTEGER NOT NULL CHECK(typeof(gross_cents)='integer' AND gross_cents>=1000),
+    CREATE TABLE withdrawals (withdrawal_id TEXT PRIMARY KEY CHECK(length(trim(withdrawal_id))>0),
+      user_id TEXT NOT NULL CHECK(length(trim(user_id))>0), gross_cents INTEGER NOT NULL CHECK(typeof(gross_cents)='integer' AND gross_cents>=1000),
       state TEXT NOT NULL CHECK(state IN ('reserved','cancelled','paid')));
     """)
     db.executescript("""
@@ -86,6 +86,10 @@ def demo():
         assert db.execute("UPDATE withdrawals SET state='cancelled' WHERE withdrawal_id='w1' AND user_id='a' AND state='reserved'").rowcount == 0
     for sql, params in (
         ("INSERT INTO receipts VALUES (?,?,?,?)", ("test-provider", "bad", "a", -1)),
+        ("INSERT INTO receipts VALUES (?,?,?,?)", (" ", "blank-provider", "a", 100)),
+        ("INSERT INTO receipts VALUES (?,?,?,?)", ("test-provider", " ", "a", 100)),
+        ("INSERT INTO withdrawals VALUES (?,?,?,?)", (" ", "a", 1000, "reserved")),
+        ("INSERT INTO withdrawals VALUES (?,?,?,?)", ("blank-owner", " ", 1000, "reserved")),
         ("INSERT INTO receipts VALUES (?,?,?,?)", ("test-provider", "bad-text", "a", "not-money")),
         ("INSERT INTO withdrawals VALUES (?,?,?,?)", ("bad-text", "a", "not-money", "reserved")),
         ("INSERT INTO withdrawals VALUES (?,?,?,?)", ("bad", "a", 999, "reserved")),
