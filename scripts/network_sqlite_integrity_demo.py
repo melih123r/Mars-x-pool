@@ -15,10 +15,16 @@ def open_demo_db():
     """)
     db.executescript("""
     CREATE TRIGGER prevent_terminal_withdrawal_mutation
-    BEFORE UPDATE OF state ON withdrawals
+    BEFORE UPDATE ON withdrawals
     WHEN OLD.state IN ('paid', 'cancelled')
     BEGIN
       SELECT RAISE(ABORT, 'terminal withdrawal state is immutable');
+    END;
+    CREATE TRIGGER prevent_terminal_withdrawal_delete
+    BEFORE DELETE ON withdrawals
+    WHEN OLD.state IN ('paid', 'cancelled')
+    BEGIN
+      SELECT RAISE(ABORT, 'terminal withdrawal cannot be deleted');
     END;
     """)
     return db
@@ -77,6 +83,20 @@ def demo():
             raise AssertionError("terminal state rewrite accepted")
         except sqlite3.IntegrityError:
             pass
+    for wid in ("w1", "w2"):
+        try:
+            with db:
+                db.execute("DELETE FROM withdrawals WHERE withdrawal_id=?", (wid,))
+            raise AssertionError("terminal record deleted")
+        except sqlite3.IntegrityError:
+            pass
+    try:
+        with db:
+            db.execute("UPDATE withdrawals SET gross_cents=2000 WHERE withdrawal_id='w2'")
+        raise AssertionError("terminal amount edited")
+    except sqlite3.IntegrityError:
+        pass
+    assert db.execute("SELECT COUNT(*) FROM withdrawals").fetchone()[0] == 2
     print("Offline SQLite settlement constraints: PASS")
 
 
