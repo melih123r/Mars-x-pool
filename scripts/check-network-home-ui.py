@@ -24,6 +24,11 @@ required = [
     "REKLAM ALANI / TEST",
     "Reklam isteği: 0",
     "Reklam geliri: €0,00",
+    "MARS-X %70 / kullanıcı %30",
+    "Ek ücret %0",
+    "Puan sistemi yok",
+    "Kullanıcı reklam bakiyesi: €0,00",
+    "bakiyeye para yazılmaz",
     "Network paylaşım onayı reklam kişiselleştirme onayı değildir",
     "Açık rıza • yalnızca TEST",
     "IP adresi",
@@ -46,5 +51,10 @@ if source.count("setEnabled(false)") < 2:
 for forbidden in ("MobileAds.initialize(", "loadAd(", "AdRequest.Builder(", "startForegroundService(", "sendTransaction(", "withdrawUsdc(", "Proxy.start("):
     if forbidden in source:
         raise SystemExit("Unsafe live action in Network test UI: " + forbidden)
+
+contract = Path("docs/network-rewarded-ads-70-30.md").read_text(encoding="utf-8")
+for marker in ("70% MARS-X / 30% user", "0%", "floor(net_cents * 30 / 100)", "written partner approval"):
+    if marker not in contract:
+        raise SystemExit("Missing rewarded-ad settlement gate: " + marker)
 
 print("Network UI contract: PASS")
