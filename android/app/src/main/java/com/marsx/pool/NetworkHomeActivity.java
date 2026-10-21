@@ -8,6 +8,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.widget.Button;
+import android.widget.EditText;
+import android.text.InputType;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -64,26 +66,50 @@ public final class NetworkHomeActivity extends Activity {
         text(earnings,"Bekleyen fiat: €0,00\nKesinleşmiş fiat: €0,00\nÇekilebilir fiat: €0,00",16,WHITE,true);
         text(earnings,"Partner makbuzu olmadan bakiye oluşturulmaz.",12,MUTED,false);
 
-        LinearLayout wallet=card("3  •  NONCUSTODIAL USDC CÜZDANI");
+        Button walletAddress=button(earnings,"Cüzdan adresi ekle");
+        walletAddress.setOnClickListener(v -> {
+            EditText input=new EditText(this);
+            input.setSingleLine(true);
+            input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+            input.setHint("USDC alıcı adresi (Solana / Base / Polygon)");
+            input.setText(prefs.getString("usdc_address",""));
+            new AlertDialog.Builder(this)
+                .setTitle("USDC cüzdan adresi")
+                .setMessage("Yalnızca herkese açık alıcı adresini girin. Özel anahtar veya kurtarma kelimelerini asla girmeyin. Ağ ve adres uyumluluğu doğrulanmadan transfer yapılmaz.")
+                .setView(input)
+                .setNegativeButton("Vazgeç",null)
+                .setNeutralButton("Adresi sil",(d,w)->{
+                    prefs.edit().remove("usdc_address").apply();
+                    walletAddress.setText("Cüzdan adresi ekle");
+                })
+                .setPositiveButton("Kaydet",(d,w)->{
+                    String address=input.getText().toString().trim();
+                    if(address.length()<25 || address.length()>100 || !address.matches("[A-Za-z0-9]+")) {
+                        android.widget.Toast.makeText(this,"Geçersiz adres biçimi. Kaydedilmedi.",android.widget.Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    prefs.edit().putString("usdc_address",address).apply();
+                    walletAddress.setText("Cüzdan adresi • "+address.substring(0,6)+"…"+address.substring(address.length()-4));
+                }).show();
+        });
+        String savedAddress=prefs.getString("usdc_address","");
+        if(!savedAddress.isEmpty())walletAddress.setText("Cüzdan adresi • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
+
+        /* Wallet and withdrawal operations remain disabled until partner approval.
+           Address entry is a local display preference only; no transfer occurs. */
+        /* LinearLayout wallet=card("3  •  NONCUSTODIAL USDC CÜZDANI");
         text(wallet,"Kayıtlı adres yok • Özel anahtar uygulamada tutulmaz",13,MUTED,false);
         text(wallet,"Solana: PARTNER BEKLENİYOR\nBase: PARTNER BEKLENİYOR\nPolygon: PARTNER BEKLENİYOR",13,MUTED,false);
         text(wallet,"Net teklif: Kullanılamıyor • ücret/kur teklifi alınmadı",13,MUTED,false);
         text(wallet,"Çekim komisyonu: %5 • Minimum çekim: €10,00 • Örnek €100,00 → fee €5,00 → net €95,00 (harici ağ masrafı hariç).",12,ORANGE,false);
         Button withdraw=button(wallet,"Para çek • TEST / DEVRE DIŞI");
-        withdraw.setEnabled(false);
+        withdraw.setEnabled(false); */
 
-        LinearLayout history=card("4  •  ÇEKİM GEÇMİŞİ");
+        LinearLayout history=card("3  •  ÇEKİM GEÇMİŞİ");
         text(history,"Henüz çekim talebi yok. Canlı transfer yapılmadı.",13,MUTED,false);
 
-        LinearLayout settings=card("5  •  AYARLAR");
+        LinearLayout settings=card("4  •  AYARLAR");
         text(settings,"Yalnız Wi-Fi: AÇIK\nPil koruması: AÇIK\nDüşük pil / ısınma durdurma: AÇIK\nİzin iptalinde çalışma: KAPALI",13,MUTED,false);
-
-        LinearLayout advertising=card("6  •  REKLAM ALANI / TEST");
-        text(advertising,"Banner reklam konumu hazır • Gerçek reklam yüklenmiyor",14,WHITE,true);
-        text(advertising,"Reklam geliri: €0,00\nReklam ağı: BAĞLI DEĞİL\nReklam isteği: 0\nÖdüllü video: KAPALI",13,MUTED,false);
-        text(advertising,"AdMob kimliği ve EEA gizlilik/onay akışı doğrulanmadan reklam SDK'sı başlatılmaz. Network paylaşım onayı reklam kişiselleştirme onayı değildir.",12,ORANGE,false);
-        text(advertising,"Ödüllü video gelir paylaşımı: MARS-X %70 / kullanıcı %30 • Ek ücret %0 • Puan sistemi yok.",13,WHITE,true);
-        text(advertising,"Kullanıcı reklam bakiyesi: €0,00 • Henüz doğrulanmış gelir yok. Uygun nakit ödül partneri ve sunucu doğrulaması olmadan bakiyeye para yazılmaz.",12,MUTED,false);
 
         text(page,"TEST SÜRÜMÜ • Ödeme, proxy, kripto transferi ve gerçek Network SDK kapalı",12,MUTED,false);
         text(page,"Uyarı: Test rızası gelecekteki gerçek ağ paylaşımı için geçerli değildir. Gerçek SDK devreye alınmadan önce yeniden ve ayrı açık onay gerekir.",12,ORANGE,false);
