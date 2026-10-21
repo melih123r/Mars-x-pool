@@ -55,6 +55,12 @@ def demo():
             pass
     assert db.execute("SELECT COUNT(*) FROM receipts").fetchone()[0] == 1
     assert db.execute("SELECT COUNT(*) FROM withdrawals").fetchone()[0] == 1
+    # A paid withdrawal cannot transition back into a reserved or cancelled state.
+    with db:
+        db.execute("INSERT INTO withdrawals VALUES (?,?,?,?)", ("w2", "a", 1000, "reserved"))
+        assert db.execute("UPDATE withdrawals SET state='paid' WHERE withdrawal_id='w2' AND user_id='a' AND state='reserved'").rowcount == 1
+        assert db.execute("UPDATE withdrawals SET state='cancelled' WHERE withdrawal_id='w2' AND user_id='a' AND state='reserved'").rowcount == 0
+    assert db.execute("SELECT state FROM withdrawals WHERE withdrawal_id='w2'").fetchone()[0] == "paid"
     print("Offline SQLite settlement constraints: PASS")
 
 
