@@ -128,7 +128,6 @@ public final class NetworkHomeActivity extends Activity {
                     }).show();
             }
         });
-        prefs.edit().putBoolean("monitor_active",false).apply();
         monitorStatus=text(network,"Bağlantı izleme kapalı • Gerçek paylaşım: KAPALI",13,MUTED,false);
         refreshConsent();
 
@@ -195,16 +194,6 @@ public final class NetworkHomeActivity extends Activity {
         monitorHandler.post(monitorTick);
     }
     private void stopMonitor(){
-        if(monitorStart>0 && false){
-            long rx=TrafficStats.getUidRxBytes(android.os.Process.myUid());
-            long tx=TrafficStats.getUidTxBytes(android.os.Process.myUid());
-            if(rx>=0 && tx>=0 && startRx>=0 && startTx>=0)sessionBytes=Math.max(0,rx-startRx)+Math.max(0,tx-startTx);
-            long seconds=Math.max(0,(SystemClock.elapsedRealtime()-monitorStart)/1000);
-            totalSessionBytes+=sessionBytes;
-            totalSessionSeconds+=seconds;
-            prefs.edit().putLong("last_session_seconds",seconds).putLong("last_session_bytes",sessionBytes).putLong("total_session_bytes",totalSessionBytes).putLong("total_session_seconds",totalSessionSeconds).apply();
-            updateHistory();
-        }
         monitorHandler.removeCallbacks(monitorTick);
         monitorStart=0;
         if(monitorStatus!=null)monitorStatus.setText("Bağlantı izleme kapalı • Gerçek paylaşım: KAPALI");
