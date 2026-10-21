@@ -21,6 +21,10 @@ required = [
     "AYARLAR",
     "1.000 kullanıcı pilotu",
     "10.000+ ölçek hedefi",
+    "REKLAM ALANI / TEST",
+    "Reklam isteği: 0",
+    "Reklam geliri: €0,00",
+    "Network paylaşım onayı reklam kişiselleştirme onayı değildir",
     "Açık rıza • yalnızca TEST",
     "IP adresi",
     "veri kotanızı",
@@ -39,7 +43,7 @@ if source.count('putBoolean("consented",true)') != 1:
     raise SystemExit("Consent must be recorded in exactly one confirmed path")
 if source.count("setEnabled(false)") < 2:
     raise SystemExit("Network and withdrawal controls must fail closed")
-for forbidden in ("startForegroundService(", "sendTransaction(", "withdrawUsdc(", "Proxy.start("):
+for forbidden in ("MobileAds.initialize(", "loadAd(", "AdRequest.Builder(", "startForegroundService(", "sendTransaction(", "withdrawUsdc(", "Proxy.start("):
     if forbidden in source:
         raise SystemExit("Unsafe live action in Network test UI: " + forbidden)
 
