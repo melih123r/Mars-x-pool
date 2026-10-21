@@ -38,6 +38,12 @@ def open_demo_db():
     BEGIN
       SELECT RAISE(ABORT, 'withdrawal identity and amount are immutable');
     END;
+    CREATE TRIGGER prevent_invalid_withdrawal_transition
+    BEFORE UPDATE OF state ON withdrawals
+    WHEN OLD.state='reserved' AND NEW.state NOT IN ('paid','cancelled')
+    BEGIN
+      SELECT RAISE(ABORT, 'invalid reserved withdrawal transition');
+    END;
     CREATE TRIGGER prevent_terminal_withdrawal_mutation
     BEFORE UPDATE ON withdrawals
     WHEN OLD.state IN ('paid', 'cancelled')
@@ -107,6 +113,12 @@ def demo():
             raise AssertionError("pending withdrawal identity was mutated")
         except sqlite3.IntegrityError:
             pass
+    try:
+        with db:
+            db.execute("UPDATE withdrawals SET state='reserved' WHERE withdrawal_id='pending'")
+        raise AssertionError("redundant reserved transition accepted")
+    except sqlite3.IntegrityError:
+        pass
     try:
         with db:
             db.execute("DELETE FROM withdrawals WHERE withdrawal_id='pending'")
