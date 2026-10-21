@@ -14,6 +14,16 @@ def open_demo_db():
       state TEXT NOT NULL CHECK(state IN ('reserved','cancelled','paid')));
     """)
     db.executescript("""
+    CREATE TRIGGER prevent_receipt_update
+    BEFORE UPDATE ON receipts
+    BEGIN
+      SELECT RAISE(ABORT, 'verified receipt is immutable');
+    END;
+    CREATE TRIGGER prevent_receipt_delete
+    BEFORE DELETE ON receipts
+    BEGIN
+      SELECT RAISE(ABORT, 'verified receipt cannot be deleted');
+    END;
     CREATE TRIGGER prevent_terminal_withdrawal_mutation
     BEFORE UPDATE ON withdrawals
     WHEN OLD.state IN ('paid', 'cancelled')
@@ -96,6 +106,15 @@ def demo():
         raise AssertionError("terminal amount edited")
     except sqlite3.IntegrityError:
         pass
+    for sql in ("UPDATE receipts SET amount_cents=2000 WHERE receipt_id='r1'",
+                "DELETE FROM receipts WHERE receipt_id='r1'"):
+        try:
+            with db:
+                db.execute(sql)
+            raise AssertionError("immutable receipt was modified")
+        except sqlite3.IntegrityError:
+            pass
+    assert db.execute("SELECT amount_cents FROM receipts WHERE receipt_id='r1'").fetchone()[0] == 1500
     assert db.execute("SELECT COUNT(*) FROM withdrawals").fetchone()[0] == 2
     print("Offline SQLite settlement constraints: PASS")
 
