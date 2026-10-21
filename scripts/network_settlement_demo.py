@@ -13,6 +13,7 @@ class DemoLedger:
     reserved_cents: Dict[str, int] = field(default_factory=dict)
     receipt_ids: Set[str] = field(default_factory=set)
     withdrawal_ids: Set[str] = field(default_factory=set)
+    reservations: Dict[str, tuple] = field(default_factory=dict)
 
     def credit_settled(self, user_id: str, receipt_id: str, amount_cents: int,
                        *, provider_verified: bool, partner_approved: bool) -> None:
@@ -39,7 +40,16 @@ class DemoLedger:
         if gross_cents > self.available(user_id):
             raise ValueError("insufficient available balance")
         self.withdrawal_ids.add(withdrawal_id)
+        self.reservations[withdrawal_id] = (user_id, gross_cents)
         self.reserved_cents[user_id] = self.reserved_cents.get(user_id, 0) + gross_cents
+
+
+    def cancel_reservation(self, user_id: str, withdrawal_id: str) -> None:
+        """Release a failed demo payout; preserve ID history against replay."""
+        if self.reservations.get(withdrawal_id, (None,))[0] != user_id:
+            raise ValueError("reservation not found or owner mismatch")
+        owner, gross_cents = self.reservations.pop(withdrawal_id)
+        self.reserved_cents[owner] -= gross_cents
 
 
 if __name__ == "__main__":
@@ -91,4 +101,21 @@ if __name__ == "__main__":
             pass
     assert ledger.reserved_cents["a"] == 1000
     assert ledger.available("a") == 500 and ledger.available("b") == 0
+    try:
+        ledger.cancel_reservation("b", "withdraw-1")
+        raise AssertionError("cross-user cancellation accepted")
+    except ValueError:
+        pass
+    ledger.cancel_reservation("a", "withdraw-1")
+    assert ledger.available("a") == 1500
+    try:
+        ledger.cancel_reservation("a", "withdraw-1")
+        raise AssertionError("duplicate cancellation accepted")
+    except ValueError:
+        pass
+    try:
+        ledger.reserve_withdrawal("a", "withdraw-1", 1000, payee_verified=True)
+        raise AssertionError("withdrawal replay accepted")
+    except ValueError:
+        pass
     print("Offline Network settlement simulation: PASS")
