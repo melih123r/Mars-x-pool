@@ -13,6 +13,14 @@ def open_demo_db():
       user_id TEXT NOT NULL, gross_cents INTEGER NOT NULL CHECK(typeof(gross_cents)='integer' AND gross_cents>=1000),
       state TEXT NOT NULL CHECK(state IN ('reserved','cancelled','paid')));
     """)
+    db.executescript("""
+    CREATE TRIGGER prevent_terminal_withdrawal_mutation
+    BEFORE UPDATE OF state ON withdrawals
+    WHEN OLD.state IN ('paid', 'cancelled')
+    BEGIN
+      SELECT RAISE(ABORT, 'terminal withdrawal state is immutable');
+    END;
+    """)
     return db
 
 
@@ -61,6 +69,14 @@ def demo():
         assert db.execute("UPDATE withdrawals SET state='paid' WHERE withdrawal_id='w2' AND user_id='a' AND state='reserved'").rowcount == 1
         assert db.execute("UPDATE withdrawals SET state='cancelled' WHERE withdrawal_id='w2' AND user_id='a' AND state='reserved'").rowcount == 0
     assert db.execute("SELECT state FROM withdrawals WHERE withdrawal_id='w2'").fetchone()[0] == "paid"
+    # Database itself blocks an accidental unguarded terminal-state rewrite.
+    for wid, new_state in (("w1", "paid"), ("w2", "cancelled")):
+        try:
+            with db:
+                db.execute("UPDATE withdrawals SET state=? WHERE withdrawal_id=?", (new_state, wid))
+            raise AssertionError("terminal state rewrite accepted")
+        except sqlite3.IntegrityError:
+            pass
     print("Offline SQLite settlement constraints: PASS")
 
 
