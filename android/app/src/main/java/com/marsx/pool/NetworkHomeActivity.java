@@ -32,6 +32,7 @@ public final class NetworkHomeActivity extends Activity {
     private TextView consentStatus;
     private Button consentButton;
     private TextView monitorStatus;
+    private Button monitorButton;
     private long monitorStart;
     private long startRx=-1, startTx=-1;
     private final Handler monitorHandler=new Handler(Looper.getMainLooper());
@@ -73,6 +74,7 @@ public final class NetworkHomeActivity extends Activity {
             if (prefs.getBoolean("consented",false)) {
                 prefs.edit().putBoolean("consented",false).putBoolean("monitor_active",false).apply();
                 stopMonitor();
+                if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
                 refreshConsent();
             } else {
                 new AlertDialog.Builder(this)
@@ -87,6 +89,7 @@ public final class NetworkHomeActivity extends Activity {
             }
         });
         Button start=button(network,"Başlat • bağlantıyı izle");
+        monitorButton=start;
         start.setOnClickListener(v -> {
             boolean active=prefs.getBoolean("monitor_active",false);
             if (active) {
@@ -186,6 +189,7 @@ public final class NetworkHomeActivity extends Activity {
     @Override protected void onStop(){
         prefs.edit().putBoolean("monitor_active",false).apply();
         stopMonitor();
+        if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
         super.onStop();
     }
     @Override protected void onDestroy(){
