@@ -17,7 +17,8 @@ const migrations = [
   '../../db/005_payout_consent_gate.sql',
   '../../db/006_payout_reservation_consistency.sql',
   '../../db/007_payout_terminal_state.sql',
-  '../../db/008_payout_transition_audit.sql'
+  '../../db/008_payout_transition_audit.sql',
+  '../../db/009_payout_audit_lookup_index.sql'
 ];
 
 async function applyMigrations(pool) {
@@ -149,6 +150,54 @@ test('submission and outcomes are audited, serialized and idempotent', {
       outcome: 'failed'
     });
     assert.equal(failedRetry.duplicate, true);
+
+    await reservePayout(pool, reservation('outcome-race', 'outcome-race-reserve'));
+    await recordPayoutSubmission(pool, {
+      requestId: 'outcome-race',
+      idempotencyKey: 'outcome-race-submit',
+      providerReference: 'approved-partner-race-reference'
+    });
+    const terminalRace = await Promise.allSettled([
+      recordPayoutOutcome(pool, {
+        requestId: 'outcome-race',
+        idempotencyKey: 'outcome-race-settle',
+        outcome: 'settled'
+      }),
+      recordPayoutOutcome(pool, {
+        requestId: 'outcome-race',
+        idempotencyKey: 'outcome-race-fail',
+        outcome: 'failed'
+      })
+    ]);
+    assert.equal(terminalRace.filter(result => result.status === 'fulfilled').length, 1);
+    assert.equal(terminalRace.filter(result => result.status === 'rejected').length, 1);
+    assert.match(
+      terminalRace.find(result => result.status === 'rejected').reason.message,
+      /conflicting payout outcome retry/
+    );
+
+    const raceState = await pool.query(`
+      SELECT status FROM network_payout_requests
+      WHERE request_id='outcome-race'
+    `);
+    assert.ok(['settled', 'failed'].includes(raceState.rows[0].status));
+    const raceAudit = await pool.query(`
+      SELECT event_kind,count(*)::int AS events
+      FROM network_payout_audit
+      WHERE request_id='outcome-race'
+        AND event_kind IN ('settled','failed')
+      GROUP BY event_kind
+    `);
+    assert.equal(raceAudit.rowCount, 1);
+    assert.equal(raceAudit.rows[0].events, 1);
+    assert.equal(raceAudit.rows[0].event_kind, raceState.rows[0].status);
+
+    const auditIndex = await pool.query(`
+      SELECT indexname FROM pg_indexes
+      WHERE schemaname=current_schema()
+        AND indexname='network_payout_audit_request_kind'
+    `);
+    assert.equal(auditIndex.rowCount, 1);
 
     const direct = await pool.connect();
     try {
