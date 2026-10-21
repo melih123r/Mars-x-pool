@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.os.BatteryManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.TrafficStats;
@@ -52,6 +53,15 @@ public final class NetworkHomeActivity extends Activity {
                     stopMonitor();
                     if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
                     android.widget.Toast.makeText(NetworkHomeActivity.this,"Wi-Fi bağlantısı kesildi; izleme durduruldu.",android.widget.Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                BatteryManager battery=(BatteryManager)getSystemService(Context.BATTERY_SERVICE);
+                int batteryPct=battery==null?-1:battery.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+                if(batteryPct>=0 && batteryPct<15){
+                    prefs.edit().putBoolean("monitor_active",false).apply();
+                    stopMonitor();
+                    if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
+                    android.widget.Toast.makeText(NetworkHomeActivity.this,"Pil %15 altında; izleme durduruldu.",android.widget.Toast.LENGTH_SHORT).show();
                     return;
                 }
                 long seconds=(SystemClock.elapsedRealtime()-monitorStart)/1000;
@@ -185,7 +195,7 @@ public final class NetworkHomeActivity extends Activity {
         updateHistory();
 
         LinearLayout settings=card("4  •  AYARLAR");
-        text(settings,"Yerel test: yalnızca uygulama trafiği izlenir.\nWi-Fi zorunluluğu: AÇIK (başlatırken kontrol edilir)\nPil / ısınma otomatik koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI",13,MUTED,false);
+        text(settings,"Yerel test: yalnızca uygulama trafiği izlenir.\nWi-Fi zorunluluğu: AÇIK (başlatırken kontrol edilir)\nDüşük pil (<%15) koruması: AÇIK (izleme sırasında)\nIsınma koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI",13,MUTED,false);
 
         // Dedicated advertising slot. Remains hidden until an approved ad SDK
         // loads an actual ad view into it; do not show internal ad revenue or fill metrics.
