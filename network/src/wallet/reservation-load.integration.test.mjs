@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import pg from 'pg';
-import { reservePayout } from './payout-reservation.mjs';
+import {
+  releasePayoutReservation,
+  reservePayout
+} from './payout-reservation.mjs';
 
 const databaseUrl = process.env.NETWORK_LEDGER_DATABASE_URL;
 const migrations = [
@@ -15,9 +18,9 @@ const migrations = [
   '../../db/006_payout_reservation_consistency.sql'
 ];
 
-test('1,000 consented users reserve fiat concurrently and retry idempotently', {
+test('1,000 consented users reserve and release fiat idempotently under load', {
   skip: !databaseUrl,
-  timeout: 180_000
+  timeout: 240_000
 }, async () => {
   const admin = new pg.Pool({ connectionString: databaseUrl });
   const schema = 'network_reservation_load_' + randomUUID().replaceAll('-', '');
@@ -86,7 +89,7 @@ test('1,000 consented users reserve fiat concurrently and retry idempotently', {
       reservations: 1000
     });
 
-    const balances = await pool.query(`
+    const reservedBalances = await pool.query(`
       SELECT user_id,
              sum(amount_minor) FILTER
                (WHERE entry_type='settled_credit')::bigint AS settled_minor,
@@ -96,8 +99,8 @@ test('1,000 consented users reserve fiat concurrently and retry idempotently', {
       FROM network_ledger_entries
       GROUP BY user_id
     `);
-    assert.equal(balances.rowCount, 1000);
-    assert.ok(balances.rows.every(row =>
+    assert.equal(reservedBalances.rowCount, 1000);
+    assert.ok(reservedBalances.rows.every(row =>
       row.settled_minor === '100' &&
       row.reservation_minor === '-40' &&
       row.available_minor === '60'
@@ -115,6 +118,69 @@ test('1,000 consented users reserve fiat concurrently and retry idempotently', {
     assert.match(
       JSON.stringify(explain.rows[0]['QUERY PLAN']),
       /network_ledger_user_currency_time/
+    );
+
+    const releaseAttempts = await Promise.all(inputs.flatMap((input, index) => {
+      const release = {
+        requestId: input.requestId,
+        idempotencyKey: 'load-release-idem-' + (index + 1)
+      };
+      return [
+        releasePayoutReservation(pool, release),
+        releasePayoutReservation(pool, release)
+      ];
+    }));
+    assert.equal(releaseAttempts.length, 2000);
+    assert.equal(
+      releaseAttempts.filter(result => result.duplicate === false).length,
+      1000
+    );
+    assert.equal(
+      releaseAttempts.filter(result => result.duplicate === true).length,
+      1000
+    );
+
+    const released = await pool.query(`
+      SELECT
+        (SELECT count(*)::int FROM network_payout_requests
+          WHERE status='cancelled') AS requests,
+        (SELECT count(*)::int FROM network_payout_audit
+          WHERE event_kind='released') AS audits,
+        (SELECT count(*)::int FROM network_ledger_entries
+          WHERE entry_type='payout_release') AS releases
+    `);
+    assert.deepEqual(released.rows[0], {
+      requests: 1000,
+      audits: 1000,
+      releases: 1000
+    });
+
+    const restoredBalances = await pool.query(`
+      SELECT user_id,
+             sum(amount_minor) FILTER
+               (WHERE entry_type='settled_credit')::bigint AS settled_minor,
+             sum(amount_minor) FILTER
+               (WHERE entry_type='payout_reservation')::bigint AS reservation_minor,
+             sum(amount_minor) FILTER
+               (WHERE entry_type='payout_release')::bigint AS release_minor,
+             sum(amount_minor)::bigint AS available_minor
+      FROM network_ledger_entries
+      GROUP BY user_id
+    `);
+    assert.equal(restoredBalances.rowCount, 1000);
+    assert.ok(restoredBalances.rows.every(row =>
+      row.settled_minor === '100' &&
+      row.reservation_minor === '-40' &&
+      row.release_minor === '40' &&
+      row.available_minor === '100'
+    ));
+
+    await assert.rejects(
+      releasePayoutReservation(pool, {
+        requestId: 'load-request-1',
+        idempotencyKey: 'conflicting-release-retry'
+      }),
+      /conflicting payout release retry/
     );
   } finally {
     await pool.end();
