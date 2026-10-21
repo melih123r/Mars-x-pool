@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import pg from 'pg';
+import { recordConsentDecision } from './consent.mjs';
 import {
   releasePayoutReservation,
   reservePayout
@@ -120,17 +121,36 @@ test('1,000 consented users reserve and release fiat idempotently under load', {
       /network_ledger_user_currency_time/
     );
 
-    const releaseAttempts = await Promise.all(inputs.flatMap((input, index) => {
+    const revokedAt = new Date(Date.now() + 60_000).toISOString();
+    const concurrentResults = await Promise.all(inputs.flatMap((input, index) => {
+      const userNo = index + 1;
       const release = {
         requestId: input.requestId,
-        idempotencyKey: 'load-release-idem-' + (index + 1)
+        idempotencyKey: 'load-release-idem-' + userNo
+      };
+      const revoke = {
+        eventId: 'load-revoke-' + userNo,
+        idempotencyKey: 'load-revoke-idem-' + userNo,
+        userId: input.userId,
+        consentVersion: 'network-v1',
+        decision: 'revoked',
+        occurredAt: revokedAt
       };
       return [
         releasePayoutReservation(pool, release),
-        releasePayoutReservation(pool, release)
+        releasePayoutReservation(pool, release),
+        recordConsentDecision(pool, revoke)
       ];
     }));
+    const releaseAttempts = concurrentResults.filter(result =>
+      Object.hasOwn(result, 'requestId')
+    );
+    const revocations = concurrentResults.filter(result =>
+      result.decision === 'revoked'
+    );
     assert.equal(releaseAttempts.length, 2000);
+    assert.equal(revocations.length, 1000);
+    assert.ok(revocations.every(result => result.duplicate === false));
     assert.equal(
       releaseAttempts.filter(result => result.duplicate === false).length,
       1000
@@ -147,12 +167,18 @@ test('1,000 consented users reserve and release fiat idempotently under load', {
         (SELECT count(*)::int FROM network_payout_audit
           WHERE event_kind='released') AS audits,
         (SELECT count(*)::int FROM network_ledger_entries
-          WHERE entry_type='payout_release') AS releases
+          WHERE entry_type='payout_release') AS releases,
+        (SELECT count(*)::int FROM network_accounts
+          WHERE revoked_at IS NOT NULL) AS revoked_accounts,
+        (SELECT count(*)::int FROM network_consent_events
+          WHERE decision='revoked') AS revocation_events
     `);
     assert.deepEqual(released.rows[0], {
       requests: 1000,
       audits: 1000,
-      releases: 1000
+      releases: 1000,
+      revoked_accounts: 1000,
+      revocation_events: 1000
     });
 
     const restoredBalances = await pool.query(`
