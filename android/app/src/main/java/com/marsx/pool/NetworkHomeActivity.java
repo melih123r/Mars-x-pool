@@ -103,7 +103,6 @@ public final class NetworkHomeActivity extends Activity {
             if (active) {
                 prefs.edit().putBoolean("monitor_active",false).apply();
                 start.setText("Başlat • bağlantıyı izle");
-                stopService(new Intent(this,NetworkMonitorService.class));
                 stopMonitor();
             } else {
                 if(!prefs.getBoolean("consented",false)){
