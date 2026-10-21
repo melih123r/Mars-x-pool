@@ -162,7 +162,7 @@ public final class NetworkHomeActivity extends Activity {
         updateHistory();
 
         LinearLayout settings=card("4  •  AYARLAR");
-        text(settings,"Yalnız Wi-Fi: AÇIK\nPil koruması: AÇIK\nDüşük pil / ısınma durdurma: AÇIK\nİzin iptalinde çalışma: KAPALI",13,MUTED,false);
+        text(settings,"Yerel test: yalnızca uygulama trafiği izlenir.\nWi-Fi zorunluluğu: YOK\nPil / ısınma otomatik koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI",13,MUTED,false);
 
         // Dedicated advertising slot. Remains hidden until an approved ad SDK
         // loads an actual ad view into it; do not show internal ad revenue or fill metrics.
