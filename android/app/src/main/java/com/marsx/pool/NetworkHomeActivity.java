@@ -107,6 +107,10 @@ public final class NetworkHomeActivity extends Activity {
                 stopService(new Intent(this,NetworkMonitorService.class));
                 stopMonitor();
             } else {
+                if(!prefs.getBoolean("consented",false)){
+                    android.widget.Toast.makeText(this,"Önce test bilgilendirmesini okuyup onaylayın.",android.widget.Toast.LENGTH_LONG).show();
+                    return;
+                }
                 new AlertDialog.Builder(this)
                     .setTitle("MARS-X Network")
                     .setMessage("Bağlantı durumunu izlemeyi başlat. Bu testte internetin başkalarıyla paylaşılmaz ve kazanç oluşmaz. İstediğin zaman durdurabilirsin.")
