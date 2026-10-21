@@ -79,7 +79,7 @@ public final class NetworkHomeActivity extends Activity {
 
         LinearLayout advertising=card("6  •  REKLAM ALANI / TEST");
         text(advertising,"Banner reklam konumu hazır • Gerçek reklam yüklenmiyor",14,WHITE,true);
-        text(advertising,"Reklam geliri: €0,00\\nReklam ağı: BAĞLI DEĞİL\\nReklam isteği: 0\\nÖdüllü video: KAPALI",13,MUTED,false);
+        text(advertising,"Reklam geliri: €0,00\nReklam ağı: BAĞLI DEĞİL\nReklam isteği: 0\nÖdüllü video: KAPALI",13,MUTED,false);
         text(advertising,"AdMob kimliği ve EEA gizlilik/onay akışı doğrulanmadan reklam SDK'sı başlatılmaz. Network paylaşım onayı reklam kişiselleştirme onayı değildir.",12,ORANGE,false);
 
         text(page,"TEST SÜRÜMÜ • Ödeme, proxy, kripto transferi ve gerçek Network SDK kapalı",12,MUTED,false);
