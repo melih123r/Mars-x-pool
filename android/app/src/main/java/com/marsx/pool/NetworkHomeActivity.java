@@ -71,7 +71,8 @@ public final class NetworkHomeActivity extends Activity {
         consentButton=button(network,"Açık rıza ver");
         consentButton.setOnClickListener(v->{
             if (prefs.getBoolean("consented",false)) {
-                prefs.edit().putBoolean("consented",false).apply();
+                prefs.edit().putBoolean("consented",false).putBoolean("monitor_active",false).apply();
+                stopMonitor();
                 refreshConsent();
             } else {
                 new AlertDialog.Builder(this)
@@ -181,6 +182,11 @@ public final class NetworkHomeActivity extends Activity {
         monitorHandler.removeCallbacks(monitorTick);
         monitorStart=0;
         if(monitorStatus!=null)monitorStatus.setText("Bağlantı izleme kapalı • Gerçek paylaşım: KAPALI");
+    }
+    @Override protected void onStop(){
+        prefs.edit().putBoolean("monitor_active",false).apply();
+        stopMonitor();
+        super.onStop();
     }
     @Override protected void onDestroy(){
         stopMonitor();
