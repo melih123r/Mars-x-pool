@@ -6,8 +6,10 @@ source = Path("android/app/src/main/java/com/marsx/pool/NetworkHomeActivity.java
 required = [
     "Açık rıza: VERİLMEDİ",
     "Rızayı iptal et",
-    "ÇEVRİMDIŞI TEST",
-    "Foreground service: KAPALI",
+    "Bağlantı izleme kapalı",
+    "Gerçek paylaşım: KAPALI",
+    "TrafficStats.getUidRxBytes",
+    "TrafficStats.getUidTxBytes",
     "Bekleyen fiat:",
     "Kesinleşmiş fiat:",
     "Çekilebilir fiat:",
@@ -41,8 +43,10 @@ if source.index('new AlertDialog.Builder(this)') > source.index('putBoolean("con
     raise SystemExit("Consent must follow disclosure dialog")
 if source.count('putBoolean("consented",true)') != 1:
     raise SystemExit("Consent must be recorded in exactly one confirmed path")
-if source.count("setEnabled(false)") < 1:
-    raise SystemExit("Network start control must fail closed")
+if "startMonitor();" not in source or "stopMonitor();" not in source:
+    raise SystemExit("Local monitoring must have explicit start and stop paths")
+if "onStop()" not in source:
+    raise SystemExit("Local monitoring must stop when activity is backgrounded")
 for forbidden in ("MobileAds.initialize(", "loadAd(", "AdRequest.Builder(", "startForegroundService(", "sendTransaction(", "withdrawUsdc(", "Proxy.start("):
     if forbidden in source:
         raise SystemExit("Unsafe live action in Network test UI: " + forbidden)
