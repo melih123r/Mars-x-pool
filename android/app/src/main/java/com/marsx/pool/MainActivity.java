@@ -141,10 +141,8 @@ public class MainActivity extends Activity {
         tabButton(tabs, "Network", view -> startActivity(new Intent(this, NetworkWebsiteActivity.class)));
         screen.addView(tabs);
         // Network demo: visible privacy controls; production ads remain disabled.
-        NetworkAdSlot networkAdSlot = new NetworkAdSlot(this);
-        screen.addView(networkAdSlot.view());
-        networkAdSlot.requestIfAllowed(this, false, NetworkAdPolicy.TEST_APP_ID,
-                NetworkAdPolicy.TEST_BANNER_UNIT_ID);
+        // Ads must only appear in the dedicated Network experience, not Pool/Finance tabs.
+        // Mount NetworkAdSlot inside the Network screen after production IDs and UMP review.
         setContentView(screen);
         showTab(0);
 
