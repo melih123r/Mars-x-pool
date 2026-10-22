@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">शुरू करें • कनेक्शन की निगरानी</string>
+    <string name="network_monitor_off">निगरानी बंद • वास्तविक साझाकरण: बंद</string>
+    <string name="network_demo_disclaimer">डेमो संस्करण • भुगतान, प्रॉक्सी, क्रिप्टो ट्रांसफर और वास्तविक Network SDK बंद हैं</string>
+</resources>
