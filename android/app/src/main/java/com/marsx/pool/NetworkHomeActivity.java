@@ -149,7 +149,9 @@ public final class NetworkHomeActivity extends Activity {
         text(earnings,"Bekleyen fiat: €0,00\nKesinleşmiş fiat: €0,00\nÇekilebilir fiat: €0,00",16,WHITE,true);
         text(earnings,"Partner makbuzu olmadan bakiye oluşturulmaz.",12,MUTED,false);
 
-        Button walletAddress=button(earnings,"Cüzdan adresi ekle");
+        // Public Polygon payout address prefilled for the demo; never a signing key.
+        final String defaultPolygonAddress="0x70A48cffBd1a1517E98b47d5f8Bb3A8b3A905c98";
+        Button walletAddress=button(earnings,"Polygon • "+defaultPolygonAddress.substring(0,6)+"…"+defaultPolygonAddress.substring(defaultPolygonAddress.length()-4));
         walletAddress.setOnClickListener(v -> {
             final String[] chains={"Solana","Base","Polygon"};
             new AlertDialog.Builder(this)
@@ -160,7 +162,7 @@ public final class NetworkHomeActivity extends Activity {
                     input.setSingleLine(true);
                     input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                     input.setHint(chain+" alıcı adresi");
-                    input.setText(prefs.getString("usdc_address",""));
+                    input.setText(prefs.getString("usdc_address",chain.equals("Polygon") ? defaultPolygonAddress : ""));
                     new AlertDialog.Builder(this)
                         .setTitle("USDC • "+chain)
                         .setMessage("Yalnızca herkese açık alıcı adresini girin. Özel anahtar veya kurtarma kelimesi girmeyin. Bu testte transfer yapılmaz.")
@@ -184,9 +186,9 @@ public final class NetworkHomeActivity extends Activity {
                         }).show();
                 }).show();
         });
-        String savedAddress=prefs.getString("usdc_address","");
+        String savedAddress=prefs.getString("usdc_address",defaultPolygonAddress);
         if(!savedAddress.isEmpty() && savedAddress.length()>=10)
-            walletAddress.setText(prefs.getString("usdc_chain","Ağ seçilmedi")+" • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
+            walletAddress.setText(prefs.getString("usdc_chain","Polygon")+" • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
 
         LinearLayout history=card("3  •  ÇEKİM GEÇMİŞİ");
         text(history,"Henüz çekim talebi yok. Canlı transfer yapılmadı.",13,MUTED,false);
