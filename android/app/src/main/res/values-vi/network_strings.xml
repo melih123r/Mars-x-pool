@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Bắt đầu • giám sát kết nối</string>
+    <string name="network_monitor_off">Đã tắt giám sát • Chia sẻ thực: TẮT</string>
+    <string name="network_demo_disclaimer">BẢN DEMO • Thanh toán, proxy, chuyển tiền mã hóa và SDK Network thực đều bị tắt</string>
+</resources>
