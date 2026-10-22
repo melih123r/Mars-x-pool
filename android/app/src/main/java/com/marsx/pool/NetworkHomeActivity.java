@@ -149,6 +149,15 @@ public final class NetworkHomeActivity extends Activity {
         text(earnings,"Bekleyen fiat: €0,00\nKesinleşmiş fiat: €0,00\nÇekilebilir fiat: €0,00",16,WHITE,true);
         text(earnings,"Partner makbuzu olmadan bakiye oluşturulmaz.",12,MUTED,false);
 
+        // Optional inline ad position after earnings. No SDK means no ad shown.
+        FrameLayout earningsAdSlot=new FrameLayout(this);
+        earningsAdSlot.setId(View.generateViewId());
+        earningsAdSlot.setContentDescription("Optional earnings ad placement");
+        earningsAdSlot.setVisibility(View.GONE);
+        LinearLayout.LayoutParams earningsAdParams=new LinearLayout.LayoutParams(-1,dp(60));
+        earningsAdParams.setMargins(0,dp(12),0,dp(8));
+        page.addView(earningsAdSlot,earningsAdParams);
+
         // Public Polygon payout address prefilled for the demo; never a signing key.
         final String defaultPolygonAddress="0x70A48cffBd1a1517E98b47d5f8Bb3A8b3A905c98";
         Button walletAddress=button(earnings,"Polygon • "+defaultPolygonAddress.substring(0,6)+"…"+defaultPolygonAddress.substring(defaultPolygonAddress.length()-4));
@@ -194,6 +203,15 @@ public final class NetworkHomeActivity extends Activity {
         text(history,"Henüz çekim talebi yok. Canlı transfer yapılmadı.",13,MUTED,false);
         historyStatus=text(history,"",13,MUTED,false);
         updateHistory();
+
+        // Optional inline placement after withdrawal history; never interrupts consent.
+        FrameLayout historyAdSlot=new FrameLayout(this);
+        historyAdSlot.setId(View.generateViewId());
+        historyAdSlot.setContentDescription("Optional withdrawal history ad placement");
+        historyAdSlot.setVisibility(View.GONE);
+        LinearLayout.LayoutParams historyAdParams=new LinearLayout.LayoutParams(-1,dp(60));
+        historyAdParams.setMargins(0,dp(12),0,dp(8));
+        page.addView(historyAdSlot,historyAdParams);
 
         LinearLayout settings=card("4  •  AYARLAR");
         text(settings,"Yerel test: yalnızca uygulama trafiği izlenir.\nBağlantı: Wi-Fi veya mobil veri (internet gereklidir)\nDüşük pil (<%15) koruması: AÇIK (izleme sırasında)\nIsınma koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI",13,MUTED,false);
