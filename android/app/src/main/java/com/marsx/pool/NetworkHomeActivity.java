@@ -11,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.TrafficStats;
 import android.content.Context;
+import java.util.Locale;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -78,6 +79,11 @@ public final class NetworkHomeActivity extends Activity {
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         prefs=getSharedPreferences("network_consent_v1",MODE_PRIVATE);
+        Locale savedLocale=Locale.forLanguageTag(prefs.getString("ui_language","tr"));
+        Locale.setDefault(savedLocale);
+        android.content.res.Configuration localeConfig=new android.content.res.Configuration(getResources().getConfiguration());
+        localeConfig.setLocale(savedLocale);
+        getResources().updateConfiguration(localeConfig,getResources().getDisplayMetrics());
         totalSessionBytes=prefs.getLong("total_session_bytes",0);
         totalSessionSeconds=prefs.getLong("total_session_seconds",0);
         ScrollView scroll=new ScrollView(this);
@@ -212,7 +218,20 @@ public final class NetworkHomeActivity extends Activity {
         historyAdParams.setMargins(0,dp(12),0,dp(8));
         page.addView(historyAdSlot,historyAdParams);
 
-        LinearLayout settings=card("4  •  AYARLAR");
+        LinearLayout settings=card("4  •  AYARLAR / SETTINGS");
+        Button lang=button(settings,"Language / Dil");
+        lang.setOnClickListener(v -> new AlertDialog.Builder(this)
+            .setTitle("Language / Dil")
+            .setItems(new String[]{"Türkçe","English","Français","Deutsch","Español","Italiano","Português","Русский","العربية"},(d,i)->{
+                String[] codes={"tr","en","fr","de","es","it","pt","ru","ar"};
+                prefs.edit().putString("ui_language",codes[i]).apply();
+                Locale locale=Locale.forLanguageTag(codes[i]);
+                Locale.setDefault(locale);
+                android.content.res.Configuration config=new android.content.res.Configuration(getResources().getConfiguration());
+                config.setLocale(locale);
+                getResources().updateConfiguration(config,getResources().getDisplayMetrics());
+                recreate();
+            }).show());
         text(settings,"Yerel test: yalnızca uygulama trafiği izlenir.\nBağlantı: Wi-Fi veya mobil veri (internet gereklidir)\nDüşük pil (<%15) koruması: AÇIK (izleme sırasında)\nIsınma koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI",13,MUTED,false);
 
         // Dedicated advertising slot. Remains hidden until an approved ad SDK
