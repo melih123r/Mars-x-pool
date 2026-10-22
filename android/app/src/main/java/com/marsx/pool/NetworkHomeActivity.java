@@ -23,6 +23,7 @@ import android.text.InputType;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import java.util.Locale;
 
 /** Offline Network-first test dashboard. No proxy, partner SDK, custody or payout execution. */
 public final class NetworkHomeActivity extends Activity {
@@ -196,6 +197,8 @@ public final class NetworkHomeActivity extends Activity {
 
         LinearLayout settings=card("4  •  AYARLAR");
         text(settings,"Yerel test: yalnızca uygulama trafiği izlenir.\nWi-Fi zorunluluğu: AÇIK (başlatırken kontrol edilir)\nDüşük pil (<%15) koruması: AÇIK (izleme sırasında)\nIsınma koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI",13,MUTED,false);
+        Button languageButton=button(settings,"Dil / Language: "+languageName());
+        languageButton.setOnClickListener(v -> chooseLanguage());
 
         // Dedicated advertising slot. Remains hidden until an approved ad SDK
         // loads an actual ad view into it; do not show internal ad revenue or fill metrics.
@@ -208,6 +211,7 @@ public final class NetworkHomeActivity extends Activity {
 
         text(page,"TEST SÜRÜMÜ • Ödeme, proxy, kripto transferi ve gerçek Network SDK kapalı",12,MUTED,false);
         text(page,"Uyarı: Test rızası gelecekteki gerçek ağ paylaşımı için geçerli değildir. Gerçek SDK devreye alınmadan önce yeniden ve ayrı açık onay gerekir.",12,ORANGE,false);
+        translatePage();
     }
 
     private void startMonitor(){
@@ -269,6 +273,101 @@ public final class NetworkHomeActivity extends Activity {
             ?"Açık rıza: VERİLDİ • Network yine kapalı"
             :"Açık rıza: VERİLMEDİ • Network kapalı");
         consentButton.setText(consent?"Rızayı iptal et":"Açık rıza ver");
+    }
+
+    private String languageName(){
+        String code=prefs.getString("language","en");
+        if("tr".equals(code)) return "Türkçe";
+        if("fr".equals(code)) return "Français";
+        if("de".equals(code)) return "Deutsch";
+        if("es".equals(code)) return "Español";
+        return "English";
+    }
+
+    private void chooseLanguage(){
+        final String[] labels={"English","Türkçe","Français","Deutsch","Español"};
+        final String[] codes={"en","tr","fr","de","es"};
+        String current=prefs.getString("language","en");
+        int checked=0;
+        for(int i=0;i<codes.length;i++) if(codes[i].equals(current)) checked=i;
+        new AlertDialog.Builder(this).setTitle("Dil / Language")
+            .setSingleChoiceItems(labels,checked,(dialog,which)->{
+                prefs.edit().putString("language",codes[which]).apply();
+                dialog.dismiss();
+                recreate();
+            }).setNegativeButton("Cancel",null).show();
+    }
+
+    private void translatePage(){
+        translateView(page);
+    }
+
+    private void translateView(View view){
+        if(view instanceof TextView){
+            TextView tv=(TextView)view;
+            String value=tv.getText().toString();
+            String translated=translate(value);
+            if(!value.equals(translated)) tv.setText(translated);
+        }
+        if(view instanceof android.view.ViewGroup){
+            android.view.ViewGroup group=(android.view.ViewGroup)view;
+            for(int i=0;i<group.getChildCount();i++) translateView(group.getChildAt(i));
+        }
+    }
+
+    private String translate(String value){
+        String lang=prefs.getString("language","en");
+        if("en".equals(lang)){
+            if(value.startsWith("TEST •")) return "TEST • 1,000-user pilot • 10,000+ scale target";
+            if(value.equals("1  •  NETWORK")) return "1  •  NETWORK";
+            if(value.equals("Açık rıza ver")) return "Give test consent";
+            if(value.equals("Başlat • bağlantıyı izle")) return "Start • monitor connection";
+            if(value.equals("2  •  KAZANÇ")) return "2  •  EARNINGS";
+            if(value.equals("3  •  ÇEKİM GEÇMİŞİ")) return "3  •  WITHDRAWAL HISTORY";
+            if(value.equals("4  •  AYARLAR")) return "4  •  SETTINGS";
+            if(value.equals("Cüzdan adresi ekle")) return "Add wallet address";
+            if(value.equals("Henüz çekim talebi yok. Canlı transfer yapılmadı.")) return "No withdrawal requests. No live transfer occurred.";
+            if(value.startsWith("TEST SÜRÜMÜ")) return "TEST BUILD • Payments, proxy, crypto transfer and real Network SDK disabled";
+            if(value.startsWith("Uyarı:")) return "Warning: Test consent does not authorize future live network sharing.";
+        }
+        if("tr".equals(lang)) return value;
+        if("fr".equals(lang)){
+            if(value.equals("MARS-X NETWORK")) return "MARS-X NETWORK";
+            if(value.startsWith("TEST •")) return "TEST • pilote de 1 000 utilisateurs • objectif 10 000+";
+            if(value.equals("1  •  NETWORK")) return "1  •  RÉSEAU";
+            if(value.equals("Açık rıza ver")) return "Donner mon consentement";
+            if(value.equals("Başlat • bağlantıyı izle")) return "Démarrer • surveiller la connexion";
+            if(value.equals("2  •  KAZANÇ")) return "2  •  GAINS";
+            if(value.equals("3  •  ÇEKİM GEÇMİŞİ")) return "3  •  HISTORIQUE DES RETRAITS";
+            if(value.equals("4  •  AYARLAR")) return "4  •  PARAMÈTRES";
+            if(value.equals("Cüzdan adresi ekle")) return "Ajouter une adresse de portefeuille";
+            if(value.equals("Henüz çekim talebi yok. Canlı transfer yapılmadı.")) return "Aucune demande de retrait. Aucun transfert réel.";
+            if(value.startsWith("TEST SÜRÜMÜ")) return "VERSION TEST • Paiement, proxy, transfert crypto et SDK Network réel désactivés";
+            if(value.startsWith("Uyarı:")) return "Attention : le consentement de test ne vaut pas consentement pour un partage réel.";
+        } else if("de".equals(lang)){
+            if(value.startsWith("TEST •")) return "TEST • Pilot mit 1.000 Nutzern • Ziel 10.000+";
+            if(value.equals("1  •  NETWORK")) return "1  •  NETZWERK";
+            if(value.equals("Açık rıza ver")) return "Einwilligung geben";
+            if(value.equals("Başlat • bağlantıyı izle")) return "Starten • Verbindung überwachen";
+            if(value.equals("2  •  KAZANÇ")) return "2  •  VERDIENST";
+            if(value.equals("3  •  ÇEKİM GEÇMİŞİ")) return "3  •  AUSZAHLUNGEN";
+            if(value.equals("4  •  AYARLAR")) return "4  •  EINSTELLUNGEN";
+            if(value.equals("Cüzdan adresi ekle")) return "Wallet-Adresse hinzufügen";
+            if(value.equals("Henüz çekim talebi yok. Canlı transfer yapılmadı.")) return "Keine Auszahlungsanfrage. Keine echte Überweisung.";
+            if(value.startsWith("TEST SÜRÜMÜ")) return "TESTVERSION • Zahlung, Proxy, Krypto-Transfer und echter Network-SDK deaktiviert";
+        } else if("es".equals(lang)){
+            if(value.startsWith("TEST •")) return "PRUEBA • piloto de 1.000 usuarios • objetivo 10.000+";
+            if(value.equals("1  •  NETWORK")) return "1  •  RED";
+            if(value.equals("Açık rıza ver")) return "Dar consentimiento";
+            if(value.equals("Başlat • bağlantıyı izle")) return "Iniciar • vigilar conexión";
+            if(value.equals("2  •  KAZANÇ")) return "2  •  GANANCIAS";
+            if(value.equals("3  •  ÇEKİM GEÇMİŞİ")) return "3  •  HISTORIAL DE RETIROS";
+            if(value.equals("4  •  AYARLAR")) return "4  •  AJUSTES";
+            if(value.equals("Cüzdan adresi ekle")) return "Añadir dirección de cartera";
+            if(value.equals("Henüz çekim talebi yok. Canlı transfer yapılmadı.")) return "No hay solicitudes. No se ha realizado ninguna transferencia real.";
+            if(value.startsWith("TEST SÜRÜMÜ")) return "VERSIÓN DE PRUEBA • Pagos, proxy, transferencias cripto y SDK Network real desactivados";
+        }
+        return value;
     }
 
     private LinearLayout card(String title){
