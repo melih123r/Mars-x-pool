@@ -60,6 +60,8 @@ jobs:
           if-no-files-found: error
       - name: Build release AAB
         run: gradle -p android :app:bundleRelease --no-daemon
+      - name: Verify merged Network DEMO manifest
+        run: python3 scripts/check-demo-manifest.py
       - uses: actions/upload-artifact@v4
         with:
           name: marsx-network-v17-release-aab-unsigned

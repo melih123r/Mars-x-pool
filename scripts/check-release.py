@@ -2,6 +2,7 @@
 from pathlib import Path
 import re
 import sys
+import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "android/app/src/main/AndroidManifest.xml"
@@ -42,6 +43,9 @@ gradle = GRADLE.read_text(encoding="utf-8")
 readme = README.read_text(encoding="utf-8")
 package = PACKAGE.read_text(encoding="utf-8")
 main_activity = MAIN_ACTIVITY.read_text(encoding="utf-8")
+declared_permissions={p.get('{http://schemas.android.com/apk/res/android}name')
+                      for p in ET.fromstring(manifest).findall('uses-permission')
+                      if p.get('{http://schemas.android.com/tools}node')!='remove'}
 
 for forbidden in (
     "android.permission.WAKE_LOCK",
@@ -49,7 +53,7 @@ for forbidden in (
     "android.permission.RECEIVE_BOOT_COMPLETED",
     "android.permission.REQUEST_INSTALL_PACKAGES",
 ):
-    if forbidden in manifest:
+    if forbidden in declared_permissions:
         raise SystemExit(f"Forbidden beta permission present: {forbidden}")
 
 if 'android.permission.INTERNET' not in manifest:

@@ -51,6 +51,7 @@ jobs:
           MARSX_UPLOAD_KEY_PASSWORD: ${{ secrets.MARSX_UPLOAD_KEY_PASSWORD }}
         run: |
           gradle -p android :app:testDebugUnitTest :app:lintRelease :app:bundleRelease --no-daemon
+          python3 scripts/check-demo-manifest.py
           AAB=android/app/build/outputs/bundle/release/app-release.aab
           test -s "$AAB"
           # Android upload certificates are normally self-signed. -strict rejects
