@@ -1,0 +1,11 @@
+{
+  "app_name": "MARS-X Network DEMO",
+  "start": "Überwachung starten",
+  "stop": "Überwachung stoppen",
+  "wifi": "WLAN",
+  "cellular": "Mobile Daten",
+  "no_connection": "Keine Internetverbindung",
+  "demo_notice": "Nur Demo. Keine echte Netzwerkfreigabe oder Einnahmen.",
+  "consent": "Einwilligung zur Demo-Überwachung",
+  "revoke": "Einwilligung widerrufen"
+}
