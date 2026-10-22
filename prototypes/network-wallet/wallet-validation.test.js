@@ -1,0 +1,12 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {test}=require('node:test');
+const {validateDestination,validateDemoWithdrawal}=require('./wallet-validation');
+const tron='TT3RpGfvUScgAG3GYULcimxFXEUnPPNfGZ';
+const sol='FqxVPDjwwMyT4y2tRsQia2pXpwCcgGnH3J4HMhqAkwcU';
+test('Solana public address structure',()=>assert.equal(validateDestination('SOLANA',sol),true));
+test('TRON public address checksum',()=>assert.equal(validateDestination('TRON',tron),true));
+test('reject network mismatch',()=>{assert.equal(validateDestination('TRON',sol),false);assert.equal(validateDestination('SOLANA',tron),false);});
+test('reject invalid destinations',()=>{assert.equal(validateDestination('SOLANA','O0Il'),false);assert.equal(validateDestination('TRON',tron.slice(0,-1)+'1'),false);});
+test('demo only, never broadcast',()=>{const v=validateDemoWithdrawal({network:'SOLANA',address:sol,asset:'USDT',amountMinor:1000000});assert.equal(v.broadcast,false);assert.equal(v.mode,'DEMO');});
+test('reject unsupported asset and invalid amount',()=>{assert.throws(()=>validateDemoWithdrawal({network:'SOLANA',address:sol,asset:'BTC',amountMinor:1}));assert.throws(()=>validateDemoWithdrawal({network:'SOLANA',address:sol,asset:'USDT',amountMinor:-1}));});
