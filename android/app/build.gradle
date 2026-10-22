@@ -56,8 +56,24 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
+    // Play upload signing is opt-in: unsigned CI bundles remain available for review.
+    // Never commit a keystore or credentials to source control.
+    if (System.getenv("MARSX_UPLOAD_KEYSTORE_FILE")) {
+        signingConfigs {
+            playUpload {
+                storeFile file(System.getenv("MARSX_UPLOAD_KEYSTORE_FILE"))
+                storePassword System.getenv("MARSX_UPLOAD_STORE_PASSWORD") ?: ""
+                keyAlias System.getenv("MARSX_UPLOAD_KEY_ALIAS") ?: ""
+                keyPassword System.getenv("MARSX_UPLOAD_KEY_PASSWORD") ?: ""
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (System.getenv("MARSX_UPLOAD_KEYSTORE_FILE")) {
+                signingConfig signingConfigs.playUpload
+            }
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
