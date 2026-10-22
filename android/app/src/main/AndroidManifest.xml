@@ -2,7 +2,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="com.android.vending.BILLING" />
+    <!-- Network DEMO has no purchase entrypoint; billing is excluded from this build. -->
     <application
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -22,6 +22,6 @@
         <activity android:name=".NetworkWebsiteActivity" android:exported="false" />
         <activity android:name=".VrscPoolActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" />
-        <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="true" />
+        <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="false" />
     </application>
 </manifest>
