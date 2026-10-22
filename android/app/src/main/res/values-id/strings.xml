@@ -173,7 +173,7 @@
     <string name="account_delete_failed">Akun tidak dapat dihapus. Coba lagi.</string>
     <string name="save_server_button">Simpan server</string>
     <string name="sandbox_payout_created_with_fee">Jumlah tes bersih: %1$s USDT_TEST • biaya: %2$s • status: %3$s. Ini bukan pembayaran nyata.</string>
-    <string name="network_consent_button">Berikan persetujuan secara tegas</string>
-    <string name="network_earnings_heading">2 • PENDAPATAN</string>
-    <string name="network_history_heading">3 • RIWAYAT PENARIKAN</string>
+
+
+
 </resources>
