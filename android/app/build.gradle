@@ -56,8 +56,24 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
+    def releaseStoreFile = providers.environmentVariable("MARSX_UPLOAD_KEYSTORE_PATH").orElse("").get()
+    def releaseStorePassword = providers.environmentVariable("MARSX_UPLOAD_STORE_PASSWORD").orElse("").get()
+    def releaseKeyAlias = providers.environmentVariable("MARSX_UPLOAD_KEY_ALIAS").orElse("").get()
+    def releaseKeyPassword = providers.environmentVariable("MARSX_UPLOAD_KEY_PASSWORD").orElse("").get()
+    def hasUploadSigning = [releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword].every { !it.isEmpty() }
+    signingConfigs {
+        uploadRelease {
+            if (hasUploadSigning) {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasUploadSigning) signingConfig signingConfigs.uploadRelease
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
