@@ -180,4 +180,7 @@
     <string name="network_start_monitoring">Başlat • bağlantıyı izle</string>
     <string name="network_monitor_off">Bağlantı izleme kapalı • Gerçek paylaşım: KAPALI</string>
     <string name="network_demo_disclaimer">TEST SÜRÜMÜ • Ödeme, proxy, kripto transferi ve gerçek Network SDK kapalı</string>
+    <string name="network_consent_button">Grant explicit consent</string>
+    <string name="network_earnings_heading">2 • EARNINGS</string>
+    <string name="network_history_heading">3 • WITHDRAWAL HISTORY</string>
 </resources>
