@@ -140,6 +140,11 @@ public class MainActivity extends Activity {
         accountTab = tabButton(tabs, getString(R.string.tab_account), view -> showTab(2));
         tabButton(tabs, "Network", view -> startActivity(new Intent(this, NetworkWebsiteActivity.class)));
         screen.addView(tabs);
+        // Network demo: visible privacy controls; production ads remain disabled.
+        NetworkAdSlot networkAdSlot = new NetworkAdSlot(this);
+        screen.addView(networkAdSlot.view());
+        networkAdSlot.requestIfAllowed(this, false, NetworkAdPolicy.TEST_APP_ID,
+                NetworkAdPolicy.TEST_BANNER_UNIT_ID);
         setContentView(screen);
         showTab(0);
 
