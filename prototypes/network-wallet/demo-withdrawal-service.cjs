@@ -214,6 +214,7 @@ function createDemoWithdrawalService({now=()=>new Date().toISOString()}={}) {
       createdAt:now(),
       updatedAt:now(),
       transactionId:null,
+      broadcast:false,
       ...DEMO_FLAGS
     });
     balances.set(userId,{
