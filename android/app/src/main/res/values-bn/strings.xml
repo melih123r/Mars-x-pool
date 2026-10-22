@@ -175,7 +175,7 @@
     <string name="account_delete_failed">অ্যাকাউন্ট মোছা যায়নি। আবার চেষ্টা করুন।</string>
     <string name="save_server_button">সার্ভার সংরক্ষণ করুন</string>
     <string name="sandbox_payout_created_with_fee">নিট পরীক্ষার পরিমাণ: %1$s USDT_TEST • ফি: %2$s • অবস্থা: %3$s। এটি আসল পেমেন্ট নয়।</string>
-    <string name="network_consent_button">স্পষ্ট সম্মতি দিন</string>
-    <string name="network_earnings_heading">২ • উপার্জন</string>
-    <string name="network_history_heading">৩ • উত্তোলনের ইতিহাস</string>
+
+
+
 </resources>
