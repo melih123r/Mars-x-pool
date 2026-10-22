@@ -89,7 +89,7 @@ public final class NetworkHomeActivity extends Activity {
         scroll.addView(page);
         setContentView(scroll);
 
-        text(page,"MARS-X NETWORK",24,WHITE,true);
+        text(page,getString(R.string.network_demo_heading),24,WHITE,true);
 
         LinearLayout network=card("1  •  NETWORK");
         consentStatus=text(network,"",15,MUTED,false);
@@ -112,7 +112,7 @@ public final class NetworkHomeActivity extends Activity {
                     .show();
             }
         });
-        Button start=button(network,"Başlat • bağlantıyı izle");
+        Button start=button(network,getString(R.string.network_start_monitoring));
         monitorButton=start;
         start.setOnClickListener(v -> {
             boolean active=prefs.getBoolean("monitor_active",false);
@@ -142,7 +142,7 @@ public final class NetworkHomeActivity extends Activity {
                     }).show();
             }
         });
-        monitorStatus=text(network,"Bağlantı izleme kapalı • Gerçek paylaşım: KAPALI",13,MUTED,false);
+        monitorStatus=text(network,getString(R.string.network_monitor_off),13,MUTED,false);
         refreshConsent();
 
         LinearLayout earnings=card("2  •  KAZANÇ");
@@ -205,7 +205,7 @@ public final class NetworkHomeActivity extends Activity {
         adParams.setMargins(0,dp(12),0,dp(8));
         page.addView(adSlot,adParams);
 
-        text(page,"TEST SÜRÜMÜ • Ödeme, proxy, kripto transferi ve gerçek Network SDK kapalı",12,MUTED,false);
+        text(page,getString(R.string.network_demo_disclaimer),12,MUTED,false);
         text(page,"Uyarı: Test rızası gelecekteki gerçek ağ paylaşımı için geçerli değildir. Gerçek SDK devreye alınmadan önce yeniden ve ayrı açık onay gerekir.",12,ORANGE,false);
     }
 
