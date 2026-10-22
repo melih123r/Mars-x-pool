@@ -15,7 +15,6 @@ required = [
     "Çekilebilir fiat:",
     "Cüzdan adresi ekle",
     "usdc_address",
-    "ÇEKİM GEÇMİŞİ",
     "AYARLAR",
     "1.000 kullanıcı pilotu",
     "10.000+ ölçek hedefi",
