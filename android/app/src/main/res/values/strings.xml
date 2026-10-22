@@ -176,4 +176,8 @@
     <string name="save_server_button">Save server</string>
     <string name="sandbox_payout_created_with_fee">Net test amount: %1$s USDT_TEST • fee: %2$s • status: %3$s. This is not a real payment.</string>
 
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Başlat • bağlantıyı izle</string>
+    <string name="network_monitor_off">Bağlantı izleme kapalı • Gerçek paylaşım: KAPALI</string>
+    <string name="network_demo_disclaimer">TEST SÜRÜMÜ • Ödeme, proxy, kripto transferi ve gerçek Network SDK kapalı</string>
 </resources>
