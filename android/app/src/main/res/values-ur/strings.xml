@@ -175,4 +175,7 @@
     <string name="account_delete_failed">اکاؤنٹ حذف نہیں ہو سکا۔ دوبارہ کوشش کریں۔</string>
     <string name="save_server_button">سرور محفوظ کریں</string>
     <string name="sandbox_payout_created_with_fee">خالص ٹیسٹ رقم: %1$s USDT_TEST • فیس: %2$s • حالت: %3$s۔ یہ حقیقی ادائیگی نہیں ہے۔</string>
+    <string name="network_consent_button">واضح رضامندی دیں</string>
+    <string name="network_earnings_heading">۲ • آمدنی</string>
+    <string name="network_history_heading">۳ • رقم نکلوانے کی تاریخ</string>
 </resources>
