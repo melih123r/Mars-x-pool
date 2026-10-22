@@ -9,6 +9,8 @@ permissions:
 
 jobs:
   backend:
+    # Network-only release: do not execute unrelated Telegram/Finance suites.
+    if: github.ref_name != 'release/network-demo-signed-aab-20261022' && github.head_ref != 'release/network-demo-signed-aab-20261022'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -53,12 +55,12 @@ jobs:
       - name: Publish debug APK immediately
         uses: actions/upload-artifact@v4
         with:
-          name: marsx-network-v16-debug-apk
+          name: marsx-network-v17-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
       - name: Build release AAB
         run: gradle -p android :app:bundleRelease --no-daemon
       - uses: actions/upload-artifact@v4
         with:
-          name: marsx-network-v16-release-aab-unsigned
+          name: marsx-network-v17-release-aab-unsigned
           path: android/app/build/outputs/bundle/release/app-release.aab

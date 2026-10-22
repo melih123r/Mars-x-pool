@@ -36,6 +36,7 @@ public final class NetworkHomeActivity extends Activity {
     private TextView monitorStatus;
     private Button monitorButton;
     private TextView historyStatus;
+    private DemoBanner demoBanner;
     private long sessionBytes;
     private long totalSessionBytes;
     private long totalSessionSeconds;
@@ -48,12 +49,12 @@ public final class NetworkHomeActivity extends Activity {
             if(monitorStatus!=null && monitorStart>0){
                 ConnectivityManager cm=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkCapabilities nc=cm.getNetworkCapabilities(cm.getActiveNetwork());
-                String kind=nc==null?"Bağlantı yok":nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)?"Wi-Fi":nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)?"Mobil veri":"Diğer ağ";
+                String kind=nc==null?getString(R.string.nui_00):nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)?"Wi-Fi":nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)?getString(R.string.nui_02):getString(R.string.nui_01);
                 if(nc==null || !nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)){
                     prefs.edit().putBoolean("monitor_active",false).apply();
                     stopMonitor();
-                    if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
-                    android.widget.Toast.makeText(NetworkHomeActivity.this,"İnternet bağlantısı kesildi; izleme durduruldu.",android.widget.Toast.LENGTH_SHORT).show();
+                    if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
+                    android.widget.Toast.makeText(NetworkHomeActivity.this,getString(R.string.nui_04),android.widget.Toast.LENGTH_SHORT).show();
                     return;
                 }
                 BatteryManager battery=(BatteryManager)getSystemService(Context.BATTERY_SERVICE);
@@ -61,29 +62,36 @@ public final class NetworkHomeActivity extends Activity {
                 if(batteryPct>=0 && batteryPct<15){
                     prefs.edit().putBoolean("monitor_active",false).apply();
                     stopMonitor();
-                    if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
-                    android.widget.Toast.makeText(NetworkHomeActivity.this,"Pil %15 altında; izleme durduruldu.",android.widget.Toast.LENGTH_SHORT).show();
+                    if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
+                    android.widget.Toast.makeText(NetworkHomeActivity.this,getString(R.string.nui_05),android.widget.Toast.LENGTH_SHORT).show();
                     return;
                 }
                 long seconds=(SystemClock.elapsedRealtime()-monitorStart)/1000;
                 long rx=TrafficStats.getUidRxBytes(android.os.Process.myUid());
                 long tx=TrafficStats.getUidTxBytes(android.os.Process.myUid());
-                String usage=(rx<0 || tx<0 || startRx<0 || startTx<0)?"ölçüm desteklenmiyor":String.format(java.util.Locale.US,"%.3f MB",((Math.max(0,rx-startRx)+Math.max(0,tx-startTx))/1048576.0));
+                String usage=(rx<0 || tx<0 || startRx<0 || startTx<0)?getString(R.string.nui_06):String.format(java.util.Locale.US,"%.3f MB",((Math.max(0,rx-startRx)+Math.max(0,tx-startTx))/1048576.0));
                 if(rx>=0 && tx>=0 && startRx>=0 && startTx>=0)sessionBytes=Math.max(0,rx-startRx)+Math.max(0,tx-startTx);
-                monitorStatus.setText("Bağlantı: "+kind+" • İzleme: "+(seconds/60)+" dk "+(seconds%60)+" sn\nUygulamanın veri kullanımı: "+usage+"\nPaylaşılan trafik: 0 GB • Kazanç: €0,00");
+                monitorStatus.setText(getString(R.string.nui_07)+kind+getString(R.string.nui_08)+(seconds/60)+getString(R.string.nui_09)+(seconds%60)+getString(R.string.nui_10)+usage+getString(R.string.nui_11));
                 monitorHandler.postDelayed(this,1000);
             }
         }
     };
 
+    @Override protected void attachBaseContext(Context base) {
+        SharedPreferences saved=base.getSharedPreferences("network_consent_v1",MODE_PRIVATE);
+        String code=saved.getString("ui_language","tr");
+        if("pt".equals(code))code="pt-BR";
+        Locale savedLocale=Locale.forLanguageTag(code);
+        Locale.setDefault(savedLocale);
+        android.content.res.Configuration localeConfig=new android.content.res.Configuration(base.getResources().getConfiguration());
+        localeConfig.setLocale(savedLocale);
+        localeConfig.setLayoutDirection(savedLocale);
+        super.attachBaseContext(base.createConfigurationContext(localeConfig));
+    }
+
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         prefs=getSharedPreferences("network_consent_v1",MODE_PRIVATE);
-        Locale savedLocale=Locale.forLanguageTag(prefs.getString("ui_language","tr"));
-        Locale.setDefault(savedLocale);
-        android.content.res.Configuration localeConfig=new android.content.res.Configuration(getResources().getConfiguration());
-        localeConfig.setLocale(savedLocale);
-        getResources().updateConfiguration(localeConfig,getResources().getDisplayMetrics());
         totalSessionBytes=prefs.getLong("total_session_bytes",0);
         totalSessionSeconds=prefs.getLong("total_session_seconds",0);
         ScrollView scroll=new ScrollView(this);
@@ -104,14 +112,14 @@ public final class NetworkHomeActivity extends Activity {
             if (prefs.getBoolean("consented",false)) {
                 prefs.edit().putBoolean("consented",false).putBoolean("monitor_active",false).apply();
                 stopMonitor();
-                if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
+                if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
                 refreshConsent();
             } else {
                 new AlertDialog.Builder(this)
-                    .setTitle("Açık rıza • yalnızca TEST")
-                    .setMessage("MARS-X Network, ileride onaylı bir partnerle cihazınızın internet bağlantısını üçüncü taraf müşteri trafiği için paylaşmayı hedefler. Bu işlem veri kotanızı, pilinizi ve bağlantınızı etkileyebilir; ağınızın IP adresi partnerin müşterileri tarafından kullanılabilir. Gelir veya trafik garantisi yoktur. Şu anda gerçek paylaşım yapılmaz. Rızayı istediğiniz an iptal edebilirsiniz. Devam etmek yalnızca test tercihini kaydeder.")
-                    .setNegativeButton("Vazgeç", (dialog, which) -> dialog.dismiss())
-                    .setPositiveButton("Test rızasını kaydet", (dialog, which) -> {
+                    .setTitle(getString(R.string.nui_12))
+                    .setMessage(getString(R.string.nui_13))
+                    .setNegativeButton(getString(R.string.nui_14), (dialog, which) -> dialog.dismiss())
+                    .setPositiveButton(getString(R.string.nui_15), (dialog, which) -> {
                         prefs.edit().putBoolean("consented",true).apply();
                         refreshConsent();
                     })
@@ -124,26 +132,26 @@ public final class NetworkHomeActivity extends Activity {
             boolean active=prefs.getBoolean("monitor_active",false);
             if (active) {
                 prefs.edit().putBoolean("monitor_active",false).apply();
-                start.setText("Başlat • bağlantıyı izle");
+                start.setText(getString(R.string.nui_03));
                 stopMonitor();
             } else {
                 if(!prefs.getBoolean("consented",false)){
-                    android.widget.Toast.makeText(this,"Önce test bilgilendirmesini okuyup onaylayın.",android.widget.Toast.LENGTH_LONG).show();
+                    android.widget.Toast.makeText(this,getString(R.string.nui_16),android.widget.Toast.LENGTH_LONG).show();
                     return;
                 }
                 ConnectivityManager connectivity=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkCapabilities caps=connectivity.getNetworkCapabilities(connectivity.getActiveNetwork());
                 if(caps==null || !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) || (wifiOnly && !caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))){
-                    android.widget.Toast.makeText(this,"İzleme için Wi-Fi veya mobil internet gerekiyor.",android.widget.Toast.LENGTH_LONG).show();
+                    android.widget.Toast.makeText(this,getString(R.string.nui_17),android.widget.Toast.LENGTH_LONG).show();
                     return;
                 }
                 new AlertDialog.Builder(this)
                     .setTitle("MARS-X Network")
-                    .setMessage("Bağlantı durumunu izlemeyi başlat. Bu testte internetin başkalarıyla paylaşılmaz ve kazanç oluşmaz. İstediğin zaman durdurabilirsin.")
-                    .setNegativeButton("Vazgeç",null)
-                    .setPositiveButton("Başlat",(d,w)->{
+                    .setMessage(getString(R.string.nui_18))
+                    .setNegativeButton(getString(R.string.nui_14),null)
+                    .setPositiveButton(getString(R.string.nui_19),(d,w)->{
                         prefs.edit().putBoolean("monitor_active",true).apply();
-                        start.setText("Durdur • bağlantı izleme");
+                        start.setText(getString(R.string.nui_20));
                         startMonitor();
                     }).show();
             }
@@ -152,47 +160,38 @@ public final class NetworkHomeActivity extends Activity {
         refreshConsent();
 
         LinearLayout earnings=card(getString(R.string.network_earnings_heading));
-        text(earnings,"Bekleyen fiat: €0,00\nKesinleşmiş fiat: €0,00\nÇekilebilir fiat: €0,00",16,WHITE,true);
-        text(earnings,"Partner makbuzu olmadan bakiye oluşturulmaz.",12,MUTED,false);
-
-        // Optional inline ad position after earnings. No SDK means no ad shown.
-        FrameLayout earningsAdSlot=new FrameLayout(this);
-        earningsAdSlot.setId(View.generateViewId());
-        earningsAdSlot.setContentDescription("Optional earnings ad placement");
-        earningsAdSlot.setVisibility(View.GONE);
-        LinearLayout.LayoutParams earningsAdParams=new LinearLayout.LayoutParams(-1,dp(60));
-        earningsAdParams.setMargins(0,dp(12),0,dp(8));
-        page.addView(earningsAdSlot,earningsAdParams);
+        text(earnings,getString(R.string.nui_21),16,WHITE,true);
+        text(earnings,getString(R.string.nui_22),12,MUTED,false);
 
         // Never ship an operator-owned wallet address as a user payout default.
-        Button walletAddress=button(earnings,"Alıcı cüzdan adresi ekle");
+        Button walletAddress=button(earnings,getString(R.string.nui_23));
         walletAddress.setOnClickListener(v -> {
             final String[] chains={"Solana","Base","Polygon"};
             new AlertDialog.Builder(this)
-                .setTitle("USDC ağı seç")
+                .setTitle(getString(R.string.nui_24))
                 .setItems(chains,(dialog,selected)->{
                     String chain=chains[selected];
                     EditText input=new EditText(this);
                     input.setSingleLine(true);
                     input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-                    input.setHint(chain+" alıcı adresi");
+                    input.setHint(chain+getString(R.string.nui_25));
                     input.setText(prefs.getString("usdc_address",""));
                     new AlertDialog.Builder(this)
                         .setTitle("USDC • "+chain)
-                        .setMessage("Yalnızca herkese açık alıcı adresini girin. Özel anahtar veya kurtarma kelimesi girmeyin. Bu testte transfer yapılmaz.")
+                        .setMessage(getString(R.string.nui_26))
                         .setView(input)
-                        .setNegativeButton("Vazgeç",null)
-                        .setNeutralButton("Adresi sil",(d,w)->{
+                        .setNegativeButton(getString(R.string.nui_14),null)
+                        .setNeutralButton(getString(R.string.nui_27),(d,w)->{
                             prefs.edit().remove("usdc_address").remove("usdc_chain").apply();
-                            walletAddress.setText("Cüzdan adresi ekle");
+                            walletAddress.setText(getString(R.string.nui_28));
                         })
-                        .setPositiveButton("Kaydet",(d,w)->{
+                        .setPositiveButton(getString(R.string.nui_29),(d,w)->{
                             String address=input.getText().toString().trim();
                             boolean valid=selected==0
                                 ?address.length()>=32 && address.length()<=44 && address.matches("[1-9A-HJ-NP-Za-km-z]+")
                                 :address.matches("0x[0-9a-fA-F]{40}");
                             if(!valid){
-                                android.widget.Toast.makeText(this,"Seçilen ağ için adres biçimi geçersiz.",android.widget.Toast.LENGTH_LONG).show();
+                                android.widget.Toast.makeText(this,getString(R.string.nui_30),android.widget.Toast.LENGTH_LONG).show();
                                 return;
                             }
                             prefs.edit().putString("usdc_address",address).putString("usdc_chain",chain).apply();
@@ -205,46 +204,34 @@ public final class NetworkHomeActivity extends Activity {
             walletAddress.setText(prefs.getString("usdc_chain","Polygon")+" • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
 
         LinearLayout history=card(getString(R.string.network_history_heading));
-        text(history,"Henüz çekim talebi yok. Canlı transfer yapılmadı.",13,MUTED,false);
+        text(history,getString(R.string.nui_31),13,MUTED,false);
         historyStatus=text(history,"",13,MUTED,false);
         updateHistory();
 
-        // Optional inline placement after withdrawal history; never interrupts consent.
-        FrameLayout historyAdSlot=new FrameLayout(this);
-        historyAdSlot.setId(View.generateViewId());
-        historyAdSlot.setContentDescription("Optional withdrawal history ad placement");
-        historyAdSlot.setVisibility(View.GONE);
-        LinearLayout.LayoutParams historyAdParams=new LinearLayout.LayoutParams(-1,dp(60));
-        historyAdParams.setMargins(0,dp(12),0,dp(8));
-        page.addView(historyAdSlot,historyAdParams);
-
-        LinearLayout settings=card("4  •  AYARLAR / SETTINGS");
-        Button lang=button(settings,"Language / Dil");
+        LinearLayout settings=card(getString(R.string.nui_32));
+        Button lang=button(settings,getString(R.string.nui_33));
         lang.setOnClickListener(v -> new AlertDialog.Builder(this)
-            .setTitle("Language / Dil")
+            .setTitle(getString(R.string.nui_33))
             .setItems(new String[]{"Türkçe","English","Français","Deutsch","Español","Italiano","Português","Русский","العربية","Nederlands","Polski","Українська","Română","Ελληνικά","Čeština","Magyar","Svenska","简体中文","繁體中文","日本語","한국어","हिन्दी","Bahasa Indonesia","Tiếng Việt","ไทย","فارسی","বাংলা","اردو","Bahasa Melayu","Filipino"},(d,i)->{
-                String[] codes={"tr","en","fr","de","es","it","pt","ru","ar","nl","pl","uk","ro","el","cs","hu","sv","zh-CN","zh-TW","ja","ko","hi","id","vi","th","fa","bn","ur","ms","fil"};
+                String[] codes={"tr","en","fr","de","es","it","pt-BR","ru","ar","nl","pl","uk","ro","el","cs","hu","sv","zh-CN","zh-TW","ja","ko","hi","id","vi","th","fa","bn","ur","ms","fil"};
                 prefs.edit().putString("ui_language",codes[i]).apply();
-                Locale locale=Locale.forLanguageTag(codes[i]);
-                Locale.setDefault(locale);
-                android.content.res.Configuration config=new android.content.res.Configuration(getResources().getConfiguration());
-                config.setLocale(locale);
-                getResources().updateConfiguration(config,getResources().getDisplayMetrics());
                 recreate();
             }).show());
-        text(settings,"Yerel test: yalnızca uygulama trafiği izlenir.\nBağlantı: Wi-Fi veya mobil veri (internet gereklidir)\nDüşük pil (<%15) koruması: AÇIK (izleme sırasında)\nIsınma koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI",13,MUTED,false);
+        text(settings,getString(R.string.nui_34)+prefs.getString("ui_language","tr")+getString(R.string.nui_35),13,MUTED,false);
 
-        // Dedicated advertising slot. Remains hidden until an approved ad SDK
-        // loads an actual ad view into it; do not show internal ad revenue or fill metrics.
+        LinearLayout advertising=card(getString(R.string.ads_title));
+        TextView adStatus=text(advertising,"",12,MUTED,false);
         FrameLayout adSlot=new FrameLayout(this);
-        adSlot.setId(View.generateViewId());
         adSlot.setVisibility(View.GONE);
-        LinearLayout.LayoutParams adParams=new LinearLayout.LayoutParams(-1,dp(60));
-        adParams.setMargins(0,dp(12),0,dp(8));
-        page.addView(adSlot,adParams);
+        // Full page width is available to the adaptive banner; no double-parent insertion.
+        page.addView(adSlot,new LinearLayout.LayoutParams(-1,-2));
+        demoBanner=new DemoBanner(this,adSlot,adStatus);
+        button(advertising,getString(R.string.ads_enable)).setOnClickListener(v->demoBanner.enable());
+        button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->demoBanner.withdraw());
+        button(advertising,getString(R.string.ads_privacy)).setOnClickListener(v->demoBanner.privacy());
 
         text(page,getString(R.string.network_demo_disclaimer),12,MUTED,false);
-        text(page,"Uyarı: Test rızası gelecekteki gerçek ağ paylaşımı için geçerli değildir. Gerçek SDK devreye alınmadan önce yeniden ve ayrı açık onay gerekir.",12,ORANGE,false);
+        text(page,getString(R.string.nui_36),12,ORANGE,false);
     }
 
     private void startMonitor(){
@@ -268,27 +255,27 @@ public final class NetworkHomeActivity extends Activity {
             updateHistory();
         }
         monitorStart=0;
-        if(monitorStatus!=null)monitorStatus.setText("Bağlantı izleme kapalı • Gerçek paylaşım: KAPALI");
+        if(monitorStatus!=null)monitorStatus.setText(getString(R.string.nui_37));
     }
     private void updateHistory(){
         if(historyStatus!=null){
             long seconds=prefs.getLong("last_session_seconds",0);
             long bytes=prefs.getLong("last_session_bytes",0);
-            historyStatus.setText("Son izleme oturumu: "+seconds+" sn • Uygulama verisi: "+String.format(java.util.Locale.US,"%.3f MB",bytes/1048576.0)+"\nToplam kayıtlı uygulama trafiği: "+String.format(java.util.Locale.US,"%.3f MB",totalSessionBytes/1048576.0)+"\nToplam izleme süresi: "+(totalSessionSeconds/60)+" dk"+"\nBu ölçüm gelir veya paylaşılan bant genişliği değildir.");
+            historyStatus.setText(getString(R.string.nui_38)+seconds+getString(R.string.nui_39)+String.format(java.util.Locale.US,"%.3f MB",bytes/1048576.0)+getString(R.string.nui_40)+String.format(java.util.Locale.US,"%.3f MB",totalSessionBytes/1048576.0)+getString(R.string.nui_41)+(totalSessionSeconds/60)+getString(R.string.nui_42)+getString(R.string.nui_43));
         }
     }
     @Override protected void onStop(){
         if(prefs.getBoolean("monitor_active",false)){
             prefs.edit().putBoolean("monitor_active",false).apply();
             stopMonitor();
-            if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
+            if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
         }
         super.onStop();
     }
     @Override protected void onStart(){
         super.onStart();
         boolean active=prefs.getBoolean("monitor_active",false);
-        if(monitorButton!=null)monitorButton.setText(active?"Durdur • bağlantı izleme":"Başlat • bağlantıyı izle");
+        if(monitorButton!=null)monitorButton.setText(active?getString(R.string.nui_20):getString(R.string.nui_03));
         totalSessionBytes=prefs.getLong("total_session_bytes",0);
         totalSessionSeconds=prefs.getLong("total_session_seconds",0);
         updateHistory();
@@ -296,16 +283,25 @@ public final class NetworkHomeActivity extends Activity {
         else if(active)monitorHandler.post(monitorTick);
     }
     @Override protected void onDestroy(){
+        if(demoBanner!=null)demoBanner.destroy();
         stopMonitor();
         super.onDestroy();
+    }
+    @Override protected void onPause(){
+        if(demoBanner!=null)demoBanner.pause();
+        super.onPause();
+    }
+    @Override protected void onResume(){
+        super.onResume();
+        if(demoBanner!=null)demoBanner.resume();
     }
 
     private void refreshConsent(){
         boolean consent=prefs.getBoolean("consented",false);
         consentStatus.setText(consent
-            ?"Açık rıza: VERİLDİ • Network yine kapalı"
-            :"Açık rıza: VERİLMEDİ • Network kapalı");
-        consentButton.setText(consent?"Rızayı iptal et":"Açık rıza ver");
+            ?getString(R.string.nui_44)
+            :getString(R.string.nui_45));
+        consentButton.setText(consent?getString(R.string.nui_46):getString(R.string.nui_47));
     }
 
     private LinearLayout card(String title){

@@ -2,6 +2,7 @@
 from pathlib import Path
 
 source = Path("android/app/src/main/java/com/marsx/pool/NetworkHomeActivity.java").read_text(encoding="utf-8")
+translated = Path("android/app/src/main/res/values-tr/network_ui.xml").read_text(encoding="utf-8")
 
 required = [
     "Açık rıza: VERİLMEDİ",
@@ -14,8 +15,8 @@ required = [
     "Cüzdan adresi ekle",
     "usdc_address",
     "AYARLAR",
-    "FrameLayout adSlot",
-    "adSlot.setVisibility(View.GONE)",
+    "FrameLayout adSlot=new FrameLayout(this)",
+    "demoBanner=new DemoBanner(this,adSlot,adStatus)",
     "Açık rıza • yalnızca TEST",
     "IP adresi",
     "veri kotanızı",
@@ -28,12 +29,12 @@ for hidden in ("card(\"3  •  NONCUSTODIAL USDC CÜZDANI\")", "card(\"6  •  R
     active_source = re.sub(r"/\\*.*?\\*/", "", source, flags=re.S)
     if hidden in active_source:
         raise SystemExit("Legacy user-facing section must remain hidden: " + hidden)
-missing = [value for value in required if value not in source]
+missing = [value for value in required if value not in source + translated]
 if missing:
     raise SystemExit("Network UI contract missing: " + ", ".join(missing))
 
 resources = Path("android/app/src/main/res/values/strings.xml").read_text(encoding="utf-8")
-for marker in ("network_monitor_off", "network_history_heading", "network_consent_button", "network_earnings_heading", "Bağlantı izleme kapalı", "Gerçek paylaşım: KAPALI"):
+for marker in ("network_monitor_off", "network_history_heading", "network_consent_button", "network_earnings_heading", "Real sharing: OFF"):
     if marker not in resources:
         raise SystemExit("Network safety label missing from Android resources: " + marker)
 for banned in ("1.000 kullanıcı pilotu", "10.000+ ölçek hedefi"):
@@ -79,3 +80,5 @@ if sqlite_test.returncode:
     raise SystemExit("SQLite integrity simulation failed: " + sqlite_test.stdout + sqlite_test.stderr)
 print(sqlite_test.stdout.strip())
 print("Network UI contract: PASS")
+subprocess.run([sys.executable, "scripts/check-demo-ads.py"], check=True)
+subprocess.run([sys.executable, "scripts/check-network-locale.py"], check=True)

@@ -46,7 +46,7 @@ Data may be processed by Supabase (Edge Functions and PostgreSQL), Qonversion, G
 
 ## Advertising and consent
 
-The current beta contains Qonversion for subscription management and related purchase analytics, but no advertising SDK. Facebook attribution collection is disabled. If AdMob, optional attribution, behavioural analytics or another tracking SDK is added, it must remain disabled until the required notice and consent flow is implemented. Marketing campaigns used to recruit testers do not justify silent tracking.
+The Network DEMO versionCode 17 includes Google Mobile Ads and the Google User Messaging Platform (UMP). Advertising is optional and initially off. Selecting the separate test-ad control contacts Google to update advertising privacy choices and display any required consent form. An ad is requested only after a successful privacy update and UMP authorization. The DEMO always uses Google's test banner unit, does not monetize impressions and does not grant rewards or withdrawable balances. Google may process connection IP, device/app information, diagnostics and advertising interaction data. The DEMO removes the advertising-ID permission. Network test consent does not authorize advertising. Users can stop ads with the in-app off control and open advertising privacy options where UMP requires them. The Network launcher does not initialize Qonversion or expose purchases. Legacy Pool code retains Qonversion. Facebook attribution collection is disabled.
 
 ## Rights and deletion
 
