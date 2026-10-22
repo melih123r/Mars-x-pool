@@ -38,7 +38,7 @@ public final class NetworkHomeActivity extends Activity {
     private long sessionBytes;
     private long totalSessionBytes;
     private long totalSessionSeconds;
-    private boolean wifiOnly=true;
+    private boolean wifiOnly=false;
     private long monitorStart;
     private long startRx=-1, startTx=-1;
     private final Handler monitorHandler=new Handler(Looper.getMainLooper());
@@ -48,11 +48,11 @@ public final class NetworkHomeActivity extends Activity {
                 ConnectivityManager cm=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkCapabilities nc=cm.getNetworkCapabilities(cm.getActiveNetwork());
                 String kind=nc==null?"Bağlantı yok":nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)?"Wi-Fi":nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)?"Mobil veri":"Diğer ağ";
-                if(nc==null || !nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) || !nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)){
+                if(nc==null || !nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)){
                     prefs.edit().putBoolean("monitor_active",false).apply();
                     stopMonitor();
                     if(monitorButton!=null)monitorButton.setText("Başlat • bağlantıyı izle");
-                    android.widget.Toast.makeText(NetworkHomeActivity.this,"Wi-Fi bağlantısı kesildi; izleme durduruldu.",android.widget.Toast.LENGTH_SHORT).show();
+                    android.widget.Toast.makeText(NetworkHomeActivity.this,"İnternet bağlantısı kesildi; izleme durduruldu.",android.widget.Toast.LENGTH_SHORT).show();
                     return;
                 }
                 BatteryManager battery=(BatteryManager)getSystemService(Context.BATTERY_SERVICE);
@@ -90,7 +90,6 @@ public final class NetworkHomeActivity extends Activity {
         setContentView(scroll);
 
         text(page,"MARS-X NETWORK",24,WHITE,true);
-        text(page,"TEST • 1.000 kullanıcı pilotu • 10.000+ ölçek hedefi",13,ORANGE,true);
 
         LinearLayout network=card("1  •  NETWORK");
         consentStatus=text(network,"",15,MUTED,false);
@@ -129,7 +128,7 @@ public final class NetworkHomeActivity extends Activity {
                 ConnectivityManager connectivity=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkCapabilities caps=connectivity.getNetworkCapabilities(connectivity.getActiveNetwork());
                 if(caps==null || !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) || (wifiOnly && !caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))){
-                    android.widget.Toast.makeText(this,"İzleme için Wi-Fi internet bağlantısı gerekiyor.",android.widget.Toast.LENGTH_LONG).show();
+                    android.widget.Toast.makeText(this,"İzleme için Wi-Fi veya mobil internet gerekiyor.",android.widget.Toast.LENGTH_LONG).show();
                     return;
                 }
                 new AlertDialog.Builder(this)
@@ -195,7 +194,7 @@ public final class NetworkHomeActivity extends Activity {
         updateHistory();
 
         LinearLayout settings=card("4  •  AYARLAR");
-        text(settings,"Yerel test: yalnızca uygulama trafiği izlenir.\nWi-Fi zorunluluğu: AÇIK (başlatırken kontrol edilir)\nDüşük pil (<%15) koruması: AÇIK (izleme sırasında)\nIsınma koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI",13,MUTED,false);
+        text(settings,"Yerel test: yalnızca uygulama trafiği izlenir.\nBağlantı: Wi-Fi veya mobil veri (internet gereklidir)\nDüşük pil (<%15) koruması: AÇIK (izleme sırasında)\nIsınma koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI",13,MUTED,false);
 
         // Dedicated advertising slot. Remains hidden until an approved ad SDK
         // loads an actual ad view into it; do not show internal ad revenue or fill metrics.
