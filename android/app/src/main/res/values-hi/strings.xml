@@ -175,4 +175,7 @@
     <string name="account_delete_failed">खाता हटाया नहीं जा सका। फिर प्रयास करें।</string>
     <string name="save_server_button">सर्वर सहेजें</string>
     <string name="sandbox_payout_created_with_fee">शुद्ध परीक्षण राशि: %1$s USDT_TEST • शुल्क: %2$s • स्थिति: %3$s। यह वास्तविक भुगतान नहीं है।</string>
+    <string name="network_consent_button">स्पष्ट सहमति दें</string>
+    <string name="network_earnings_heading">2 • कमाई</string>
+    <string name="network_history_heading">3 • निकासी इतिहास</string>
 </resources>
