@@ -175,7 +175,7 @@
     <string name="account_delete_failed">Không thể xóa tài khoản. Hãy thử lại.</string>
     <string name="save_server_button">Lưu máy chủ</string>
     <string name="sandbox_payout_created_with_fee">Số tiền thử nghiệm ròng: %1$s USDT_TEST • phí: %2$s • trạng thái: %3$s. Đây không phải thanh toán thật.</string>
-    <string name="network_consent_button">Đồng ý rõ ràng</string>
-    <string name="network_earnings_heading">2 • THU NHẬP</string>
-    <string name="network_history_heading">3 • LỊCH SỬ RÚT TIỀN</string>
+
+
+
 </resources>
