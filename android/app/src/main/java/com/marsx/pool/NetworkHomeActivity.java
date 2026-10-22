@@ -222,8 +222,8 @@ public final class NetworkHomeActivity extends Activity {
         Button lang=button(settings,"Language / Dil");
         lang.setOnClickListener(v -> new AlertDialog.Builder(this)
             .setTitle("Language / Dil")
-            .setItems(new String[]{"Türkçe","English","Français","Deutsch","Español","Italiano","Português","Русский","العربية"},(d,i)->{
-                String[] codes={"tr","en","fr","de","es","it","pt","ru","ar"};
+            .setItems(new String[]{"Türkçe","English","Français","Deutsch","Español","Italiano","Português","Русский","العربية","Nederlands","Polski","Українська","Română","Ελληνικά","Čeština","Magyar","Svenska","简体中文","繁體中文","日本語","한국어","हिन्दी","Bahasa Indonesia","Tiếng Việt","ไทย","فارسی","বাংলা","اردو","Bahasa Melayu","Filipino"},(d,i)->{
+                String[] codes={"tr","en","fr","de","es","it","pt","ru","ar","nl","pl","uk","ro","el","cs","hu","sv","zh-CN","zh-TW","ja","ko","hi","id","vi","th","fa","bn","ur","ms","fil"};
                 prefs.edit().putString("ui_language",codes[i]).apply();
                 Locale locale=Locale.forLanguageTag(codes[i]);
                 Locale.setDefault(locale);
