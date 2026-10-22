@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Démarrer • surveiller la connexion</string>
+    <string name="network_monitor_off">Surveillance arrêtée • Partage réel : DÉSACTIVÉ</string>
+    <string name="network_demo_disclaimer">VERSION DÉMO • Paiements, proxy, transferts crypto et SDK Network réel désactivés</string>
+</resources>
