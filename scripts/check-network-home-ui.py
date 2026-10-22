@@ -6,8 +6,6 @@ source = Path("android/app/src/main/java/com/marsx/pool/NetworkHomeActivity.java
 required = [
     "Açık rıza: VERİLMEDİ",
     "Rızayı iptal et",
-    "Bağlantı izleme kapalı",
-    "Gerçek paylaşım: KAPALI",
     "TrafficStats.getUidRxBytes",
     "TrafficStats.getUidTxBytes",
     "Bekleyen fiat:",
@@ -17,8 +15,6 @@ required = [
     "usdc_address",
     "ÇEKİM GEÇMİŞİ",
     "AYARLAR",
-    "1.000 kullanıcı pilotu",
-    "10.000+ ölçek hedefi",
     "FrameLayout adSlot",
     "adSlot.setVisibility(View.GONE)",
     "Açık rıza • yalnızca TEST",
@@ -37,6 +33,13 @@ missing = [value for value in required if value not in source]
 if missing:
     raise SystemExit("Network UI contract missing: " + ", ".join(missing))
 
+resources = Path("android/app/src/main/res/values/strings.xml").read_text(encoding="utf-8")
+for marker in ("network_monitor_off", "Bağlantı izleme kapalı", "Gerçek paylaşım: KAPALI"):
+    if marker not in resources:
+        raise SystemExit("Network safety label missing from Android resources: " + marker)
+for banned in ("1.000 kullanıcı pilotu", "10.000+ ölçek hedefi"):
+    if banned in source:
+        raise SystemExit("Pilot scale banner must not be visible: " + banned)
 if 'new AlertDialog.Builder(this)' not in source:
     raise SystemExit("Explicit disclosure dialog required before test consent")
 if source.index('new AlertDialog.Builder(this)') > source.index('putBoolean("consented",true)'):
