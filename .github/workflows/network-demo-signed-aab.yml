@@ -1,8 +1,6 @@
 name: Network DEMO signed AAB
 on:
   workflow_dispatch:
-  push:
-    branches: [release/network-demo-signed-aab-20261022]
 permissions:
   contents: read
 jobs:
