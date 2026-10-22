@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">开始 • 监测连接</string>
+    <string name="network_monitor_off">监测已关闭 • 实际共享：关闭</string>
+    <string name="network_demo_disclaimer">演示版本 • 支付、代理、加密货币转账和真实 Network SDK 均已禁用</string>
+</resources>
