@@ -173,7 +173,7 @@
     <string name="account_delete_failed">تعذر حذف الحساب. حاول مجدداً.</string>
     <string name="save_server_button">حفظ الخادم</string>
     <string name="sandbox_payout_created_with_fee">صافي المبلغ التجريبي: %1$s USDT_TEST • الرسم: %2$s • الحالة: %3$s. هذه ليست دفعة حقيقية.</string>
-    <string name="network_consent_button">منح الموافقة الصريحة</string>
-    <string name="network_earnings_heading">٢ • الأرباح</string>
-    <string name="network_history_heading">٣ • سجل السحوبات</string>
+
+
+
 </resources>
