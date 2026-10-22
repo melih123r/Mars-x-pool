@@ -26,6 +26,11 @@ jobs:
           grep -Eq 'versionName[[:space:]]+"0\\.9\\.3-network-test"' android/app/build.gradle
           grep -q 'NetworkHomeActivity' android/app/src/main/AndroidManifest.xml
           echo 'Network DEMO package, minimum SDK, version and launcher verified'
+      - name: Check Network UI safety and translations
+        run: |
+          python3 scripts/check-network-home-ui.py
+          python3 scripts/check-translations.py
+          python3 scripts/check-release.py
       - name: Require existing upload key
         env:
           KEYSTORE_BASE64: ${{ secrets.MARSX_UPLOAD_KEYSTORE_BASE64 }}
