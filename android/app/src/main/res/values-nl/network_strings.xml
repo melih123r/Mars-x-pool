@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Start • verbinding bewaken</string>
+    <string name="network_monitor_off">Bewaking uit • Echt delen: UIT</string>
+    <string name="network_demo_disclaimer">DEMOVERSIE • Betalingen, proxy, cryptotransacties en echte Network SDK uitgeschakeld</string>
+</resources>
