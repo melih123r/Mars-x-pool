@@ -52,9 +52,11 @@ def placeholders(path: Path) -> dict[str, list[str]]:
 
 
 network_keys = {"network_demo_heading", "network_start_monitoring", "network_monitor_off", "network_demo_disclaimer"}
-base = keys(ROOT / "values/strings.xml") - network_keys
+# New Network-only UI strings fall back to default resources until reviewed translations ship.
+network_fallback_keys = {"network_consent_button", "network_earnings_heading", "network_history_heading"}
+base = keys(ROOT / "values/strings.xml") - network_keys - network_fallback_keys
 base_placeholders = placeholders(ROOT / "values/strings.xml")
-core = keys(CORE_FILES["fr"]) - network_keys
+core = keys(CORE_FILES["fr"]) - network_keys - network_fallback_keys
 failed = False
 
 if len(core) < 100 or core - base:
@@ -62,7 +64,7 @@ if len(core) < 100 or core - base:
     print(f"core locale manifest invalid: keys={len(core)} extra={sorted(core - base)}")
 
 for locale, path in FULL_FILES.items():
-    localized = keys(path) - network_keys
+    localized = keys(path) - network_keys - network_fallback_keys
     missing = sorted(base - localized)
     extra = sorted(localized - base)
     if missing or extra:
@@ -80,7 +82,7 @@ for locale, path in FULL_FILES.items():
         print(f"{locale}: {len(localized)} keys OK")
 
 for locale, path in CORE_FILES.items():
-    localized = keys(path) - network_keys
+    localized = keys(path) - network_keys - network_fallback_keys
     missing = sorted(core - localized)
     extra = sorted(localized - core)
     if missing or extra:
