@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">شروع کریں • کنکشن کی نگرانی</string>
+    <string name="network_monitor_off">نگرانی بند • حقیقی شیئرنگ: بند</string>
+    <string name="network_demo_disclaimer">ڈیمو ورژن • ادائیگیاں، پراکسی، کرپٹو ٹرانسفر اور اصل Network SDK غیر فعال ہیں</string>
+</resources>
