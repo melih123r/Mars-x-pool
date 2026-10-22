@@ -13,7 +13,6 @@ required = [
     "Çekilebilir fiat:",
     "Cüzdan adresi ekle",
     "usdc_address",
-    "ÇEKİM GEÇMİŞİ",
     "AYARLAR",
     "FrameLayout adSlot",
     "adSlot.setVisibility(View.GONE)",
@@ -34,7 +33,7 @@ if missing:
     raise SystemExit("Network UI contract missing: " + ", ".join(missing))
 
 resources = Path("android/app/src/main/res/values/strings.xml").read_text(encoding="utf-8")
-for marker in ("network_monitor_off", "Bağlantı izleme kapalı", "Gerçek paylaşım: KAPALI"):
+for marker in ("network_monitor_off", "network_history_heading", "network_consent_button", "network_earnings_heading", "Bağlantı izleme kapalı", "Gerçek paylaşım: KAPALI"):
     if marker not in resources:
         raise SystemExit("Network safety label missing from Android resources: " + marker)
 for banned in ("1.000 kullanıcı pilotu", "10.000+ ölçek hedefi"):
