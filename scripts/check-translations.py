@@ -97,7 +97,7 @@ for locale, path in CORE_FILES.items():
     else:
         print(f"{locale}: {len(localized)}/{len(base)} core keys OK; advanced UI uses English fallback")
 
-for locale in ("en", "fr", "de"):
+for locale in ("en", "fr", "de", "es", "pt-rBR", "it", "ar", "ru", "id", "hi", "bn", "ur", "vi", "ja", "ko", "zh-rCN", "nl", "pl", "uk"):
     network_file = ROOT / f"values-{locale}/network_strings.xml"
     if not network_file.exists() or keys(network_file) != network_keys:
         failed = True
