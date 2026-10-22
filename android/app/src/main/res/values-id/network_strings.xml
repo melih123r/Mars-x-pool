@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Mulai • pantau koneksi</string>
+    <string name="network_monitor_off">Pemantauan mati • Berbagi nyata: NONAKTIF</string>
+    <string name="network_demo_disclaimer">VERSI DEMO • Pembayaran, proxy, transfer kripto, dan SDK Network nyata dinonaktifkan</string>
+</resources>
