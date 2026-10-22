@@ -158,9 +158,8 @@ public final class NetworkHomeActivity extends Activity {
         earningsAdParams.setMargins(0,dp(12),0,dp(8));
         page.addView(earningsAdSlot,earningsAdParams);
 
-        // Public Polygon payout address prefilled for the demo; never a signing key.
-        final String defaultPolygonAddress="0x70A48cffBd1a1517E98b47d5f8Bb3A8b3A905c98";
-        Button walletAddress=button(earnings,"Polygon • "+defaultPolygonAddress.substring(0,6)+"…"+defaultPolygonAddress.substring(defaultPolygonAddress.length()-4));
+        // Never ship an operator-owned wallet address as a user payout default.
+        Button walletAddress=button(earnings,"Alıcı cüzdan adresi ekle");
         walletAddress.setOnClickListener(v -> {
             final String[] chains={"Solana","Base","Polygon"};
             new AlertDialog.Builder(this)
@@ -171,7 +170,7 @@ public final class NetworkHomeActivity extends Activity {
                     input.setSingleLine(true);
                     input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                     input.setHint(chain+" alıcı adresi");
-                    input.setText(prefs.getString("usdc_address",chain.equals("Polygon") ? defaultPolygonAddress : ""));
+                    input.setText(prefs.getString("usdc_address",""));
                     new AlertDialog.Builder(this)
                         .setTitle("USDC • "+chain)
                         .setMessage("Yalnızca herkese açık alıcı adresini girin. Özel anahtar veya kurtarma kelimesi girmeyin. Bu testte transfer yapılmaz.")
@@ -195,7 +194,7 @@ public final class NetworkHomeActivity extends Activity {
                         }).show();
                 }).show();
         });
-        String savedAddress=prefs.getString("usdc_address",defaultPolygonAddress);
+        String savedAddress=prefs.getString("usdc_address","");
         if(!savedAddress.isEmpty() && savedAddress.length()>=10)
             walletAddress.setText(prefs.getString("usdc_chain","Polygon")+" • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
 
