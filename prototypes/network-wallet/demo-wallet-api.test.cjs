@@ -21,7 +21,7 @@ test('destination and withdrawal API responses stay masked and demo-only',async(
     }
   });
   assert.equal(destination.status,201);
-  assert.equal(destination.body.maskedAddress,'FqxVPD…AkwcU');
+  assert.equal(destination.body.maskedAddress,'FqxVPD…qAkwcU');
   assert.equal('publicAddress' in destination.body,false);
   assert.equal(destination.body.ownershipVerified,false);
   assert.equal(destination.body.payoutsEnabled,false);
