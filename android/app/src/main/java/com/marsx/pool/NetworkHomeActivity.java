@@ -93,7 +93,7 @@ public final class NetworkHomeActivity extends Activity {
 
         LinearLayout network=card("1  •  NETWORK");
         consentStatus=text(network,"",15,MUTED,false);
-        consentButton=button(network,"Açık rıza ver");
+        consentButton=button(network,getString(R.string.network_consent_button));
         consentButton.setOnClickListener(v->{
             if (prefs.getBoolean("consented",false)) {
                 prefs.edit().putBoolean("consented",false).putBoolean("monitor_active",false).apply();
@@ -145,7 +145,7 @@ public final class NetworkHomeActivity extends Activity {
         monitorStatus=text(network,getString(R.string.network_monitor_off),13,MUTED,false);
         refreshConsent();
 
-        LinearLayout earnings=card("2  •  KAZANÇ");
+        LinearLayout earnings=card(getString(R.string.network_earnings_heading));
         text(earnings,"Bekleyen fiat: €0,00\nKesinleşmiş fiat: €0,00\nÇekilebilir fiat: €0,00",16,WHITE,true);
         text(earnings,"Partner makbuzu olmadan bakiye oluşturulmaz.",12,MUTED,false);
 
@@ -190,7 +190,7 @@ public final class NetworkHomeActivity extends Activity {
         if(!savedAddress.isEmpty() && savedAddress.length()>=10)
             walletAddress.setText(prefs.getString("usdc_chain","Polygon")+" • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
 
-        LinearLayout history=card("3  •  ÇEKİM GEÇMİŞİ");
+        LinearLayout history=card(getString(R.string.network_history_heading));
         text(history,"Henüz çekim talebi yok. Canlı transfer yapılmadı.",13,MUTED,false);
         historyStatus=text(history,"",13,MUTED,false);
         updateHistory();
