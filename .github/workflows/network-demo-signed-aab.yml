@@ -23,9 +23,9 @@ jobs:
           "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
       - name: Verify Network DEMO release identity
         run: |
-          grep -Eq 'applicationId[[:space:]]+"com\\.marsx\\.pool"' android/app/build.gradle
+          grep -Fq 'applicationId "com.marsx.pool"' android/app/build.gradle
           grep -Eq 'minSdk[[:space:]]+26' android/app/build.gradle
-          grep -Eq 'versionName[[:space:]]+"0\\.9\\.3-network-test"' android/app/build.gradle
+          grep -Fq 'versionName "0.9.3-network-test"' android/app/build.gradle
           grep -q 'NetworkHomeActivity' android/app/src/main/AndroidManifest.xml
           echo 'Network DEMO package, minimum SDK, version and launcher verified'
       - name: Check Network UI safety and translations
