@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Почати • моніторинг з’єднання</string>
+    <string name="network_monitor_off">Моніторинг вимкнено • Реальний обмін: ВИМК.</string>
+    <string name="network_demo_disclaimer">ДЕМО • Платежі, проксі, криптоперекази та реальний Network SDK вимкнені</string>
+</resources>
