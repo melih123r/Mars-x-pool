@@ -1,10 +1,12 @@
-# MARS-X Pool Privacy Policy
+# MARS-X Pool / Network DEMO Privacy Policy
 
-Version: 2026-09-27-v3
+Version: 2026-10-23-v4
 
-Controller: AbdilMelih Demirbaş / MARS-X Pool. Before public commercial release, add a monitored privacy email and legally required postal/business details here and in the store listing.
+Controller: AbdilMelih Demirbaş / MARS-X Pool. Privacy and support contact: abdilmelih08@gmail.com, as published on the existing service privacy page.
 
-MARS-X Pool Beta is an authorised remote node/pool management and sandbox-payout test. It does not mine cryptocurrency on the Android device, run hidden background compute, promise earnings, transfer real money in sandbox mode, use advertising SDKs or sell personal data.
+MARS-X Network DEMO versionCode 18 uses an offline Network launcher with optional Google test advertising as described below. Real bandwidth sharing, partner traffic forwarding, mining, real earnings and payouts are disabled. Language, test consent, session statistics and entered public wallet addresses remain in device-local preferences. Local data can be removed by clearing app storage or uninstalling. The following legacy Pool account and subscription descriptions apply only where those older features are available; the Network launcher does not create an account or initialize Qonversion.
+
+The live store privacy page is https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-pool-api/privacy . Its deployed v18 notice is tracked in [docs/network-demo-privacy.html](docs/network-demo-privacy.html).
 
 ## Data processed
 
@@ -44,9 +46,9 @@ connection records. Address/IP sharing is disclosed before any request in the UI
 
 Data may be processed by Supabase (Edge Functions and PostgreSQL), Qonversion, Google Play, infrastructure and app-distribution providers used to operate MARS-X Pool. Cloudflare Workers/D1 is an alternative deployment target and Railway/Redis is a temporary rollback target; they process service data only while actually enabled. Review [Supabase's privacy information](https://supabase.com/privacy), [Cloudflare's privacy information](https://www.cloudflare.com/privacypolicy/), [Qonversion's privacy information](https://qonversion.io/privacy) and [Google's privacy policy](https://policies.google.com/privacy). The production notice must identify all actual processors and relevant international-transfer safeguards. Data is not sold or shared with advertisers; it is disclosed only for service delivery, security, valid legal obligations or protection of legal rights.
 
-## Advertising and consent
+## Advertising and consent (Network DEMO)
 
-The Network DEMO versionCode 17 includes Google Mobile Ads and the Google User Messaging Platform (UMP). Advertising is optional and initially off. Selecting the separate test-ad control contacts Google to update advertising privacy choices and display any required consent form. An ad is requested only after a successful privacy update and UMP authorization. The DEMO always uses Google's test banner unit, does not monetize impressions and does not grant rewards or withdrawable balances. Google may process connection IP, device/app information, diagnostics and advertising interaction data. The DEMO removes the advertising-ID permission. Network test consent does not authorize advertising. Users can stop ads with the in-app off control and open advertising privacy options where UMP requires them. The Network launcher does not initialize Qonversion or expose purchases. Legacy Pool code retains Qonversion. Facebook attribution collection is disabled.
+Network DEMO versions 17 and 18 include Google Mobile Ads and the Google User Messaging Platform (UMP). Advertising is optional and initially off. Selecting the separate test-ad control contacts Google to update advertising privacy choices and display any required consent form. An ad is requested only after a successful privacy update and UMP authorization. The DEMO always uses Google's test banner unit, does not monetize impressions and does not grant rewards or withdrawable balances. Google may collect and share IP-derived approximate location, app/ad interactions, diagnostics and device/app identifiers for advertising, analytics and fraud prevention. Google SDK traffic uses TLS. The DEMO removes advertising-ID and AdServices permissions; this does not eliminate all identifiers or connection data. Network test consent does not authorize advertising. Users can stop ads with the off control and open privacy options where UMP requires them. Turning ads off does not retract already transmitted data. Google retention and handling follow its privacy policy and applicable settings; MARS-X does not promise a specific Google retention period. The earlier legacy statement about no advertiser sharing does not apply to this optional Google SDK processing. The Network launcher does not initialize Qonversion or expose purchases. Legacy Pool code retains Qonversion. Facebook attribution collection is disabled.
 
 ## Rights and deletion
 
