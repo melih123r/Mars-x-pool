@@ -24,7 +24,7 @@ def tap(label,scroll=False):
     attempts=9 if scroll else 8
     for attempt in range(attempts):
         for n in ui().iter('node'):
-            if n.get('text')==label or n.get('content-desc')==label:
+            if n.get('text','').casefold()==label.casefold() or n.get('content-desc','').casefold()==label.casefold():
                 x1,y1,x2,y2=map(int,re.findall(r'\d+',n.get('bounds')))
                 if x2>x1 and y2>y1:
                     adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2));time.sleep(.5);return
