@@ -74,7 +74,7 @@ try:
     tap(en['nui_33'],scroll=True)
     assert any(n.get('text')=='English' and n.get('checked')=='true' for n in ui().iter('node'))
     shot('en-language-picker')
-    tap('Türkçe')
+    tap('Türkçe',scroll=True)
     adb('shell','am','force-stop',PKG);launch()
     assert strings('tr')['nui_47'] in textset(ui())
     prefs=adb('shell','run-as',PKG,'cat','shared_prefs/network_consent_v1.xml')
