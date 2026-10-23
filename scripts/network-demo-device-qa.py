@@ -21,14 +21,18 @@ def ui():
 def textset(tree):
     return {n.get('text','') for n in tree.iter('node')}
 def tap(label,scroll=False):
-    for attempt in range(9 if scroll else 1):
+    attempts=9 if scroll else 8
+    for attempt in range(attempts):
         for n in ui().iter('node'):
             if n.get('text')==label or n.get('content-desc')==label:
                 x1,y1,x2,y2=map(int,re.findall(r'\d+',n.get('bounds')))
                 if x2>x1 and y2>y1:
                     adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2));time.sleep(.5);return
-        adb('shell','input','swipe','540','1600','540','450','350')
-    raise AssertionError('Control not found: '+label)
+        if scroll:
+            adb('shell','input','swipe','540','1600','540','450','350')
+        else:
+            time.sleep(.25)
+    raise AssertionError('Control not found after waiting: '+label)
 def strings(code):
     folder='values-'+code.replace('-','-r')
     data={}
