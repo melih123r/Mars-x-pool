@@ -29,7 +29,10 @@ def tap(label,scroll=False):
                 if x2>x1 and y2>y1:
                     adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2));time.sleep(.5);return
         if scroll:
-            adb('shell','input','swipe','540','1600','540','450','350')
+            if attempt % 2 == 0:
+                adb('shell','input','swipe','540','450','540','1600','350')
+            else:
+                adb('shell','input','swipe','540','1600','540','450','350')
         else:
             time.sleep(.25)
     raise AssertionError('Control not found after waiting: '+label)
