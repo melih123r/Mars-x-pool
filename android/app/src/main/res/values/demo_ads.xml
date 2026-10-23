@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">ADVERTISEMENT • DEMO</string>
+    <string name="ads_disabled">Optional test ads are off. No ad rewards or real revenue.</string>
+    <string name="ads_checking">Checking advertising privacy choices…</string>
+    <string name="ads_unavailable">Test ads unavailable. You can continue using the demo without ads.</string>
+    <string name="ads_test_notice">Google test advertisement • no earnings. Advertising traffic is included in app data usage.</string>
+    <string name="ads_enable">Enable optional test advertisement</string>
+    <string name="ads_disable">Turn advertisements off</string>
+    <string name="ads_privacy">Advertising privacy options</string>
+</resources>

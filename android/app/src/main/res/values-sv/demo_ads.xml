@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">ANNONS • DEMO</string>
+    <string name="ads_disabled">Valfria testannonser är avstängda. Inga annonsbelöningar eller verkliga intäkter.</string>
+    <string name="ads_checking">Kontrollerar integritetsval för annonser…</string>
+    <string name="ads_unavailable">Testannonser är inte tillgängliga. Du kan fortsätta använda demon utan annonser.</string>
+    <string name="ads_test_notice">Google-testannons • inga intäkter. Annonstrafik ingår i appens dataanvändning.</string>
+    <string name="ads_enable">Aktivera valfri testannons</string>
+    <string name="ads_disable">Stäng av annonser</string>
+    <string name="ads_privacy">Integritetsalternativ för annonser</string>
+</resources>

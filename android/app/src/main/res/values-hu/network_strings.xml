@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Indítás • kapcsolatfigyelés</string>
+    <string name="network_monitor_off">Kapcsolatfigyelés kikapcsolva • Tényleges megosztás: KI</string>
+    <string name="network_demo_disclaimer">DEMÓ • Fizetések, proxy, kriptoátutalások és valódi Network SDK letiltva</string>
+</resources>

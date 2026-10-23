@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"無連線"</string>
+    <string name="nui_01" formatted="false">"其他網路"</string>
+    <string name="nui_02" formatted="false">"行動數據"</string>
+    <string name="nui_03" formatted="false">"開始 • 監測連線"</string>
+    <string name="nui_04" formatted="false">"連線已中斷；監測已停止。"</string>
+    <string name="nui_05" formatted="false">"電量低於15%；監測已停止。"</string>
+    <string name="nui_06" formatted="false">"不支援測量"</string>
+    <string name="nui_07" formatted="false">"連線： "</string>
+    <string name="nui_08" formatted="false">" • 監測時間： "</string>
+    <string name="nui_09" formatted="false">" 分 "</string>
+    <string name="nui_10" formatted="false">" 秒\n應用程式數據用量： "</string>
+    <string name="nui_11" formatted="false">"\n共享流量：0 GB • 收益：€0.00"</string>
+    <string name="nui_12" formatted="false">"明確同意 • 僅供測試"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network 計劃透過未來獲核准的合作夥伴，將您的網際網路連線用於第三方客戶流量。這可能影響您的數據額度、電池和連線；合作夥伴的客戶可能使用您的網路 IP 位址。不保證流量或收入。目前已停用實際共享。您可以隨時撤回同意。繼續操作僅儲存測試偏好。"</string>
+    <string name="nui_14" formatted="false">"取消"</string>
+    <string name="nui_15" formatted="false">"儲存測試同意"</string>
+    <string name="nui_16" formatted="false">"請先閱讀並接受測試說明。"</string>
+    <string name="nui_17" formatted="false">"監測需要 Wi-Fi 或行動網際網路。"</string>
+    <string name="nui_18" formatted="false">"開始監測連線。本測試不會共享您的網際網路或產生收益。您可以隨時停止。"</string>
+    <string name="nui_19" formatted="false">"開始"</string>
+    <string name="nui_20" formatted="false">"停止 • 連線監測"</string>
+    <string name="nui_21" formatted="false">"待結算法幣：€0.00\n已結算法幣：€0.00\n可提領法幣：€0.00"</string>
+    <string name="nui_22" formatted="false">"沒有合作夥伴收據，不會產生餘額。"</string>
+    <string name="nui_23" formatted="false">"新增收款錢包位址"</string>
+    <string name="nui_24" formatted="false">"選擇 USDC 網路"</string>
+    <string name="nui_25" formatted="false">" 收款位址"</string>
+    <string name="nui_26" formatted="false">"僅輸入公開的收款位址。請勿輸入私鑰或復原助記詞。本測試不會轉移資金。"</string>
+    <string name="nui_27" formatted="false">"刪除位址"</string>
+    <string name="nui_28" formatted="false">"新增錢包位址"</string>
+    <string name="nui_29" formatted="false">"儲存"</string>
+    <string name="nui_30" formatted="false">"位址格式不適用於所選網路。"</string>
+    <string name="nui_31" formatted="false">"沒有提領要求。未進行任何真實轉帳。"</string>
+    <string name="nui_32" formatted="false">"4  •  設定"</string>
+    <string name="nui_33" formatted="false">"語言"</string>
+    <string name="nui_34" formatted="false">"所選語言代碼： "</string>
+    <string name="nui_35" formatted="false">"\n本機測試：僅測量應用程式流量。\n連線：Wi-Fi 或行動數據（需要網際網路）\n低電量（&lt;15%）保護：監測時開啟\n過熱保護：無法使用\n背景監測：關閉\n撤回同意後監測將停止"</string>
+    <string name="nui_36" formatted="false">"警告：測試同意不授權未來的實際網路共享。啟用真實 Network SDK 前，需要另行取得明確同意。"</string>
+    <string name="nui_37" formatted="false">"連線監測已關閉 • 實際共享：關閉"</string>
+    <string name="nui_38" formatted="false">"上次監測時間： "</string>
+    <string name="nui_39" formatted="false">" 秒 • 應用程式數據： "</string>
+    <string name="nui_40" formatted="false">"\n累計記錄的應用程式流量： "</string>
+    <string name="nui_41" formatted="false">"\n累計監測時間： "</string>
+    <string name="nui_42" formatted="false">" 分"</string>
+    <string name="nui_43" formatted="false">"\n此測量值並非收入或共享頻寬。"</string>
+    <string name="nui_44" formatted="false">"明確同意：已授予 • 實際共享仍關閉"</string>
+    <string name="nui_45" formatted="false">"明確同意：未授予 • 實際共享關閉"</string>
+    <string name="nui_46" formatted="false">"撤回同意"</string>
+    <string name="nui_47" formatted="false">"授予明確同意"</string>
+</resources>

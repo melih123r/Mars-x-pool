@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Walang koneksyon"</string>
+    <string name="nui_01" formatted="false">"Ibang network"</string>
+    <string name="nui_02" formatted="false">"Mobile data"</string>
+    <string name="nui_03" formatted="false">"Simulan • subaybayan ang koneksyon"</string>
+    <string name="nui_04" formatted="false">"Naputol ang koneksyon; itinigil ang pagsubaybay."</string>
+    <string name="nui_05" formatted="false">"Mas mababa sa 15% ang baterya; itinigil ang pagsubaybay."</string>
+    <string name="nui_06" formatted="false">"Hindi suportado ang pagsukat"</string>
+    <string name="nui_07" formatted="false">"Koneksyon: "</string>
+    <string name="nui_08" formatted="false">" • Pagsubaybay: "</string>
+    <string name="nui_09" formatted="false">" min "</string>
+    <string name="nui_10" formatted="false">" seg\nPaggamit ng data ng app: "</string>
+    <string name="nui_11" formatted="false">"\nIbinahaging trapiko: 0 GB • Kita: €0.00"</string>
+    <string name="nui_12" formatted="false">"Tahasang pahintulot • PAGSUBOK lang"</string>
+    <string name="nui_13" formatted="false">"Layunin ng MARS-X Network na ibahagi ang iyong koneksyon sa internet para sa trapiko ng mga customer ng ikatlong partido sa pamamagitan ng isang aprubadong kasosyo sa hinaharap. Maaari nitong maapektuhan ang iyong data allowance, baterya at koneksyon; maaaring gamitin ng mga customer ng kasosyo ang IP address ng iyong network. Walang garantiya ng trapiko o kita. Kasalukuyang hindi pinagana ang tunay na pagbabahagi. Maaari mong bawiin ang pahintulot anumang oras. Ang pagpapatuloy ay magse-save lamang ng kagustuhan sa pagsubok."</string>
+    <string name="nui_14" formatted="false">"Kanselahin"</string>
+    <string name="nui_15" formatted="false">"I-save ang pahintulot sa pagsubok"</string>
+    <string name="nui_16" formatted="false">"Basahin at tanggapin muna ang pagsisiwalat para sa pagsubok."</string>
+    <string name="nui_17" formatted="false">"Kailangan ng Wi-Fi o mobile internet para sa pagsubaybay."</string>
+    <string name="nui_18" formatted="false">"Simulang subaybayan ang koneksyon. Hindi ibinabahagi ng pagsubok na ito ang iyong internet at hindi ito lumilikha ng kita. Maaari kang huminto anumang oras."</string>
+    <string name="nui_19" formatted="false">"Simulan"</string>
+    <string name="nui_20" formatted="false">"Ihinto • pagsubaybay sa koneksyon"</string>
+    <string name="nui_21" formatted="false">"Nakabinbing fiat: €0.00\nNaayos na fiat: €0.00\nFiat na maaaring i-withdraw: €0.00"</string>
+    <string name="nui_22" formatted="false">"Walang nalilikhang balanse kung walang resibo mula sa kasosyo."</string>
+    <string name="nui_23" formatted="false">"Magdagdag ng wallet address ng tatanggap"</string>
+    <string name="nui_24" formatted="false">"Piliin ang USDC network"</string>
+    <string name="nui_25" formatted="false">" address ng tatanggap"</string>
+    <string name="nui_26" formatted="false">"Ilagay lamang ang pampublikong address ng tatanggap. Huwag maglagay ng mga pribadong key o mga salita sa pagbawi. Hindi naglilipat ng pondo ang pagsubok na ito."</string>
+    <string name="nui_27" formatted="false">"Burahin ang address"</string>
+    <string name="nui_28" formatted="false">"Magdagdag ng wallet address"</string>
+    <string name="nui_29" formatted="false">"I-save"</string>
+    <string name="nui_30" formatted="false">"Hindi wasto ang format ng address para sa napiling network."</string>
+    <string name="nui_31" formatted="false">"Walang kahilingan sa pag-withdraw. Walang aktuwal na paglilipat na nagawa."</string>
+    <string name="nui_32" formatted="false">"4  •  MGA SETTING"</string>
+    <string name="nui_33" formatted="false">"Wika"</string>
+    <string name="nui_34" formatted="false">"Code ng napiling wika: "</string>
+    <string name="nui_35" formatted="false">"\nLokal na pagsubok: trapiko ng app lang ang sinusukat.\nKoneksyon: Wi-Fi o mobile data (kailangan ng internet)\nProteksyon sa mababang baterya (&lt;15%): NAKA-ON habang sumusubaybay\nProteksyon sa init: hindi available\nPagsubaybay sa background: NAKA-OFF\nHihinto ang pagsubaybay kapag binawi ang pahintulot"</string>
+    <string name="nui_36" formatted="false">"Babala: hindi pinahihintulutan ng pahintulot sa pagsubok ang tunay na pagbabahagi ng network sa hinaharap. Kailangan ng hiwalay na tahasang pahintulot bago paganahin ang tunay na Network SDK."</string>
+    <string name="nui_37" formatted="false">"Naka-off ang pagsubaybay sa koneksyon • Tunay na pagbabahagi: NAKA-OFF"</string>
+    <string name="nui_38" formatted="false">"Huling sesyon ng pagsubaybay: "</string>
+    <string name="nui_39" formatted="false">" seg • Data ng app: "</string>
+    <string name="nui_40" formatted="false">"\nKabuuang naitalang trapiko ng app: "</string>
+    <string name="nui_41" formatted="false">"\nKabuuang oras ng pagsubaybay: "</string>
+    <string name="nui_42" formatted="false">" min"</string>
+    <string name="nui_43" formatted="false">"\nAng sukat na ito ay hindi kita o ibinahaging bandwidth."</string>
+    <string name="nui_44" formatted="false">"Tahasang pahintulot: IBINIGAY • Nananatiling NAKA-OFF ang tunay na pagbabahagi"</string>
+    <string name="nui_45" formatted="false">"Tahasang pahintulot: HINDI IBINIGAY • Tunay na pagbabahagi NAKA-OFF"</string>
+    <string name="nui_46" formatted="false">"Bawiin ang pahintulot"</string>
+    <string name="nui_47" formatted="false">"Magbigay ng tahasang pahintulot"</string>
+</resources>

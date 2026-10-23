@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">بدء • مراقبة الاتصال</string>
+    <string name="network_monitor_off">مراقبة الاتصال متوقفة • المشاركة الفعلية: معطلة</string>
+    <string name="network_demo_disclaimer">نسخة تجريبية • المدفوعات والوكيل وتحويلات العملات الرقمية وNetwork SDK الفعلي معطلة</string>
+</resources>

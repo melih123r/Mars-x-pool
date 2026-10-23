@@ -173,4 +173,7 @@
     <string name="account_delete_failed">Hesap silinemedi. Tekrar dene.</string>
     <string name="save_server_button">Sunucuyu kaydet</string>
     <string name="sandbox_payout_created_with_fee">Net test tutarı: %1$s USDT_TEST • ücret: %2$s • durum: %3$s. Bu gerçek ödeme değildir.</string>
+
+
+
 </resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_consent_button">Magbigay ng tahasang pahintulot</string>
+    <string name="network_earnings_heading">2 • KITA</string>
+    <string name="network_history_heading">3 • KASAYSAYAN NG PAG-WITHDRAW</string>
+</resources>

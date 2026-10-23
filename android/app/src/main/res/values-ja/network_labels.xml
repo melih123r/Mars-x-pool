@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_consent_button" formatted="false">明示的に同意</string>
+    <string name="network_earnings_heading" formatted="false">2 • 収益</string>
+    <string name="network_history_heading" formatted="false">3 • 出金履歴</string>
+</resources>

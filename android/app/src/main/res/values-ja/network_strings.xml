@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading" formatted="false">MARS-X NETWORK</string>
+    <string name="network_start_monitoring" formatted="false">開始 • 接続を監視</string>
+    <string name="network_monitor_off" formatted="false">接続監視オフ • 実際の共有：オフ</string>
+    <string name="network_demo_disclaimer" formatted="false">デモ • 決済、プロキシ、暗号資産送金、実際の Network SDK は無効</string>
+</resources>

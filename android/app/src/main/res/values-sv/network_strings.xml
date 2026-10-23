@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Starta • övervaka anslutning</string>
+    <string name="network_monitor_off">Anslutningsövervakning av • Verklig delning: AV</string>
+    <string name="network_demo_disclaimer">DEMO • Betalningar, proxy, kryptoöverföringar och verklig Network SDK avstängda</string>
+</resources>

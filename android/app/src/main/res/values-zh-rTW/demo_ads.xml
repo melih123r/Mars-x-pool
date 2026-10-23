@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title" formatted="false">廣告 • 示範</string>
+    <string name="ads_disabled" formatted="false">可選測試廣告已關閉。沒有廣告獎勵或真實收入。</string>
+    <string name="ads_checking" formatted="false">正在檢查廣告隱私選項…</string>
+    <string name="ads_unavailable" formatted="false">測試廣告無法使用。您可以繼續使用無廣告示範。</string>
+    <string name="ads_test_notice" formatted="false">Google 測試廣告 • 無收益。廣告流量計入應用程式數據用量。</string>
+    <string name="ads_enable" formatted="false">啟用可選測試廣告</string>
+    <string name="ads_disable" formatted="false">關閉廣告</string>
+    <string name="ads_privacy" formatted="false">廣告隱私選項</string>
+</resources>

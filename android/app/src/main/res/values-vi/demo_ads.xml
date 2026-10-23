@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">QUẢNG CÁO • DEMO</string>
+    <string name="ads_disabled">Quảng cáo thử nghiệm tùy chọn đã tắt. Không có phần thưởng quảng cáo hay doanh thu thực.</string>
+    <string name="ads_checking">Đang kiểm tra lựa chọn quyền riêng tư quảng cáo…</string>
+    <string name="ads_unavailable">Quảng cáo thử nghiệm không khả dụng. Bạn có thể tiếp tục dùng bản demo mà không có quảng cáo.</string>
+    <string name="ads_test_notice">Quảng cáo thử nghiệm Google • không có thu nhập. Lưu lượng quảng cáo được tính vào dữ liệu ứng dụng sử dụng.</string>
+    <string name="ads_enable">Bật quảng cáo thử nghiệm tùy chọn</string>
+    <string name="ads_disable">Tắt quảng cáo</string>
+    <string name="ads_privacy">Tùy chọn quyền riêng tư quảng cáo</string>
+</resources>

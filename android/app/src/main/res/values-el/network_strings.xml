@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Έναρξη • παρακολούθηση σύνδεσης</string>
+    <string name="network_monitor_off">Παρακολούθηση σύνδεσης ανενεργή • Πραγματική κοινή χρήση: ΑΝΕΝΕΡΓΗ</string>
+    <string name="network_demo_disclaimer">DEMO • Πληρωμές, διακομιστής μεσολάβησης, μεταφορές κρυπτονομισμάτων και πραγματικό Network SDK απενεργοποιημένα</string>
+</resources>

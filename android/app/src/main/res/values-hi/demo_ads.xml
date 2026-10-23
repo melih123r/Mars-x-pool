@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">विज्ञापन • डेमो</string>
+    <string name="ads_disabled">वैकल्पिक परीक्षण विज्ञापन बंद हैं। कोई विज्ञापन पुरस्कार या वास्तविक आय नहीं।</string>
+    <string name="ads_checking">विज्ञापन गोपनीयता विकल्पों की जाँच हो रही है…</string>
+    <string name="ads_unavailable">परीक्षण विज्ञापन उपलब्ध नहीं हैं। आप विज्ञापनों के बिना डेमो का उपयोग जारी रख सकते हैं।</string>
+    <string name="ads_test_notice">Google परीक्षण विज्ञापन • कोई कमाई नहीं। विज्ञापन ट्रैफ़िक ऐप के डेटा उपयोग में शामिल है।</string>
+    <string name="ads_enable">वैकल्पिक परीक्षण विज्ञापन चालू करें</string>
+    <string name="ads_disable">विज्ञापन बंद करें</string>
+    <string name="ads_privacy">विज्ञापन गोपनीयता विकल्प</string>
+</resources>

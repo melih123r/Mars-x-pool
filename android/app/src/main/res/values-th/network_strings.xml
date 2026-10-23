@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading" formatted="false">MARS-X NETWORK</string>
+    <string name="network_start_monitoring" formatted="false">เริ่ม • ตรวจสอบการเชื่อมต่อ</string>
+    <string name="network_monitor_off" formatted="false">ปิดการตรวจสอบการเชื่อมต่อ • การแชร์จริง: ปิด</string>
+    <string name="network_demo_disclaimer" formatted="false">สาธิต • ปิดใช้งานการชำระเงิน พร็อกซี การโอนคริปโต และ Network SDK จริง</string>
+</resources>

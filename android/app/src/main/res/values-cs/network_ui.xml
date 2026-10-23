@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Bez připojení"</string>
+    <string name="nui_01" formatted="false">"Jiná síť"</string>
+    <string name="nui_02" formatted="false">"Mobilní data"</string>
+    <string name="nui_03" formatted="false">"Spustit • sledování připojení"</string>
+    <string name="nui_04" formatted="false">"Připojení ztraceno; sledování zastaveno."</string>
+    <string name="nui_05" formatted="false">"Baterie pod 15 %; sledování zastaveno."</string>
+    <string name="nui_06" formatted="false">"Měření není podporováno"</string>
+    <string name="nui_07" formatted="false">"Připojení: "</string>
+    <string name="nui_08" formatted="false">" • Sledování: "</string>
+    <string name="nui_09" formatted="false">" min "</string>
+    <string name="nui_10" formatted="false">" s\nSpotřeba dat aplikace: "</string>
+    <string name="nui_11" formatted="false">"\nSdílený provoz: 0 GB • Výdělky: €0.00"</string>
+    <string name="nui_12" formatted="false">"Výslovný souhlas • pouze TEST"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network plánuje sdílet vaše internetové připojení pro provoz zákazníků třetích stran prostřednictvím budoucího schváleného partnera. To může ovlivnit váš datový limit, baterii a připojení; zákazníci partnera mohou používat IP adresu vaší sítě. Objem provozu ani příjem nejsou zaručeny. Skutečné sdílení je nyní vypnuté. Souhlas můžete kdykoli odvolat. Pokračováním se pouze uloží testovací nastavení."</string>
+    <string name="nui_14" formatted="false">"Zrušit"</string>
+    <string name="nui_15" formatted="false">"Uložit testovací souhlas"</string>
+    <string name="nui_16" formatted="false">"Nejprve si přečtěte a přijměte informace o testu."</string>
+    <string name="nui_17" formatted="false">"Sledování vyžaduje Wi-Fi nebo mobilní internet."</string>
+    <string name="nui_18" formatted="false">"Spusťte sledování připojení. Tento test nesdílí váš internet ani nevytváří výdělky. Můžete jej kdykoli zastavit."</string>
+    <string name="nui_19" formatted="false">"Spustit"</string>
+    <string name="nui_20" formatted="false">"Zastavit • sledování připojení"</string>
+    <string name="nui_21" formatted="false">"Čekající fiat: €0.00\nVypořádaný fiat: €0.00\nFiat k výběru: €0.00"</string>
+    <string name="nui_22" formatted="false">"Bez potvrzení od partnera nevzniká žádný zůstatek."</string>
+    <string name="nui_23" formatted="false">"Přidat adresu peněženky příjemce"</string>
+    <string name="nui_24" formatted="false">"Vyberte síť USDC"</string>
+    <string name="nui_25" formatted="false">" adresa příjemce"</string>
+    <string name="nui_26" formatted="false">"Zadejte pouze veřejnou adresu příjemce. Nezadávejte soukromé klíče ani slova pro obnovení. Tento test nepřevádí prostředky."</string>
+    <string name="nui_27" formatted="false">"Smazat adresu"</string>
+    <string name="nui_28" formatted="false">"Přidat adresu peněženky"</string>
+    <string name="nui_29" formatted="false">"Uložit"</string>
+    <string name="nui_30" formatted="false">"Neplatný formát adresy pro vybranou síť."</string>
+    <string name="nui_31" formatted="false">"Žádné žádosti o výběr. Nebyly provedeny žádné skutečné převody."</string>
+    <string name="nui_32" formatted="false">"4  •  NASTAVENÍ"</string>
+    <string name="nui_33" formatted="false">"Jazyk"</string>
+    <string name="nui_34" formatted="false">"Kód vybraného jazyka: "</string>
+    <string name="nui_35" formatted="false">"\nMístní test: měří pouze provoz aplikace.\nPřipojení: Wi-Fi nebo mobilní data (vyžaduje internet)\nOchrana při nízkém stavu baterie (&lt;15 %): ZAP. během sledování\nTepelná ochrana: nedostupná\nSledování na pozadí: VYP.\nPo odvolání souhlasu se sledování zastaví"</string>
+    <string name="nui_36" formatted="false">"Upozornění: testovací souhlas neopravňuje k budoucímu skutečnému sdílení sítě. Před zapnutím skutečného Network SDK je nutný samostatný výslovný souhlas."</string>
+    <string name="nui_37" formatted="false">"Sledování připojení vypnuto • Skutečné sdílení: VYP."</string>
+    <string name="nui_38" formatted="false">"Poslední relace sledování: "</string>
+    <string name="nui_39" formatted="false">" s • Data aplikace: "</string>
+    <string name="nui_40" formatted="false">"\nCelkový zaznamenaný provoz aplikace: "</string>
+    <string name="nui_41" formatted="false">"\nCelková doba sledování: "</string>
+    <string name="nui_42" formatted="false">" min"</string>
+    <string name="nui_43" formatted="false">"\nToto měření nepředstavuje příjem ani sdílenou šířku pásma."</string>
+    <string name="nui_44" formatted="false">"Výslovný souhlas: UDĚLEN • Skutečné sdílení zůstává VYP."</string>
+    <string name="nui_45" formatted="false">"Výslovný souhlas: NEUDĚLEN • Skutečné sdílení VYP."</string>
+    <string name="nui_46" formatted="false">"Odvolat souhlas"</string>
+    <string name="nui_47" formatted="false">"Udělit výslovný souhlas"</string>
+</resources>

@@ -2,6 +2,7 @@
 from pathlib import Path
 import re
 import sys
+import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "android/app/src/main/AndroidManifest.xml"
@@ -42,6 +43,9 @@ gradle = GRADLE.read_text(encoding="utf-8")
 readme = README.read_text(encoding="utf-8")
 package = PACKAGE.read_text(encoding="utf-8")
 main_activity = MAIN_ACTIVITY.read_text(encoding="utf-8")
+declared_permissions={p.get('{http://schemas.android.com/apk/res/android}name')
+                      for p in ET.fromstring(manifest).findall('uses-permission')
+                      if p.get('{http://schemas.android.com/tools}node')!='remove'}
 
 for forbidden in (
     "android.permission.WAKE_LOCK",
@@ -49,15 +53,24 @@ for forbidden in (
     "android.permission.RECEIVE_BOOT_COMPLETED",
     "android.permission.REQUEST_INSTALL_PACKAGES",
 ):
-    if forbidden in manifest:
+    if forbidden in declared_permissions:
         raise SystemExit(f"Forbidden beta permission present: {forbidden}")
 
 if 'android.permission.INTERNET' not in manifest:
     raise SystemExit("INTERNET permission is required")
 if not re.search(r"targetSdk\s+36", gradle):
     raise SystemExit("targetSdk 36 is required")
-if 'versionName "0.9.0-beta"' not in gradle or 'versionCode 13' not in gradle:
-    raise SystemExit("Beta 0.9.0 Android version is required")
+# Accept the legacy beta or the explicitly isolated Network test build.
+# Network versioning does not change the backend API's legacy 0.9.0 contract.
+legacy_version = 'versionName "0.9.0-beta"' in gradle and 'versionCode 13' in gradle
+network_version = 'versionName "0.9.3-network-test"' in gradle and bool(re.search(r'versionCode\s+(?:16|17|18)\b', gradle))
+if not (legacy_version or network_version):
+    raise SystemExit("Unsupported Android version: expected legacy beta 13 or Network test 16")
+if network_version:
+    if 'android:name=".NetworkHomeActivity"' not in manifest:
+        raise SystemExit("Network test launcher activity is missing")
+    if not re.search(r'<activity\s+android:name="\.NetworkHomeActivity"[^>]*>[\s\S]*?android.intent.action.MAIN[\s\S]*?android.intent.category.LAUNCHER', manifest):
+        raise SystemExit("Network test must launch NetworkHomeActivity")
 if '"version": "0.9.0"' not in package:
     raise SystemExit("Package version must match Beta 0.9.0")
 if 'APP_VERSION = "0.9.0-beta"' not in main_activity:
