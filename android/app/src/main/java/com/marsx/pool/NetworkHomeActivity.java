@@ -29,6 +29,7 @@ import android.widget.TextView;
 public final class NetworkHomeActivity extends Activity {
     private static final int BG=Color.rgb(9,14,24), PANEL=Color.rgb(23,31,46);
     private static final int WHITE=Color.WHITE, MUTED=Color.rgb(171,183,201), ORANGE=Color.rgb(255,128,43);
+    private final NetworkPartnerConnection partnerConnection = NetworkPartnerConnection.demo();
     private SharedPreferences prefs;
     private LinearLayout page;
     private TextView consentStatus;
@@ -110,6 +111,7 @@ public final class NetworkHomeActivity extends Activity {
         consentButton=button(network,getString(R.string.network_consent_button));
         consentButton.setOnClickListener(v->{
             if (prefs.getBoolean("consented",false)) {
+                partnerConnection.stop();
                 prefs.edit().putBoolean("consented",false).putBoolean("monitor_active",false).apply();
                 stopMonitor();
                 if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
@@ -273,6 +275,7 @@ public final class NetworkHomeActivity extends Activity {
         }
     }
     @Override protected void onStop(){
+        partnerConnection.stop();
         if(prefs.getBoolean("monitor_active",false)){
             prefs.edit().putBoolean("monitor_active",false).apply();
             stopMonitor();
@@ -291,6 +294,7 @@ public final class NetworkHomeActivity extends Activity {
         else if(active)monitorHandler.post(monitorTick);
     }
     @Override protected void onDestroy(){
+        partnerConnection.stop();
         if(demoBanner!=null)demoBanner.destroy();
         stopMonitor();
         super.onDestroy();

@@ -10,7 +10,7 @@ permissions:
 jobs:
   backend:
     # Network-only release: do not execute unrelated Telegram/Finance suites.
-    if: github.ref_name != 'release/network-demo-signed-aab-20261022' && github.head_ref != 'release/network-demo-signed-aab-20261022'
+    if: github.ref_name != 'release/network-demo-signed-aab-20261022' && github.head_ref != 'release/network-demo-signed-aab-20261022' && github.ref_name != 'prep/traffmonetizer-adapter-20261024' && github.head_ref != 'prep/traffmonetizer-adapter-20261024'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
