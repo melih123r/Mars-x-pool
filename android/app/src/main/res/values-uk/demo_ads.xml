@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">РЕКЛАМА • ДЕМО</string>
+    <string name="ads_disabled">Необов’язкову тестову рекламу вимкнено. Немає рекламних винагород або реального доходу.</string>
+    <string name="ads_checking">Перевірка налаштувань конфіденційності реклами…</string>
+    <string name="ads_unavailable">Тестова реклама недоступна. Ви можете продовжити користуватися демо без реклами.</string>
+    <string name="ads_test_notice">Тестова реклама Google • без доходу. Рекламний трафік враховано у використанні даних застосунку.</string>
+    <string name="ads_enable">Увімкнути необов’язкову тестову рекламу</string>
+    <string name="ads_disable">Вимкнути рекламу</string>
+    <string name="ads_privacy">Налаштування конфіденційності реклами</string>
+</resources>

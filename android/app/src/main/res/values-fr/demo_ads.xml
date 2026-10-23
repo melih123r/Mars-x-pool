@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">PUBLICITÉ • DÉMO</string>
+    <string name="ads_disabled">Les publicités de test facultatives sont désactivées. Aucune récompense publicitaire ni revenu réel.</string>
+    <string name="ads_checking">Vérification des choix de confidentialité publicitaire…</string>
+    <string name="ads_unavailable">Publicités de test indisponibles. Vous pouvez continuer à utiliser la démo sans publicité.</string>
+    <string name="ads_test_notice">Publicité de test Google • aucun revenu. Le trafic publicitaire est inclus dans les données utilisées par l’application.</string>
+    <string name="ads_enable">Activer la publicité de test facultative</string>
+    <string name="ads_disable">Désactiver les publicités</string>
+    <string name="ads_privacy">Options de confidentialité publicitaire</string>
+</resources>

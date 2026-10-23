@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_consent_button">Beri persetujuan jelas</string>
+    <string name="network_earnings_heading">2 • PENDAPATAN</string>
+    <string name="network_history_heading">3 • SEJARAH PENGELUARAN</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">ANUNSYO • DEMO</string>
+    <string name="ads_disabled">Naka-off ang mga opsyonal na pansubok na ad. Walang gantimpala sa ad o tunay na kita.</string>
+    <string name="ads_checking">Sinusuri ang mga pagpipilian sa privacy ng advertising…</string>
+    <string name="ads_unavailable">Hindi available ang mga pansubok na ad. Maaari mong patuloy na gamitin ang demo nang walang ad.</string>
+    <string name="ads_test_notice">Pansubok na anunsyo ng Google • walang kita. Kasama ang trapiko ng advertising sa paggamit ng data ng app.</string>
+    <string name="ads_enable">Paganahin ang opsyonal na pansubok na anunsyo</string>
+    <string name="ads_disable">I-off ang mga anunsyo</string>
+    <string name="ads_privacy">Mga opsyon sa privacy ng advertising</string>
+</resources>

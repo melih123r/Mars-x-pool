@@ -69,7 +69,7 @@ public final class NetworkHomeActivity extends Activity {
                 long seconds=(SystemClock.elapsedRealtime()-monitorStart)/1000;
                 long rx=TrafficStats.getUidRxBytes(android.os.Process.myUid());
                 long tx=TrafficStats.getUidTxBytes(android.os.Process.myUid());
-                String usage=(rx<0 || tx<0 || startRx<0 || startTx<0)?getString(R.string.nui_06):String.format(java.util.Locale.US,"%.3f MB",((Math.max(0,rx-startRx)+Math.max(0,tx-startTx))/1048576.0));
+                String usage=(rx<0 || tx<0 || startRx<0 || startTx<0)?getString(R.string.nui_06):String.format(Locale.getDefault(),"%.3f MB",((Math.max(0,rx-startRx)+Math.max(0,tx-startTx))/1048576.0));
                 if(rx>=0 && tx>=0 && startRx>=0 && startTx>=0)sessionBytes=Math.max(0,rx-startRx)+Math.max(0,tx-startTx);
                 monitorStatus.setText(getString(R.string.nui_07)+kind+getString(R.string.nui_08)+(seconds/60)+getString(R.string.nui_09)+(seconds%60)+getString(R.string.nui_10)+usage+getString(R.string.nui_11));
                 monitorHandler.postDelayed(this,1000);
@@ -172,6 +172,7 @@ public final class NetworkHomeActivity extends Activity {
                 .setItems(chains,(dialog,selected)->{
                     String chain=chains[selected];
                     EditText input=new EditText(this);
+                    input.setTextDirection(View.TEXT_DIRECTION_LTR);
                     input.setSingleLine(true);
                     input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                     input.setHint(chain+getString(R.string.nui_25));
@@ -210,12 +211,19 @@ public final class NetworkHomeActivity extends Activity {
 
         LinearLayout settings=card(getString(R.string.nui_32));
         Button lang=button(settings,getString(R.string.nui_33));
+        final String[] languageNames=getResources().getStringArray(R.array.network_language_names);
+        final String[] languageCodes=getResources().getStringArray(R.array.network_language_codes);
+        String selectedCode=prefs.getString("ui_language","tr");
+        if("pt".equals(selectedCode))selectedCode="pt-BR";
+        final int selectedLanguage=java.util.Arrays.asList(languageCodes).indexOf(selectedCode);
         lang.setOnClickListener(v -> new AlertDialog.Builder(this)
             .setTitle(getString(R.string.nui_33))
-            .setItems(new String[]{"Türkçe","English","Français","Deutsch","Español","Italiano","Português","Русский","العربية","Nederlands","Polski","Українська","Română","Ελληνικά","Čeština","Magyar","Svenska","简体中文","繁體中文","日本語","한국어","हिन्दी","Bahasa Indonesia","Tiếng Việt","ไทย","فارسی","বাংলা","اردو","Bahasa Melayu","Filipino"},(d,i)->{
-                String[] codes={"tr","en","fr","de","es","it","pt-BR","ru","ar","nl","pl","uk","ro","el","cs","hu","sv","zh-CN","zh-TW","ja","ko","hi","id","vi","th","fa","bn","ur","ms","fil"};
-                prefs.edit().putString("ui_language",codes[i]).apply();
-                recreate();
+            .setSingleChoiceItems(languageNames,selectedLanguage,(d,i)->{
+                d.dismiss();
+                if(i!=selectedLanguage){
+                    prefs.edit().putString("ui_language",languageCodes[i]).apply();
+                    recreate();
+                }
             }).show());
         text(settings,getString(R.string.nui_34)+prefs.getString("ui_language","tr")+getString(R.string.nui_35),13,MUTED,false);
 
@@ -261,7 +269,7 @@ public final class NetworkHomeActivity extends Activity {
         if(historyStatus!=null){
             long seconds=prefs.getLong("last_session_seconds",0);
             long bytes=prefs.getLong("last_session_bytes",0);
-            historyStatus.setText(getString(R.string.nui_38)+seconds+getString(R.string.nui_39)+String.format(java.util.Locale.US,"%.3f MB",bytes/1048576.0)+getString(R.string.nui_40)+String.format(java.util.Locale.US,"%.3f MB",totalSessionBytes/1048576.0)+getString(R.string.nui_41)+(totalSessionSeconds/60)+getString(R.string.nui_42)+getString(R.string.nui_43));
+            historyStatus.setText(getString(R.string.nui_38)+seconds+getString(R.string.nui_39)+String.format(Locale.getDefault(),"%.3f MB",bytes/1048576.0)+getString(R.string.nui_40)+String.format(Locale.getDefault(),"%.3f MB",totalSessionBytes/1048576.0)+getString(R.string.nui_41)+(totalSessionSeconds/60)+getString(R.string.nui_42)+getString(R.string.nui_43));
         }
     }
     @Override protected void onStop(){
@@ -336,7 +344,7 @@ public final class NetworkHomeActivity extends Activity {
         b.setAllCaps(false);
         b.setMinHeight(dp(54));
         b.setContentDescription(label);
-        parent.addView(b,new LinearLayout.LayoutParams(-1,dp(54)));
+        parent.addView(b,new LinearLayout.LayoutParams(-1,-2));
         return b;
     }
 

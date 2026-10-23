@@ -55,7 +55,7 @@ jobs:
       - name: Publish debug APK immediately
         uses: actions/upload-artifact@v4
         with:
-          name: marsx-network-v17-debug-apk
+          name: marsx-network-v18-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
       - name: Build release AAB
@@ -64,5 +64,5 @@ jobs:
         run: python3 scripts/check-demo-manifest.py
       - uses: actions/upload-artifact@v4
         with:
-          name: marsx-network-v17-release-aab-unsigned
+          name: marsx-network-v18-release-aab-unsigned
           path: android/app/build/outputs/bundle/release/app-release.aab

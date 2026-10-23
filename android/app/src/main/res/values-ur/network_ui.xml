@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"کوئی کنکشن نہیں"</string>
+    <string name="nui_01" formatted="false">"دوسرا نیٹ ورک"</string>
+    <string name="nui_02" formatted="false">"موبائل ڈیٹا"</string>
+    <string name="nui_03" formatted="false">"شروع کریں • کنکشن کی نگرانی"</string>
+    <string name="nui_04" formatted="false">"کنکشن منقطع؛ نگرانی رک گئی۔"</string>
+    <string name="nui_05" formatted="false">"بیٹری 15% سے کم؛ نگرانی رک گئی۔"</string>
+    <string name="nui_06" formatted="false">"پیمائش معاونت یافتہ نہیں"</string>
+    <string name="nui_07" formatted="false">"کنکشن: "</string>
+    <string name="nui_08" formatted="false">" • نگرانی: "</string>
+    <string name="nui_09" formatted="false">" منٹ "</string>
+    <string name="nui_10" formatted="false">" سیکنڈ\nایپ کا ڈیٹا استعمال: "</string>
+    <string name="nui_11" formatted="false">"\nشیئر کردہ ٹریفک: 0 GB • آمدنی: €0.00"</string>
+    <string name="nui_12" formatted="false">"واضح رضامندی • صرف آزمائش"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network کا مقصد مستقبل کے ایک منظور شدہ شراکت دار کے ذریعے آپ کا انٹرنیٹ کنکشن تیسرے فریق کے صارفین کی ٹریفک کے لیے شیئر کرنا ہے۔ اس سے آپ کے ڈیٹا کوٹے، بیٹری اور کنکشن پر اثر پڑ سکتا ہے؛ شراکت دار کے صارفین آپ کے نیٹ ورک کا IP پتہ استعمال کر سکتے ہیں۔ ٹریفک یا آمدنی کی کوئی ضمانت نہیں۔ حقیقی شیئرنگ فی الحال بند ہے۔ آپ کسی بھی وقت رضامندی واپس لے سکتے ہیں۔ جاری رکھنے سے صرف آزمائشی ترجیح محفوظ ہوتی ہے۔"</string>
+    <string name="nui_14" formatted="false">"منسوخ کریں"</string>
+    <string name="nui_15" formatted="false">"آزمائشی رضامندی محفوظ کریں"</string>
+    <string name="nui_16" formatted="false">"پہلے آزمائشی وضاحت پڑھیں اور قبول کریں۔"</string>
+    <string name="nui_17" formatted="false">"نگرانی کے لیے Wi-Fi یا موبائل انٹرنیٹ درکار ہے۔"</string>
+    <string name="nui_18" formatted="false">"کنکشن کی نگرانی شروع کریں۔ یہ آزمائش آپ کا انٹرنیٹ شیئر نہیں کرتی اور آمدنی پیدا نہیں کرتی۔ آپ کسی بھی وقت روک سکتے ہیں۔"</string>
+    <string name="nui_19" formatted="false">"شروع کریں"</string>
+    <string name="nui_20" formatted="false">"روکیں • کنکشن کی نگرانی"</string>
+    <string name="nui_21" formatted="false">"زیر التوا روایتی کرنسی: €0.00\nتصفیہ شدہ روایتی کرنسی: €0.00\nقابل نکاسی روایتی کرنسی: €0.00"</string>
+    <string name="nui_22" formatted="false">"شراکت دار کی رسید کے بغیر کوئی بیلنس نہیں بنتا۔"</string>
+    <string name="nui_23" formatted="false">"وصول کنندہ کا والیٹ پتہ شامل کریں"</string>
+    <string name="nui_24" formatted="false">"USDC نیٹ ورک منتخب کریں"</string>
+    <string name="nui_25" formatted="false">" وصول کنندہ کا پتہ"</string>
+    <string name="nui_26" formatted="false">"صرف وصول کنندہ کا عوامی پتہ درج کریں۔ نجی کلیدیں یا بازیابی کے الفاظ درج نہ کریں۔ یہ آزمائش رقم منتقل نہیں کرتی۔"</string>
+    <string name="nui_27" formatted="false">"پتہ حذف کریں"</string>
+    <string name="nui_28" formatted="false">"والیٹ پتہ شامل کریں"</string>
+    <string name="nui_29" formatted="false">"محفوظ کریں"</string>
+    <string name="nui_30" formatted="false">"منتخب نیٹ ورک کے لیے پتے کا فارمیٹ غلط ہے۔"</string>
+    <string name="nui_31" formatted="false">"نکاسی کی کوئی درخواست نہیں۔ کوئی حقیقی منتقلی نہیں کی گئی۔"</string>
+    <string name="nui_32" formatted="false">"4  •  ترتیبات"</string>
+    <string name="nui_33" formatted="false">"زبان"</string>
+    <string name="nui_34" formatted="false">"منتخب زبان کا کوڈ: "</string>
+    <string name="nui_35" formatted="false">"\nمقامی آزمائش: صرف ایپ کی ٹریفک ناپتی ہے۔\nکنکشن: Wi-Fi یا موبائل ڈیٹا (انٹرنیٹ درکار)\nکم بیٹری (&lt;15%) سے تحفظ: نگرانی کے دوران فعال\nحرارت سے تحفظ: دستیاب نہیں\nپس منظر میں نگرانی: بند\nرضامندی واپس لینے پر نگرانی رک جاتی ہے"</string>
+    <string name="nui_36" formatted="false">"انتباہ: آزمائشی رضامندی مستقبل میں حقیقی نیٹ ورک شیئرنگ کی اجازت نہیں دیتی۔ حقیقی Network SDK فعال کرنے سے پہلے الگ واضح رضامندی درکار ہے۔"</string>
+    <string name="nui_37" formatted="false">"کنکشن کی نگرانی بند • حقیقی شیئرنگ: بند"</string>
+    <string name="nui_38" formatted="false">"نگرانی کا آخری سیشن: "</string>
+    <string name="nui_39" formatted="false">" سیکنڈ • ایپ ڈیٹا: "</string>
+    <string name="nui_40" formatted="false">"\nایپ کی کل ریکارڈ شدہ ٹریفک: "</string>
+    <string name="nui_41" formatted="false">"\nنگرانی کا کل وقت: "</string>
+    <string name="nui_42" formatted="false">" منٹ"</string>
+    <string name="nui_43" formatted="false">"\nیہ پیمائش آمدنی یا شیئر کردہ بینڈوڈتھ نہیں ہے۔"</string>
+    <string name="nui_44" formatted="false">"واضح رضامندی: دی گئی • حقیقی شیئرنگ بدستور بند"</string>
+    <string name="nui_45" formatted="false">"واضح رضامندی: نہیں دی گئی • حقیقی شیئرنگ بند"</string>
+    <string name="nui_46" formatted="false">"رضامندی واپس لیں"</string>
+    <string name="nui_47" formatted="false">"واضح رضامندی دیں"</string>
+</resources>

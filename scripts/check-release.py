@@ -63,7 +63,7 @@ if not re.search(r"targetSdk\s+36", gradle):
 # Accept the legacy beta or the explicitly isolated Network test build.
 # Network versioning does not change the backend API's legacy 0.9.0 contract.
 legacy_version = 'versionName "0.9.0-beta"' in gradle and 'versionCode 13' in gradle
-network_version = 'versionName "0.9.3-network-test"' in gradle and bool(re.search(r'versionCode\s+(?:16|17)\b', gradle))
+network_version = 'versionName "0.9.3-network-test"' in gradle and bool(re.search(r'versionCode\s+(?:16|17|18)\b', gradle))
 if not (legacy_version or network_version):
     raise SystemExit("Unsupported Android version: expected legacy beta 13 or Network test 16")
 if network_version:

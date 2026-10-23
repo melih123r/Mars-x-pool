@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">اشتہار • ڈیمو</string>
+    <string name="ads_disabled">اختیاری آزمائشی اشتہارات بند ہیں۔ اشتہاری انعامات یا حقیقی آمدنی نہیں۔</string>
+    <string name="ads_checking">اشتہارات کی رازداری کے انتخاب چیک ہو رہے ہیں…</string>
+    <string name="ads_unavailable">آزمائشی اشتہارات دستیاب نہیں۔ آپ اشتہارات کے بغیر ڈیمو استعمال کر سکتے ہیں۔</string>
+    <string name="ads_test_notice">Google کا آزمائشی اشتہار • کوئی آمدنی نہیں۔ اشتہاری ٹریفک ایپ کے ڈیٹا استعمال میں شامل ہے۔</string>
+    <string name="ads_enable">اختیاری آزمائشی اشتہار فعال کریں</string>
+    <string name="ads_disable">اشتہارات بند کریں</string>
+    <string name="ads_privacy">اشتہارات کی رازداری کے اختیارات</string>
+</resources>

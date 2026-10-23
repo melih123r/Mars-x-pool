@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Нет соединения"</string>
+    <string name="nui_01" formatted="false">"Другая сеть"</string>
+    <string name="nui_02" formatted="false">"Мобильные данные"</string>
+    <string name="nui_03" formatted="false">"Начать • мониторинг соединения"</string>
+    <string name="nui_04" formatted="false">"Соединение потеряно; мониторинг остановлен."</string>
+    <string name="nui_05" formatted="false">"Заряд батареи ниже 15%; мониторинг остановлен."</string>
+    <string name="nui_06" formatted="false">"Измерение не поддерживается"</string>
+    <string name="nui_07" formatted="false">"Соединение: "</string>
+    <string name="nui_08" formatted="false">" • Мониторинг: "</string>
+    <string name="nui_09" formatted="false">" мин "</string>
+    <string name="nui_10" formatted="false">" сек\nТрафик приложения: "</string>
+    <string name="nui_11" formatted="false">"\nПредоставленный трафик: 0 GB • Доход: €0.00"</string>
+    <string name="nui_12" formatted="false">"Явное согласие • только ТЕСТ"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network планирует предоставлять ваше интернет-соединение для трафика сторонних клиентов через будущего одобренного партнёра. Это может повлиять на лимит трафика, батарею и соединение; клиенты партнёра могут использовать IP-адрес вашей сети. Объём трафика и доход не гарантируются. Реальная передача трафика сейчас отключена. Вы можете отозвать согласие в любое время. Продолжение лишь сохраняет тестовую настройку."</string>
+    <string name="nui_14" formatted="false">"Отмена"</string>
+    <string name="nui_15" formatted="false">"Сохранить тестовое согласие"</string>
+    <string name="nui_16" formatted="false">"Сначала прочитайте и примите тестовое уведомление."</string>
+    <string name="nui_17" formatted="false">"Для мониторинга нужен Wi-Fi или мобильный интернет."</string>
+    <string name="nui_18" formatted="false">"Начните мониторинг соединения. Этот тест не предоставляет доступ к вашему интернету и не приносит доход. Вы можете остановить его в любое время."</string>
+    <string name="nui_19" formatted="false">"Начать"</string>
+    <string name="nui_20" formatted="false">"Остановить • мониторинг соединения"</string>
+    <string name="nui_21" formatted="false">"Фиат в ожидании: €0.00\nПодтверждённый фиат: €0.00\nФиат для вывода: €0.00"</string>
+    <string name="nui_22" formatted="false">"Баланс не создаётся без подтверждения от партнёра."</string>
+    <string name="nui_23" formatted="false">"Добавить адрес кошелька получателя"</string>
+    <string name="nui_24" formatted="false">"Выберите сеть USDC"</string>
+    <string name="nui_25" formatted="false">" адрес получателя"</string>
+    <string name="nui_26" formatted="false">"Введите только публичный адрес получателя. Не вводите приватные ключи или слова восстановления. Этот тест не переводит средства."</string>
+    <string name="nui_27" formatted="false">"Удалить адрес"</string>
+    <string name="nui_28" formatted="false">"Добавить адрес кошелька"</string>
+    <string name="nui_29" formatted="false">"Сохранить"</string>
+    <string name="nui_30" formatted="false">"Неверный формат адреса для выбранной сети."</string>
+    <string name="nui_31" formatted="false">"Нет заявок на вывод. Реальные переводы не выполнялись."</string>
+    <string name="nui_32" formatted="false">"4  •  НАСТРОЙКИ"</string>
+    <string name="nui_33" formatted="false">"Язык"</string>
+    <string name="nui_34" formatted="false">"Код выбранного языка: "</string>
+    <string name="nui_35" formatted="false">"\nЛокальный тест: измеряет только трафик приложения.\nСоединение: Wi-Fi или мобильные данные (нужен интернет)\nЗащита при низком заряде (&lt;15%): ВКЛ при мониторинге\nЗащита от перегрева: недоступна\nФоновый мониторинг: ВЫКЛ\nМониторинг прекращается при отзыве согласия"</string>
+    <string name="nui_36" formatted="false">"Внимание: тестовое согласие не разрешает будущую реальную передачу сетевого трафика. Перед включением реального Network SDK необходимо отдельное явное согласие."</string>
+    <string name="nui_37" formatted="false">"Мониторинг соединения выключен • Реальная передача трафика: ВЫКЛ"</string>
+    <string name="nui_38" formatted="false">"Последний сеанс мониторинга: "</string>
+    <string name="nui_39" formatted="false">" сек • Данные приложения: "</string>
+    <string name="nui_40" formatted="false">"\nВсего записано трафика приложения: "</string>
+    <string name="nui_41" formatted="false">"\nОбщее время мониторинга: "</string>
+    <string name="nui_42" formatted="false">" мин"</string>
+    <string name="nui_43" formatted="false">"\nЭто измерение не является доходом или предоставленной пропускной способностью."</string>
+    <string name="nui_44" formatted="false">"Явное согласие: ПОЛУЧЕНО • Реальная передача трафика остаётся ВЫКЛ"</string>
+    <string name="nui_45" formatted="false">"Явное согласие: НЕ ПОЛУЧЕНО • Реальная передача трафика ВЫКЛ"</string>
+    <string name="nui_46" formatted="false">"Отозвать согласие"</string>
+    <string name="nui_47" formatted="false">"Дать явное согласие"</string>
+</resources>

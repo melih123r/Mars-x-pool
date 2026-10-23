@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="network_demo_heading">MARS-X NETWORK</string>
-    <string name="network_start_monitoring">시작 • 연결 모니터링</string>
-    <string name="network_monitor_off">모니터링 꺼짐 • 실제 공유: 꺼짐</string>
-    <string name="network_demo_disclaimer">데모 버전 • 결제, 프록시, 암호화폐 전송 및 실제 Network SDK가 비활성화됨</string>
+    <string name="network_demo_heading" formatted="false">MARS-X NETWORK</string>
+    <string name="network_start_monitoring" formatted="false">시작 • 연결 모니터링</string>
+    <string name="network_monitor_off" formatted="false">연결 모니터링 꺼짐 • 실제 공유: 꺼짐</string>
+    <string name="network_demo_disclaimer" formatted="false">데모 • 결제, 프록시, 암호화폐 전송 및 실제 Network SDK 비활성화</string>
 </resources>

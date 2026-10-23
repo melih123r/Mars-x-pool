@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Sin conexión"</string>
+    <string name="nui_01" formatted="false">"Otra red"</string>
+    <string name="nui_02" formatted="false">"Datos móviles"</string>
+    <string name="nui_03" formatted="false">"Iniciar • supervisar conexión"</string>
+    <string name="nui_04" formatted="false">"Conexión perdida; supervisión detenida."</string>
+    <string name="nui_05" formatted="false">"Batería por debajo del 15 %; supervisión detenida."</string>
+    <string name="nui_06" formatted="false">"Medición no compatible"</string>
+    <string name="nui_07" formatted="false">"Conexión: "</string>
+    <string name="nui_08" formatted="false">" • Supervisión: "</string>
+    <string name="nui_09" formatted="false">" min "</string>
+    <string name="nui_10" formatted="false">" s\nUso de datos de la aplicación: "</string>
+    <string name="nui_11" formatted="false">"\nTráfico compartido: 0 GB • Ingresos: €0.00"</string>
+    <string name="nui_12" formatted="false">"Consentimiento explícito • Solo PRUEBA"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network pretende compartir tu conexión a Internet con el tráfico de clientes externos mediante un futuro socio autorizado. Esto puede afectar a tu plan de datos, batería y conexión; los clientes del socio pueden usar la dirección IP de tu red. No se garantiza tráfico ni ingresos. El uso compartido real está desactivado actualmente. Puedes revocar el consentimiento en cualquier momento. Al continuar solo se guarda una preferencia de prueba."</string>
+    <string name="nui_14" formatted="false">"Cancelar"</string>
+    <string name="nui_15" formatted="false">"Guardar consentimiento de prueba"</string>
+    <string name="nui_16" formatted="false">"Lee y acepta primero la información de la prueba."</string>
+    <string name="nui_17" formatted="false">"La supervisión requiere Internet por Wi-Fi o datos móviles."</string>
+    <string name="nui_18" formatted="false">"Inicia la supervisión de la conexión. Esta prueba no comparte tu Internet ni genera ingresos. Puedes detenerla en cualquier momento."</string>
+    <string name="nui_19" formatted="false">"Iniciar"</string>
+    <string name="nui_20" formatted="false">"Detener • supervisión de conexión"</string>
+    <string name="nui_21" formatted="false">"Dinero fiduciario pendiente: €0.00\nDinero fiduciario liquidado: €0.00\nDinero fiduciario retirable: €0.00"</string>
+    <string name="nui_22" formatted="false">"No se crea saldo sin un comprobante del socio."</string>
+    <string name="nui_23" formatted="false">"Añadir dirección de monedero del destinatario"</string>
+    <string name="nui_24" formatted="false">"Seleccionar red USDC"</string>
+    <string name="nui_25" formatted="false">" : dirección del destinatario"</string>
+    <string name="nui_26" formatted="false">"Introduce solo una dirección pública del destinatario. No introduzcas claves privadas ni palabras de recuperación. Esta prueba no transfiere fondos."</string>
+    <string name="nui_27" formatted="false">"Eliminar dirección"</string>
+    <string name="nui_28" formatted="false">"Añadir dirección de monedero"</string>
+    <string name="nui_29" formatted="false">"Guardar"</string>
+    <string name="nui_30" formatted="false">"Formato de dirección no válido para la red seleccionada."</string>
+    <string name="nui_31" formatted="false">"No hay solicitudes de retiro. No se han realizado transferencias reales."</string>
+    <string name="nui_32" formatted="false">"4  •  AJUSTES"</string>
+    <string name="nui_33" formatted="false">"Idioma"</string>
+    <string name="nui_34" formatted="false">"Código de idioma seleccionado: "</string>
+    <string name="nui_35" formatted="false">"\nPrueba local: mide solo el tráfico de la aplicación.\nConexión: Wi-Fi o datos móviles (requiere Internet)\nProtección de batería baja (&lt;15 %): ACTIVADA durante la supervisión\nProtección térmica: no disponible\nSupervisión en segundo plano: DESACTIVADA\nLa supervisión se detiene al revocar el consentimiento"</string>
+    <string name="nui_36" formatted="false">"Aviso: el consentimiento de prueba no autoriza ningún uso compartido real futuro de la red. Se requiere un consentimiento explícito independiente antes de activar un Network SDK real."</string>
+    <string name="nui_37" formatted="false">"Supervisión de conexión desactivada • Uso compartido real: DESACTIVADO"</string>
+    <string name="nui_38" formatted="false">"Última sesión de supervisión: "</string>
+    <string name="nui_39" formatted="false">" s • Datos de la aplicación: "</string>
+    <string name="nui_40" formatted="false">"\nTráfico total registrado de la aplicación: "</string>
+    <string name="nui_41" formatted="false">"\nTiempo total de supervisión: "</string>
+    <string name="nui_42" formatted="false">" min"</string>
+    <string name="nui_43" formatted="false">"\nEsta medición no representa ingresos ni ancho de banda compartido."</string>
+    <string name="nui_44" formatted="false">"Consentimiento explícito: OTORGADO • El uso compartido real sigue DESACTIVADO"</string>
+    <string name="nui_45" formatted="false">"Consentimiento explícito: NO OTORGADO • Uso compartido real DESACTIVADO"</string>
+    <string name="nui_46" formatted="false">"Revocar consentimiento"</string>
+    <string name="nui_47" formatted="false">"Otorgar consentimiento explícito"</string>
+</resources>

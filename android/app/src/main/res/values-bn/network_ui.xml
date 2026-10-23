@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"সংযোগ নেই"</string>
+    <string name="nui_01" formatted="false">"অন্য নেটওয়ার্ক"</string>
+    <string name="nui_02" formatted="false">"মোবাইল ডেটা"</string>
+    <string name="nui_03" formatted="false">"শুরু • সংযোগ পর্যবেক্ষণ"</string>
+    <string name="nui_04" formatted="false">"সংযোগ বিচ্ছিন্ন; পর্যবেক্ষণ বন্ধ হয়েছে।"</string>
+    <string name="nui_05" formatted="false">"ব্যাটারি 15%-এর নিচে; পর্যবেক্ষণ বন্ধ হয়েছে।"</string>
+    <string name="nui_06" formatted="false">"পরিমাপ সমর্থিত নয়"</string>
+    <string name="nui_07" formatted="false">"সংযোগ: "</string>
+    <string name="nui_08" formatted="false">" • পর্যবেক্ষণ: "</string>
+    <string name="nui_09" formatted="false">" মিনিট "</string>
+    <string name="nui_10" formatted="false">" সেকেন্ড\nঅ্যাপের ডেটা ব্যবহার: "</string>
+    <string name="nui_11" formatted="false">"\nশেয়ার করা ট্রাফিক: 0 GB • আয়: €0.00"</string>
+    <string name="nui_12" formatted="false">"স্পষ্ট সম্মতি • শুধু পরীক্ষা"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network ভবিষ্যতে অনুমোদিত অংশীদারের মাধ্যমে তৃতীয় পক্ষের গ্রাহকদের ট্রাফিকের জন্য আপনার ইন্টারনেট সংযোগ শেয়ার করার লক্ষ্য রাখে। এটি আপনার ডেটা সীমা, ব্যাটারি ও সংযোগে প্রভাব ফেলতে পারে; অংশীদারের গ্রাহকরা আপনার নেটওয়ার্কের IP ঠিকানা ব্যবহার করতে পারেন। ট্রাফিক বা আয়ের নিশ্চয়তা নেই। প্রকৃত শেয়ারিং বর্তমানে বন্ধ। আপনি যেকোনো সময় সম্মতি প্রত্যাহার করতে পারেন। চালিয়ে গেলে শুধু একটি পরীক্ষামূলক পছন্দ সংরক্ষিত হয়।"</string>
+    <string name="nui_14" formatted="false">"বাতিল"</string>
+    <string name="nui_15" formatted="false">"পরীক্ষামূলক সম্মতি সংরক্ষণ"</string>
+    <string name="nui_16" formatted="false">"আগে পরীক্ষার বিবরণ পড়ুন ও গ্রহণ করুন।"</string>
+    <string name="nui_17" formatted="false">"পর্যবেক্ষণের জন্য Wi-Fi বা মোবাইল ইন্টারনেট প্রয়োজন।"</string>
+    <string name="nui_18" formatted="false">"সংযোগ পর্যবেক্ষণ শুরু করুন। এই পরীক্ষা আপনার ইন্টারনেট শেয়ার করে না বা আয় তৈরি করে না। যেকোনো সময় বন্ধ করতে পারেন।"</string>
+    <string name="nui_19" formatted="false">"শুরু"</string>
+    <string name="nui_20" formatted="false">"বন্ধ • সংযোগ পর্যবেক্ষণ"</string>
+    <string name="nui_21" formatted="false">"অপেক্ষমাণ প্রচলিত মুদ্রা: €0.00\nনিষ্পত্তি হওয়া প্রচলিত মুদ্রা: €0.00\nউত্তোলনযোগ্য প্রচলিত মুদ্রা: €0.00"</string>
+    <string name="nui_22" formatted="false">"অংশীদারের রসিদ ছাড়া কোনো ব্যালেন্স তৈরি হয় না।"</string>
+    <string name="nui_23" formatted="false">"প্রাপকের ওয়ালেট ঠিকানা যোগ করুন"</string>
+    <string name="nui_24" formatted="false">"USDC নেটওয়ার্ক বেছে নিন"</string>
+    <string name="nui_25" formatted="false">" প্রাপকের ঠিকানা"</string>
+    <string name="nui_26" formatted="false">"শুধু প্রাপকের সর্বজনীন ঠিকানা লিখুন। গোপন কী বা পুনরুদ্ধারের শব্দ লিখবেন না। এই পরীক্ষা অর্থ স্থানান্তর করে না।"</string>
+    <string name="nui_27" formatted="false">"ঠিকানা মুছুন"</string>
+    <string name="nui_28" formatted="false">"ওয়ালেট ঠিকানা যোগ করুন"</string>
+    <string name="nui_29" formatted="false">"সংরক্ষণ"</string>
+    <string name="nui_30" formatted="false">"নির্বাচিত নেটওয়ার্কের জন্য ঠিকানার বিন্যাস সঠিক নয়।"</string>
+    <string name="nui_31" formatted="false">"উত্তোলনের অনুরোধ নেই। কোনো প্রকৃত স্থানান্তর হয়নি।"</string>
+    <string name="nui_32" formatted="false">"4  •  সেটিংস"</string>
+    <string name="nui_33" formatted="false">"ভাষা"</string>
+    <string name="nui_34" formatted="false">"নির্বাচিত ভাষার কোড: "</string>
+    <string name="nui_35" formatted="false">"\nস্থানীয় পরীক্ষা: শুধু অ্যাপের ট্রাফিক মাপে।\nসংযোগ: Wi-Fi বা মোবাইল ডেটা (ইন্টারনেট প্রয়োজন)\nকম ব্যাটারি (&lt;15%) সুরক্ষা: পর্যবেক্ষণের সময় চালু\nতাপমাত্রা সুরক্ষা: অনুপলব্ধ\nপটভূমিতে পর্যবেক্ষণ: বন্ধ\nসম্মতি প্রত্যাহার করলে পর্যবেক্ষণ বন্ধ হয়"</string>
+    <string name="nui_36" formatted="false">"সতর্কতা: পরীক্ষামূলক সম্মতি ভবিষ্যতে প্রকৃত নেটওয়ার্ক শেয়ারিংয়ের অনুমতি দেয় না। প্রকৃত Network SDK চালু করার আগে আলাদা স্পষ্ট সম্মতি প্রয়োজন।"</string>
+    <string name="nui_37" formatted="false">"সংযোগ পর্যবেক্ষণ বন্ধ • প্রকৃত শেয়ারিং: বন্ধ"</string>
+    <string name="nui_38" formatted="false">"শেষ পর্যবেক্ষণ সেশন: "</string>
+    <string name="nui_39" formatted="false">" সেকেন্ড • অ্যাপের ডেটা: "</string>
+    <string name="nui_40" formatted="false">"\nঅ্যাপের মোট রেকর্ড করা ট্রাফিক: "</string>
+    <string name="nui_41" formatted="false">"\nমোট পর্যবেক্ষণের সময়: "</string>
+    <string name="nui_42" formatted="false">" মিনিট"</string>
+    <string name="nui_43" formatted="false">"\nএই পরিমাপ আয় বা শেয়ার করা ব্যান্ডউইথ নয়।"</string>
+    <string name="nui_44" formatted="false">"স্পষ্ট সম্মতি: দেওয়া হয়েছে • প্রকৃত শেয়ারিং বন্ধই থাকবে"</string>
+    <string name="nui_45" formatted="false">"স্পষ্ট সম্মতি: দেওয়া হয়নি • প্রকৃত শেয়ারিং বন্ধ"</string>
+    <string name="nui_46" formatted="false">"সম্মতি প্রত্যাহার"</string>
+    <string name="nui_47" formatted="false">"স্পষ্ট সম্মতি দিন"</string>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Ingen anslutning"</string>
+    <string name="nui_01" formatted="false">"Annat nätverk"</string>
+    <string name="nui_02" formatted="false">"Mobildata"</string>
+    <string name="nui_03" formatted="false">"Starta • övervaka anslutning"</string>
+    <string name="nui_04" formatted="false">"Anslutningen bröts; övervakningen stoppades."</string>
+    <string name="nui_05" formatted="false">"Batteri under 15%; övervakningen stoppades."</string>
+    <string name="nui_06" formatted="false">"Mätning stöds inte"</string>
+    <string name="nui_07" formatted="false">"Anslutning: "</string>
+    <string name="nui_08" formatted="false">" • Övervakning: "</string>
+    <string name="nui_09" formatted="false">" min "</string>
+    <string name="nui_10" formatted="false">" sek\nAppens dataanvändning: "</string>
+    <string name="nui_11" formatted="false">"\nDelad trafik: 0 GB • Intäkter: €0.00"</string>
+    <string name="nui_12" formatted="false">"Uttryckligt samtycke • endast TEST"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network har som mål att dela din internetanslutning för tredjepartskunders trafik via en framtida godkänd partner. Detta kan påverka din datamängd, ditt batteri och din anslutning; partnerns kunder kan använda ditt nätverks IP-adress. Det finns ingen garanti för trafik eller intäkter. Verklig delning är för närvarande avstängd. Du kan när som helst återkalla samtycket. Om du fortsätter sparas endast en testinställning."</string>
+    <string name="nui_14" formatted="false">"Avbryt"</string>
+    <string name="nui_15" formatted="false">"Spara testsamtycke"</string>
+    <string name="nui_16" formatted="false">"Läs och godkänn testinformationen först."</string>
+    <string name="nui_17" formatted="false">"Övervakning kräver Wi-Fi eller mobilt internet."</string>
+    <string name="nui_18" formatted="false">"Starta övervakning av anslutningen. Detta test delar inte ditt internet och genererar inga intäkter. Du kan sluta när som helst."</string>
+    <string name="nui_19" formatted="false">"Starta"</string>
+    <string name="nui_20" formatted="false">"Stoppa • anslutningsövervakning"</string>
+    <string name="nui_21" formatted="false">"Väntande fiatbelopp: €0.00\nAvräknat fiatbelopp: €0.00\nUttagbart fiatbelopp: €0.00"</string>
+    <string name="nui_22" formatted="false">"Inget saldo skapas utan ett kvitto från en partner."</string>
+    <string name="nui_23" formatted="false">"Lägg till mottagarens plånboksadress"</string>
+    <string name="nui_24" formatted="false">"Välj USDC-nätverk"</string>
+    <string name="nui_25" formatted="false">" mottagaradress"</string>
+    <string name="nui_26" formatted="false">"Ange endast en offentlig mottagaradress. Ange inte privata nycklar eller återställningsord. Detta test överför inga pengar."</string>
+    <string name="nui_27" formatted="false">"Ta bort adress"</string>
+    <string name="nui_28" formatted="false">"Lägg till plånboksadress"</string>
+    <string name="nui_29" formatted="false">"Spara"</string>
+    <string name="nui_30" formatted="false">"Ogiltigt adressformat för det valda nätverket."</string>
+    <string name="nui_31" formatted="false">"Inga uttagsbegäranden. Inga verkliga överföringar har gjorts."</string>
+    <string name="nui_32" formatted="false">"4  •  INSTÄLLNINGAR"</string>
+    <string name="nui_33" formatted="false">"Språk"</string>
+    <string name="nui_34" formatted="false">"Vald språkkod: "</string>
+    <string name="nui_35" formatted="false">"\nLokalt test: mäter endast apptrafik.\nAnslutning: Wi-Fi eller mobildata (internet krävs)\nSkydd vid låg batterinivå (&lt;15%): PÅ under övervakning\nVärmeskydd: inte tillgängligt\nBakgrundsövervakning: AV\nÖvervakningen stoppas när samtycket återkallas"</string>
+    <string name="nui_36" formatted="false">"Varning: testsamtycke godkänner inte framtida verklig nätverksdelning. Separat uttryckligt samtycke krävs innan en verklig Network SDK aktiveras."</string>
+    <string name="nui_37" formatted="false">"Anslutningsövervakning av • Verklig delning: AV"</string>
+    <string name="nui_38" formatted="false">"Senaste övervakningssession: "</string>
+    <string name="nui_39" formatted="false">" sek • Appdata: "</string>
+    <string name="nui_40" formatted="false">"\nTotalt registrerad apptrafik: "</string>
+    <string name="nui_41" formatted="false">"\nTotal övervakningstid: "</string>
+    <string name="nui_42" formatted="false">" min"</string>
+    <string name="nui_43" formatted="false">"\nDenna mätning är inte inkomst eller delad bandbredd."</string>
+    <string name="nui_44" formatted="false">"Uttryckligt samtycke: GIVET • Verklig delning förblir AV"</string>
+    <string name="nui_45" formatted="false">"Uttryckligt samtycke: INTE GIVET • Verklig delning AV"</string>
+    <string name="nui_46" formatted="false">"Återkalla samtycke"</string>
+    <string name="nui_47" formatted="false">"Ge uttryckligt samtycke"</string>
+</resources>

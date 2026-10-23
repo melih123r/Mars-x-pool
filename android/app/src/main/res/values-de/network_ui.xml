@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Keine Verbindung"</string>
+    <string name="nui_01" formatted="false">"Anderes Netzwerk"</string>
+    <string name="nui_02" formatted="false">"Mobile Daten"</string>
+    <string name="nui_03" formatted="false">"Starten • Verbindung überwachen"</string>
+    <string name="nui_04" formatted="false">"Verbindung verloren; Überwachung beendet."</string>
+    <string name="nui_05" formatted="false">"Akku unter 15 %; Überwachung beendet."</string>
+    <string name="nui_06" formatted="false">"Messung nicht unterstützt"</string>
+    <string name="nui_07" formatted="false">"Verbindung: "</string>
+    <string name="nui_08" formatted="false">" • Überwachung: "</string>
+    <string name="nui_09" formatted="false">" Min. "</string>
+    <string name="nui_10" formatted="false">" Sek.\nApp-Datenverbrauch: "</string>
+    <string name="nui_11" formatted="false">"\nGeteilter Datenverkehr: 0 GB • Einnahmen: €0.00"</string>
+    <string name="nui_12" formatted="false">"Ausdrückliche Einwilligung • Nur TEST"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network soll Ihre Internetverbindung künftig über einen zugelassenen Partner für den Datenverkehr externer Kunden freigeben. Dies kann Ihr Datenvolumen, Ihren Akku und Ihre Verbindung beeinträchtigen; Kunden des Partners können die IP-Adresse Ihres Netzwerks nutzen. Datenverkehr oder Einnahmen werden nicht garantiert. Die echte Freigabe ist derzeit deaktiviert. Sie können Ihre Einwilligung jederzeit widerrufen. Beim Fortfahren wird nur eine Testeinstellung gespeichert."</string>
+    <string name="nui_14" formatted="false">"Abbrechen"</string>
+    <string name="nui_15" formatted="false">"Testeinwilligung speichern"</string>
+    <string name="nui_16" formatted="false">"Lesen und akzeptieren Sie zuerst die Testhinweise."</string>
+    <string name="nui_17" formatted="false">"Die Überwachung erfordert WLAN oder mobiles Internet."</string>
+    <string name="nui_18" formatted="false">"Starten Sie die Verbindungsüberwachung. Dieser Test gibt Ihr Internet nicht frei und erzielt keine Einnahmen. Sie können jederzeit stoppen."</string>
+    <string name="nui_19" formatted="false">"Starten"</string>
+    <string name="nui_20" formatted="false">"Stoppen • Verbindungsüberwachung"</string>
+    <string name="nui_21" formatted="false">"Ausstehendes Fiatgeld: €0.00\nAbgerechnetes Fiatgeld: €0.00\nAuszahlbares Fiatgeld: €0.00"</string>
+    <string name="nui_22" formatted="false">"Ohne Beleg eines Partners wird kein Guthaben erstellt."</string>
+    <string name="nui_23" formatted="false">"Empfänger-Wallet-Adresse hinzufügen"</string>
+    <string name="nui_24" formatted="false">"USDC-Netzwerk auswählen"</string>
+    <string name="nui_25" formatted="false">" Empfängeradresse"</string>
+    <string name="nui_26" formatted="false">"Geben Sie nur eine öffentliche Empfängeradresse ein. Geben Sie keine privaten Schlüssel oder Wiederherstellungswörter ein. Dieser Test überträgt kein Geld."</string>
+    <string name="nui_27" formatted="false">"Adresse löschen"</string>
+    <string name="nui_28" formatted="false">"Wallet-Adresse hinzufügen"</string>
+    <string name="nui_29" formatted="false">"Speichern"</string>
+    <string name="nui_30" formatted="false">"Ungültiges Adressformat für das ausgewählte Netzwerk."</string>
+    <string name="nui_31" formatted="false">"Keine Auszahlungsanträge. Es wurden keine echten Übertragungen durchgeführt."</string>
+    <string name="nui_32" formatted="false">"4  •  EINSTELLUNGEN"</string>
+    <string name="nui_33" formatted="false">"Sprache"</string>
+    <string name="nui_34" formatted="false">"Ausgewählter Sprachcode: "</string>
+    <string name="nui_35" formatted="false">"\nLokaler Test: misst nur den App-Datenverkehr.\nVerbindung: WLAN oder mobile Daten (Internet erforderlich)\nSchutz bei niedrigem Akkustand (&lt;15 %): während der Überwachung EIN\nÜberhitzungsschutz: nicht verfügbar\nHintergrundüberwachung: AUS\nDie Überwachung endet beim Widerruf der Einwilligung"</string>
+    <string name="nui_36" formatted="false">"Warnung: Die Testeinwilligung erlaubt keine zukünftige echte Netzwerkfreigabe. Vor der Aktivierung eines echten Network SDK ist eine separate ausdrückliche Einwilligung erforderlich."</string>
+    <string name="nui_37" formatted="false">"Verbindungsüberwachung aus • Echte Freigabe: AUS"</string>
+    <string name="nui_38" formatted="false">"Letzte Überwachungssitzung: "</string>
+    <string name="nui_39" formatted="false">" Sek. • App-Daten: "</string>
+    <string name="nui_40" formatted="false">"\nInsgesamt erfasster App-Datenverkehr: "</string>
+    <string name="nui_41" formatted="false">"\nGesamte Überwachungszeit: "</string>
+    <string name="nui_42" formatted="false">" Min."</string>
+    <string name="nui_43" formatted="false">"\nDiese Messung stellt weder Einnahmen noch geteilte Bandbreite dar."</string>
+    <string name="nui_44" formatted="false">"Ausdrückliche Einwilligung: ERTEILT • Echte Freigabe bleibt AUS"</string>
+    <string name="nui_45" formatted="false">"Ausdrückliche Einwilligung: NICHT ERTEILT • Echte Freigabe AUS"</string>
+    <string name="nui_46" formatted="false">"Einwilligung widerrufen"</string>
+    <string name="nui_47" formatted="false">"Ausdrücklich einwilligen"</string>
+</resources>

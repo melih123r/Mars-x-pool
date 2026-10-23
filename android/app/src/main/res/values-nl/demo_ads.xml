@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">ADVERTENTIE • DEMO</string>
+    <string name="ads_disabled">Optionele testadvertenties staan uit. Geen advertentiebeloningen of echte inkomsten.</string>
+    <string name="ads_checking">Privacykeuzes voor advertenties controleren…</string>
+    <string name="ads_unavailable">Testadvertenties niet beschikbaar. U kunt de demo zonder advertenties blijven gebruiken.</string>
+    <string name="ads_test_notice">Google-testadvertentie • geen inkomsten. Advertentieverkeer telt mee voor het dataverbruik van de app.</string>
+    <string name="ads_enable">Optionele testadvertentie inschakelen</string>
+    <string name="ads_disable">Advertenties uitschakelen</string>
+    <string name="ads_privacy">Privacyopties voor advertenties</string>
+</resources>

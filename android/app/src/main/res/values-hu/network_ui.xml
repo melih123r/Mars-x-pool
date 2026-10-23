@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Nincs kapcsolat"</string>
+    <string name="nui_01" formatted="false">"Másik hálózat"</string>
+    <string name="nui_02" formatted="false">"Mobiladat"</string>
+    <string name="nui_03" formatted="false">"Indítás • kapcsolatfigyelés"</string>
+    <string name="nui_04" formatted="false">"A kapcsolat megszakadt; a figyelés leállt."</string>
+    <string name="nui_05" formatted="false">"Az akkumulátor 15% alatt; a figyelés leállt."</string>
+    <string name="nui_06" formatted="false">"A mérés nem támogatott"</string>
+    <string name="nui_07" formatted="false">"Kapcsolat: "</string>
+    <string name="nui_08" formatted="false">" • Figyelés: "</string>
+    <string name="nui_09" formatted="false">" perc "</string>
+    <string name="nui_10" formatted="false">" mp\nAlkalmazás adatforgalma: "</string>
+    <string name="nui_11" formatted="false">"\nMegosztott forgalom: 0 GB • Bevétel: €0.00"</string>
+    <string name="nui_12" formatted="false">"Kifejezett hozzájárulás • csak TESZT"</string>
+    <string name="nui_13" formatted="false">"A MARS-X Network célja az internetkapcsolat megosztása harmadik fél ügyfeleinek forgalmához egy jövőbeli jóváhagyott partneren keresztül. Ez hatással lehet az adatkeretre, az akkumulátorra és a kapcsolatra; a partner ügyfelei használhatják a hálózat IP-címét. Nincs garancia forgalomra vagy bevételre. A tényleges megosztás jelenleg le van tiltva. Hozzájárulását bármikor visszavonhatja. A folytatás csak egy tesztbeállítást ment el."</string>
+    <string name="nui_14" formatted="false">"Mégse"</string>
+    <string name="nui_15" formatted="false">"Teszthozzájárulás mentése"</string>
+    <string name="nui_16" formatted="false">"Először olvassa el és fogadja el a teszttájékoztatót."</string>
+    <string name="nui_17" formatted="false">"A figyeléshez Wi-Fi vagy mobilinternet szükséges."</string>
+    <string name="nui_18" formatted="false">"Indítsa el a kapcsolat figyelését. Ez a teszt nem osztja meg az internetet és nem termel bevételt. Bármikor leállíthatja."</string>
+    <string name="nui_19" formatted="false">"Indítás"</string>
+    <string name="nui_20" formatted="false">"Leállítás • kapcsolatfigyelés"</string>
+    <string name="nui_21" formatted="false">"Függő fiat összeg: €0.00\nElszámolt fiat összeg: €0.00\nFelvehető fiat összeg: €0.00"</string>
+    <string name="nui_22" formatted="false">"Partneri bizonylat nélkül nem keletkezik egyenleg."</string>
+    <string name="nui_23" formatted="false">"Címzett tárcacímének hozzáadása"</string>
+    <string name="nui_24" formatted="false">"USDC-hálózat kiválasztása"</string>
+    <string name="nui_25" formatted="false">" címzett címe"</string>
+    <string name="nui_26" formatted="false">"Csak nyilvános címzetti címet adjon meg. Ne adjon meg privát kulcsokat vagy helyreállító szavakat. Ez a teszt nem utal át pénzt."</string>
+    <string name="nui_27" formatted="false">"Cím törlése"</string>
+    <string name="nui_28" formatted="false">"Tárcacím hozzáadása"</string>
+    <string name="nui_29" formatted="false">"Mentés"</string>
+    <string name="nui_30" formatted="false">"Érvénytelen címformátum a kiválasztott hálózathoz."</string>
+    <string name="nui_31" formatted="false">"Nincsenek kifizetési kérelmek. Nem történt tényleges átutalás."</string>
+    <string name="nui_32" formatted="false">"4  •  BEÁLLÍTÁSOK"</string>
+    <string name="nui_33" formatted="false">"Nyelv"</string>
+    <string name="nui_34" formatted="false">"Kiválasztott nyelvkód: "</string>
+    <string name="nui_35" formatted="false">"\nHelyi teszt: csak az alkalmazás forgalmát méri.\nKapcsolat: Wi-Fi vagy mobiladat (internet szükséges)\nAlacsony töltöttségi védelem (&lt;15%): BE figyelés közben\nHővédelem: nem érhető el\nHáttérben figyelés: KI\nA figyelés leáll a hozzájárulás visszavonásakor"</string>
+    <string name="nui_36" formatted="false">"Figyelmeztetés: a teszthozzájárulás nem engedélyezi a jövőbeli tényleges hálózatmegosztást. Valódi Network SDK engedélyezése előtt külön kifejezett hozzájárulás szükséges."</string>
+    <string name="nui_37" formatted="false">"Kapcsolatfigyelés kikapcsolva • Tényleges megosztás: KI"</string>
+    <string name="nui_38" formatted="false">"Utolsó figyelési munkamenet: "</string>
+    <string name="nui_39" formatted="false">" mp • Alkalmazásadatok: "</string>
+    <string name="nui_40" formatted="false">"\nÖsszes rögzített alkalmazásforgalom: "</string>
+    <string name="nui_41" formatted="false">"\nÖsszes figyelési idő: "</string>
+    <string name="nui_42" formatted="false">" perc"</string>
+    <string name="nui_43" formatted="false">"\nEz a mérés nem bevétel vagy megosztott sávszélesség."</string>
+    <string name="nui_44" formatted="false">"Kifejezett hozzájárulás: MEGADVA • A tényleges megosztás továbbra is KI"</string>
+    <string name="nui_45" formatted="false">"Kifejezett hozzájárulás: NINCS MEGADVA • Tényleges megosztás KI"</string>
+    <string name="nui_46" formatted="false">"Hozzájárulás visszavonása"</string>
+    <string name="nui_47" formatted="false">"Kifejezett hozzájárulás megadása"</string>
+</resources>

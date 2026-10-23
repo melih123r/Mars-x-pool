@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Không có kết nối"</string>
+    <string name="nui_01" formatted="false">"Mạng khác"</string>
+    <string name="nui_02" formatted="false">"Dữ liệu di động"</string>
+    <string name="nui_03" formatted="false">"Bắt đầu • giám sát kết nối"</string>
+    <string name="nui_04" formatted="false">"Mất kết nối; đã dừng giám sát."</string>
+    <string name="nui_05" formatted="false">"Pin dưới 15%; đã dừng giám sát."</string>
+    <string name="nui_06" formatted="false">"Không hỗ trợ đo lường"</string>
+    <string name="nui_07" formatted="false">"Kết nối: "</string>
+    <string name="nui_08" formatted="false">" • Giám sát: "</string>
+    <string name="nui_09" formatted="false">" phút "</string>
+    <string name="nui_10" formatted="false">" giây\nDữ liệu ứng dụng sử dụng: "</string>
+    <string name="nui_11" formatted="false">"\nLưu lượng đã chia sẻ: 0 GB • Thu nhập: €0.00"</string>
+    <string name="nui_12" formatted="false">"Đồng ý rõ ràng • chỉ THỬ NGHIỆM"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network hướng đến việc chia sẻ kết nối internet của bạn cho lưu lượng của khách hàng bên thứ ba thông qua một đối tác được phê duyệt trong tương lai. Điều này có thể ảnh hưởng đến dung lượng dữ liệu, pin và kết nối của bạn; khách hàng của đối tác có thể sử dụng địa chỉ IP mạng của bạn. Không có bảo đảm về lưu lượng hay thu nhập. Tính năng chia sẻ thực hiện đang bị tắt. Bạn có thể rút lại sự đồng ý bất cứ lúc nào. Tiếp tục chỉ lưu tùy chọn thử nghiệm."</string>
+    <string name="nui_14" formatted="false">"Hủy"</string>
+    <string name="nui_15" formatted="false">"Lưu sự đồng ý thử nghiệm"</string>
+    <string name="nui_16" formatted="false">"Hãy đọc và chấp nhận thông tin công bố thử nghiệm trước."</string>
+    <string name="nui_17" formatted="false">"Giám sát cần Wi-Fi hoặc internet di động."</string>
+    <string name="nui_18" formatted="false">"Bắt đầu giám sát kết nối. Thử nghiệm này không chia sẻ internet của bạn hay tạo thu nhập. Bạn có thể dừng bất cứ lúc nào."</string>
+    <string name="nui_19" formatted="false">"Bắt đầu"</string>
+    <string name="nui_20" formatted="false">"Dừng • giám sát kết nối"</string>
+    <string name="nui_21" formatted="false">"Tiền pháp định chờ xử lý: €0.00\nTiền pháp định đã quyết toán: €0.00\nTiền pháp định có thể rút: €0.00"</string>
+    <string name="nui_22" formatted="false">"Không tạo số dư nếu không có biên nhận từ đối tác."</string>
+    <string name="nui_23" formatted="false">"Thêm địa chỉ ví người nhận"</string>
+    <string name="nui_24" formatted="false">"Chọn mạng USDC"</string>
+    <string name="nui_25" formatted="false">" địa chỉ người nhận"</string>
+    <string name="nui_26" formatted="false">"Chỉ nhập địa chỉ công khai của người nhận. Không nhập khóa riêng tư hoặc các từ khôi phục. Thử nghiệm này không chuyển tiền."</string>
+    <string name="nui_27" formatted="false">"Xóa địa chỉ"</string>
+    <string name="nui_28" formatted="false">"Thêm địa chỉ ví"</string>
+    <string name="nui_29" formatted="false">"Lưu"</string>
+    <string name="nui_30" formatted="false">"Định dạng địa chỉ không hợp lệ cho mạng đã chọn."</string>
+    <string name="nui_31" formatted="false">"Không có yêu cầu rút tiền. Chưa thực hiện giao dịch chuyển tiền thực nào."</string>
+    <string name="nui_32" formatted="false">"4  •  CÀI ĐẶT"</string>
+    <string name="nui_33" formatted="false">"Ngôn ngữ"</string>
+    <string name="nui_34" formatted="false">"Mã ngôn ngữ đã chọn: "</string>
+    <string name="nui_35" formatted="false">"\nThử nghiệm cục bộ: chỉ đo lưu lượng ứng dụng.\nKết nối: Wi-Fi hoặc dữ liệu di động (cần internet)\nBảo vệ pin yếu (&lt;15%): BẬT khi giám sát\nBảo vệ nhiệt: không khả dụng\nGiám sát nền: TẮT\nGiám sát dừng khi rút lại sự đồng ý"</string>
+    <string name="nui_36" formatted="false">"Cảnh báo: sự đồng ý thử nghiệm không cho phép chia sẻ mạng thực trong tương lai. Cần có sự đồng ý rõ ràng riêng trước khi bật Network SDK thực."</string>
+    <string name="nui_37" formatted="false">"Giám sát kết nối đã tắt • Chia sẻ thực: TẮT"</string>
+    <string name="nui_38" formatted="false">"Phiên giám sát gần nhất: "</string>
+    <string name="nui_39" formatted="false">" giây • Dữ liệu ứng dụng: "</string>
+    <string name="nui_40" formatted="false">"\nTổng lưu lượng ứng dụng đã ghi: "</string>
+    <string name="nui_41" formatted="false">"\nTổng thời gian giám sát: "</string>
+    <string name="nui_42" formatted="false">" phút"</string>
+    <string name="nui_43" formatted="false">"\nSố đo này không phải thu nhập hay băng thông đã chia sẻ."</string>
+    <string name="nui_44" formatted="false">"Đồng ý rõ ràng: ĐÃ CẤP • Chia sẻ thực vẫn TẮT"</string>
+    <string name="nui_45" formatted="false">"Đồng ý rõ ràng: CHƯA CẤP • Chia sẻ thực TẮT"</string>
+    <string name="nui_46" formatted="false">"Rút lại sự đồng ý"</string>
+    <string name="nui_47" formatted="false">"Đồng ý rõ ràng"</string>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Fără conexiune"</string>
+    <string name="nui_01" formatted="false">"Altă rețea"</string>
+    <string name="nui_02" formatted="false">"Date mobile"</string>
+    <string name="nui_03" formatted="false">"Pornește • monitorizarea conexiunii"</string>
+    <string name="nui_04" formatted="false">"Conexiune pierdută; monitorizarea s-a oprit."</string>
+    <string name="nui_05" formatted="false">"Baterie sub 15%; monitorizarea s-a oprit."</string>
+    <string name="nui_06" formatted="false">"Măsurarea nu este acceptată"</string>
+    <string name="nui_07" formatted="false">"Conexiune: "</string>
+    <string name="nui_08" formatted="false">" • Monitorizare: "</string>
+    <string name="nui_09" formatted="false">" min "</string>
+    <string name="nui_10" formatted="false">" sec\nUtilizarea datelor de către aplicație: "</string>
+    <string name="nui_11" formatted="false">"\nTrafic partajat: 0 GB • Câștiguri: €0.00"</string>
+    <string name="nui_12" formatted="false">"Consimțământ explicit • doar TEST"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network își propune să partajeze conexiunea ta la internet pentru traficul clienților terți printr-un viitor partener aprobat. Acest lucru poate afecta limita de date, bateria și conexiunea; clienții partenerului pot folosi adresa IP a rețelei tale. Traficul și veniturile nu sunt garantate. Partajarea reală este dezactivată în prezent. Îți poți retrage consimțământul oricând. Continuarea salvează doar o preferință de test."</string>
+    <string name="nui_14" formatted="false">"Anulează"</string>
+    <string name="nui_15" formatted="false">"Salvează consimțământul de test"</string>
+    <string name="nui_16" formatted="false">"Citește și acceptă mai întâi informarea despre test."</string>
+    <string name="nui_17" formatted="false">"Monitorizarea necesită Wi-Fi sau internet mobil."</string>
+    <string name="nui_18" formatted="false">"Pornește monitorizarea conexiunii. Acest test nu partajează internetul tău și nu generează câștiguri. Îl poți opri oricând."</string>
+    <string name="nui_19" formatted="false">"Pornește"</string>
+    <string name="nui_20" formatted="false">"Oprește • monitorizarea conexiunii"</string>
+    <string name="nui_21" formatted="false">"Fiat în așteptare: €0.00\nFiat decontat: €0.00\nFiat disponibil pentru retragere: €0.00"</string>
+    <string name="nui_22" formatted="false">"Nu se creează niciun sold fără o confirmare de la partener."</string>
+    <string name="nui_23" formatted="false">"Adaugă adresa portofelului destinatarului"</string>
+    <string name="nui_24" formatted="false">"Selectează rețeaua USDC"</string>
+    <string name="nui_25" formatted="false">" adresa destinatarului"</string>
+    <string name="nui_26" formatted="false">"Introdu doar o adresă publică a destinatarului. Nu introduce chei private sau cuvinte de recuperare. Acest test nu transferă fonduri."</string>
+    <string name="nui_27" formatted="false">"Șterge adresa"</string>
+    <string name="nui_28" formatted="false">"Adaugă adresa portofelului"</string>
+    <string name="nui_29" formatted="false">"Salvează"</string>
+    <string name="nui_30" formatted="false">"Format de adresă nevalid pentru rețeaua selectată."</string>
+    <string name="nui_31" formatted="false">"Nu există cereri de retragere. Nu au fost efectuate transferuri reale."</string>
+    <string name="nui_32" formatted="false">"4  •  SETĂRI"</string>
+    <string name="nui_33" formatted="false">"Limbă"</string>
+    <string name="nui_34" formatted="false">"Codul limbii selectate: "</string>
+    <string name="nui_35" formatted="false">"\nTest local: măsoară doar traficul aplicației.\nConexiune: Wi-Fi sau date mobile (necesită internet)\nProtecție la baterie scăzută (&lt;15%): ACTIVĂ în timpul monitorizării\nProtecție termică: indisponibilă\nMonitorizare în fundal: DEZACTIVATĂ\nMonitorizarea se oprește la retragerea consimțământului"</string>
+    <string name="nui_36" formatted="false">"Avertisment: consimțământul de test nu autorizează viitoarea partajare reală a rețelei. Este necesar un consimțământ explicit separat înainte de activarea unui Network SDK real."</string>
+    <string name="nui_37" formatted="false">"Monitorizarea conexiunii oprită • Partajare reală: DEZACTIVATĂ"</string>
+    <string name="nui_38" formatted="false">"Ultima sesiune de monitorizare: "</string>
+    <string name="nui_39" formatted="false">" sec • Datele aplicației: "</string>
+    <string name="nui_40" formatted="false">"\nTraficul total înregistrat al aplicației: "</string>
+    <string name="nui_41" formatted="false">"\nTimp total de monitorizare: "</string>
+    <string name="nui_42" formatted="false">" min"</string>
+    <string name="nui_43" formatted="false">"\nAceastă măsurare nu reprezintă venituri sau lățime de bandă partajată."</string>
+    <string name="nui_44" formatted="false">"Consimțământ explicit: ACORDAT • Partajarea reală rămâne DEZACTIVATĂ"</string>
+    <string name="nui_45" formatted="false">"Consimțământ explicit: NEACORDAT • Partajare reală DEZACTIVATĂ"</string>
+    <string name="nui_46" formatted="false">"Retrage consimțământul"</string>
+    <string name="nui_47" formatted="false">"Acordă consimțământul explicit"</string>
+</resources>

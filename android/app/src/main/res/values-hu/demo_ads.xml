@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">HIRDETÉS • DEMÓ</string>
+    <string name="ads_disabled">Az opcionális teszthirdetések ki vannak kapcsolva. Nincsenek hirdetési jutalmak vagy valódi bevétel.</string>
+    <string name="ads_checking">Hirdetési adatvédelmi beállítások ellenőrzése…</string>
+    <string name="ads_unavailable">A teszthirdetések nem érhetők el. A demót hirdetések nélkül is tovább használhatja.</string>
+    <string name="ads_test_notice">Google-teszthirdetés • nincs bevétel. A hirdetési forgalom beleszámít az alkalmazás adatforgalmába.</string>
+    <string name="ads_enable">Opcionális teszthirdetés engedélyezése</string>
+    <string name="ads_disable">Hirdetések kikapcsolása</string>
+    <string name="ads_privacy">Hirdetési adatvédelmi beállítások</string>
+</resources>

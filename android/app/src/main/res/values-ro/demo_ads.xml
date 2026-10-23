@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">PUBLICITATE • DEMO</string>
+    <string name="ads_disabled">Reclamele de test opționale sunt dezactivate. Fără recompense publicitare sau venituri reale.</string>
+    <string name="ads_checking">Se verifică opțiunile de confidențialitate pentru reclame…</string>
+    <string name="ads_unavailable">Reclamele de test nu sunt disponibile. Poți continua să folosești demo-ul fără reclame.</string>
+    <string name="ads_test_notice">Reclamă de test Google • fără câștiguri. Traficul publicitar este inclus în utilizarea datelor de către aplicație.</string>
+    <string name="ads_enable">Activează reclama de test opțională</string>
+    <string name="ads_disable">Dezactivează reclamele</string>
+    <string name="ads_privacy">Opțiuni de confidențialitate pentru reclame</string>
+</resources>

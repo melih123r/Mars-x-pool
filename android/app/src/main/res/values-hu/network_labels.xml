@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_consent_button">Kifejezett hozzájárulás megadása</string>
+    <string name="network_earnings_heading">2 • BEVÉTEL</string>
+    <string name="network_history_heading">3 • KIFIZETÉSI ELŐZMÉNYEK</string>
+</resources>
