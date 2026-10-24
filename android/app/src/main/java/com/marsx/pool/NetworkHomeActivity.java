@@ -81,11 +81,11 @@ public final class NetworkHomeActivity extends Activity {
         scroll.setBackgroundColor(BG);
         page=new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
-        page.setPadding(dp(14),dp(16),dp(14),dp(16));
+        page.setPadding(dp(10),dp(8),dp(10),dp(8));
         scroll.addView(page);
         setContentView(scroll);
 
-        text(page,getString(R.string.network_demo_heading),21,WHITE,true);
+        text(page,getString(R.string.network_demo_heading),18,WHITE,true);
 
         LinearLayout network=card("1  •  NETWORK");
         consentStatus=text(network,"",15,MUTED,false);
@@ -142,13 +142,13 @@ public final class NetworkHomeActivity extends Activity {
         refreshConsent();
 
         LinearLayout earnings=card(getString(R.string.network_earnings_heading));
-        text(earnings,getString(R.string.nui_21),16,WHITE,true);
+        text(earnings,getString(R.string.nui_21),13,WHITE,true);
         text(earnings,getString(R.string.nui_22),12,MUTED,false).setVisibility(View.GONE);
 
         // Never ship an operator-owned wallet address as a user payout default.
         Button walletAddress=button(earnings,getString(R.string.nui_23));
         walletAddress.setOnClickListener(v -> {
-            final String[] chains={"Solana","Base","Polygon"};
+            final String[] chains={"Solana","Polygon"};
             new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.nui_24))
                 .setItems(chains,(dialog,selected)->{
@@ -158,14 +158,14 @@ public final class NetworkHomeActivity extends Activity {
                     input.setSingleLine(true);
                     input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                     input.setHint(chain+getString(R.string.nui_25));
-                    input.setText(prefs.getString("usdc_address",""));
+                    input.setText(chain.equals(prefs.getString("usdt_chain","")) ? prefs.getString("usdt_address","") : "");
                     new AlertDialog.Builder(this)
-                        .setTitle("USDC • "+chain)
+                        .setTitle("USDT • "+chain)
                         .setMessage(getString(R.string.nui_26))
                         .setView(input)
                         .setNegativeButton(getString(R.string.nui_14),null)
                         .setNeutralButton(getString(R.string.nui_27),(d,w)->{
-                            prefs.edit().remove("usdc_address").remove("usdc_chain").apply();
+                            prefs.edit().remove("usdt_address").remove("usdt_chain").remove("usdc_address").remove("usdc_chain").apply();
                             walletAddress.setText(getString(R.string.nui_28));
                         })
                         .setPositiveButton(getString(R.string.nui_29),(d,w)->{
@@ -177,18 +177,18 @@ public final class NetworkHomeActivity extends Activity {
                                 android.widget.Toast.makeText(this,getString(R.string.nui_30),android.widget.Toast.LENGTH_LONG).show();
                                 return;
                             }
-                            prefs.edit().putString("usdc_address",address).putString("usdc_chain",chain).apply();
+                            prefs.edit().putString("usdt_address",address).putString("usdt_chain",chain).remove("usdc_address").remove("usdc_chain").apply();
                             walletAddress.setText(chain+" • "+address.substring(0,6)+"…"+address.substring(address.length()-4));
                         }).show();
                 }).show();
         });
-        String savedAddress=prefs.getString("usdc_address","");
+        String savedAddress=prefs.getString("usdt_address","");
         if(!savedAddress.isEmpty() && savedAddress.length()>=10)
-            walletAddress.setText(prefs.getString("usdc_chain","Polygon")+" • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
+            walletAddress.setText(prefs.getString("usdt_chain","Solana")+" • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
 
         // Keep usage history alongside earnings to reduce dashboard sections.
         LinearLayout history=earnings;
-        text(history,getString(R.string.network_history_heading),15,WHITE,true);
+        text(history,getString(R.string.network_history_heading),12,WHITE,true);
         text(history,getString(R.string.nui_31),13,MUTED,false).setVisibility(View.GONE);
         historyStatus=text(history,"",13,MUTED,false);
         updateHistory();
