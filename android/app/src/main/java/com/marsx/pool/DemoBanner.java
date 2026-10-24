@@ -68,10 +68,11 @@ final class DemoBanner {
                     activity.getResources().getDisplayMetrics().density)-40;
             ad=new AdView(activity);
             ad.setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity,Math.max(120,width)));
-            ad.setAdUnitId(BuildConfig.DEMO_BANNER_UNIT);
+            boolean production = !BuildConfig.DEBUG && !BuildConfig.LIVE_BANNER_UNIT.isEmpty();
+            ad.setAdUnitId(production ? BuildConfig.LIVE_BANNER_UNIT : BuildConfig.DEMO_BANNER_UNIT);
             slot.addView(ad);
             slot.setVisibility(View.VISIBLE);
-            status.setText(R.string.ads_test_notice);
+            status.setText(production ? R.string.ads_checking : R.string.ads_test_notice);
             ad.loadAd(new AdRequest.Builder().build());
         }));
     }
