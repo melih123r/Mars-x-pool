@@ -36,6 +36,7 @@ public final class NetworkHomeActivity extends Activity {
     private Button monitorButton;
     private TextView historyStatus;
     private DemoBanner demoBanner;
+    private NetworkInterstitial interstitial;
     private long sessionBytes;
     private long totalSessionBytes;
     private long totalSessionSeconds;
@@ -83,7 +84,11 @@ public final class NetworkHomeActivity extends Activity {
         page.setOrientation(LinearLayout.VERTICAL);
         page.setPadding(dp(10),dp(8),dp(10),dp(8));
         scroll.addView(page);
-        setContentView(scroll);
+        LinearLayout root=new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(BG);
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        setContentView(root);
 
         text(page,getString(R.string.network_demo_heading),18,WHITE,true);
 
@@ -116,6 +121,7 @@ public final class NetworkHomeActivity extends Activity {
                 prefs.edit().putBoolean("monitor_active",false).apply();
                 start.setText(getString(R.string.nui_03));
                 stopMonitor();
+                if(interstitial!=null) interstitial.atNaturalBreak();
             } else {
                 if(!prefs.getBoolean("consented",false)){
                     android.widget.Toast.makeText(this,getString(R.string.nui_16),android.widget.Toast.LENGTH_LONG).show();
@@ -215,10 +221,11 @@ public final class NetworkHomeActivity extends Activity {
         FrameLayout adSlot=new FrameLayout(this);
         adSlot.setVisibility(View.GONE);
         // Keep the standard banner within the compact settings/advertising card.
-        advertising.addView(adSlot,new LinearLayout.LayoutParams(-1,-2));
+        root.addView(adSlot,new LinearLayout.LayoutParams(-1,-2));
         demoBanner=new DemoBanner(this,adSlot,adStatus);
         // Request UMP consent on entry; ad requests remain gated by canRequestAds().
         demoBanner.enable();
+        interstitial=new NetworkInterstitial(this,demoBanner);
         // Standard banner only until a compliant rewarded-ad experience is designed.
         text(advertising,"Standard ad • No points or cash rewards",11,MUTED,false);
         button(advertising,getString(R.string.ads_enable)).setOnClickListener(v->demoBanner.enable());
@@ -290,6 +297,7 @@ public final class NetworkHomeActivity extends Activity {
     }
     @Override protected void onResume(){
         super.onResume();
+        if(interstitial!=null) interstitial.preload();
         if(demoBanner!=null)demoBanner.resume();
     }
 
