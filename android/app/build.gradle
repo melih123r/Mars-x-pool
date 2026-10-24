@@ -46,6 +46,9 @@ android {
         buildConfigField "String", "DEMO_BANNER_UNIT", '"ca-app-pub-3940256099942544/6300978111"'
     }
 
+    // The in-app picker must work offline for every supported language after Play install.
+    bundle { language { enableSplit = false } }
+
     buildFeatures { buildConfig true }
 
     // AGP normalizes Indonesian inconsistently between the modern `id` locale

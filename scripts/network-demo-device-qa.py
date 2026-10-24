@@ -51,15 +51,18 @@ def set_locale(code):
     adb('push',str(path),'/data/local/tmp/network-locale.xml')
     adb('shell','run-as',PKG,'mkdir','-p','shared_prefs')
     adb('shell','run-as',PKG,'cp','/data/local/tmp/network-locale.xml','shared_prefs/network_consent_v1.xml')
+    if API >= 33:
+        adb('shell','cmd','locale','set-app-locales',PKG,'--user','0','--locales',code)
     launch()
 def shot(name):
     with (OUT/(name+'.png')).open('wb') as f:sp.run(['adb','exec-out','screencap','-p'],stdout=f,check=True)
-report={'device':'Android emulator API 26','physical_device':False,'source_app_version':18,'checks':{}}
+API=int(adb('shell','getprop','ro.build.version.sdk').strip())
+report={'device':f'Android emulator API {API}','physical_device':False,'source_app_version':18,'checks':{}}
 try:
-    assert adb('shell','getprop','ro.build.version.sdk').strip()=='26'
+    assert API in (26,33)
     adb('shell','wm','size','1080x1920');adb('shell','wm','density','420')
     adb('install','-r','android/app/build/outputs/apk/debug/app-debug.apk')
-    report['checks']['Android 8 install']='PASS'
+    report['checks'][f'Android API {API} install']='PASS'
     codes=[n.text for n in ET.parse(RES/'values/network_languages.xml').getroot().find("string-array[@name='network_language_codes']")]
     for code in codes:
         set_locale(code)
@@ -83,6 +86,12 @@ try:
     prefs=adb('shell','run-as',PKG,'cat','shared_prefs/network_consent_v1.xml')
     assert 'ui_language' in prefs and '>tr<' in prefs
     report['checks']['language picker and process restart persistence']='PASS'
+    if API >= 33:
+        # System selection must override a different saved in-app preference.
+        adb('shell','cmd','locale','set-app-locales',PKG,'--user','0','--locales','fr')
+        adb('shell','am','force-stop',PKG);launch()
+        assert strings('fr')['nui_47'] in textset(ui())
+        report['checks']['Android Settings overrides saved picker language']='PASS'
     set_locale('en')
     for _ in range(4):adb('shell','input','swipe','540','1600','540','450','350')
     shot('en-settings-ads-off')

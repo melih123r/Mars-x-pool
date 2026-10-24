@@ -1,15 +1,20 @@
-name: Network DEMO Android 8 device QA
+name: Network DEMO language device QA
 on:
   pull_request:
     paths:
       - '.github/workflows/network-demo-device-qa.yml'
       - 'scripts/network-demo-device-qa.py'
+      - 'android/**'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   emulator:
-    if: github.head_ref == 'release/network-demo-signed-aab-20261022' || github.ref_name == 'release/network-demo-signed-aab-20261022'
+    if: github.head_ref == 'release/network-demo-signed-aab-20261022' || github.ref_name == 'release/network-demo-signed-aab-20261022' || github.head_ref == 'fix/network-language-delivery-20261024' || github.ref_name == 'fix/network-language-delivery-20261024'
+    strategy:
+      fail-fast: false
+      matrix:
+        api: [26, 33]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -21,7 +26,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.11.1
-      - name: Build unchanged version 18 Android sources
+      - name: Build Network Android sources
         run: |
           "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
           gradle -p android :app:assembleDebug --no-daemon
@@ -33,7 +38,7 @@ jobs:
       - name: Android 8 installation, locales, consent and screenshots
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 26
+          api-level: ${{ matrix.api }}
           arch: x86_64
           target: google_apis
           profile: pixel_2
@@ -42,6 +47,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: network-demo-v18-api26-device-qa
+          name: network-demo-v18-api${{ matrix.api }}-device-qa
           path: device-qa/
           if-no-files-found: error
