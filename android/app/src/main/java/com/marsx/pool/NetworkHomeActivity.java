@@ -217,6 +217,8 @@ public final class NetworkHomeActivity extends Activity {
         // Full page width is available to the adaptive banner; no double-parent insertion.
         page.addView(adSlot,new LinearLayout.LayoutParams(-1,-2));
         demoBanner=new DemoBanner(this,adSlot,adStatus);
+        // Request UMP consent on entry; ad requests remain gated by canRequestAds().
+        demoBanner.enable();
         // Ads stay opt-in via the existing consent flow; no redundant enable button.
         // Users can change their advertising preferences through the privacy control.
         button(advertising,getString(R.string.ads_privacy)).setOnClickListener(v->demoBanner.privacy());
