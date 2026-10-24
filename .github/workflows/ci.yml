@@ -97,6 +97,7 @@ jobs:
       - name: Build release AAB
         env:
           MARSX_ADMOB_BANNER_UNIT: ${{ secrets.MARSX_ADMOB_BANNER_UNIT }}
+          MARSX_ADMOB_INTERSTITIAL_UNIT: ${{ secrets.MARSX_ADMOB_INTERSTITIAL_UNIT }}
         run: |
           for attempt in 1 2 3; do
             if gradle -p android :app:bundleRelease --no-daemon; then exit 0; fi
