@@ -60,6 +60,18 @@ jobs:
           name: marsx-network-v18-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+      - name: Check production AdMob configuration
+        env:
+          MARSX_ADMOB_BANNER_UNIT: ${{ secrets.MARSX_ADMOB_BANNER_UNIT }}
+        run: |
+          if [ -z "$MARSX_ADMOB_BANNER_UNIT" ]; then
+            echo "::warning::MARSX_ADMOB_BANNER_UNIT is not configured. Release AAB will not request live banner ads."
+          elif [[ ! "$MARSX_ADMOB_BANNER_UNIT" =~ ^ca-app-pub-[0-9]+/[0-9]+$ ]]; then
+            echo "::error::MARSX_ADMOB_BANNER_UNIT has an invalid format."
+            exit 1
+          else
+            echo "Production AdMob banner unit format verified (value kept secret)."
+          fi
       - name: Build release AAB
         env:
           MARSX_ADMOB_BANNER_UNIT: ${{ secrets.MARSX_ADMOB_BANNER_UNIT }}
