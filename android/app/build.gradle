@@ -26,6 +26,9 @@ def escapedMarsxVrscPoolAddress = marsxVrscPoolAddress
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
 
+def liveBannerUnit = providers.environmentVariable("MARSX_ADMOB_BANNER_UNIT").getOrElse("")
+if (liveBannerUnit && !(liveBannerUnit ==~ /ca-app-pub-[0-9]+\/[0-9]+/)) throw new GradleException("Invalid MARSX_ADMOB_BANNER_UNIT")
+
 android {
     namespace "com.marsx.pool"
     compileSdk 36
@@ -44,6 +47,7 @@ android {
         buildConfigField "String", "MARSX_VRSC_POOL_ADDRESS", "\"${escapedMarsxVrscPoolAddress}\""
         // Both debug and release DEMO builds use Google's non-monetizing test banner.
         buildConfigField "String", "DEMO_BANNER_UNIT", '"ca-app-pub-3940256099942544/6300978111"'
+        buildConfigField "String", "LIVE_BANNER_UNIT", "\"${liveBannerUnit}\""
     }
 
     // The in-app picker must work offline for every supported language after Play install.
