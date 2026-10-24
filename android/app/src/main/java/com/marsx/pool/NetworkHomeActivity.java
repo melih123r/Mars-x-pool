@@ -217,8 +217,8 @@ public final class NetworkHomeActivity extends Activity {
         // Full page width is available to the adaptive banner; no double-parent insertion.
         page.addView(adSlot,new LinearLayout.LayoutParams(-1,-2));
         demoBanner=new DemoBanner(this,adSlot,adStatus);
-        button(advertising,getString(R.string.ads_enable)).setOnClickListener(v->demoBanner.enable());
-        button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->demoBanner.withdraw());
+        // Ads stay opt-in via the existing consent flow; no redundant enable button.
+        // Users can change their advertising preferences through the privacy control.
         button(advertising,getString(R.string.ads_privacy)).setOnClickListener(v->demoBanner.privacy());
 
         text(page,getString(R.string.network_demo_disclaimer),12,MUTED,false);
