@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.os.BatteryManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.TrafficStats;
@@ -37,6 +36,8 @@ public final class NetworkHomeActivity extends Activity {
     private Button monitorButton;
     private TextView historyStatus;
     private DemoBanner demoBanner;
+    private NetworkInterstitial interstitial;
+    private boolean showingInterstitial;
     private long sessionBytes;
     private long totalSessionBytes;
     private long totalSessionSeconds;
@@ -55,15 +56,6 @@ public final class NetworkHomeActivity extends Activity {
                     stopMonitor();
                     if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
                     android.widget.Toast.makeText(NetworkHomeActivity.this,getString(R.string.nui_04),android.widget.Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                BatteryManager battery=(BatteryManager)getSystemService(Context.BATTERY_SERVICE);
-                int batteryPct=battery==null?-1:battery.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-                if(batteryPct>=0 && batteryPct<15){
-                    prefs.edit().putBoolean("monitor_active",false).apply();
-                    stopMonitor();
-                    if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
-                    android.widget.Toast.makeText(NetworkHomeActivity.this,getString(R.string.nui_05),android.widget.Toast.LENGTH_SHORT).show();
                     return;
                 }
                 long seconds=(SystemClock.elapsedRealtime()-monitorStart)/1000;
@@ -91,11 +83,15 @@ public final class NetworkHomeActivity extends Activity {
         scroll.setBackgroundColor(BG);
         page=new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
-        page.setPadding(dp(20),dp(32),dp(20),dp(24));
+        page.setPadding(dp(10),dp(8),dp(10),dp(8));
         scroll.addView(page);
-        setContentView(scroll);
+        LinearLayout root=new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setBackgroundColor(BG);
+        root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
+        setContentView(root);
 
-        text(page,getString(R.string.network_demo_heading),24,WHITE,true);
+        text(page,getString(R.string.network_demo_heading),18,WHITE,true);
 
         LinearLayout network=card("1  •  NETWORK");
         consentStatus=text(network,"",15,MUTED,false);
@@ -126,6 +122,7 @@ public final class NetworkHomeActivity extends Activity {
                 prefs.edit().putBoolean("monitor_active",false).apply();
                 start.setText(getString(R.string.nui_03));
                 stopMonitor();
+                if(interstitial!=null) interstitial.atNaturalBreak();
             } else {
                 if(!prefs.getBoolean("consented",false)){
                     android.widget.Toast.makeText(this,getString(R.string.nui_16),android.widget.Toast.LENGTH_LONG).show();
@@ -145,6 +142,7 @@ public final class NetworkHomeActivity extends Activity {
                         prefs.edit().putBoolean("monitor_active",true).apply();
                         start.setText(getString(R.string.nui_20));
                         startMonitor();
+                        if(interstitial!=null) interstitial.preload();
                     }).show();
             }
         });
@@ -152,13 +150,13 @@ public final class NetworkHomeActivity extends Activity {
         refreshConsent();
 
         LinearLayout earnings=card(getString(R.string.network_earnings_heading));
-        text(earnings,getString(R.string.nui_21),16,WHITE,true);
-        text(earnings,getString(R.string.nui_22),12,MUTED,false);
+        text(earnings,getString(R.string.nui_21).replace("€", "$"),13,WHITE,true);
+        text(earnings,getString(R.string.nui_22),12,MUTED,false).setVisibility(View.GONE);
 
         // Never ship an operator-owned wallet address as a user payout default.
         Button walletAddress=button(earnings,getString(R.string.nui_23));
         walletAddress.setOnClickListener(v -> {
-            final String[] chains={"Solana","Base","Polygon"};
+            final String[] chains={"Solana","Polygon"};
             new AlertDialog.Builder(this)
                 .setTitle(getString(R.string.nui_24))
                 .setItems(chains,(dialog,selected)->{
@@ -168,14 +166,14 @@ public final class NetworkHomeActivity extends Activity {
                     input.setSingleLine(true);
                     input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
                     input.setHint(chain+getString(R.string.nui_25));
-                    input.setText(prefs.getString("usdc_address",""));
+                    input.setText(chain.equals(prefs.getString("usdt_chain","")) ? prefs.getString("usdt_address","") : "");
                     new AlertDialog.Builder(this)
-                        .setTitle("USDC • "+chain)
+                        .setTitle("USDT • "+chain)
                         .setMessage(getString(R.string.nui_26))
                         .setView(input)
                         .setNegativeButton(getString(R.string.nui_14),null)
                         .setNeutralButton(getString(R.string.nui_27),(d,w)->{
-                            prefs.edit().remove("usdc_address").remove("usdc_chain").apply();
+                            prefs.edit().remove("usdt_address").remove("usdt_chain").remove("usdc_address").remove("usdc_chain").apply();
                             walletAddress.setText(getString(R.string.nui_28));
                         })
                         .setPositiveButton(getString(R.string.nui_29),(d,w)->{
@@ -187,17 +185,19 @@ public final class NetworkHomeActivity extends Activity {
                                 android.widget.Toast.makeText(this,getString(R.string.nui_30),android.widget.Toast.LENGTH_LONG).show();
                                 return;
                             }
-                            prefs.edit().putString("usdc_address",address).putString("usdc_chain",chain).apply();
+                            prefs.edit().putString("usdt_address",address).putString("usdt_chain",chain).remove("usdc_address").remove("usdc_chain").apply();
                             walletAddress.setText(chain+" • "+address.substring(0,6)+"…"+address.substring(address.length()-4));
                         }).show();
                 }).show();
         });
-        String savedAddress=prefs.getString("usdc_address","");
+        String savedAddress=prefs.getString("usdt_address","");
         if(!savedAddress.isEmpty() && savedAddress.length()>=10)
-            walletAddress.setText(prefs.getString("usdc_chain","Polygon")+" • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
+            walletAddress.setText(prefs.getString("usdt_chain","Solana")+" • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
 
-        LinearLayout history=card(getString(R.string.network_history_heading));
-        text(history,getString(R.string.nui_31),13,MUTED,false);
+        // Keep usage history alongside earnings to reduce dashboard sections.
+        LinearLayout history=earnings;
+        text(history,getString(R.string.network_history_heading),12,WHITE,true);
+        text(history,getString(R.string.nui_31),13,MUTED,false).setVisibility(View.GONE);
         historyStatus=text(history,"",13,MUTED,false);
         updateHistory();
 
@@ -215,18 +215,26 @@ public final class NetworkHomeActivity extends Activity {
                     NetworkLocale.select(this,languageCodes[i]);
                 }
             }).show());
-        text(settings,getString(R.string.nui_34)+selectedCode+getString(R.string.nui_35),13,MUTED,false);
+        text(settings,getString(R.string.nui_34)+selectedCode+getString(R.string.nui_35),13,MUTED,false).setVisibility(View.GONE);
 
-        LinearLayout advertising=card(getString(R.string.ads_title));
+        LinearLayout advertising=settings;
+        text(advertising,getString(R.string.ads_title),15,WHITE,true);
         TextView adStatus=text(advertising,"",12,MUTED,false);
         FrameLayout adSlot=new FrameLayout(this);
         adSlot.setVisibility(View.GONE);
-        // Full page width is available to the adaptive banner; no double-parent insertion.
-        page.addView(adSlot,new LinearLayout.LayoutParams(-1,-2));
+        // Pin the standard banner below the scrolling dashboard.
+        root.addView(adSlot,new LinearLayout.LayoutParams(-1,-2));
         demoBanner=new DemoBanner(this,adSlot,adStatus);
-        button(advertising,getString(R.string.ads_enable)).setOnClickListener(v->demoBanner.enable());
-        button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->demoBanner.withdraw());
-        button(advertising,getString(R.string.ads_privacy)).setOnClickListener(v->demoBanner.privacy());
+        // Request UMP consent on entry; ad requests remain gated by canRequestAds().
+        interstitial=new NetworkInterstitial(this,demoBanner,showing -> showingInterstitial=showing);
+        demoBanner.enable();
+        // Standard banner only until a compliant rewarded-ad experience is designed.
+        text(advertising,"Standard ad • No points or cash rewards",11,MUTED,false);
+        button(advertising,getString(R.string.ads_enable)).setOnClickListener(v->{demoBanner.enable();interstitial.preload();});
+        advertising.getChildAt(advertising.getChildCount()-1).setVisibility(View.GONE);
+        button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->{demoBanner.withdraw();interstitial.clear();});
+        advertising.getChildAt(advertising.getChildCount()-1).setVisibility(View.GONE);
+        button(advertising,getString(R.string.ads_privacy)).setOnClickListener(v->{interstitial.clear();demoBanner.privacy();});
 
         text(page,getString(R.string.network_demo_disclaimer),12,MUTED,false);
         text(page,getString(R.string.nui_36),12,ORANGE,false);
@@ -263,7 +271,7 @@ public final class NetworkHomeActivity extends Activity {
         }
     }
     @Override protected void onStop(){
-        if(prefs.getBoolean("monitor_active",false)){
+        if(prefs.getBoolean("monitor_active",false) && !showingInterstitial){
             prefs.edit().putBoolean("monitor_active",false).apply();
             stopMonitor();
             if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
@@ -291,6 +299,7 @@ public final class NetworkHomeActivity extends Activity {
     }
     @Override protected void onResume(){
         super.onResume();
+        if(interstitial!=null) interstitial.preload();
         if(demoBanner!=null)demoBanner.resume();
     }
 
@@ -305,15 +314,15 @@ public final class NetworkHomeActivity extends Activity {
     private LinearLayout card(String title){
         LinearLayout box=new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(dp(18),dp(14),dp(18),dp(18));
+        box.setPadding(dp(14),dp(10),dp(14),dp(12));
         GradientDrawable bg=new GradientDrawable();
         bg.setColor(PANEL);
-        bg.setCornerRadius(dp(20));
+        bg.setCornerRadius(dp(14));
         box.setBackground(bg);
         LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);
-        lp.setMargins(0,dp(18),0,0);
+        lp.setMargins(0,dp(10),0,0);
         page.addView(box,lp);
-        text(box,title,18,WHITE,true);
+        text(box,title,16,WHITE,true);
         return box;
     }
 
@@ -323,7 +332,7 @@ public final class NetworkHomeActivity extends Activity {
         t.setTextSize(size);
         t.setTextColor(color);
         if(bold)t.setTypeface(null,Typeface.BOLD);
-        t.setPadding(0,dp(5),0,dp(6));
+        t.setPadding(0,dp(3),0,dp(4));
         parent.addView(t);
         return t;
     }
@@ -332,7 +341,7 @@ public final class NetworkHomeActivity extends Activity {
         Button b=new Button(this);
         b.setText(label);
         b.setAllCaps(false);
-        b.setMinHeight(dp(54));
+        b.setMinHeight(dp(46));
         b.setContentDescription(label);
         parent.addView(b,new LinearLayout.LayoutParams(-1,-2));
         return b;

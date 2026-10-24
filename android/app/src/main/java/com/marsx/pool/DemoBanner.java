@@ -9,6 +9,8 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.ump.ConsentInformation;
 import com.google.android.ump.ConsentRequestParameters;
 import com.google.android.ump.UserMessagingPlatform;
@@ -24,6 +26,7 @@ final class DemoBanner {
     private boolean destroyed;
     private boolean pending;
     private boolean updated;
+    private boolean loadingAd;
 
     DemoBanner(Activity activity, FrameLayout slot, TextView status) {
         this.activity=activity;
@@ -33,6 +36,8 @@ final class DemoBanner {
         consent=UserMessagingPlatform.getConsentInformation(activity);
         status.setText(R.string.ads_disabled);
     }
+
+    boolean canRequestAds() { return allowed() && updated && consent.canRequestAds(); }
 
     void enable() {
         if (destroyed || pending) return;
@@ -44,6 +49,7 @@ final class DemoBanner {
             if (!allowed()) { pending=false; return; }
             UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity,error->{
                 pending=false;
+                if (destroyed) return;
                 if (error!=null) { status.setText(R.string.ads_unavailable); return; }
                 updated=true;
                 load();
@@ -59,41 +65,84 @@ final class DemoBanner {
     }
 
     private void load() {
-        if (!allowed() || !updated || !consent.canRequestAds() || ad!=null) return;
+        if (!allowed() || !updated || !consent.canRequestAds() || ad!=null || loadingAd) return;
+        // A production build must never silently show Google test inventory.
+        if (!BuildConfig.DEBUG && BuildConfig.LIVE_BANNER_UNIT.isEmpty()) {
+            status.setText(R.string.ads_unavailable);
+            slot.setVisibility(View.GONE);
+            return;
+        }
         pending=true;
+        loadingAd=true;
         MobileAds.initialize(activity,state->activity.runOnUiThread(()->{
+            loadingAd=false;
             pending=false;
             if (!allowed() || !updated || !consent.canRequestAds() || ad!=null) return;
             int width=(int)(activity.getResources().getDisplayMetrics().widthPixels /
                     activity.getResources().getDisplayMetrics().density)-40;
             ad=new AdView(activity);
             ad.setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(activity,Math.max(120,width)));
-            ad.setAdUnitId(BuildConfig.DEMO_BANNER_UNIT);
+            boolean production = !BuildConfig.DEBUG && !BuildConfig.LIVE_BANNER_UNIT.isEmpty();
+            ad.setAdUnitId(production ? BuildConfig.LIVE_BANNER_UNIT : BuildConfig.DEMO_BANNER_UNIT);
             slot.addView(ad);
             slot.setVisibility(View.VISIBLE);
-            status.setText(R.string.ads_test_notice);
+            status.setText(production ? R.string.ads_checking : R.string.ads_test_notice);
+            ad.setAdListener(new AdListener() {
+                @Override public void onAdLoaded() {
+                    if (!destroyed) {
+                        status.setText(production ? "" : activity.getString(R.string.ads_test_notice));
+                    }
+                }
+                @Override public void onAdFailedToLoad(LoadAdError error) {
+                    if (destroyed) return;
+                    status.setText(R.string.ads_unavailable);
+                    // Defer cleanup until after the SDK callback returns.
+                    activity.runOnUiThread(() -> {
+                        if (destroyed) return;
+                        if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
+                        slot.setVisibility(View.GONE);
+                    });
+                }
+            });
             ad.loadAd(new AdRequest.Builder().build());
         }));
     }
 
     void privacy() {
-        // Stop displaying/requesting ads before any privacy choice is changed.
-        withdraw();
+        // Temporarily suspend requests while privacy choices are edited.
+        if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
+        slot.setVisibility(View.GONE);
+        updated=false;
         if (consent.getPrivacyOptionsRequirementStatus()==ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED) {
             UserMessagingPlatform.showPrivacyOptionsForm(activity,error->{
-                if (!destroyed) status.setText(error==null?R.string.ads_disabled:R.string.ads_unavailable);
+                if (destroyed) return;
+                if (error!=null) { status.setText(R.string.ads_unavailable); return; }
+                // Refresh UMP state and request only when consent permits.
+                enable();
             });
+        } else {
+            // No privacy form is required for this user; restore the banner flow.
+            enable();
         }
     }
 
     void withdraw() {
         prefs.edit().putBoolean("enabled",false).apply();
         updated=false;
+        loadingAd=false;
         if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
         slot.setVisibility(View.GONE);
         status.setText(R.string.ads_disabled);
     }
     void pause() { if(ad!=null) ad.pause(); }
     void resume() { if(ad!=null) ad.resume(); }
-    void destroy() { destroyed=true; withdraw(); }
+    void destroy() {
+        destroyed=true;
+        updated=false;
+        loadingAd=false;
+        pending=false;
+        if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
+        slot.setVisibility(View.GONE);
+        // Activity recreation must not silently change saved advertising preferences.
+    }
 }
