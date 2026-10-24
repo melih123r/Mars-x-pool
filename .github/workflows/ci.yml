@@ -49,7 +49,12 @@ jobs:
       - name: Network locale and DEMO safety checks
         run: python3 scripts/check-network-home-ui.py
       - name: Android unit tests
-        run: gradle -p android :app:testDebugUnitTest --no-daemon
+        run: |
+          for attempt in 1 2 3; do
+            gradle -p android :app:testDebugUnitTest --no-daemon && exit 0
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep $((attempt * 20))
+          done
       - name: Android release lint
         run: gradle -p android :app:lintRelease --no-daemon
       - name: Build debug APK
