@@ -219,8 +219,10 @@ public final class NetworkHomeActivity extends Activity {
         demoBanner=new DemoBanner(this,adSlot,adStatus);
         // Request UMP consent on entry; ad requests remain gated by canRequestAds().
         demoBanner.enable();
-        RewardedDemoAd rewardedDemoAd=new RewardedDemoAd(this,demoBanner);
-        button(advertising,"▶ Rewarded Ad · DEMO").setOnClickListener(v->rewardedDemoAd.show());
+        TextView rewardPoints=text(advertising,"MARS-X demo points: 0 • Not withdrawable",12,MUTED,false);
+        RewardedDemoAd rewardedDemoAd=new RewardedDemoAd(this,demoBanner,()->rewardPoints.setText("MARS-X demo points: "+getSharedPreferences("marsx_demo_reward_points",MODE_PRIVATE).getInt("points",0)+" • Not withdrawable"));
+        rewardPoints.setText("MARS-X demo points: "+rewardedDemoAd.points()+" • Not withdrawable");
+        button(advertising,"▶ Watch ad · +10 demo points").setOnClickListener(v->rewardedDemoAd.show());
         button(advertising,getString(R.string.ads_enable)).setOnClickListener(v->demoBanner.enable());
         advertising.getChildAt(advertising.getChildCount()-1).setVisibility(View.GONE);
         button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->demoBanner.withdraw());
