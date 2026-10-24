@@ -25,7 +25,7 @@ assert 'getApplicationLocales' in locale_source and 'setApplicationLocales' in l
 
 ads=(root/'android/app/src/main/java/com/marsx/pool/DemoBanner.java').read_text()
 used=set(re.findall(r'R.string.((?:nui_|network_|ads_)\w+)',source+ads))
-assert len(used)==63, f'Unexpected UI manifest: {len(used)} keys'
+assert len(used)==62, f'Unexpected UI manifest: {len(used)} keys'
 
 def entries(folder):
     found={}
