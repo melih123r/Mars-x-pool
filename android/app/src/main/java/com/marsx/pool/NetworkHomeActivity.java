@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.os.BatteryManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.TrafficStats;
@@ -55,15 +54,6 @@ public final class NetworkHomeActivity extends Activity {
                     stopMonitor();
                     if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
                     android.widget.Toast.makeText(NetworkHomeActivity.this,getString(R.string.nui_04),android.widget.Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                BatteryManager battery=(BatteryManager)getSystemService(Context.BATTERY_SERVICE);
-                int batteryPct=battery==null?-1:battery.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
-                if(batteryPct>=0 && batteryPct<15){
-                    prefs.edit().putBoolean("monitor_active",false).apply();
-                    stopMonitor();
-                    if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
-                    android.widget.Toast.makeText(NetworkHomeActivity.this,getString(R.string.nui_05),android.widget.Toast.LENGTH_SHORT).show();
                     return;
                 }
                 long seconds=(SystemClock.elapsedRealtime()-monitorStart)/1000;
@@ -153,7 +143,7 @@ public final class NetworkHomeActivity extends Activity {
 
         LinearLayout earnings=card(getString(R.string.network_earnings_heading));
         text(earnings,getString(R.string.nui_21),16,WHITE,true);
-        text(earnings,getString(R.string.nui_22),12,MUTED,false);
+        // Earnings subtitle omitted for compact layout.
 
         // Never ship an operator-owned wallet address as a user payout default.
         Button walletAddress=button(earnings,getString(R.string.nui_23));
@@ -199,7 +189,7 @@ public final class NetworkHomeActivity extends Activity {
         // Keep usage history alongside earnings to reduce dashboard sections.
         LinearLayout history=earnings;
         text(history,getString(R.string.network_history_heading),15,WHITE,true);
-        text(history,getString(R.string.nui_31),13,MUTED,false);
+        // History value already includes the necessary details.
         historyStatus=text(history,"",13,MUTED,false);
         updateHistory();
 
@@ -217,9 +207,10 @@ public final class NetworkHomeActivity extends Activity {
                     NetworkLocale.select(this,languageCodes[i]);
                 }
             }).show());
-        text(settings,getString(R.string.nui_34)+selectedCode+getString(R.string.nui_35),13,MUTED,false);
+        // Language picker shows the selected locale.
 
-        LinearLayout advertising=card(getString(R.string.ads_title));
+        LinearLayout advertising=settings;
+        text(advertising,getString(R.string.ads_title),15,WHITE,true);
         TextView adStatus=text(advertising,"",12,MUTED,false);
         FrameLayout adSlot=new FrameLayout(this);
         adSlot.setVisibility(View.GONE);
