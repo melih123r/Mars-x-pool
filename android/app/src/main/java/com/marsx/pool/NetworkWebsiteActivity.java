@@ -44,6 +44,7 @@ public final class NetworkWebsiteActivity extends Activity {
         if ("tr".equals(language)) page = "index-tr.html";
         else if ("fr".equals(language)) page = "index-fr.html";
         else if ("es".equals(language)) page = "index-es.html";
+        else if ("de".equals(language)) page = "index-de.html";
         webView.loadUrl("file:///android_asset/network/" + page);
     }
 
