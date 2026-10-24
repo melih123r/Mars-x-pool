@@ -220,7 +220,9 @@ public final class NetworkHomeActivity extends Activity {
         // Request UMP consent on entry; ad requests remain gated by canRequestAds().
         demoBanner.enable();
         button(advertising,getString(R.string.ads_enable)).setOnClickListener(v->demoBanner.enable());
+        advertising.getChildAt(advertising.getChildCount()-1).setVisibility(View.GONE);
         button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->demoBanner.withdraw());
+        advertising.getChildAt(advertising.getChildCount()-1).setVisibility(View.GONE);
         button(advertising,getString(R.string.ads_privacy)).setOnClickListener(v->demoBanner.privacy());
 
         text(page,getString(R.string.network_demo_disclaimer),12,MUTED,false);
