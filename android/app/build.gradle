@@ -27,7 +27,9 @@ def escapedMarsxVrscPoolAddress = marsxVrscPoolAddress
         .replace("\"", "\\\"")
 
 def liveBannerUnit = providers.environmentVariable("MARSX_ADMOB_BANNER_UNIT").getOrElse("")
+def liveInterstitialUnit = providers.environmentVariable("MARSX_ADMOB_INTERSTITIAL_UNIT").getOrElse("")
 if (liveBannerUnit && !(liveBannerUnit ==~ /ca-app-pub-[0-9]+\/[0-9]+/)) throw new GradleException("Invalid MARSX_ADMOB_BANNER_UNIT")
+if (liveInterstitialUnit && !(liveInterstitialUnit ==~ /ca-app-pub-[0-9]+\/[0-9]+/)) throw new GradleException("Invalid MARSX_ADMOB_INTERSTITIAL_UNIT")
 
 android {
     namespace "com.marsx.pool"
@@ -48,6 +50,7 @@ android {
         // Debug uses Google test inventory; release requires an explicitly configured live unit.
         buildConfigField "String", "DEMO_BANNER_UNIT", '"ca-app-pub-3940256099942544/6300978111"'
         buildConfigField "String", "LIVE_BANNER_UNIT", "\"${liveBannerUnit}\""
+        buildConfigField "String", "LIVE_INTERSTITIAL_UNIT", "\"${liveInterstitialUnit}\""
     }
 
     // The in-app picker must work offline for every supported language after Play install.
