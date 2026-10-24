@@ -26,6 +26,7 @@ final class DemoBanner {
     private boolean destroyed;
     private boolean pending;
     private boolean updated;
+    private boolean loadingAd;
 
     DemoBanner(Activity activity, FrameLayout slot, TextView status) {
         this.activity=activity;
@@ -61,7 +62,7 @@ final class DemoBanner {
     }
 
     private void load() {
-        if (!allowed() || !updated || !consent.canRequestAds() || ad!=null) return;
+        if (!allowed() || !updated || !consent.canRequestAds() || ad!=null || loadingAd) return;
         // A production build must never silently show Google test inventory.
         if (!BuildConfig.DEBUG && BuildConfig.LIVE_BANNER_UNIT.isEmpty()) {
             status.setText(R.string.ads_unavailable);
@@ -69,7 +70,9 @@ final class DemoBanner {
             return;
         }
         pending=true;
+        loadingAd=true;
         MobileAds.initialize(activity,state->activity.runOnUiThread(()->{
+            loadingAd=false;
             pending=false;
             if (!allowed() || !updated || !consent.canRequestAds() || ad!=null) return;
             int width=(int)(activity.getResources().getDisplayMetrics().widthPixels /
@@ -119,6 +122,7 @@ final class DemoBanner {
     void withdraw() {
         prefs.edit().putBoolean("enabled",false).apply();
         updated=false;
+        loadingAd=false;
         if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
         slot.setVisibility(View.GONE);
         status.setText(R.string.ads_disabled);
