@@ -142,7 +142,7 @@ public final class NetworkHomeActivity extends Activity {
         refreshConsent();
 
         LinearLayout earnings=card(getString(R.string.network_earnings_heading));
-        text(earnings,getString(R.string.nui_21),13,WHITE,true);
+        text(earnings,getString(R.string.nui_21).replace("€", "$"),13,WHITE,true);
         text(earnings,getString(R.string.nui_22),12,MUTED,false).setVisibility(View.GONE);
 
         // Never ship an operator-owned wallet address as a user payout default.
