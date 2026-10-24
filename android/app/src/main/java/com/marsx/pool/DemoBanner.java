@@ -47,6 +47,7 @@ final class DemoBanner {
             if (!allowed()) { pending=false; return; }
             UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity,error->{
                 pending=false;
+                if (destroyed) return;
                 if (error!=null) { status.setText(R.string.ads_unavailable); return; }
                 updated=true;
                 load();
@@ -116,6 +117,9 @@ final class DemoBanner {
                 // Refresh UMP state and request only when consent permits.
                 enable();
             });
+        } else {
+            // No privacy form is required for this user; restore the banner flow.
+            enable();
         }
     }
 
