@@ -141,6 +141,7 @@ public final class NetworkHomeActivity extends Activity {
                         prefs.edit().putBoolean("monitor_active",true).apply();
                         start.setText(getString(R.string.nui_20));
                         startMonitor();
+                        if(interstitial!=null) interstitial.preload();
                     }).show();
             }
         });
