@@ -77,10 +77,13 @@ final class DemoBanner {
             status.setText(production ? R.string.ads_checking : R.string.ads_test_notice);
             ad.setAdListener(new AdListener() {
                 @Override public void onAdLoaded() {
-                    if (!destroyed) status.setText(production ? R.string.ads_disabled : R.string.ads_test_notice);
+                    if (!destroyed) {
+                        status.setText(production ? "" : activity.getString(R.string.ads_test_notice));
+                    }
                 }
                 @Override public void onAdFailedToLoad(LoadAdError error) {
                     if (!destroyed) status.setText(R.string.ads_unavailable);
+                    if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
                     slot.setVisibility(View.GONE);
                 }
             });
