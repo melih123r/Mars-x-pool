@@ -88,9 +88,13 @@ final class DemoBanner {
                     }
                 }
                 @Override public void onAdFailedToLoad(LoadAdError error) {
-                    if (!destroyed) status.setText(R.string.ads_unavailable);
-                    if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
-                    slot.setVisibility(View.GONE);
+                    if (destroyed) return;
+                    status.setText(R.string.ads_unavailable);
+                    // Defer cleanup until after the SDK callback returns.
+                    activity.runOnUiThread(() -> {
+                        if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
+                        slot.setVisibility(View.GONE);
+                    });
                 }
             });
             ad.loadAd(new AdRequest.Builder().build());
