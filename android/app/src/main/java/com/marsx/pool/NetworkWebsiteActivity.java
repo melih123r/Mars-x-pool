@@ -39,7 +39,11 @@ public final class NetworkWebsiteActivity extends Activity {
             }
         });
         setContentView(webView);
-        webView.loadUrl("file:///android_asset/network/index.html");
+        String language = NetworkLocale.selected(this);
+        String page = "index.html";
+        if ("tr".equals(language)) page = "index-tr.html";
+        else if ("fr".equals(language)) page = "index-fr.html";
+        webView.loadUrl("file:///android_asset/network/" + page);
     }
 
     @Override public void onDestroy() {
