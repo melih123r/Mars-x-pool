@@ -221,15 +221,15 @@ public final class NetworkHomeActivity extends Activity {
         TextView adStatus=text(advertising,"",12,MUTED,false);
         FrameLayout adSlot=new FrameLayout(this);
         adSlot.setVisibility(View.GONE);
-        // Keep the standard banner within the compact settings/advertising card.
+        // Pin the standard banner below the scrolling dashboard.
         root.addView(adSlot,new LinearLayout.LayoutParams(-1,-2));
         demoBanner=new DemoBanner(this,adSlot,adStatus);
         // Request UMP consent on entry; ad requests remain gated by canRequestAds().
-        demoBanner.enable();
         interstitial=new NetworkInterstitial(this,demoBanner);
+        demoBanner.enable();
         // Standard banner only until a compliant rewarded-ad experience is designed.
         text(advertising,"Standard ad • No points or cash rewards",11,MUTED,false);
-        button(advertising,getString(R.string.ads_enable)).setOnClickListener(v->demoBanner.enable());
+        button(advertising,getString(R.string.ads_enable)).setOnClickListener(v->{demoBanner.enable();interstitial.preload();});
         advertising.getChildAt(advertising.getChildCount()-1).setVisibility(View.GONE);
         button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->demoBanner.withdraw());
         advertising.getChildAt(advertising.getChildCount()-1).setVisibility(View.GONE);
