@@ -9,6 +9,8 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.ump.ConsentInformation;
 import com.google.android.ump.ConsentRequestParameters;
 import com.google.android.ump.UserMessagingPlatform;
@@ -73,6 +75,15 @@ final class DemoBanner {
             slot.addView(ad);
             slot.setVisibility(View.VISIBLE);
             status.setText(production ? R.string.ads_checking : R.string.ads_test_notice);
+            ad.setAdListener(new AdListener() {
+                @Override public void onAdLoaded() {
+                    if (!destroyed) status.setText(production ? R.string.ads_disabled : R.string.ads_test_notice);
+                }
+                @Override public void onAdFailedToLoad(LoadAdError error) {
+                    if (!destroyed) status.setText(R.string.ads_unavailable);
+                    slot.setVisibility(View.GONE);
+                }
+            });
             ad.loadAd(new AdRequest.Builder().build());
         }));
     }
@@ -96,5 +107,11 @@ final class DemoBanner {
     }
     void pause() { if(ad!=null) ad.pause(); }
     void resume() { if(ad!=null) ad.resume(); }
-    void destroy() { destroyed=true; withdraw(); }
+    void destroy() {
+        destroyed=true;
+        updated=false;
+        if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
+        slot.setVisibility(View.GONE);
+        // Activity recreation must not silently change saved advertising preferences.
+    }
 }
