@@ -37,6 +37,8 @@ final class DemoBanner {
         status.setText(R.string.ads_disabled);
     }
 
+    boolean canRequestAds() { return allowed() && updated && consent.canRequestAds(); }
+
     void enable() {
         if (destroyed || pending) return;
         prefs.edit().putBoolean("enabled",true).apply();
