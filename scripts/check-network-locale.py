@@ -7,7 +7,9 @@ import xml.etree.ElementTree as ET
 root=Path(__file__).resolve().parents[1]
 source=(root/'android/app/src/main/java/com/marsx/pool/NetworkHomeActivity.java').read_text()
 assert 'attachBaseContext' in source, 'Locale must be applied before Activity creation'
-assert 'createConfigurationContext' in source, 'Use a localized context, not global resource mutation'
+locale_source=(root/'android/app/src/main/java/com/marsx/pool/NetworkLocale.java').read_text()
+assert 'NetworkLocale.wrap(base)' in source
+assert 'createConfigurationContext' in locale_source, 'Use a localized context, not global resource mutation'
 resources=root/'android/app/src/main/res'
 assert (resources/'values/network_languages.xml').is_file(), 'A shared 30-language name/code registry is required'
 languages=ET.parse(resources/'values/network_languages.xml').getroot()
@@ -17,7 +19,9 @@ names=arrays['network_language_names']
 assert len(codes)==len(names)==len(set(codes))==30
 assert 'pt-BR' in codes and 'zh-TW' in codes and 'fil' in codes
 assert 'R.array.network_language_codes' in source and 'setSingleChoiceItems' in source
-assert 'setLayoutDirection(savedLocale)' in source
+assert 'setLayoutDirection(locale)' in locale_source
+assert 'enableSplit = false' in (root/'android/app/build.gradle').read_text(), 'Play installs must include all picker languages'
+assert 'getApplicationLocales' in locale_source and 'setApplicationLocales' in locale_source
 
 ads=(root/'android/app/src/main/java/com/marsx/pool/DemoBanner.java').read_text()
 used=set(re.findall(r'R.string.((?:nui_|network_|ads_)\w+)',source+ads))

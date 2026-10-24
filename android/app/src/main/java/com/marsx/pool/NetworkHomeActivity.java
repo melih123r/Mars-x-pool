@@ -78,15 +78,7 @@ public final class NetworkHomeActivity extends Activity {
     };
 
     @Override protected void attachBaseContext(Context base) {
-        SharedPreferences saved=base.getSharedPreferences("network_consent_v1",MODE_PRIVATE);
-        String code=saved.getString("ui_language","tr");
-        if("pt".equals(code))code="pt-BR";
-        Locale savedLocale=Locale.forLanguageTag(code);
-        Locale.setDefault(savedLocale);
-        android.content.res.Configuration localeConfig=new android.content.res.Configuration(base.getResources().getConfiguration());
-        localeConfig.setLocale(savedLocale);
-        localeConfig.setLayoutDirection(savedLocale);
-        super.attachBaseContext(base.createConfigurationContext(localeConfig));
+        super.attachBaseContext(NetworkLocale.wrap(base));
     }
 
     @Override public void onCreate(Bundle saved) {
@@ -213,19 +205,17 @@ public final class NetworkHomeActivity extends Activity {
         Button lang=button(settings,getString(R.string.nui_33));
         final String[] languageNames=getResources().getStringArray(R.array.network_language_names);
         final String[] languageCodes=getResources().getStringArray(R.array.network_language_codes);
-        String selectedCode=prefs.getString("ui_language","tr");
-        if("pt".equals(selectedCode))selectedCode="pt-BR";
+        String selectedCode=NetworkLocale.selected(this);
         final int selectedLanguage=java.util.Arrays.asList(languageCodes).indexOf(selectedCode);
         lang.setOnClickListener(v -> new AlertDialog.Builder(this)
             .setTitle(getString(R.string.nui_33))
             .setSingleChoiceItems(languageNames,selectedLanguage,(d,i)->{
                 d.dismiss();
                 if(i!=selectedLanguage){
-                    prefs.edit().putString("ui_language",languageCodes[i]).apply();
-                    recreate();
+                    NetworkLocale.select(this,languageCodes[i]);
                 }
             }).show());
-        text(settings,getString(R.string.nui_34)+prefs.getString("ui_language","tr")+getString(R.string.nui_35),13,MUTED,false);
+        text(settings,getString(R.string.nui_34)+selectedCode+getString(R.string.nui_35),13,MUTED,false);
 
         LinearLayout advertising=card(getString(R.string.ads_title));
         TextView adStatus=text(advertising,"",12,MUTED,false);

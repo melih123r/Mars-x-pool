@@ -13,6 +13,10 @@ import android.net.Uri;
 public final class NetworkWebsiteActivity extends Activity {
     private WebView webView;
 
+    @Override protected void attachBaseContext(android.content.Context base) {
+        super.attachBaseContext(NetworkLocale.wrap(base));
+    }
+
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         webView = new WebView(this);

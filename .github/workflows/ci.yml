@@ -10,7 +10,7 @@ permissions:
 jobs:
   backend:
     # Network-only release: do not execute unrelated Telegram/Finance suites.
-    if: github.ref_name != 'release/network-demo-signed-aab-20261022' && github.head_ref != 'release/network-demo-signed-aab-20261022'
+    if: github.ref_name != 'release/network-demo-signed-aab-20261022' && github.head_ref != 'release/network-demo-signed-aab-20261022' && github.ref_name != 'fix/network-language-delivery-20261024' && github.head_ref != 'fix/network-language-delivery-20261024'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -46,6 +46,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 8.11.1
+      - name: Network locale and DEMO safety checks
+        run: python3 scripts/check-network-home-ui.py
       - name: Android unit tests
         run: gradle -p android :app:testDebugUnitTest --no-daemon
       - name: Android release lint
@@ -60,6 +62,18 @@ jobs:
           if-no-files-found: error
       - name: Build release AAB
         run: gradle -p android :app:bundleRelease --no-daemon
+      - name: Verify all-language AAB packaging
+        run: |
+          curl --fail --location --retry 3 https://github.com/google/bundletool/releases/download/1.18.2/bundletool-all-1.18.2.jar -o "$RUNNER_TEMP/bundletool.jar"
+          java -jar "$RUNNER_TEMP/bundletool.jar" dump config --bundle=android/app/build/outputs/bundle/release/app-release.aab > "$RUNNER_TEMP/bundle-config.json"
+          python3 - <<'PYCONFIG'
+          import json, os
+          from pathlib import Path
+          config=json.loads((Path(os.environ['RUNNER_TEMP'])/'bundle-config.json').read_text())
+          dimensions=config['optimizations']['splitsConfig']['splitDimension']
+          assert any(d.get('value')=='LANGUAGE' and d.get('negate') is True for d in dimensions), dimensions
+          print('PASS: built AAB disables language splits; picker resources ship together')
+          PYCONFIG
       - name: Verify merged Network DEMO manifest
         run: python3 scripts/check-demo-manifest.py
       - uses: actions/upload-artifact@v4
