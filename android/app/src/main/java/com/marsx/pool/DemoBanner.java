@@ -62,6 +62,12 @@ final class DemoBanner {
 
     private void load() {
         if (!allowed() || !updated || !consent.canRequestAds() || ad!=null) return;
+        // A production build must never silently show Google test inventory.
+        if (!BuildConfig.DEBUG && BuildConfig.LIVE_BANNER_UNIT.isEmpty()) {
+            status.setText(R.string.ads_unavailable);
+            slot.setVisibility(View.GONE);
+            return;
+        }
         pending=true;
         MobileAds.initialize(activity,state->activity.runOnUiThread(()->{
             pending=false;
