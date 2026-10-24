@@ -45,7 +45,7 @@ public final class NetworkWebsiteActivity extends Activity {
         else if ("fr".equals(language)) page = "index-fr.html";
         else if ("es".equals(language)) page = "index-es.html";
         else if ("de".equals(language)) page = "index-de.html";
-        else if (java.util.Arrays.asList("it","pt-BR","nl","pl","ar","sv","da","fi","no","ro","cs","sk","hu","el","uk").contains(language)) {
+        else if (java.util.Arrays.asList("it","pt-BR","nl","pl","ar","sv","da","fi","no","ro","cs","sk","hu","el","uk","ru","zh-CN","zh-TW","ja","ko","hi","id","vi","th","fa","bn","ur","ms","fil").contains(language)) {
             page = "index-" + language + ".html";
         }
         webView.loadUrl("file:///android_asset/network/" + page);
