@@ -56,9 +56,19 @@ jobs:
             sleep $((attempt * 20))
           done
       - name: Android release lint
-        run: gradle -p android :app:lintRelease --no-daemon
+        run: |
+          for attempt in 1 2 3; do
+            if gradle -p android :app:lintRelease --no-daemon; then exit 0; fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep $((attempt * 30))
+          done
       - name: Build debug APK
-        run: gradle -p android :app:assembleDebug --no-daemon
+        run: |
+          for attempt in 1 2 3; do
+            if gradle -p android :app:assembleDebug --no-daemon; then exit 0; fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep $((attempt * 30))
+          done
       - name: Publish debug APK immediately
         uses: actions/upload-artifact@v4
         with:
@@ -87,7 +97,12 @@ jobs:
       - name: Build release AAB
         env:
           MARSX_ADMOB_BANNER_UNIT: ${{ secrets.MARSX_ADMOB_BANNER_UNIT }}
-        run: gradle -p android :app:bundleRelease --no-daemon
+        run: |
+          for attempt in 1 2 3; do
+            if gradle -p android :app:bundleRelease --no-daemon; then exit 0; fi
+            if [ "$attempt" -eq 3 ]; then exit 1; fi
+            sleep $((attempt * 30))
+          done
       - name: Verify all-language AAB packaging
         run: |
           curl --fail --location --retry 3 https://github.com/google/bundletool/releases/download/1.18.2/bundletool-all-1.18.2.jar -o "$RUNNER_TEMP/bundletool.jar"
