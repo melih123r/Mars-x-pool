@@ -62,6 +62,18 @@ jobs:
           if-no-files-found: error
       - name: Build release AAB
         run: gradle -p android :app:bundleRelease --no-daemon
+      - name: Verify all-language AAB packaging
+        run: |
+          curl --fail --location --retry 3 https://github.com/google/bundletool/releases/download/1.18.2/bundletool-all-1.18.2.jar -o "$RUNNER_TEMP/bundletool.jar"
+          java -jar "$RUNNER_TEMP/bundletool.jar" dump config --bundle=android/app/build/outputs/bundle/release/app-release.aab > "$RUNNER_TEMP/bundle-config.json"
+          python3 - <<'PYCONFIG'
+          import json, os
+          from pathlib import Path
+          config=json.loads((Path(os.environ['RUNNER_TEMP'])/'bundle-config.json').read_text())
+          dimensions=config['optimizations']['splitsConfig']['splitDimension']
+          assert any(d.get('value')=='LANGUAGE' and d.get('negate') is True for d in dimensions), dimensions
+          print('PASS: built AAB disables language splits; picker resources ship together')
+          PYCONFIG
       - name: Verify merged Network DEMO manifest
         run: python3 scripts/check-demo-manifest.py
       - uses: actions/upload-artifact@v4
