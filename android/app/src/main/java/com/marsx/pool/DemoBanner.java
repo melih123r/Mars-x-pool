@@ -98,11 +98,16 @@ final class DemoBanner {
     }
 
     void privacy() {
-        // Stop displaying/requesting ads before any privacy choice is changed.
-        withdraw();
+        // Temporarily suspend requests while privacy choices are edited.
+        if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
+        slot.setVisibility(View.GONE);
+        updated=false;
         if (consent.getPrivacyOptionsRequirementStatus()==ConsentInformation.PrivacyOptionsRequirementStatus.REQUIRED) {
             UserMessagingPlatform.showPrivacyOptionsForm(activity,error->{
-                if (!destroyed) status.setText(error==null?R.string.ads_disabled:R.string.ads_unavailable);
+                if (destroyed) return;
+                if (error!=null) { status.setText(R.string.ads_unavailable); return; }
+                // Refresh UMP state and request only when consent permits.
+                enable();
             });
         }
     }
