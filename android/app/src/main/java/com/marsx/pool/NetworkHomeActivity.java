@@ -143,7 +143,7 @@ public final class NetworkHomeActivity extends Activity {
 
         LinearLayout earnings=card(getString(R.string.network_earnings_heading));
         text(earnings,getString(R.string.nui_21),16,WHITE,true);
-        // Earnings subtitle omitted for compact layout.
+        text(earnings,getString(R.string.nui_22),12,MUTED,false).setVisibility(View.GONE);
 
         // Never ship an operator-owned wallet address as a user payout default.
         Button walletAddress=button(earnings,getString(R.string.nui_23));
@@ -189,7 +189,7 @@ public final class NetworkHomeActivity extends Activity {
         // Keep usage history alongside earnings to reduce dashboard sections.
         LinearLayout history=earnings;
         text(history,getString(R.string.network_history_heading),15,WHITE,true);
-        // History value already includes the necessary details.
+        text(history,getString(R.string.nui_31),13,MUTED,false).setVisibility(View.GONE);
         historyStatus=text(history,"",13,MUTED,false);
         updateHistory();
 
@@ -207,7 +207,7 @@ public final class NetworkHomeActivity extends Activity {
                     NetworkLocale.select(this,languageCodes[i]);
                 }
             }).show());
-        // Language picker shows the selected locale.
+        text(settings,getString(R.string.nui_34)+selectedCode+getString(R.string.nui_35),13,MUTED,false).setVisibility(View.GONE);
 
         LinearLayout advertising=settings;
         text(advertising,getString(R.string.ads_title),15,WHITE,true);
@@ -219,8 +219,8 @@ public final class NetworkHomeActivity extends Activity {
         demoBanner=new DemoBanner(this,adSlot,adStatus);
         // Request UMP consent on entry; ad requests remain gated by canRequestAds().
         demoBanner.enable();
-        // Ads stay opt-in via the existing consent flow; no redundant enable button.
-        // Users can change their advertising preferences through the privacy control.
+        button(advertising,getString(R.string.ads_enable)).setOnClickListener(v->demoBanner.enable());
+        button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->demoBanner.withdraw());
         button(advertising,getString(R.string.ads_privacy)).setOnClickListener(v->demoBanner.privacy());
 
         text(page,getString(R.string.network_demo_disclaimer),12,MUTED,false);
