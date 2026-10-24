@@ -91,11 +91,11 @@ public final class NetworkHomeActivity extends Activity {
         scroll.setBackgroundColor(BG);
         page=new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
-        page.setPadding(dp(20),dp(32),dp(20),dp(24));
+        page.setPadding(dp(14),dp(16),dp(14),dp(16));
         scroll.addView(page);
         setContentView(scroll);
 
-        text(page,getString(R.string.network_demo_heading),24,WHITE,true);
+        text(page,getString(R.string.network_demo_heading),21,WHITE,true);
 
         LinearLayout network=card("1  •  NETWORK");
         consentStatus=text(network,"",15,MUTED,false);
@@ -196,7 +196,9 @@ public final class NetworkHomeActivity extends Activity {
         if(!savedAddress.isEmpty() && savedAddress.length()>=10)
             walletAddress.setText(prefs.getString("usdc_chain","Polygon")+" • "+savedAddress.substring(0,6)+"…"+savedAddress.substring(savedAddress.length()-4));
 
-        LinearLayout history=card(getString(R.string.network_history_heading));
+        // Keep usage history alongside earnings to reduce dashboard sections.
+        LinearLayout history=earnings;
+        text(history,getString(R.string.network_history_heading),15,WHITE,true);
         text(history,getString(R.string.nui_31),13,MUTED,false);
         historyStatus=text(history,"",13,MUTED,false);
         updateHistory();
@@ -305,15 +307,15 @@ public final class NetworkHomeActivity extends Activity {
     private LinearLayout card(String title){
         LinearLayout box=new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(dp(18),dp(14),dp(18),dp(18));
+        box.setPadding(dp(14),dp(10),dp(14),dp(12));
         GradientDrawable bg=new GradientDrawable();
         bg.setColor(PANEL);
-        bg.setCornerRadius(dp(20));
+        bg.setCornerRadius(dp(14));
         box.setBackground(bg);
         LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);
-        lp.setMargins(0,dp(18),0,0);
+        lp.setMargins(0,dp(10),0,0);
         page.addView(box,lp);
-        text(box,title,18,WHITE,true);
+        text(box,title,16,WHITE,true);
         return box;
     }
 
@@ -323,7 +325,7 @@ public final class NetworkHomeActivity extends Activity {
         t.setTextSize(size);
         t.setTextColor(color);
         if(bold)t.setTypeface(null,Typeface.BOLD);
-        t.setPadding(0,dp(5),0,dp(6));
+        t.setPadding(0,dp(3),0,dp(4));
         parent.addView(t);
         return t;
     }
@@ -332,7 +334,7 @@ public final class NetworkHomeActivity extends Activity {
         Button b=new Button(this);
         b.setText(label);
         b.setAllCaps(false);
-        b.setMinHeight(dp(54));
+        b.setMinHeight(dp(46));
         b.setContentDescription(label);
         parent.addView(b,new LinearLayout.LayoutParams(-1,-2));
         return b;
