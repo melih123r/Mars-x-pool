@@ -96,6 +96,7 @@ final class DemoBanner {
                     status.setText(R.string.ads_unavailable);
                     // Defer cleanup until after the SDK callback returns.
                     activity.runOnUiThread(() -> {
+                        if (destroyed) return;
                         if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
                         slot.setVisibility(View.GONE);
                     });
@@ -136,6 +137,8 @@ final class DemoBanner {
     void destroy() {
         destroyed=true;
         updated=false;
+        loadingAd=false;
+        pending=false;
         if (ad!=null) { ad.destroy(); slot.removeAllViews(); ad=null; }
         slot.setVisibility(View.GONE);
         // Activity recreation must not silently change saved advertising preferences.
