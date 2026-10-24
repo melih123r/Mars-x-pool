@@ -37,6 +37,7 @@ public final class NetworkHomeActivity extends Activity {
     private TextView historyStatus;
     private DemoBanner demoBanner;
     private NetworkInterstitial interstitial;
+    private boolean showingInterstitial;
     private long sessionBytes;
     private long totalSessionBytes;
     private long totalSessionSeconds;
@@ -225,15 +226,15 @@ public final class NetworkHomeActivity extends Activity {
         root.addView(adSlot,new LinearLayout.LayoutParams(-1,-2));
         demoBanner=new DemoBanner(this,adSlot,adStatus);
         // Request UMP consent on entry; ad requests remain gated by canRequestAds().
-        interstitial=new NetworkInterstitial(this,demoBanner);
+        interstitial=new NetworkInterstitial(this,demoBanner,showing -> showingInterstitial=showing);
         demoBanner.enable();
         // Standard banner only until a compliant rewarded-ad experience is designed.
         text(advertising,"Standard ad • No points or cash rewards",11,MUTED,false);
         button(advertising,getString(R.string.ads_enable)).setOnClickListener(v->{demoBanner.enable();interstitial.preload();});
         advertising.getChildAt(advertising.getChildCount()-1).setVisibility(View.GONE);
-        button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->demoBanner.withdraw());
+        button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->{demoBanner.withdraw();interstitial.clear();});
         advertising.getChildAt(advertising.getChildCount()-1).setVisibility(View.GONE);
-        button(advertising,getString(R.string.ads_privacy)).setOnClickListener(v->demoBanner.privacy());
+        button(advertising,getString(R.string.ads_privacy)).setOnClickListener(v->{interstitial.clear();demoBanner.privacy();});
 
         text(page,getString(R.string.network_demo_disclaimer),12,MUTED,false);
         text(page,getString(R.string.nui_36),12,ORANGE,false);
@@ -270,7 +271,7 @@ public final class NetworkHomeActivity extends Activity {
         }
     }
     @Override protected void onStop(){
-        if(prefs.getBoolean("monitor_active",false)){
+        if(prefs.getBoolean("monitor_active",false) && !showingInterstitial){
             prefs.edit().putBoolean("monitor_active",false).apply();
             stopMonitor();
             if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
