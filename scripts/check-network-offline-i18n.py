@@ -23,9 +23,13 @@ for language in ("en", "tr", "fr", "es", "de", "it", "pt-BR", "nl", "pl", "ar", 
     if re.search(r'<script\b|onerror\s*=|onload\s*=', text, re.I):
         errors.append(f"{name}: executable HTML not permitted")
 source = activity.read_text(encoding="utf-8")
-for marker in ('NetworkLocale.selected(this)', '"index-tr.html"', '"index-fr.html"', '"index-es.html"', '"index-de.html"', '"index-"+language+".html"', '"index.html"', 'setJavaScriptEnabled(false)'):
+for marker in ('NetworkLocale.selected(this)', '"index-tr.html"', '"index-fr.html"', '"index-es.html"', '"index-de.html"', '"index-" + language + ".html"', '"index.html"', 'setJavaScriptEnabled(false)'):
     if marker not in source:
         errors.append(f"Activity missing {marker}")
+# Ensure every localized asset is reachable through the explicitly allowed language list.
+for language in ("it", "pt-BR", "nl", "pl", "ar", "sv", "da", "fi", "no", "ro", "cs", "sk", "hu", "el", "uk"):
+    if f'"{language}"' not in source:
+        errors.append(f"Activity missing routing for {language}")
 if errors:
     print("FAIL: " + "; ".join(errors))
     sys.exit(1)
