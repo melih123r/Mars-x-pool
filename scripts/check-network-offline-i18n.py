@@ -8,7 +8,7 @@ root = Path(__file__).resolve().parents[1]
 assets = root / "android/app/src/main/assets/network"
 activity = root / "android/app/src/main/java/com/marsx/pool/NetworkWebsiteActivity.java"
 errors = []
-for language in ("en", "tr", "fr", "es", "de", "it", "pt-BR", "nl", "pl", "ar"):
+for language in ("en", "tr", "fr", "es", "de", "it", "pt-BR", "nl", "pl", "ar", "sv", "da", "fi", "no", "ro"):
     name = "index.html" if language == "en" else f"index-{language}.html"
     path = assets / name
     if not path.is_file():
@@ -29,4 +29,4 @@ for marker in ('NetworkLocale.selected(this)', '"index-tr.html"', '"index-fr.htm
 if errors:
     print("FAIL: " + "; ".join(errors))
     sys.exit(1)
-print("PASS: 10 locale offline pages and fail-closed WebView selection (static only)")
+print("PASS: 15 locale offline pages and fail-closed WebView selection (static only)")
