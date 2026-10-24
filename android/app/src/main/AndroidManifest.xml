@@ -30,8 +30,5 @@
             </intent-filter>
         </activity>
         <activity android:name=".NetworkWebsiteActivity" android:exported="false" />
-        <activity android:name=".VrscPoolActivity" android:exported="false" />
-        <activity android:name=".MainActivity" android:exported="false" />
-        <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="false" />
     </application>
 </manifest>
