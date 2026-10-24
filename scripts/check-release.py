@@ -56,8 +56,16 @@ if 'android.permission.INTERNET' not in manifest:
     raise SystemExit("INTERNET permission is required")
 if not re.search(r"targetSdk\s+36", gradle):
     raise SystemExit("targetSdk 36 is required")
-if 'versionName "0.9.0-beta"' not in gradle or 'versionCode 13' not in gradle:
-    raise SystemExit("Beta 0.9.0 Android version is required")
+# The legacy beta remains supported, while production candidates must advance
+# the Play versionCode without changing unrelated backend API versions.
+version_code = re.search(r"\bversionCode\s+(\d+)\b", gradle)
+version_name = re.search(r'\bversionName\s+"([^"]+)"', gradle)
+if not version_code or not version_name:
+    raise SystemExit("Android versionCode/versionName is missing")
+code = int(version_code.group(1))
+name = version_name.group(1)
+if (code, name) != (13, "0.9.0-beta") and not (code >= 19 and re.fullmatch(r"0\.9\.\d+-network", name)):
+    raise SystemExit("Expected beta 13/0.9.0-beta or Network production candidate >=19/0.9.x-network")
 if '"version": "0.9.0"' not in package:
     raise SystemExit("Package version must match Beta 0.9.0")
 if 'APP_VERSION = "0.9.0-beta"' not in main_activity:
