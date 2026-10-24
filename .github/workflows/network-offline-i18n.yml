@@ -1,0 +1,24 @@
+name: Network offline localization static QA
+on:
+  pull_request:
+    paths:
+      - 'android/app/src/main/assets/network/**'
+      - 'android/app/src/main/java/com/marsx/pool/NetworkWebsiteActivity.java'
+      - 'scripts/check-network-offline-i18n.py'
+      - '.github/workflows/network-offline-i18n.yml'
+  push:
+    paths:
+      - 'android/app/src/main/assets/network/**'
+      - 'android/app/src/main/java/com/marsx/pool/NetworkWebsiteActivity.java'
+      - 'scripts/check-network-offline-i18n.py'
+      - '.github/workflows/network-offline-i18n.yml'
+permissions:
+  contents: read
+jobs:
+  offline-i18n:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate localized offline pages and safe WebView routing
+        run: python3 scripts/check-network-offline-i18n.py

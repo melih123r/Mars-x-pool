@@ -52,7 +52,13 @@ final class NetworkLocale {
             LocaleList effective = appLocales.isEmpty() ? manager.getSystemLocales() : appLocales;
             return supported(context, effective.isEmpty() ? "en" : effective.get(0).toLanguageTag());
         }
-        return supported(context, saved.getString("ui_language", "tr"));
+        // On Android 8–12, follow the device language until the user explicitly chooses one.
+        // Previously a fresh installation was forced to Turkish regardless of system settings.
+        if (saved.contains("ui_language")) {
+            return supported(context, saved.getString("ui_language", "en"));
+        }
+        LocaleList systemLocales = context.getResources().getConfiguration().getLocales();
+        return supported(context, systemLocales.isEmpty() ? "en" : systemLocales.get(0).toLanguageTag());
     }
 
     static Context wrap(Context base) {
