@@ -1,6 +1,7 @@
 package com.marsx.pool;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.widget.Toast;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
@@ -14,10 +15,16 @@ final class RewardedDemoAd {
     private final Activity activity;
     private final DemoBanner consent;
     private boolean loading;
-    RewardedDemoAd(Activity activity, DemoBanner consent) {
+    private final SharedPreferences rewards;
+    private final Runnable onReward;
+    private static final int POINTS_PER_AD = 10;
+    RewardedDemoAd(Activity activity, DemoBanner consent, Runnable onReward) {
         this.activity=activity;
         this.consent=consent;
+        this.onReward=onReward;
+        this.rewards=activity.getSharedPreferences("marsx_demo_reward_points",Activity.MODE_PRIVATE);
     }
+    int points() { return rewards.getInt("points",0); }
     void show() {
         if (!BuildConfig.DEBUG) {
             Toast.makeText(activity,"Rewarded ads are not configured for production",Toast.LENGTH_LONG).show();
@@ -38,7 +45,13 @@ final class RewardedDemoAd {
                 loading=false;
                 if (activity.isFinishing() || !consent.canRequestAds()) return;
                 ad.setFullScreenContentCallback(new FullScreenContentCallback(){});
-                ad.show(activity,reward -> Toast.makeText(activity,"Demo reward only — no USDT credited",Toast.LENGTH_LONG).show());
+                ad.show(activity,reward -> {
+                    int current=points();
+                    int next=current > Integer.MAX_VALUE-POINTS_PER_AD ? Integer.MAX_VALUE : current+POINTS_PER_AD;
+                    rewards.edit().putInt("points",next).apply();
+                    if (onReward!=null) onReward.run();
+                    Toast.makeText(activity,"+10 MARS-X demo points — not cash or USDT",Toast.LENGTH_LONG).show();
+                });
             }
         });
     }
