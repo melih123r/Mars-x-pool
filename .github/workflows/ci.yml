@@ -22,6 +22,8 @@ jobs:
       - run: npm test
       - run: npm run cf:check
       - run: npm run cf:db:local
+      - name: Network Android release static safety gates
+        run: python3 scripts/check-network-release-static.py
       - run: python3 scripts/check-translations.py
       - run: python3 scripts/check-release.py
 
