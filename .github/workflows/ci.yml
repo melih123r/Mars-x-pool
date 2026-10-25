@@ -10,7 +10,7 @@ permissions:
 jobs:
   backend:
     # Network-only release: do not execute unrelated Telegram/Finance suites.
-    if: github.ref_name != 'release/network-demo-signed-aab-20261022' && github.head_ref != 'release/network-demo-signed-aab-20261022' && github.ref_name != 'fix/network-language-delivery-20261024' && github.head_ref != 'fix/network-language-delivery-20261024'
+    if: github.ref_name != 'release/network-demo-signed-aab-20261022' && github.head_ref != 'release/network-demo-signed-aab-20261022' && github.ref_name != 'fix/network-language-delivery-20261024' && github.head_ref != 'fix/network-language-delivery-20261024' && github.ref_name != 'fix/network-admob-connection-20261025' && github.head_ref != 'fix/network-admob-connection-20261025'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
