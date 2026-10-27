@@ -15,4 +15,7 @@ source = (root / 'android/app/src/main/java/com/marsx/pool/DemoBanner.java').rea
 assert 'canRequestAds()' in source and 'requestConsentInfoUpdate' in source
 assert 'showPrivacyOptionsForm' in source and 'loadAndShowConsentFormIfRequired' in source
 assert 'withdraw()' in source and 'destroy()' in source
+assert 'onAdFailedToLoad' in source and 'onAdLoaded' in source
+assert 'current(ticket)' in source and '++generation' in source
+assert source.index('ad.setAdListener') < source.index('ad.loadAd')
 print('DEMO ad configuration safety: PASS (static checks, not a device test)')

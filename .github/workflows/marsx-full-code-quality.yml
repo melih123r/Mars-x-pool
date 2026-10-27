@@ -12,7 +12,7 @@ concurrency:
 jobs:
   backend:
     # This branch is restricted to the Android Network DEMO release.
-    if: github.ref_name != 'release/network-demo-signed-aab-20261022' && github.head_ref != 'release/network-demo-signed-aab-20261022'
+    if: github.ref_name != 'release/network-demo-v19-20261027' && github.head_ref != 'release/network-demo-v19-20261027' && github.ref_name != 'release/network-demo-signed-aab-20261022' && github.head_ref != 'release/network-demo-signed-aab-20261022' && github.ref_name != 'fix/network-language-delivery-20261024' && github.head_ref != 'fix/network-language-delivery-20261024' && github.ref_name != 'fix/network-admob-connection-20261025' && github.head_ref != 'fix/network-admob-connection-20261025'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:

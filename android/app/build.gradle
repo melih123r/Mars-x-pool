@@ -34,8 +34,8 @@ android {
         applicationId "com.marsx.pool"
         minSdk 26
         targetSdk 36
-        versionCode 18
-        versionName "0.9.3-network-test"
+        versionCode 19
+        versionName "0.9.4-network-demo"
         buildConfigField "String", "QONVERSION_PROJECT_KEY", "\"${escapedQonversionProjectKey}\""
         buildConfigField "String", "QONVERSION_PRODUCT_PRO", "\"pro_monthly\""
         buildConfigField "String", "QONVERSION_PRODUCT_FARM", "\"farm_monthly\""
@@ -45,6 +45,9 @@ android {
         // Both debug and release DEMO builds use Google's non-monetizing test banner.
         buildConfigField "String", "DEMO_BANNER_UNIT", '"ca-app-pub-3940256099942544/6300978111"'
     }
+
+    // The in-app picker must work offline for every supported language after Play install.
+    bundle { language { enableSplit = false } }
 
     buildFeatures { buildConfig true }
 

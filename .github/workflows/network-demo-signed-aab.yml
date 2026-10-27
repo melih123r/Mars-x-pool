@@ -1,6 +1,8 @@
 name: Network DEMO signed AAB
 on:
   workflow_dispatch:
+  push:
+    branches: [release/network-demo-v19-20261027]
 permissions:
   contents: read
 jobs:
@@ -23,7 +25,7 @@ jobs:
         run: |
           grep -Fq 'applicationId "com.marsx.pool"' android/app/build.gradle
           grep -Eq 'minSdk[[:space:]]+26' android/app/build.gradle
-          grep -Fq 'versionName "0.9.3-network-test"' android/app/build.gradle
+          grep -Fq 'versionName "0.9.4-network-demo"' android/app/build.gradle
           grep -q 'NetworkHomeActivity' android/app/src/main/AndroidManifest.xml
           echo 'Network DEMO package, minimum SDK, version and launcher verified'
       - name: Check Network UI safety and translations
@@ -64,7 +66,7 @@ jobs:
       - name: Upload signed bundle and verification metadata
         uses: actions/upload-artifact@v4
         with:
-          name: marsx-network-demo-signed-aab
+          name: marsx-network-demo-v19-signed-aab
           path: |
             android/app/build/outputs/bundle/release/app-release.aab
             ${{ runner.temp }}/aab-sha256.txt
