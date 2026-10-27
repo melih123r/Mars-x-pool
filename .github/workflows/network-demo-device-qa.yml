@@ -10,7 +10,7 @@ permissions:
   contents: read
 jobs:
   emulator:
-    if: github.head_ref == 'release/network-demo-signed-aab-20261022' || github.ref_name == 'release/network-demo-signed-aab-20261022' || github.head_ref == 'fix/network-language-delivery-20261024' || github.ref_name == 'fix/network-language-delivery-20261024'
+    if: github.head_ref == 'release/network-demo-v19-20261027' || github.ref_name == 'release/network-demo-v19-20261027' || github.head_ref == 'release/network-demo-signed-aab-20261022' || github.ref_name == 'release/network-demo-signed-aab-20261022' || github.head_ref == 'fix/network-language-delivery-20261024' || github.ref_name == 'fix/network-language-delivery-20261024'
     strategy:
       fail-fast: false
       matrix:
@@ -47,6 +47,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: network-demo-v18-api${{ matrix.api }}-device-qa
+          name: network-demo-v19-api${{ matrix.api }}-device-qa
           path: device-qa/
           if-no-files-found: error
