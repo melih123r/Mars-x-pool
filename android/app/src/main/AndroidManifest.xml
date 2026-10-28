@@ -13,6 +13,7 @@
         android:theme="@style/Theme.MarsX"
         android:usesCleartextTraffic="false">
         <activity android:name=".VrscPoolActivity" android:exported="false" />
+        <activity android:name=".TradingViewMarketActivity" android:exported="false" />
         <activity android:name=".FinanceActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
