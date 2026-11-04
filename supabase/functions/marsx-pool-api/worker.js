@@ -1108,7 +1108,7 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
           referral_policy: {
             platform_fee_percent: 2,
             share_of_platform_fee_percent: 3,
-            effective_gross_percent: 0.06,
+            effective_gross_percent: 0.3,
             charged_to_invitee: false,
             levels: 1,
           },
