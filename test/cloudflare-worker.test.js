@@ -171,8 +171,8 @@ test("Google sign-in verifies RS256 nonce and locks a one-level referral", async
   }), env);
   assert.equal(me.status, 200);
   const profile = await me.json();
-  assert.equal(profile.referral.rewardUnits, 60_000);
-  assert.equal(profile.referral_policy.effective_gross_percent, 0.06);
+  assert.equal(profile.referral.rewardUnits, 300_000);
+  assert.equal(profile.referral_policy.effective_gross_percent, 0.3);
   assert.equal(profile.referral_policy.charged_to_invitee, false);
 });
 
