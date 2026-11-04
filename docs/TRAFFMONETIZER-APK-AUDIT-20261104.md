@@ -20,3 +20,7 @@ The partner's public developer page says app developers receive the official SDK
 The Network app keeps an app-owned `NetworkPartnerConnection` boundary. It cannot be unlocked by a preference, publisher ID, AdMob ID, test consent or a token placed in the APK. The new Supabase migration adds per-user device records, consent history, provider report deduplication, immutable server-written ledger rows, withdrawal gates and publisher reconciliation. Provider report ingestion and ledger writes must be performed by a reviewed server/Edge Function using the publisher secret; clients have no write policy for those tables.
 
 Real routing, partner earnings, cash withdrawals and gas settlement remain disabled until the official SDK/API package, signed agreement, publisher authorization, server-side receipt verification contract and device tests are available.
+
+## Token-only configuration
+
+The server boundary may receive `TRAFFMONETIZER_ACCESS_TOKEN` through the Supabase secret store, but the Android client and GitHub repository must never contain it. `TRAFFMONETIZER_API_BASE_URL` and `TRAFFMONETIZER_LIVE_ENABLED=true` are also required, and the gateway still returns a locked response until the official endpoint and receipt contract are reviewed. A token alone is not treated as an API specification.
