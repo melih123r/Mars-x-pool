@@ -1105,7 +1105,7 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
           user: { display_name: user.display_name, email: user.email },
           referral: await authReferralProfile(store, user.user_id),
           referral_policy: {
-            platform_fee_percent: 2,
+            platform_fee_percent: 10,
             share_of_platform_fee_percent: 3,
             effective_gross_percent: 0.3,
             charged_to_invitee: false,
@@ -1283,7 +1283,7 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
           referralRewardUnits: fee.referralRewardUnits,
           referralRewardDisplay: formatUnits(fee.referralRewardUnits),
           marsxNetFeeUnits: fee.marsxNetFeeUnits,
-          feePolicy: "2_percent_platform_fee;3_percent_of_fee_to_single_level_referrer",
+          feePolicy: "10_percent_platform_fee;3_percent_of_fee_to_single_level_referrer",
           status: "pending", sandbox: true, createdAt: timestamp, updatedAt: timestamp,
         };
         const result = await store.createPayout(auth.workerId, payout, idempotencyKey);
