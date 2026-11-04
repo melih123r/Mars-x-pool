@@ -7,8 +7,9 @@ The APK is interoperability evidence only. It is not an SDK artifact or an autho
 | Item | Value |
 | --- | --- |
 | Size | 16,902,244 bytes |
-| SHA-256 | `633c584cbd7f7bf2df4b8fc86fb2413e100d285fbd58310bab034b35042e8773` |
+| SHA-256 | `633c584cbd7f7bf2df4b8fc86fb2413e100d285fbd58310bab35042e8773` |
 | Native ABI | armeabi-v7a, arm64-v8a, x86, x86_64 |
+| APK signer | Traffmonetizer self-signed certificate; SHA-256 `5D:A7:28:3A:21:29:19:4A:12:4B:7A:80:BA:6D:85:73:D4:F1:52:01:B0:6D:A2:51:12:5F:6E:4A:2E:8B:2C:E3` |
 | Client clues | `AuthViewModel`, `TraffmonetizerForegroundService`, `ServiceViewModel`, `base_client_set_token` |
 | MARS-X token | not present in this repository or build |
 
