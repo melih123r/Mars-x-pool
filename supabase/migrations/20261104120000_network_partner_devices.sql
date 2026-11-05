@@ -115,6 +115,24 @@ alter table public.earnings_ledger enable row level security;
 alter table public.withdrawal_requests enable row level security;
 alter table public.publisher_reconciliation enable row level security;
 
+-- RLS is row filtering, not a substitute for table privileges. Start from deny-all,
+-- then grant authenticated clients only the DEMO operations backed by policies.
+revoke all on table public.profiles from anon, authenticated;
+revoke all on table public.publisher_nodes from anon, authenticated;
+revoke all on table public.devices from anon, authenticated;
+revoke all on table public.consent_events from anon, authenticated;
+revoke all on table public.traffic_reports from anon, authenticated;
+revoke all on table public.earnings_ledger from anon, authenticated;
+revoke all on table public.withdrawal_requests from anon, authenticated;
+revoke all on table public.publisher_reconciliation from anon, authenticated;
+
+grant select, insert, update on table public.profiles to authenticated;
+grant select, insert, update on table public.devices to authenticated;
+grant select, insert on table public.consent_events to authenticated;
+grant select on table public.traffic_reports to authenticated;
+grant select on table public.earnings_ledger to authenticated;
+grant select, insert on table public.withdrawal_requests to authenticated;
+
 drop policy if exists profiles_self_select on public.profiles;
 drop policy if exists profiles_self_update on public.profiles;
 drop policy if exists profiles_self_insert on public.profiles;
@@ -128,18 +146,78 @@ drop policy if exists ledger_self_select on public.earnings_ledger;
 drop policy if exists withdrawal_self_select on public.withdrawal_requests;
 drop policy if exists withdrawal_self_insert on public.withdrawal_requests;
 drop policy if exists publisher_nodes_self_select on public.publisher_nodes;
-create policy profiles_self_select on public.profiles for select using (id = auth.uid());
-create policy profiles_self_update on public.profiles for update using (id = auth.uid()) with check (id = auth.uid());
-create policy profiles_self_insert on public.profiles for insert with check (id = auth.uid());
--- Publisher nodes are provisioned only by the reviewed server/Edge Function.
-create policy devices_self_select on public.devices for select using (user_id = auth.uid());
-create policy devices_self_insert on public.devices for insert with check (user_id = auth.uid());
-create policy devices_self_update on public.devices for update using (user_id = auth.uid()) with check (user_id = auth.uid() and live_enabled = false);
-create policy consent_self_select on public.consent_events for select using (user_id = auth.uid());
-create policy consent_self_insert on public.consent_events for insert with check (user_id = auth.uid());
-create policy traffic_self_select on public.traffic_reports for select using (exists (select 1 from public.devices d where d.id = device_id and d.user_id = auth.uid()));
-create policy ledger_self_select on public.earnings_ledger for select using (user_id = auth.uid());
-create policy withdrawal_self_select on public.withdrawal_requests for select using (user_id = auth.uid());
-create policy withdrawal_self_insert on public.withdrawal_requests for insert with check (user_id = auth.uid() and status = 'demo_blocked');
+create policy profiles_self_select on public.profiles
+  for select to authenticated
+  using ((select auth.uid()) = id);
+create policy profiles_self_update on public.profiles
+  for update to authenticated
+  using ((select auth.uid()) = id)
+  with check ((select auth.uid()) = id and demo_only = true);
+create policy profiles_self_insert on public.profiles
+  for insert to authenticated
+  with check ((select auth.uid()) = id and demo_only = true);
 
--- No client policies are created for publisher_reconciliation, ledger writes or provider reports.
+-- Publisher nodes and provider identifiers are server-only. Android clients can
+-- register and update an installation only while it is unbound and live-disabled.
+create policy devices_self_select on public.devices
+  for select to authenticated
+  using ((select auth.uid()) = user_id);
+create policy devices_self_insert on public.devices
+  for insert to authenticated
+  with check (
+    (select auth.uid()) = user_id
+    and publisher_node_id is null
+    and live_enabled = false
+    and consent_state in ('none', 'demo', 'revoked')
+  );
+create policy devices_self_update on public.devices
+  for update to authenticated
+  using ((select auth.uid()) = user_id)
+  with check (
+    (select auth.uid()) = user_id
+    and publisher_node_id is null
+    and live_enabled = false
+    and consent_state in ('none', 'demo', 'revoked')
+  );
+
+create policy consent_self_select on public.consent_events
+  for select to authenticated
+  using ((select auth.uid()) = user_id);
+create policy consent_self_insert on public.consent_events
+  for insert to authenticated
+  with check (
+    (select auth.uid()) = user_id
+    and exists (
+      select 1
+      from public.devices d
+      where d.id = device_id
+        and d.user_id = (select auth.uid())
+    )
+  );
+
+create policy traffic_self_select on public.traffic_reports
+  for select to authenticated
+  using (
+    exists (
+      select 1
+      from public.devices d
+      where d.id = device_id
+        and d.user_id = (select auth.uid())
+    )
+  );
+create policy ledger_self_select on public.earnings_ledger
+  for select to authenticated
+  using ((select auth.uid()) = user_id);
+create policy withdrawal_self_select on public.withdrawal_requests
+  for select to authenticated
+  using ((select auth.uid()) = user_id);
+create policy withdrawal_self_insert on public.withdrawal_requests
+  for insert to authenticated
+  with check (
+    (select auth.uid()) = user_id
+    and status = 'demo_blocked'
+    and gas_minor = 0
+  );
+
+-- No client grants or policies exist for publisher nodes, reconciliation,
+-- ledger writes or provider-report writes. Reviewed server code owns them.
