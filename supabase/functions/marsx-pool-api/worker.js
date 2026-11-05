@@ -10,7 +10,7 @@ const QONVERSION_API_BASE = "https://api.qonversion.io/v4";
 const GOOGLE_JWKS_URL = "https://www.googleapis.com/oauth2/v3/certs";
 const AUTH_NONCE_TTL_MS = 5 * 60 * 1000;
 const AUTH_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
-const PLATFORM_FEE_BPS = 200;
+const PLATFORM_FEE_BPS = 1_000;
 const REFERRAL_SHARE_OF_FEE_BPS = 300;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -996,7 +996,7 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
       && authPepper.length >= 32;
     const licenseTtl = Math.min(Math.max(Number(env.LICENSE_TOKEN_TTL_SECONDS || 2_592_000), 3_600), 7_776_000);
     const partnerTtl = Math.min(Math.max(Number(env.QONVERSION_SESSION_TTL_SECONDS || 86_400), 900), 86_400);
-    const minimum = normalizePositiveUnits(env.MIN_PAYOUT_UNITS) || 1_000_000;
+    const minimum = normalizePositiveUnits(env.MIN_PAYOUT_UNITS) || 2_000_000;
     const dormancyWindow = Math.max(Number(env.DORMANT_AFTER_MS || DEFAULT_DORMANT_AFTER_MS), 86_400_000);
 
     async function currentLicense(installId) {
@@ -1106,9 +1106,9 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
           user: { display_name: user.display_name, email: user.email },
           referral: await authReferralProfile(store, user.user_id),
           referral_policy: {
-            platform_fee_percent: 2,
+            platform_fee_percent: 10,
             share_of_platform_fee_percent: 3,
-            effective_gross_percent: 0.06,
+            effective_gross_percent: 0.3,
             charged_to_invitee: false,
             levels: 1,
           },
@@ -1284,7 +1284,7 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
           referralRewardUnits: fee.referralRewardUnits,
           referralRewardDisplay: formatUnits(fee.referralRewardUnits),
           marsxNetFeeUnits: fee.marsxNetFeeUnits,
-          feePolicy: "2_percent_platform_fee;3_percent_of_fee_to_single_level_referrer",
+          feePolicy: "10_percent_platform_fee;3_percent_of_fee_to_single_level_referrer",
           status: "pending", sandbox: true, createdAt: timestamp, updatedAt: timestamp,
         };
         const result = await store.createPayout(auth.workerId, payout, idempotencyKey);

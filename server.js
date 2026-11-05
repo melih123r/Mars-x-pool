@@ -745,7 +745,7 @@ export function createServer({
   store = new MemoryStore(),
   now = () => Date.now(),
   rateLimitMax = 300,
-  minPayoutUnits = Number(process.env.MIN_PAYOUT_UNITS || 1_000_000),
+  minPayoutUnits = Number(process.env.MIN_PAYOUT_UNITS || 2_000_000),
   dormantAfterMs = Number(process.env.DORMANT_AFTER_MS || DEFAULT_DORMANT_AFTER_MS),
   licensePepper = process.env.LICENSE_PEPPER || "",
   licenseSessionSecret = process.env.LICENSE_SESSION_SECRET || "",
@@ -761,7 +761,7 @@ export function createServer({
   const ttlSeconds = Math.min(Math.max(Number(licenseTokenTtlSeconds), 3_600), 7_776_000);
   const partnerTtlSeconds = Math.min(Math.max(Number(qonversionSessionTtlSeconds), 900), 86_400);
   const entitlementIds = parseEntitlementIds(qonversionEntitlementIds);
-  const minimum = normalizePositiveUnits(minPayoutUnits) || 1_000_000;
+  const minimum = normalizePositiveUnits(minPayoutUnits) || 2_000_000;
   const dormancyWindow = Number.isFinite(dormantAfterMs) && dormantAfterMs > 0
     ? dormantAfterMs
     : DEFAULT_DORMANT_AFTER_MS;

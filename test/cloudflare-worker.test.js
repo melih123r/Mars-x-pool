@@ -50,7 +50,7 @@ function environment(extra = {}) {
     QONVERSION_SESSION_TTL_SECONDS: "86400",
     GOOGLE_WEB_CLIENT_ID: GOOGLE_AUDIENCE,
     AUTH_SUBJECT_PEPPER: "google-auth-subject-pepper-at-least-32-characters",
-    MIN_PAYOUT_UNITS: "1000000",
+    MIN_PAYOUT_UNITS: "2000000",
     DORMANT_AFTER_MS: "31536000000",
     ...extra,
   };
@@ -153,9 +153,9 @@ test("Google sign-in verifies RS256 nonce and locks a one-level referral", async
   }), env);
   assert.equal(payout.status, 201);
   const payoutBody = await payout.json();
-  assert.equal(payoutBody.payout.platformFeeUnits, 2_000_000);
-  assert.equal(payoutBody.payout.payoutNetUnits, 98_000_000);
-  assert.equal(payoutBody.payout.referralRewardUnits, 60_000);
+  assert.equal(payoutBody.payout.platformFeeUnits, 10_000_000);
+  assert.equal(payoutBody.payout.payoutNetUnits, 90_000_000);
+  assert.equal(payoutBody.payout.referralRewardUnits, 300_000);
 
   assert.equal((await app.fetch(request(`/admin/payouts/${payoutBody.payout.id}`, {
     method: "POST", headers: { Authorization: "Bearer payout-admin-token", "Content-Type": "application/json" },
@@ -171,8 +171,9 @@ test("Google sign-in verifies RS256 nonce and locks a one-level referral", async
   }), env);
   assert.equal(me.status, 200);
   const profile = await me.json();
-  assert.equal(profile.referral.rewardUnits, 60_000);
-  assert.equal(profile.referral_policy.effective_gross_percent, 0.06);
+  assert.equal(profile.referral.rewardUnits, 300_000);
+  assert.equal(profile.referral_policy.platform_fee_percent, 10);
+  assert.equal(profile.referral_policy.effective_gross_percent, 0.3);
   assert.equal(profile.referral_policy.charged_to_invitee, false);
 });
 
@@ -236,6 +237,21 @@ test("Cloudflare register, credit and idempotent sandbox payout preserve the API
     "X-Install-Id": installId,
     "X-Worker-Id": workerId,
   };
+  const belowMinimum = await app.fetch(request("/payouts", {
+    method: "POST",
+    headers: payoutHeaders,
+    body: JSON.stringify({
+      amountUnits: 1_999_999,
+      destination: "sandbox-wallet-cf",
+      idempotencyKey: "cloudflare-payout-below-minimum",
+    }),
+  }), env);
+  assert.equal(belowMinimum.status, 400);
+  assert.deepEqual(await belowMinimum.json(), {
+    error: "amount_below_sandbox_minimum",
+    minimumPayoutUnits: 2_000_000,
+  });
+
   const body = JSON.stringify({
     amountUnits: 2_000_000,
     destination: "sandbox-wallet-cf",

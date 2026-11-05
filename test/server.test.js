@@ -209,6 +209,21 @@ test("licensed sandbox payouts reserve balance once and rejected payouts refund 
     });
     assert.equal(credit.status, 201);
 
+    const belowMinimum = await fetch(`${baseUrl}/payouts`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        amountUnits: 1_999_999,
+        destination: "sandbox-wallet-001",
+        idempotencyKey: "payout-below-minimum",
+      }),
+    });
+    assert.equal(belowMinimum.status, 400);
+    assert.deepEqual(await belowMinimum.json(), {
+      error: "amount_below_sandbox_minimum",
+      minimumPayoutUnits: 2_000_000,
+    });
+
     const requestBody = JSON.stringify({
       amountUnits: 2_000_000,
       destination: "sandbox-wallet-001",
