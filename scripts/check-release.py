@@ -56,8 +56,17 @@ if 'android.permission.INTERNET' not in manifest:
     raise SystemExit("INTERNET permission is required")
 if not re.search(r"targetSdk\s+36", gradle):
     raise SystemExit("targetSdk 36 is required")
-if 'versionName "0.9.0-beta"' not in gradle or 'versionCode 13' not in gradle:
-    raise SystemExit("Beta 0.9.0 Android version is required")
+# Accept the legacy beta or the explicitly isolated Network test build.
+# Network versioning does not change the backend API's legacy 0.9.0 contract.
+legacy_version = 'versionName "0.9.0-beta"' in gradle and 'versionCode 13' in gradle
+network_version = 'versionName "0.9.3-network-test"' in gradle and 'versionCode 16' in gradle
+if not (legacy_version or network_version):
+    raise SystemExit("Unsupported Android version: expected legacy beta 13 or Network test 16")
+if network_version:
+    if 'android:name=".NetworkHomeActivity"' not in manifest:
+        raise SystemExit("Network test launcher activity is missing")
+    if not re.search(r'<activity\s+android:name="\.NetworkHomeActivity"[^>]*>[\s\S]*?android.intent.action.MAIN[\s\S]*?android.intent.category.LAUNCHER', manifest):
+        raise SystemExit("Network test must launch NetworkHomeActivity")
 if '"version": "0.9.0"' not in package:
     raise SystemExit("Package version must match Beta 0.9.0")
 if 'APP_VERSION = "0.9.0-beta"' not in main_activity:
