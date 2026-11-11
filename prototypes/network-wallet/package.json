@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "type": "commonjs",
+  "description": "Isolate SDK-free Network wallet demo CommonJS tests from root ESM package"
+}

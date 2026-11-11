@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "mode": "demo",
+  "purpose": "publisher_receiving_addresses_only",
+  "real_payouts_enabled": false,
+  "automatic_signing_enabled": false,
+  "wallets": [
+    {
+      "asset": "USDT",
+      "network": "TRON",
+      "token_standard": "TRC20",
+      "address": "TT3RpGfvUScgAG3GYULcimxFXEUnPPNfGZ",
+      "verification": "user_reported_not_onchain_verified"
+    },
+    {
+      "asset": "USDT",
+      "network": "SOLANA",
+      "token_standard": "SPL",
+      "address": "FqxVPDjwwMyT4y2tRsQia2pXpwCcgGnH3J4HMhqAkwcU",
+      "verification": "user_reported_not_onchain_verified"
+    }
+  ],
+  "security_note": "Public receiving addresses only. Do not place wallet keys or seeds in this repository. No payment signing or broadcast."
+}
