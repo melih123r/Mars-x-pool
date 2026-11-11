@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"لا يوجد اتصال"</string>
+    <string name="nui_01" formatted="false">"شبكة أخرى"</string>
+    <string name="nui_02" formatted="false">"بيانات الهاتف"</string>
+    <string name="nui_03" formatted="false">"بدء • مراقبة الاتصال"</string>
+    <string name="nui_04" formatted="false">"انقطع الاتصال؛ توقفت المراقبة."</string>
+    <string name="nui_05" formatted="false">"البطارية أقل من 15%؛ توقفت المراقبة."</string>
+    <string name="nui_06" formatted="false">"القياس غير مدعوم"</string>
+    <string name="nui_07" formatted="false">"الاتصال: "</string>
+    <string name="nui_08" formatted="false">" • المراقبة: "</string>
+    <string name="nui_09" formatted="false">" دقيقة "</string>
+    <string name="nui_10" formatted="false">" ثانية\nاستخدام التطبيق للبيانات: "</string>
+    <string name="nui_11" formatted="false">"\nحركة البيانات المشتركة: 0 GB • الأرباح: €0.00"</string>
+    <string name="nui_12" formatted="false">"موافقة صريحة • للاختبار فقط"</string>
+    <string name="nui_13" formatted="false">"يهدف MARS-X Network إلى مشاركة اتصالك بالإنترنت مع حركة بيانات عملاء جهات خارجية عبر شريك مستقبلي معتمد. قد يؤثر ذلك على باقة بياناتك وبطاريتك واتصالك؛ وقد يستخدم عملاء الشريك عنوان IP لشبكتك. لا ضمان لحركة البيانات أو الدخل. المشاركة الفعلية معطلة حاليًا. يمكنك سحب موافقتك في أي وقت. المتابعة تحفظ تفضيلًا اختباريًا فقط."</string>
+    <string name="nui_14" formatted="false">"إلغاء"</string>
+    <string name="nui_15" formatted="false">"حفظ الموافقة الاختبارية"</string>
+    <string name="nui_16" formatted="false">"اقرأ الإفصاح الاختباري واقبله أولًا."</string>
+    <string name="nui_17" formatted="false">"تتطلب المراقبة اتصال إنترنت عبر Wi-Fi أو الهاتف."</string>
+    <string name="nui_18" formatted="false">"ابدأ مراقبة الاتصال. هذا الاختبار لا يشارك اتصالك بالإنترنت ولا يحقق أرباحًا. يمكنك الإيقاف في أي وقت."</string>
+    <string name="nui_19" formatted="false">"بدء"</string>
+    <string name="nui_20" formatted="false">"إيقاف • مراقبة الاتصال"</string>
+    <string name="nui_21" formatted="false">"عملة نقدية معلقة: €0.00\nعملة نقدية تمت تسويتها: €0.00\nعملة نقدية قابلة للسحب: €0.00"</string>
+    <string name="nui_22" formatted="false">"لا يُنشأ رصيد دون إيصال من الشريك."</string>
+    <string name="nui_23" formatted="false">"إضافة عنوان محفظة المستلم"</string>
+    <string name="nui_24" formatted="false">"اختر شبكة USDC"</string>
+    <string name="nui_25" formatted="false">" عنوان المستلم"</string>
+    <string name="nui_26" formatted="false">"أدخل عنوانًا عامًا للمستلم فقط. لا تدخل مفاتيح خاصة أو كلمات الاسترداد. هذا الاختبار لا يحول أموالًا."</string>
+    <string name="nui_27" formatted="false">"حذف العنوان"</string>
+    <string name="nui_28" formatted="false">"إضافة عنوان محفظة"</string>
+    <string name="nui_29" formatted="false">"حفظ"</string>
+    <string name="nui_30" formatted="false">"تنسيق العنوان غير صالح للشبكة المحددة."</string>
+    <string name="nui_31" formatted="false">"لا توجد طلبات سحب. لم تُجرَ أي تحويلات فعلية."</string>
+    <string name="nui_32" formatted="false">"4  •  الإعدادات"</string>
+    <string name="nui_33" formatted="false">"اللغة"</string>
+    <string name="nui_34" formatted="false">"رمز اللغة المحددة: "</string>
+    <string name="nui_35" formatted="false">"\nاختبار محلي: يقيس حركة بيانات التطبيق فقط.\nالاتصال: Wi-Fi أو بيانات الهاتف (يلزم الإنترنت)\nحماية البطارية المنخفضة (&lt;15%): مفعلة أثناء المراقبة\nالحماية الحرارية: غير متاحة\nالمراقبة في الخلفية: متوقفة\nتتوقف المراقبة عند سحب الموافقة"</string>
+    <string name="nui_36" formatted="false">"تحذير: الموافقة الاختبارية لا تسمح بمشاركة الشبكة الفعلية مستقبلًا. يلزم الحصول على موافقة صريحة منفصلة قبل تفعيل Network SDK فعلي."</string>
+    <string name="nui_37" formatted="false">"مراقبة الاتصال متوقفة • المشاركة الفعلية: معطلة"</string>
+    <string name="nui_38" formatted="false">"آخر جلسة مراقبة: "</string>
+    <string name="nui_39" formatted="false">" ثانية • بيانات التطبيق: "</string>
+    <string name="nui_40" formatted="false">"\nإجمالي حركة بيانات التطبيق المسجلة: "</string>
+    <string name="nui_41" formatted="false">"\nإجمالي وقت المراقبة: "</string>
+    <string name="nui_42" formatted="false">" دقيقة"</string>
+    <string name="nui_43" formatted="false">"\nهذا القياس ليس دخلًا ولا نطاقًا تردديًا مشتركًا."</string>
+    <string name="nui_44" formatted="false">"الموافقة الصريحة: ممنوحة • المشاركة الفعلية تبقى معطلة"</string>
+    <string name="nui_45" formatted="false">"الموافقة الصريحة: غير ممنوحة • المشاركة الفعلية معطلة"</string>
+    <string name="nui_46" formatted="false">"سحب الموافقة"</string>
+    <string name="nui_47" formatted="false">"منح موافقة صريحة"</string>
+</resources>

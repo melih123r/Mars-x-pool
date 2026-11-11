@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"연결 없음"</string>
+    <string name="nui_01" formatted="false">"기타 네트워크"</string>
+    <string name="nui_02" formatted="false">"모바일 데이터"</string>
+    <string name="nui_03" formatted="false">"시작 • 연결 모니터링"</string>
+    <string name="nui_04" formatted="false">"연결이 끊겨 모니터링이 중지되었습니다."</string>
+    <string name="nui_05" formatted="false">"배터리가 15% 미만이어서 모니터링이 중지되었습니다."</string>
+    <string name="nui_06" formatted="false">"측정 지원 안 됨"</string>
+    <string name="nui_07" formatted="false">"연결: "</string>
+    <string name="nui_08" formatted="false">" • 모니터링: "</string>
+    <string name="nui_09" formatted="false">" 분 "</string>
+    <string name="nui_10" formatted="false">" 초\n앱 데이터 사용량: "</string>
+    <string name="nui_11" formatted="false">"\n공유 트래픽: 0 GB • 수익: €0.00"</string>
+    <string name="nui_12" formatted="false">"명시적 동의 • 테스트 전용"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network는 향후 승인된 파트너를 통해 타사 고객의 트래픽에 사용자의 인터넷 연결을 공유하는 것을 목표로 합니다. 이는 데이터 한도, 배터리 및 연결에 영향을 줄 수 있으며, 파트너 고객이 사용자의 네트워크 IP 주소를 사용할 수 있습니다. 트래픽이나 수입은 보장되지 않습니다. 현재 실제 공유는 비활성화되어 있습니다. 언제든지 동의를 철회할 수 있습니다. 계속하면 테스트 설정만 저장됩니다."</string>
+    <string name="nui_14" formatted="false">"취소"</string>
+    <string name="nui_15" formatted="false">"테스트 동의 저장"</string>
+    <string name="nui_16" formatted="false">"먼저 테스트 안내를 읽고 동의하세요."</string>
+    <string name="nui_17" formatted="false">"모니터링에는 Wi-Fi 또는 모바일 인터넷이 필요합니다."</string>
+    <string name="nui_18" formatted="false">"연결 모니터링을 시작합니다. 이 테스트는 인터넷을 공유하거나 수익을 발생시키지 않습니다. 언제든지 중지할 수 있습니다."</string>
+    <string name="nui_19" formatted="false">"시작"</string>
+    <string name="nui_20" formatted="false">"중지 • 연결 모니터링"</string>
+    <string name="nui_21" formatted="false">"미정산 법정화폐: €0.00\n정산된 법정화폐: €0.00\n출금 가능한 법정화폐: €0.00"</string>
+    <string name="nui_22" formatted="false">"파트너 영수증 없이는 잔액이 생성되지 않습니다."</string>
+    <string name="nui_23" formatted="false">"수신자 지갑 주소 추가"</string>
+    <string name="nui_24" formatted="false">"USDC 네트워크 선택"</string>
+    <string name="nui_25" formatted="false">" 수신자 주소"</string>
+    <string name="nui_26" formatted="false">"공개 수신자 주소만 입력하세요. 개인 키나 복구 문구를 입력하지 마세요. 이 테스트는 자금을 전송하지 않습니다."</string>
+    <string name="nui_27" formatted="false">"주소 삭제"</string>
+    <string name="nui_28" formatted="false">"지갑 주소 추가"</string>
+    <string name="nui_29" formatted="false">"저장"</string>
+    <string name="nui_30" formatted="false">"선택한 네트워크의 주소 형식이 올바르지 않습니다."</string>
+    <string name="nui_31" formatted="false">"출금 요청이 없습니다. 실제 전송은 이루어지지 않았습니다."</string>
+    <string name="nui_32" formatted="false">"4  •  설정"</string>
+    <string name="nui_33" formatted="false">"언어"</string>
+    <string name="nui_34" formatted="false">"선택한 언어 코드: "</string>
+    <string name="nui_35" formatted="false">"\n로컬 테스트: 앱 트래픽만 측정합니다.\n연결: Wi-Fi 또는 모바일 데이터(인터넷 필요)\n배터리 부족(&lt;15%) 보호: 모니터링 중 켜짐\n과열 보호: 사용 불가\n백그라운드 모니터링: 꺼짐\n동의를 철회하면 모니터링이 중지됩니다"</string>
+    <string name="nui_36" formatted="false">"경고: 테스트 동의는 향후 실제 네트워크 공유를 승인하지 않습니다. 실제 Network SDK를 활성화하기 전에 별도의 명시적 동의가 필요합니다."</string>
+    <string name="nui_37" formatted="false">"연결 모니터링 꺼짐 • 실제 공유: 꺼짐"</string>
+    <string name="nui_38" formatted="false">"마지막 모니터링 시간: "</string>
+    <string name="nui_39" formatted="false">" 초 • 앱 데이터: "</string>
+    <string name="nui_40" formatted="false">"\n기록된 총 앱 트래픽: "</string>
+    <string name="nui_41" formatted="false">"\n총 모니터링 시간: "</string>
+    <string name="nui_42" formatted="false">" 분"</string>
+    <string name="nui_43" formatted="false">"\n이 측정값은 수입이나 공유 대역폭이 아닙니다."</string>
+    <string name="nui_44" formatted="false">"명시적 동의: 허용됨 • 실제 공유는 계속 꺼짐"</string>
+    <string name="nui_45" formatted="false">"명시적 동의: 허용되지 않음 • 실제 공유 꺼짐"</string>
+    <string name="nui_46" formatted="false">"동의 철회"</string>
+    <string name="nui_47" formatted="false">"명시적 동의 제공"</string>
+</resources>

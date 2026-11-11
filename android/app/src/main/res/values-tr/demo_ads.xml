@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">REKLAM • DEMO</string>
+    <string name="ads_disabled">İsteğe bağlı test reklamları kapalı. Reklam ödülü veya gerçek gelir yok.</string>
+    <string name="ads_checking">Reklam gizlilik tercihleri kontrol ediliyor…</string>
+    <string name="ads_unavailable">Test reklamı kullanılamıyor. Demoyu reklamsız kullanabilirsiniz.</string>
+    <string name="ads_test_notice">Google test reklamı • kazanç yok. Reklam trafiği uygulama veri kullanımına dahildir.</string>
+    <string name="ads_enable">İsteğe bağlı test reklamını aç</string>
+    <string name="ads_disable">Reklamları kapat</string>
+    <string name="ads_privacy">Reklam gizlilik seçenekleri</string>
+</resources>

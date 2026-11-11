@@ -9,6 +9,8 @@ permissions:
 
 jobs:
   backend:
+    # Network-only release: do not execute unrelated Telegram/Finance suites.
+    if: github.ref_name != 'release/network-demo-signed-aab-20261022' && github.head_ref != 'release/network-demo-signed-aab-20261022'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -24,6 +26,8 @@ jobs:
       - run: npm run cf:db:local
       - run: python3 scripts/check-translations.py
       - run: python3 scripts/check-release.py
+      - name: Network Android UI safety contract
+        run: python3 scripts/check-network-home-ui.py
 
   android:
     runs-on: ubuntu-latest
@@ -48,13 +52,17 @@ jobs:
         run: gradle -p android :app:lintRelease --no-daemon
       - name: Build debug APK
         run: gradle -p android :app:assembleDebug --no-daemon
+      - name: Publish debug APK immediately
+        uses: actions/upload-artifact@v4
+        with:
+          name: marsx-network-v18-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
       - name: Build release AAB
         run: gradle -p android :app:bundleRelease --no-daemon
+      - name: Verify merged Network DEMO manifest
+        run: python3 scripts/check-demo-manifest.py
       - uses: actions/upload-artifact@v4
         with:
-          name: marsx-pool-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-      - uses: actions/upload-artifact@v4
-        with:
-          name: marsx-pool-release-aab-unsigned
+          name: marsx-network-v18-release-aab-unsigned
           path: android/app/build/outputs/bundle/release/app-release.aab

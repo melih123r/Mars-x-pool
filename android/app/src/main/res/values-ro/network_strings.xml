@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Pornește • monitorizarea conexiunii</string>
+    <string name="network_monitor_off">Monitorizarea conexiunii oprită • Partajare reală: DEZACTIVATĂ</string>
+    <string name="network_demo_disclaimer">DEMO • Plățile, proxy-ul, transferurile cripto și Network SDK real sunt dezactivate</string>
+</resources>

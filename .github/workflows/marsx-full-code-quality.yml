@@ -11,6 +11,8 @@ concurrency:
   cancel-in-progress: true
 jobs:
   backend:
+    # This branch is restricted to the Android Network DEMO release.
+    if: github.ref_name != 'release/network-demo-signed-aab-20261022' && github.head_ref != 'release/network-demo-signed-aab-20261022'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:

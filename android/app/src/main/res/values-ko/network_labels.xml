@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_consent_button" formatted="false">명시적 동의 제공</string>
+    <string name="network_earnings_heading" formatted="false">2 • 수익</string>
+    <string name="network_history_heading" formatted="false">3 • 출금 내역</string>
+</resources>

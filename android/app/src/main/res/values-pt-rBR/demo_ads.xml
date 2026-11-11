@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">PUBLICIDADE • DEMO</string>
+    <string name="ads_disabled">Os anúncios de teste opcionais estão desativados. Sem recompensas de anúncios nem receita real.</string>
+    <string name="ads_checking">Verificando as escolhas de privacidade de publicidade…</string>
+    <string name="ads_unavailable">Anúncios de teste indisponíveis. Você pode continuar usando a demonstração sem anúncios.</string>
+    <string name="ads_test_notice">Anúncio de teste do Google • sem ganhos. O tráfego de publicidade está incluído no uso de dados do aplicativo.</string>
+    <string name="ads_enable">Ativar anúncio de teste opcional</string>
+    <string name="ads_disable">Desativar anúncios</string>
+    <string name="ads_privacy">Opções de privacidade de publicidade</string>
+</resources>

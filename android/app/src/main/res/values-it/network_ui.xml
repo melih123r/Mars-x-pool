@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Nessuna connessione"</string>
+    <string name="nui_01" formatted="false">"Altra rete"</string>
+    <string name="nui_02" formatted="false">"Dati mobili"</string>
+    <string name="nui_03" formatted="false">"Avvia • monitora la connessione"</string>
+    <string name="nui_04" formatted="false">"Connessione persa; monitoraggio interrotto."</string>
+    <string name="nui_05" formatted="false">"Batteria sotto il 15%; monitoraggio interrotto."</string>
+    <string name="nui_06" formatted="false">"Misurazione non supportata"</string>
+    <string name="nui_07" formatted="false">"Connessione: "</string>
+    <string name="nui_08" formatted="false">" • Monitoraggio: "</string>
+    <string name="nui_09" formatted="false">" min "</string>
+    <string name="nui_10" formatted="false">" s\nUtilizzo dati dell’app: "</string>
+    <string name="nui_11" formatted="false">"\nTraffico condiviso: 0 GB • Guadagni: €0.00"</string>
+    <string name="nui_12" formatted="false">"Consenso esplicito • Solo TEST"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network mira a condividere la tua connessione Internet con il traffico di clienti terzi tramite un futuro partner approvato. Questo può influire sul piano dati, sulla batteria e sulla connessione; i clienti del partner possono usare l’indirizzo IP della tua rete. Non sono garantiti traffico o guadagni. La condivisione reale è attualmente disattivata. Puoi revocare il consenso in qualsiasi momento. Proseguendo salvi solo una preferenza di test."</string>
+    <string name="nui_14" formatted="false">"Annulla"</string>
+    <string name="nui_15" formatted="false">"Salva il consenso di test"</string>
+    <string name="nui_16" formatted="false">"Leggi e accetta prima l’informativa del test."</string>
+    <string name="nui_17" formatted="false">"Il monitoraggio richiede Internet tramite Wi-Fi o rete mobile."</string>
+    <string name="nui_18" formatted="false">"Avvia il monitoraggio della connessione. Questo test non condivide Internet e non genera guadagni. Puoi interromperlo in qualsiasi momento."</string>
+    <string name="nui_19" formatted="false">"Avvia"</string>
+    <string name="nui_20" formatted="false">"Interrompi • monitoraggio connessione"</string>
+    <string name="nui_21" formatted="false">"Valuta fiat in sospeso: €0.00\nValuta fiat liquidata: €0.00\nValuta fiat prelevabile: €0.00"</string>
+    <string name="nui_22" formatted="false">"Nessun saldo viene creato senza una ricevuta del partner."</string>
+    <string name="nui_23" formatted="false">"Aggiungi l’indirizzo del wallet del destinatario"</string>
+    <string name="nui_24" formatted="false">"Seleziona la rete USDC"</string>
+    <string name="nui_25" formatted="false">" : indirizzo del destinatario"</string>
+    <string name="nui_26" formatted="false">"Inserisci solo un indirizzo pubblico del destinatario. Non inserire chiavi private o parole di recupero. Questo test non trasferisce fondi."</string>
+    <string name="nui_27" formatted="false">"Elimina indirizzo"</string>
+    <string name="nui_28" formatted="false">"Aggiungi indirizzo wallet"</string>
+    <string name="nui_29" formatted="false">"Salva"</string>
+    <string name="nui_30" formatted="false">"Formato indirizzo non valido per la rete selezionata."</string>
+    <string name="nui_31" formatted="false">"Nessuna richiesta di prelievo. Nessun trasferimento reale effettuato."</string>
+    <string name="nui_32" formatted="false">"4  •  IMPOSTAZIONI"</string>
+    <string name="nui_33" formatted="false">"Lingua"</string>
+    <string name="nui_34" formatted="false">"Codice lingua selezionato: "</string>
+    <string name="nui_35" formatted="false">"\nTest locale: misura solo il traffico dell’app.\nConnessione: Wi-Fi o dati mobili (Internet richiesto)\nProtezione batteria scarica (&lt;15%): ATTIVA durante il monitoraggio\nProtezione termica: non disponibile\nMonitoraggio in background: DISATTIVATO\nIl monitoraggio si interrompe quando il consenso viene revocato"</string>
+    <string name="nui_36" formatted="false">"Avviso: il consenso di test non autorizza la futura condivisione reale della rete. È richiesto un consenso esplicito separato prima di attivare un Network SDK reale."</string>
+    <string name="nui_37" formatted="false">"Monitoraggio connessione disattivato • Condivisione reale: DISATTIVATA"</string>
+    <string name="nui_38" formatted="false">"Ultima sessione di monitoraggio: "</string>
+    <string name="nui_39" formatted="false">" s • Dati dell’app: "</string>
+    <string name="nui_40" formatted="false">"\nTraffico totale registrato dell’app: "</string>
+    <string name="nui_41" formatted="false">"\nTempo totale di monitoraggio: "</string>
+    <string name="nui_42" formatted="false">" min"</string>
+    <string name="nui_43" formatted="false">"\nQuesta misurazione non rappresenta guadagni né larghezza di banda condivisa."</string>
+    <string name="nui_44" formatted="false">"Consenso esplicito: CONCESSO • La condivisione reale resta DISATTIVATA"</string>
+    <string name="nui_45" formatted="false">"Consenso esplicito: NON CONCESSO • Condivisione reale DISATTIVATA"</string>
+    <string name="nui_46" formatted="false">"Revoca il consenso"</string>
+    <string name="nui_47" formatted="false">"Fornisci il consenso esplicito"</string>
+</resources>

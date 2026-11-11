@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Spustit • sledování připojení</string>
+    <string name="network_monitor_off">Sledování připojení vypnuto • Skutečné sdílení: VYP.</string>
+    <string name="network_demo_disclaimer">DEMO • Platby, proxy, kryptoměnové převody a skutečný Network SDK jsou vypnuté</string>
+</resources>

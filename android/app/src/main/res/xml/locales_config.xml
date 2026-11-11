@@ -13,4 +13,21 @@
     <locale android:name="es" />
     <locale android:name="pt-BR" />
     <locale android:name="it" />
+    <locale android:name="ru" />
+    <locale android:name="ja" />
+    <locale android:name="ko" />
+    <locale android:name="zh-CN" />
+    <locale android:name="nl" />
+    <locale android:name="pl" />
+    <locale android:name="uk" />
+    <locale android:name="ro" />
+    <locale android:name="el" />
+    <locale android:name="cs" />
+    <locale android:name="hu" />
+    <locale android:name="sv" />
+    <locale android:name="zh-TW" />
+    <locale android:name="th" />
+    <locale android:name="fa" />
+    <locale android:name="ms" />
+    <locale android:name="fil" />
 </locale-config>

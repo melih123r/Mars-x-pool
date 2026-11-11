@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Parallel arrays are the single source of truth for language selection. -->
+    <string-array name="network_language_names" translatable="false">
+        <item>Türkçe</item><item>English</item><item>Français</item><item>Deutsch</item>
+        <item>Español</item><item>Italiano</item><item>Português (Brasil)</item><item>Русский</item>
+        <item>العربية</item><item>Nederlands</item><item>Polski</item><item>Українська</item>
+        <item>Română</item><item>Ελληνικά</item><item>Čeština</item><item>Magyar</item>
+        <item>Svenska</item><item>简体中文</item><item>繁體中文</item><item>日本語</item>
+        <item>한국어</item><item>हिन्दी</item><item>Bahasa Indonesia</item><item>Tiếng Việt</item>
+        <item>ไทย</item><item>فارسی</item><item>বাংলা</item><item>اردو</item>
+        <item>Bahasa Melayu</item><item>Filipino</item>
+    </string-array>
+    <string-array name="network_language_codes" translatable="false">
+        <item>tr</item><item>en</item><item>fr</item><item>de</item>
+        <item>es</item><item>it</item><item>pt-BR</item><item>ru</item>
+        <item>ar</item><item>nl</item><item>pl</item><item>uk</item>
+        <item>ro</item><item>el</item><item>cs</item><item>hu</item>
+        <item>sv</item><item>zh-CN</item><item>zh-TW</item><item>ja</item>
+        <item>ko</item><item>hi</item><item>id</item><item>vi</item>
+        <item>th</item><item>fa</item><item>bn</item><item>ur</item>
+        <item>ms</item><item>fil</item>
+    </string-array>
+</resources>

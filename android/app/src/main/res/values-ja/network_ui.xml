@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"未接続"</string>
+    <string name="nui_01" formatted="false">"その他のネットワーク"</string>
+    <string name="nui_02" formatted="false">"モバイルデータ"</string>
+    <string name="nui_03" formatted="false">"開始 • 接続を監視"</string>
+    <string name="nui_04" formatted="false">"接続が切れたため、監視を停止しました。"</string>
+    <string name="nui_05" formatted="false">"バッテリー残量が15%未満のため、監視を停止しました。"</string>
+    <string name="nui_06" formatted="false">"測定非対応"</string>
+    <string name="nui_07" formatted="false">"接続： "</string>
+    <string name="nui_08" formatted="false">" • 監視時間： "</string>
+    <string name="nui_09" formatted="false">" 分 "</string>
+    <string name="nui_10" formatted="false">" 秒\nアプリのデータ使用量： "</string>
+    <string name="nui_11" formatted="false">"\n共有通信量：0 GB • 収益：€0.00"</string>
+    <string name="nui_12" formatted="false">"明示的な同意 • テスト専用"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network は、将来承認されるパートナーを通じて、お客様のインターネット接続を第三者の顧客の通信に共有することを目指しています。データ容量、バッテリー、接続に影響する可能性があり、パートナーの顧客がお客様のネットワークの IP アドレスを使用する場合があります。通信量や収入の保証はありません。実際の共有は現在無効です。同意はいつでも撤回できます。続行するとテスト用の設定のみが保存されます。"</string>
+    <string name="nui_14" formatted="false">"キャンセル"</string>
+    <string name="nui_15" formatted="false">"テストへの同意を保存"</string>
+    <string name="nui_16" formatted="false">"先にテストの説明を読み、同意してください。"</string>
+    <string name="nui_17" formatted="false">"監視には Wi-Fi またはモバイルインターネットが必要です。"</string>
+    <string name="nui_18" formatted="false">"接続の監視を開始します。このテストはインターネットを共有せず、収益も発生しません。いつでも停止できます。"</string>
+    <string name="nui_19" formatted="false">"開始"</string>
+    <string name="nui_20" formatted="false">"停止 • 接続の監視"</string>
+    <string name="nui_21" formatted="false">"未決済の法定通貨：€0.00\n決済済みの法定通貨：€0.00\n出金可能な法定通貨：€0.00"</string>
+    <string name="nui_22" formatted="false">"パートナーからの受領証なしに残高は発生しません。"</string>
+    <string name="nui_23" formatted="false">"受取先ウォレットアドレスを追加"</string>
+    <string name="nui_24" formatted="false">"USDC ネットワークを選択"</string>
+    <string name="nui_25" formatted="false">" 受取先アドレス"</string>
+    <string name="nui_26" formatted="false">"公開の受取先アドレスのみを入力してください。秘密鍵やリカバリーフレーズは入力しないでください。このテストは資金を送金しません。"</string>
+    <string name="nui_27" formatted="false">"アドレスを削除"</string>
+    <string name="nui_28" formatted="false">"ウォレットアドレスを追加"</string>
+    <string name="nui_29" formatted="false">"保存"</string>
+    <string name="nui_30" formatted="false">"選択したネットワークのアドレス形式が無効です。"</string>
+    <string name="nui_31" formatted="false">"出金リクエストはありません。実際の送金は行われていません。"</string>
+    <string name="nui_32" formatted="false">"4  •  設定"</string>
+    <string name="nui_33" formatted="false">"言語"</string>
+    <string name="nui_34" formatted="false">"選択中の言語コード： "</string>
+    <string name="nui_35" formatted="false">"\nローカルテスト：アプリの通信量のみ測定します。\n接続：Wi-Fi またはモバイルデータ（インターネット必須）\n低バッテリー（&lt;15%）保護：監視中はオン\n過熱保護：利用不可\nバックグラウンド監視：オフ\n同意を撤回すると監視が停止します"</string>
+    <string name="nui_36" formatted="false">"警告：テストへの同意は、将来の実際のネットワーク共有を許可するものではありません。実際の Network SDK を有効にする前に、別途明示的な同意が必要です。"</string>
+    <string name="nui_37" formatted="false">"接続監視オフ • 実際の共有：オフ"</string>
+    <string name="nui_38" formatted="false">"前回の監視時間： "</string>
+    <string name="nui_39" formatted="false">" 秒 • アプリデータ： "</string>
+    <string name="nui_40" formatted="false">"\n記録されたアプリ通信量の合計： "</string>
+    <string name="nui_41" formatted="false">"\n合計監視時間： "</string>
+    <string name="nui_42" formatted="false">" 分"</string>
+    <string name="nui_43" formatted="false">"\nこの測定値は収入や共有帯域幅ではありません。"</string>
+    <string name="nui_44" formatted="false">"明示的な同意：許可済み • 実際の共有はオフのまま"</string>
+    <string name="nui_45" formatted="false">"明示的な同意：未許可 • 実際の共有はオフ"</string>
+    <string name="nui_46" formatted="false">"同意を撤回"</string>
+    <string name="nui_47" formatted="false">"明示的に同意"</string>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Tidak ada koneksi"</string>
+    <string name="nui_01" formatted="false">"Jaringan lain"</string>
+    <string name="nui_02" formatted="false">"Data seluler"</string>
+    <string name="nui_03" formatted="false">"Mulai • pantau koneksi"</string>
+    <string name="nui_04" formatted="false">"Koneksi terputus; pemantauan dihentikan."</string>
+    <string name="nui_05" formatted="false">"Baterai di bawah 15%; pemantauan dihentikan."</string>
+    <string name="nui_06" formatted="false">"Pengukuran tidak didukung"</string>
+    <string name="nui_07" formatted="false">"Koneksi: "</string>
+    <string name="nui_08" formatted="false">" • Pemantauan: "</string>
+    <string name="nui_09" formatted="false">" mnt "</string>
+    <string name="nui_10" formatted="false">" dtk\nPenggunaan data aplikasi: "</string>
+    <string name="nui_11" formatted="false">"\nLalu lintas dibagikan: 0 GB • Pendapatan: €0.00"</string>
+    <string name="nui_12" formatted="false">"Persetujuan tegas • hanya UJI COBA"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network bertujuan membagikan koneksi internet Anda untuk lalu lintas pelanggan pihak ketiga melalui mitra yang disetujui di masa mendatang. Ini dapat memengaruhi kuota data, baterai, dan koneksi Anda; pelanggan mitra dapat menggunakan alamat IP jaringan Anda. Tidak ada jaminan lalu lintas atau pendapatan. Berbagi nyata saat ini dinonaktifkan. Anda dapat mencabut persetujuan kapan saja. Melanjutkan hanya menyimpan preferensi uji coba."</string>
+    <string name="nui_14" formatted="false">"Batal"</string>
+    <string name="nui_15" formatted="false">"Simpan persetujuan uji coba"</string>
+    <string name="nui_16" formatted="false">"Baca dan setujui penjelasan uji coba terlebih dahulu."</string>
+    <string name="nui_17" formatted="false">"Pemantauan memerlukan Wi-Fi atau internet seluler."</string>
+    <string name="nui_18" formatted="false">"Mulai memantau koneksi. Uji coba ini tidak membagikan internet Anda atau menghasilkan pendapatan. Anda dapat berhenti kapan saja."</string>
+    <string name="nui_19" formatted="false">"Mulai"</string>
+    <string name="nui_20" formatted="false">"Hentikan • pemantauan koneksi"</string>
+    <string name="nui_21" formatted="false">"Fiat tertunda: €0.00\nFiat diselesaikan: €0.00\nFiat dapat ditarik: €0.00"</string>
+    <string name="nui_22" formatted="false">"Saldo tidak dibuat tanpa tanda terima mitra."</string>
+    <string name="nui_23" formatted="false">"Tambahkan alamat dompet penerima"</string>
+    <string name="nui_24" formatted="false">"Pilih jaringan USDC"</string>
+    <string name="nui_25" formatted="false">" alamat penerima"</string>
+    <string name="nui_26" formatted="false">"Masukkan hanya alamat publik penerima. Jangan masukkan kunci privat atau kata pemulihan. Uji coba ini tidak mentransfer dana."</string>
+    <string name="nui_27" formatted="false">"Hapus alamat"</string>
+    <string name="nui_28" formatted="false">"Tambahkan alamat dompet"</string>
+    <string name="nui_29" formatted="false">"Simpan"</string>
+    <string name="nui_30" formatted="false">"Format alamat tidak valid untuk jaringan yang dipilih."</string>
+    <string name="nui_31" formatted="false">"Tidak ada permintaan penarikan. Tidak ada transfer nyata yang dilakukan."</string>
+    <string name="nui_32" formatted="false">"4  •  PENGATURAN"</string>
+    <string name="nui_33" formatted="false">"Bahasa"</string>
+    <string name="nui_34" formatted="false">"Kode bahasa yang dipilih: "</string>
+    <string name="nui_35" formatted="false">"\nUji coba lokal: hanya mengukur lalu lintas aplikasi.\nKoneksi: Wi-Fi atau data seluler (internet diperlukan)\nPerlindungan baterai lemah (&lt;15%): AKTIF selama pemantauan\nPerlindungan termal: tidak tersedia\nPemantauan latar belakang: NONAKTIF\nPemantauan berhenti saat persetujuan dicabut"</string>
+    <string name="nui_36" formatted="false">"Peringatan: persetujuan uji coba tidak mengizinkan berbagi jaringan nyata di masa mendatang. Persetujuan tegas terpisah diperlukan sebelum mengaktifkan Network SDK nyata."</string>
+    <string name="nui_37" formatted="false">"Pemantauan koneksi nonaktif • Berbagi nyata: NONAKTIF"</string>
+    <string name="nui_38" formatted="false">"Sesi pemantauan terakhir: "</string>
+    <string name="nui_39" formatted="false">" dtk • Data aplikasi: "</string>
+    <string name="nui_40" formatted="false">"\nTotal lalu lintas aplikasi tercatat: "</string>
+    <string name="nui_41" formatted="false">"\nTotal waktu pemantauan: "</string>
+    <string name="nui_42" formatted="false">" mnt"</string>
+    <string name="nui_43" formatted="false">"\nPengukuran ini bukan pendapatan atau bandwidth yang dibagikan."</string>
+    <string name="nui_44" formatted="false">"Persetujuan tegas: DIBERIKAN • Berbagi nyata tetap NONAKTIF"</string>
+    <string name="nui_45" formatted="false">"Persetujuan tegas: BELUM DIBERIKAN • Berbagi nyata NONAKTIF"</string>
+    <string name="nui_46" formatted="false">"Cabut persetujuan"</string>
+    <string name="nui_47" formatted="false">"Berikan persetujuan tegas"</string>
+</resources>

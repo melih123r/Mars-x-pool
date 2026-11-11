@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title" formatted="false">โฆษณา • สาธิต</string>
+    <string name="ads_disabled" formatted="false">ปิดโฆษณาทดสอบแบบเลือกได้ ไม่มีรางวัลจากโฆษณาหรือรายได้จริง</string>
+    <string name="ads_checking" formatted="false">กำลังตรวจสอบตัวเลือกความเป็นส่วนตัวของโฆษณา…</string>
+    <string name="ads_unavailable" formatted="false">โฆษณาทดสอบไม่พร้อมใช้งาน คุณใช้การสาธิตต่อได้โดยไม่มีโฆษณา</string>
+    <string name="ads_test_notice" formatted="false">โฆษณาทดสอบของ Google • ไม่มีรายได้ ปริมาณข้อมูลโฆษณารวมอยู่ในการใช้ข้อมูลของแอป</string>
+    <string name="ads_enable" formatted="false">เปิดโฆษณาทดสอบแบบเลือกได้</string>
+    <string name="ads_disable" formatted="false">ปิดโฆษณา</string>
+    <string name="ads_privacy" formatted="false">ตัวเลือกความเป็นส่วนตัวของโฆษณา</string>
+</resources>

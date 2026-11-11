@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Tiada sambungan"</string>
+    <string name="nui_01" formatted="false">"Rangkaian lain"</string>
+    <string name="nui_02" formatted="false">"Data mudah alih"</string>
+    <string name="nui_03" formatted="false">"Mula • pantau sambungan"</string>
+    <string name="nui_04" formatted="false">"Sambungan terputus; pemantauan dihentikan."</string>
+    <string name="nui_05" formatted="false">"Bateri di bawah 15%; pemantauan dihentikan."</string>
+    <string name="nui_06" formatted="false">"Pengukuran tidak disokong"</string>
+    <string name="nui_07" formatted="false">"Sambungan: "</string>
+    <string name="nui_08" formatted="false">" • Pemantauan: "</string>
+    <string name="nui_09" formatted="false">" min "</string>
+    <string name="nui_10" formatted="false">" saat\nPenggunaan data aplikasi: "</string>
+    <string name="nui_11" formatted="false">"\nTrafik dikongsi: 0 GB • Pendapatan: €0.00"</string>
+    <string name="nui_12" formatted="false">"Persetujuan jelas • UJIAN sahaja"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network bertujuan berkongsi sambungan internet anda untuk trafik pelanggan pihak ketiga melalui rakan kongsi yang diluluskan pada masa hadapan. Ini boleh menjejaskan kuota data, bateri dan sambungan anda; pelanggan rakan kongsi boleh menggunakan alamat IP rangkaian anda. Tiada jaminan trafik atau pendapatan. Perkongsian sebenar kini dinyahdayakan. Anda boleh menarik balik persetujuan pada bila-bila masa. Meneruskan hanya menyimpan pilihan ujian."</string>
+    <string name="nui_14" formatted="false">"Batal"</string>
+    <string name="nui_15" formatted="false">"Simpan persetujuan ujian"</string>
+    <string name="nui_16" formatted="false">"Baca dan terima pendedahan ujian dahulu."</string>
+    <string name="nui_17" formatted="false">"Pemantauan memerlukan Wi-Fi atau internet mudah alih."</string>
+    <string name="nui_18" formatted="false">"Mula memantau sambungan. Ujian ini tidak berkongsi internet anda atau menjana pendapatan. Anda boleh berhenti pada bila-bila masa."</string>
+    <string name="nui_19" formatted="false">"Mula"</string>
+    <string name="nui_20" formatted="false">"Henti • pemantauan sambungan"</string>
+    <string name="nui_21" formatted="false">"Fiat tertunda: €0.00\nFiat diselesaikan: €0.00\nFiat boleh dikeluarkan: €0.00"</string>
+    <string name="nui_22" formatted="false">"Tiada baki diwujudkan tanpa resit rakan kongsi."</string>
+    <string name="nui_23" formatted="false">"Tambah alamat dompet penerima"</string>
+    <string name="nui_24" formatted="false">"Pilih rangkaian USDC"</string>
+    <string name="nui_25" formatted="false">" alamat penerima"</string>
+    <string name="nui_26" formatted="false">"Masukkan alamat awam penerima sahaja. Jangan masukkan kunci peribadi atau perkataan pemulihan. Ujian ini tidak memindahkan dana."</string>
+    <string name="nui_27" formatted="false">"Padam alamat"</string>
+    <string name="nui_28" formatted="false">"Tambah alamat dompet"</string>
+    <string name="nui_29" formatted="false">"Simpan"</string>
+    <string name="nui_30" formatted="false">"Format alamat tidak sah untuk rangkaian yang dipilih."</string>
+    <string name="nui_31" formatted="false">"Tiada permintaan pengeluaran. Tiada pemindahan sebenar dilakukan."</string>
+    <string name="nui_32" formatted="false">"4  •  TETAPAN"</string>
+    <string name="nui_33" formatted="false">"Bahasa"</string>
+    <string name="nui_34" formatted="false">"Kod bahasa yang dipilih: "</string>
+    <string name="nui_35" formatted="false">"\nUjian setempat: mengukur trafik aplikasi sahaja.\nSambungan: Wi-Fi atau data mudah alih (internet diperlukan)\nPerlindungan bateri lemah (&lt;15%): HIDUP semasa pemantauan\nPerlindungan haba: tidak tersedia\nPemantauan latar belakang: MATI\nPemantauan berhenti apabila persetujuan ditarik balik"</string>
+    <string name="nui_36" formatted="false">"Amaran: persetujuan ujian tidak membenarkan perkongsian rangkaian sebenar pada masa hadapan. Persetujuan jelas yang berasingan diperlukan sebelum mendayakan Network SDK sebenar."</string>
+    <string name="nui_37" formatted="false">"Pemantauan sambungan mati • Perkongsian sebenar: MATI"</string>
+    <string name="nui_38" formatted="false">"Sesi pemantauan terakhir: "</string>
+    <string name="nui_39" formatted="false">" saat • Data aplikasi: "</string>
+    <string name="nui_40" formatted="false">"\nJumlah trafik aplikasi direkodkan: "</string>
+    <string name="nui_41" formatted="false">"\nJumlah masa pemantauan: "</string>
+    <string name="nui_42" formatted="false">" min"</string>
+    <string name="nui_43" formatted="false">"\nPengukuran ini bukan pendapatan atau lebar jalur dikongsi."</string>
+    <string name="nui_44" formatted="false">"Persetujuan jelas: DIBERIKAN • Perkongsian sebenar kekal MATI"</string>
+    <string name="nui_45" formatted="false">"Persetujuan jelas: BELUM DIBERIKAN • Perkongsian sebenar MATI"</string>
+    <string name="nui_46" formatted="false">"Tarik balik persetujuan"</string>
+    <string name="nui_47" formatted="false">"Beri persetujuan jelas"</string>
+</resources>

@@ -1,0 +1,11 @@
+{
+  "app_name": "MARS-X Network DEMO",
+  "start": "İzlemeyi başlat",
+  "stop": "İzlemeyi durdur",
+  "wifi": "Wi-Fi",
+  "cellular": "Mobil veri",
+  "no_connection": "İnternet bağlantısı yok",
+  "demo_notice": "Yalnızca demo. Gerçek ağ paylaşımı veya kazanç yok.",
+  "consent": "Demo izleme izni",
+  "revoke": "İzni geri çek"
+}

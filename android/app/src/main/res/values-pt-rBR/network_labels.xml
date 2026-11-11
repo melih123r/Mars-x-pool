@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_consent_button">Conceder consentimento explícito</string>
+    <string name="network_earnings_heading">2 • GANHOS</string>
+    <string name="network_history_heading">3 • HISTÓRICO DE SAQUES</string>
+</resources>

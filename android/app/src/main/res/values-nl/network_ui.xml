@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Geen verbinding"</string>
+    <string name="nui_01" formatted="false">"Ander netwerk"</string>
+    <string name="nui_02" formatted="false">"Mobiele data"</string>
+    <string name="nui_03" formatted="false">"Start • verbinding bewaken"</string>
+    <string name="nui_04" formatted="false">"Verbinding verbroken; bewaking gestopt."</string>
+    <string name="nui_05" formatted="false">"Batterij onder 15%; bewaking gestopt."</string>
+    <string name="nui_06" formatted="false">"Meting niet ondersteund"</string>
+    <string name="nui_07" formatted="false">"Verbinding: "</string>
+    <string name="nui_08" formatted="false">" • Bewaking: "</string>
+    <string name="nui_09" formatted="false">" min "</string>
+    <string name="nui_10" formatted="false">" sec\nDataverbruik app: "</string>
+    <string name="nui_11" formatted="false">"\nGedeeld verkeer: 0 GB • Inkomsten: €0.00"</string>
+    <string name="nui_12" formatted="false">"Uitdrukkelijke toestemming • alleen TEST"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network wil uw internetverbinding via een toekomstige goedgekeurde partner delen voor verkeer van externe klanten. Dit kan invloed hebben op uw databundel, batterij en verbinding; klanten van de partner kunnen het IP-adres van uw netwerk gebruiken. Er is geen garantie op verkeer of inkomsten. Echt delen is momenteel uitgeschakeld. U kunt uw toestemming op elk moment intrekken. Doorgaan slaat alleen een testvoorkeur op."</string>
+    <string name="nui_14" formatted="false">"Annuleren"</string>
+    <string name="nui_15" formatted="false">"Testtoestemming opslaan"</string>
+    <string name="nui_16" formatted="false">"Lees en accepteer eerst de testinformatie."</string>
+    <string name="nui_17" formatted="false">"Bewaking vereist wifi of mobiel internet."</string>
+    <string name="nui_18" formatted="false">"Start de verbindingsbewaking. Deze test deelt uw internet niet en levert geen inkomsten op. U kunt op elk moment stoppen."</string>
+    <string name="nui_19" formatted="false">"Start"</string>
+    <string name="nui_20" formatted="false">"Stop • verbindingsbewaking"</string>
+    <string name="nui_21" formatted="false">"Fiat in afwachting: €0.00\nVerrekende fiat: €0.00\nOpneembare fiat: €0.00"</string>
+    <string name="nui_22" formatted="false">"Zonder ontvangstbewijs van een partner ontstaat geen saldo."</string>
+    <string name="nui_23" formatted="false">"Walletadres van ontvanger toevoegen"</string>
+    <string name="nui_24" formatted="false">"USDC-netwerk selecteren"</string>
+    <string name="nui_25" formatted="false">" ontvangstadres"</string>
+    <string name="nui_26" formatted="false">"Voer alleen een openbaar ontvangstadres in. Voer geen privésleutels of herstelwoorden in. Deze test maakt geen geld over."</string>
+    <string name="nui_27" formatted="false">"Adres verwijderen"</string>
+    <string name="nui_28" formatted="false">"Walletadres toevoegen"</string>
+    <string name="nui_29" formatted="false">"Opslaan"</string>
+    <string name="nui_30" formatted="false">"Ongeldig adresformaat voor het geselecteerde netwerk."</string>
+    <string name="nui_31" formatted="false">"Geen opnameverzoeken. Er zijn geen echte overboekingen uitgevoerd."</string>
+    <string name="nui_32" formatted="false">"4  •  INSTELLINGEN"</string>
+    <string name="nui_33" formatted="false">"Taal"</string>
+    <string name="nui_34" formatted="false">"Geselecteerde taalcode: "</string>
+    <string name="nui_35" formatted="false">"\nLokale test: meet alleen appverkeer.\nVerbinding: wifi of mobiele data (internet vereist)\nBescherming bij lage batterij (&lt;15%): AAN tijdens bewaking\nThermische bescherming: niet beschikbaar\nAchtergrondbewaking: UIT\nBewaking stopt wanneer toestemming wordt ingetrokken"</string>
+    <string name="nui_36" formatted="false">"Waarschuwing: testtoestemming geeft geen toestemming voor toekomstig echt delen van het netwerk. Afzonderlijke uitdrukkelijke toestemming is vereist voordat een echte Network SDK wordt ingeschakeld."</string>
+    <string name="nui_37" formatted="false">"Verbindingsbewaking uit • Echt delen: UIT"</string>
+    <string name="nui_38" formatted="false">"Laatste bewakingssessie: "</string>
+    <string name="nui_39" formatted="false">" sec • Appdata: "</string>
+    <string name="nui_40" formatted="false">"\nTotaal geregistreerd appverkeer: "</string>
+    <string name="nui_41" formatted="false">"\nTotale bewakingstijd: "</string>
+    <string name="nui_42" formatted="false">" min"</string>
+    <string name="nui_43" formatted="false">"\nDeze meting is geen inkomen of gedeelde bandbreedte."</string>
+    <string name="nui_44" formatted="false">"Uitdrukkelijke toestemming: VERLEEND • Echt delen blijft UIT"</string>
+    <string name="nui_45" formatted="false">"Uitdrukkelijke toestemming: NIET VERLEEND • Echt delen UIT"</string>
+    <string name="nui_46" formatted="false">"Toestemming intrekken"</string>
+    <string name="nui_47" formatted="false">"Uitdrukkelijke toestemming geven"</string>
+</resources>

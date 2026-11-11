@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Немає з’єднання"</string>
+    <string name="nui_01" formatted="false">"Інша мережа"</string>
+    <string name="nui_02" formatted="false">"Мобільні дані"</string>
+    <string name="nui_03" formatted="false">"Почати • моніторинг з’єднання"</string>
+    <string name="nui_04" formatted="false">"З’єднання втрачено; моніторинг зупинено."</string>
+    <string name="nui_05" formatted="false">"Заряд батареї нижче 15%; моніторинг зупинено."</string>
+    <string name="nui_06" formatted="false">"Вимірювання не підтримується"</string>
+    <string name="nui_07" formatted="false">"З’єднання: "</string>
+    <string name="nui_08" formatted="false">" • Моніторинг: "</string>
+    <string name="nui_09" formatted="false">" хв "</string>
+    <string name="nui_10" formatted="false">" с\nТрафік застосунку: "</string>
+    <string name="nui_11" formatted="false">"\nНаданий трафік: 0 GB • Дохід: €0.00"</string>
+    <string name="nui_12" formatted="false">"Явна згода • лише ТЕСТ"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network планує надавати ваше інтернет-з’єднання для трафіку сторонніх клієнтів через майбутнього схваленого партнера. Це може вплинути на ліміт даних, батарею та з’єднання; клієнти партнера можуть використовувати IP-адресу вашої мережі. Обсяг трафіку та дохід не гарантуються. Реальне надання доступу зараз вимкнено. Ви можете відкликати згоду будь-коли. Продовження лише зберігає тестове налаштування."</string>
+    <string name="nui_14" formatted="false">"Скасувати"</string>
+    <string name="nui_15" formatted="false">"Зберегти тестову згоду"</string>
+    <string name="nui_16" formatted="false">"Спочатку прочитайте та прийміть тестове повідомлення."</string>
+    <string name="nui_17" formatted="false">"Для моніторингу потрібен Wi-Fi або мобільний інтернет."</string>
+    <string name="nui_18" formatted="false">"Почніть моніторинг з’єднання. Цей тест не надає доступу до вашого інтернету та не створює доходу. Ви можете зупинити його будь-коли."</string>
+    <string name="nui_19" formatted="false">"Почати"</string>
+    <string name="nui_20" formatted="false">"Зупинити • моніторинг з’єднання"</string>
+    <string name="nui_21" formatted="false">"Фіат в очікуванні: €0.00\nРозрахований фіат: €0.00\nФіат для виведення: €0.00"</string>
+    <string name="nui_22" formatted="false">"Баланс не створюється без підтвердження від партнера."</string>
+    <string name="nui_23" formatted="false">"Додати адресу гаманця отримувача"</string>
+    <string name="nui_24" formatted="false">"Виберіть мережу USDC"</string>
+    <string name="nui_25" formatted="false">" адреса отримувача"</string>
+    <string name="nui_26" formatted="false">"Введіть лише публічну адресу отримувача. Не вводьте приватні ключі або слова відновлення. Цей тест не переказує кошти."</string>
+    <string name="nui_27" formatted="false">"Видалити адресу"</string>
+    <string name="nui_28" formatted="false">"Додати адресу гаманця"</string>
+    <string name="nui_29" formatted="false">"Зберегти"</string>
+    <string name="nui_30" formatted="false">"Неправильний формат адреси для вибраної мережі."</string>
+    <string name="nui_31" formatted="false">"Запитів на виведення немає. Реальних переказів не було."</string>
+    <string name="nui_32" formatted="false">"4  •  НАЛАШТУВАННЯ"</string>
+    <string name="nui_33" formatted="false">"Мова"</string>
+    <string name="nui_34" formatted="false">"Код вибраної мови: "</string>
+    <string name="nui_35" formatted="false">"\nЛокальний тест: вимірює лише трафік застосунку.\nЗ’єднання: Wi-Fi або мобільні дані (потрібен інтернет)\nЗахист за низького заряду (&lt;15%): УВІМК. під час моніторингу\nТепловий захист: недоступний\nФоновий моніторинг: ВИМК.\nМоніторинг зупиняється після відкликання згоди"</string>
+    <string name="nui_36" formatted="false">"Увага: тестова згода не дозволяє майбутнє реальне надання доступу до мережі. Перед увімкненням реального Network SDK потрібна окрема явна згода."</string>
+    <string name="nui_37" formatted="false">"Моніторинг з’єднання вимкнено • Реальне надання доступу: ВИМК."</string>
+    <string name="nui_38" formatted="false">"Останній сеанс моніторингу: "</string>
+    <string name="nui_39" formatted="false">" с • Дані застосунку: "</string>
+    <string name="nui_40" formatted="false">"\nЗагальний записаний трафік застосунку: "</string>
+    <string name="nui_41" formatted="false">"\nЗагальний час моніторингу: "</string>
+    <string name="nui_42" formatted="false">" хв"</string>
+    <string name="nui_43" formatted="false">"\nЦе вимірювання не є доходом або наданою пропускною здатністю."</string>
+    <string name="nui_44" formatted="false">"Явна згода: НАДАНА • Реальне надання доступу залишається ВИМК."</string>
+    <string name="nui_45" formatted="false">"Явна згода: НЕ НАДАНА • Реальне надання доступу ВИМК."</string>
+    <string name="nui_46" formatted="false">"Відкликати згоду"</string>
+    <string name="nui_47" formatted="false">"Надати явну згоду"</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">PUBBLICITÀ • DEMO</string>
+    <string name="ads_disabled">Gli annunci di test facoltativi sono disattivati. Nessun premio pubblicitario o guadagno reale.</string>
+    <string name="ads_checking">Verifica delle scelte sulla privacy pubblicitaria…</string>
+    <string name="ads_unavailable">Annunci di test non disponibili. Puoi continuare a usare la demo senza annunci.</string>
+    <string name="ads_test_notice">Annuncio di test Google • nessun guadagno. Il traffico pubblicitario è incluso nell’utilizzo dati dell’app.</string>
+    <string name="ads_enable">Attiva annuncio di test facoltativo</string>
+    <string name="ads_disable">Disattiva gli annunci</string>
+    <string name="ads_privacy">Opzioni sulla privacy pubblicitaria</string>
+</resources>

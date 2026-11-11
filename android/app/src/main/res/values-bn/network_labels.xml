@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_consent_button">স্পষ্ট সম্মতি দিন</string>
+    <string name="network_earnings_heading">2 • আয়</string>
+    <string name="network_history_heading">3 • উত্তোলনের ইতিহাস</string>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Aucune connexion"</string>
+    <string name="nui_01" formatted="false">"Autre réseau"</string>
+    <string name="nui_02" formatted="false">"Données mobiles"</string>
+    <string name="nui_03" formatted="false">"Démarrer • surveiller la connexion"</string>
+    <string name="nui_04" formatted="false">"Connexion perdue ; surveillance arrêtée."</string>
+    <string name="nui_05" formatted="false">"Batterie inférieure à 15 % ; surveillance arrêtée."</string>
+    <string name="nui_06" formatted="false">"Mesure non prise en charge"</string>
+    <string name="nui_07" formatted="false">"Connexion : "</string>
+    <string name="nui_08" formatted="false">" • Surveillance : "</string>
+    <string name="nui_09" formatted="false">" min "</string>
+    <string name="nui_10" formatted="false">" s\nDonnées utilisées par l’application : "</string>
+    <string name="nui_11" formatted="false">"\nTrafic partagé : 0 GB • Revenus : €0.00"</string>
+    <string name="nui_12" formatted="false">"Consentement explicite • TEST uniquement"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network vise à partager votre connexion Internet avec le trafic de clients tiers via un futur partenaire agréé. Cela peut affecter votre forfait de données, votre batterie et votre connexion ; les clients du partenaire peuvent utiliser l’adresse IP de votre réseau. Aucun trafic ni revenu n’est garanti. Le partage réel est actuellement désactivé. Vous pouvez retirer votre consentement à tout moment. Continuer enregistre uniquement une préférence de test."</string>
+    <string name="nui_14" formatted="false">"Annuler"</string>
+    <string name="nui_15" formatted="false">"Enregistrer le consentement de test"</string>
+    <string name="nui_16" formatted="false">"Lisez et acceptez d’abord les informations du test."</string>
+    <string name="nui_17" formatted="false">"La surveillance nécessite une connexion Internet Wi-Fi ou mobile."</string>
+    <string name="nui_18" formatted="false">"Démarrez la surveillance de la connexion. Ce test ne partage pas votre accès Internet et ne génère aucun revenu. Vous pouvez arrêter à tout moment."</string>
+    <string name="nui_19" formatted="false">"Démarrer"</string>
+    <string name="nui_20" formatted="false">"Arrêter • surveillance de la connexion"</string>
+    <string name="nui_21" formatted="false">"Monnaie fiduciaire en attente : €0.00\nMonnaie fiduciaire réglée : €0.00\nMonnaie fiduciaire disponible au retrait : €0.00"</string>
+    <string name="nui_22" formatted="false">"Aucun solde n’est créé sans justificatif du partenaire."</string>
+    <string name="nui_23" formatted="false">"Ajouter une adresse de portefeuille destinataire"</string>
+    <string name="nui_24" formatted="false">"Choisir le réseau USDC"</string>
+    <string name="nui_25" formatted="false">" : adresse du destinataire"</string>
+    <string name="nui_26" formatted="false">"Saisissez uniquement une adresse publique de destinataire. Ne saisissez pas de clés privées ni de mots de récupération. Ce test ne transfère aucun fonds."</string>
+    <string name="nui_27" formatted="false">"Supprimer l’adresse"</string>
+    <string name="nui_28" formatted="false">"Ajouter une adresse de portefeuille"</string>
+    <string name="nui_29" formatted="false">"Enregistrer"</string>
+    <string name="nui_30" formatted="false">"Format d’adresse invalide pour le réseau sélectionné."</string>
+    <string name="nui_31" formatted="false">"Aucune demande de retrait. Aucun transfert réel n’a été effectué."</string>
+    <string name="nui_32" formatted="false">"4  •  PARAMÈTRES"</string>
+    <string name="nui_33" formatted="false">"Langue"</string>
+    <string name="nui_34" formatted="false">"Code de langue sélectionné : "</string>
+    <string name="nui_35" formatted="false">"\nTest local : mesure uniquement le trafic de l’application.\nConnexion : Wi-Fi ou données mobiles (Internet requis)\nProtection batterie faible (&lt;15 %) : ACTIVÉE pendant la surveillance\nProtection thermique : indisponible\nSurveillance en arrière-plan : DÉSACTIVÉE\nLa surveillance s’arrête lorsque le consentement est retiré"</string>
+    <string name="nui_36" formatted="false">"Attention : le consentement de test n’autorise aucun futur partage réel du réseau. Un consentement explicite distinct est requis avant d’activer un véritable Network SDK."</string>
+    <string name="nui_37" formatted="false">"Surveillance de la connexion arrêtée • Partage réel : DÉSACTIVÉ"</string>
+    <string name="nui_38" formatted="false">"Dernière session de surveillance : "</string>
+    <string name="nui_39" formatted="false">" s • Données de l’application : "</string>
+    <string name="nui_40" formatted="false">"\nTrafic total enregistré de l’application : "</string>
+    <string name="nui_41" formatted="false">"\nDurée totale de surveillance : "</string>
+    <string name="nui_42" formatted="false">" min"</string>
+    <string name="nui_43" formatted="false">"\nCette mesure ne représente ni un revenu ni une bande passante partagée."</string>
+    <string name="nui_44" formatted="false">"Consentement explicite : ACCORDÉ • Le partage réel reste DÉSACTIVÉ"</string>
+    <string name="nui_45" formatted="false">"Consentement explicite : NON ACCORDÉ • Partage réel DÉSACTIVÉ"</string>
+    <string name="nui_46" formatted="false">"Retirer le consentement"</string>
+    <string name="nui_47" formatted="false">"Donner un consentement explicite"</string>
+</resources>

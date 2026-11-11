@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Mula • pantau sambungan</string>
+    <string name="network_monitor_off">Pemantauan sambungan mati • Perkongsian sebenar: MATI</string>
+    <string name="network_demo_disclaimer">DEMO • Pembayaran, proksi, pemindahan kripto dan Network SDK sebenar dinyahdayakan</string>
+</resources>

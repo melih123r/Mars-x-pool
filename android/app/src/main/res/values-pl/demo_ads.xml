@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">REKLAMA • DEMO</string>
+    <string name="ads_disabled">Opcjonalne reklamy testowe są wyłączone. Brak nagród za reklamy i rzeczywistych przychodów.</string>
+    <string name="ads_checking">Sprawdzanie ustawień prywatności reklam…</string>
+    <string name="ads_unavailable">Reklamy testowe niedostępne. Możesz nadal korzystać z wersji demo bez reklam.</string>
+    <string name="ads_test_notice">Reklama testowa Google • bez zarobków. Ruch reklamowy jest wliczany do zużycia danych aplikacji.</string>
+    <string name="ads_enable">Włącz opcjonalną reklamę testową</string>
+    <string name="ads_disable">Wyłącz reklamy</string>
+    <string name="ads_privacy">Opcje prywatności reklam</string>
+</resources>

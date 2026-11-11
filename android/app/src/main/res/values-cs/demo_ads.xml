@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">REKLAMA • DEMO</string>
+    <string name="ads_disabled">Volitelné testovací reklamy jsou vypnuté. Žádné odměny za reklamy ani skutečné příjmy.</string>
+    <string name="ads_checking">Kontrola nastavení soukromí reklam…</string>
+    <string name="ads_unavailable">Testovací reklamy nejsou dostupné. Demo můžete používat dál bez reklam.</string>
+    <string name="ads_test_notice">Testovací reklama Google • bez výdělků. Provoz reklam je zahrnut do spotřeby dat aplikace.</string>
+    <string name="ads_enable">Zapnout volitelnou testovací reklamu</string>
+    <string name="ads_disable">Vypnout reklamy</string>
+    <string name="ads_privacy">Možnosti soukromí reklam</string>
+</resources>

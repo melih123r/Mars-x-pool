@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">Simulan • subaybayan ang koneksyon</string>
+    <string name="network_monitor_off">Naka-off ang pagsubaybay sa koneksyon • Tunay na pagbabahagi: NAKA-OFF</string>
+    <string name="network_demo_disclaimer">DEMO • Hindi pinagana ang mga pagbabayad, proxy, paglilipat ng crypto at tunay na Network SDK</string>
+</resources>

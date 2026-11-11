@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">বিজ্ঞাপন • ডেমো</string>
+    <string name="ads_disabled">ঐচ্ছিক পরীক্ষামূলক বিজ্ঞাপন বন্ধ। বিজ্ঞাপনের পুরস্কার বা প্রকৃত আয় নেই।</string>
+    <string name="ads_checking">বিজ্ঞাপনের গোপনীয়তার পছন্দ যাচাই হচ্ছে…</string>
+    <string name="ads_unavailable">পরীক্ষামূলক বিজ্ঞাপন অনুপলব্ধ। বিজ্ঞাপন ছাড়াই ডেমো ব্যবহার চালিয়ে যেতে পারেন।</string>
+    <string name="ads_test_notice">Google পরীক্ষামূলক বিজ্ঞাপন • আয় নেই। বিজ্ঞাপনের ট্রাফিক অ্যাপের ডেটা ব্যবহারে অন্তর্ভুক্ত।</string>
+    <string name="ads_enable">ঐচ্ছিক পরীক্ষামূলক বিজ্ঞাপন চালু করুন</string>
+    <string name="ads_disable">বিজ্ঞাপন বন্ধ করুন</string>
+    <string name="ads_privacy">বিজ্ঞাপনের গোপনীয়তার বিকল্প</string>
+</resources>

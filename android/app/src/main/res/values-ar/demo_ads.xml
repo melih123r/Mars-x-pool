@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">إعلان • نسخة تجريبية</string>
+    <string name="ads_disabled">الإعلانات الاختبارية الاختيارية متوقفة. لا مكافآت إعلانية ولا إيرادات فعلية.</string>
+    <string name="ads_checking">جارٍ التحقق من خيارات خصوصية الإعلانات…</string>
+    <string name="ads_unavailable">الإعلانات الاختبارية غير متاحة. يمكنك متابعة استخدام النسخة التجريبية دون إعلانات.</string>
+    <string name="ads_test_notice">إعلان Google اختباري • لا أرباح. تُحتسب حركة بيانات الإعلانات ضمن استخدام التطبيق للبيانات.</string>
+    <string name="ads_enable">تفعيل الإعلان الاختباري الاختياري</string>
+    <string name="ads_disable">إيقاف الإعلانات</string>
+    <string name="ads_privacy">خيارات خصوصية الإعلانات</string>
+</resources>

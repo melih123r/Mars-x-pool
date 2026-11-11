@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">ΔΙΑΦΗΜΙΣΗ • DEMO</string>
+    <string name="ads_disabled">Οι προαιρετικές δοκιμαστικές διαφημίσεις είναι ανενεργές. Χωρίς ανταμοιβές διαφημίσεων ή πραγματικά έσοδα.</string>
+    <string name="ads_checking">Έλεγχος επιλογών απορρήτου διαφημίσεων…</string>
+    <string name="ads_unavailable">Οι δοκιμαστικές διαφημίσεις δεν είναι διαθέσιμες. Μπορείτε να συνεχίσετε να χρησιμοποιείτε το demo χωρίς διαφημίσεις.</string>
+    <string name="ads_test_notice">Δοκιμαστική διαφήμιση Google • χωρίς έσοδα. Η διαφημιστική κίνηση περιλαμβάνεται στη χρήση δεδομένων της εφαρμογής.</string>
+    <string name="ads_enable">Ενεργοποίηση προαιρετικής δοκιμαστικής διαφήμισης</string>
+    <string name="ads_disable">Απενεργοποίηση διαφημίσεων</string>
+    <string name="ads_privacy">Επιλογές απορρήτου διαφημίσεων</string>
+</resources>

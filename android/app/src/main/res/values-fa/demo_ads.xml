@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">تبلیغ • نسخه نمایشی</string>
+    <string name="ads_disabled">تبلیغات آزمایشی اختیاری خاموش است. پاداش تبلیغاتی یا درآمد واقعی وجود ندارد.</string>
+    <string name="ads_checking">در حال بررسی انتخاب‌های حریم خصوصی تبلیغات…</string>
+    <string name="ads_unavailable">تبلیغات آزمایشی در دسترس نیست. می‌توانید بدون تبلیغ به استفاده از نسخه نمایشی ادامه دهید.</string>
+    <string name="ads_test_notice">تبلیغ آزمایشی Google • بدون درآمد. ترافیک تبلیغات در مصرف داده برنامه محاسبه می‌شود.</string>
+    <string name="ads_enable">فعال کردن تبلیغ آزمایشی اختیاری</string>
+    <string name="ads_disable">خاموش کردن تبلیغات</string>
+    <string name="ads_privacy">گزینه‌های حریم خصوصی تبلیغات</string>
+</resources>

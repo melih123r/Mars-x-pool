@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"No connection"</string>
+    <string name="nui_01" formatted="false">"Other network"</string>
+    <string name="nui_02" formatted="false">"Mobile data"</string>
+    <string name="nui_03" formatted="false">"Start • monitor connection"</string>
+    <string name="nui_04" formatted="false">"Connection lost; monitoring stopped."</string>
+    <string name="nui_05" formatted="false">"Battery below 15%; monitoring stopped."</string>
+    <string name="nui_06" formatted="false">"Measurement unsupported"</string>
+    <string name="nui_07" formatted="false">"Connection: "</string>
+    <string name="nui_08" formatted="false">" • Monitoring: "</string>
+    <string name="nui_09" formatted="false">" min "</string>
+    <string name="nui_10" formatted="false">" sec\nApp data usage: "</string>
+    <string name="nui_11" formatted="false">"\nShared traffic: 0 GB • Earnings: €0.00"</string>
+    <string name="nui_12" formatted="false">"Explicit consent • TEST only"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network aims to share your internet connection with third-party customer traffic through an approved future partner. This may affect your data allowance, battery and connection; partner customers may use your network IP address. There is no traffic or income guarantee. Real sharing is currently disabled. You can revoke consent at any time. Continuing only saves a test preference."</string>
+    <string name="nui_14" formatted="false">"Cancel"</string>
+    <string name="nui_15" formatted="false">"Save test consent"</string>
+    <string name="nui_16" formatted="false">"Read and accept the test disclosure first."</string>
+    <string name="nui_17" formatted="false">"Monitoring requires Wi-Fi or mobile internet."</string>
+    <string name="nui_18" formatted="false">"Start monitoring the connection. This test does not share your internet or generate earnings. You can stop at any time."</string>
+    <string name="nui_19" formatted="false">"Start"</string>
+    <string name="nui_20" formatted="false">"Stop • connection monitoring"</string>
+    <string name="nui_21" formatted="false">"Pending fiat: €0.00\nSettled fiat: €0.00\nWithdrawable fiat: €0.00"</string>
+    <string name="nui_22" formatted="false">"No balance is created without a partner receipt."</string>
+    <string name="nui_23" formatted="false">"Add recipient wallet address"</string>
+    <string name="nui_24" formatted="false">"Select USDC network"</string>
+    <string name="nui_25" formatted="false">" recipient address"</string>
+    <string name="nui_26" formatted="false">"Enter only a public recipient address. Do not enter private keys or recovery words. This test does not transfer funds."</string>
+    <string name="nui_27" formatted="false">"Delete address"</string>
+    <string name="nui_28" formatted="false">"Add wallet address"</string>
+    <string name="nui_29" formatted="false">"Save"</string>
+    <string name="nui_30" formatted="false">"Invalid address format for the selected network."</string>
+    <string name="nui_31" formatted="false">"No withdrawal requests. No live transfers have been made."</string>
+    <string name="nui_32" formatted="false">"4  •  SETTINGS"</string>
+    <string name="nui_33" formatted="false">"Language"</string>
+    <string name="nui_34" formatted="false">"Selected language code: "</string>
+    <string name="nui_35" formatted="false">"\nLocal test: measures app traffic only.\nConnection: Wi-Fi or mobile data (internet required)\nLow battery (&lt;15%) protection: ON while monitoring\nThermal protection: unavailable\nBackground monitoring: OFF\nMonitoring stops when consent is revoked"</string>
+    <string name="nui_36" formatted="false">"Warning: test consent does not authorize future real network sharing. Separate explicit consent is required before enabling a real Network SDK."</string>
+    <string name="nui_37" formatted="false">"Connection monitoring off • Real sharing: OFF"</string>
+    <string name="nui_38" formatted="false">"Last monitoring session: "</string>
+    <string name="nui_39" formatted="false">" sec • App data: "</string>
+    <string name="nui_40" formatted="false">"\nTotal recorded app traffic: "</string>
+    <string name="nui_41" formatted="false">"\nTotal monitoring time: "</string>
+    <string name="nui_42" formatted="false">" min"</string>
+    <string name="nui_43" formatted="false">"\nThis measurement is not income or shared bandwidth."</string>
+    <string name="nui_44" formatted="false">"Explicit consent: GRANTED • Real sharing remains OFF"</string>
+    <string name="nui_45" formatted="false">"Explicit consent: NOT GRANTED • Real sharing OFF"</string>
+    <string name="nui_46" formatted="false">"Revoke consent"</string>
+    <string name="nui_47" formatted="false">"Grant explicit consent"</string>
+</resources>

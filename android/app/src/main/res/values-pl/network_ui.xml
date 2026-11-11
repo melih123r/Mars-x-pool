@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Brak połączenia"</string>
+    <string name="nui_01" formatted="false">"Inna sieć"</string>
+    <string name="nui_02" formatted="false">"Dane komórkowe"</string>
+    <string name="nui_03" formatted="false">"Start • monitoruj połączenie"</string>
+    <string name="nui_04" formatted="false">"Utracono połączenie; monitorowanie zatrzymane."</string>
+    <string name="nui_05" formatted="false">"Bateria poniżej 15%; monitorowanie zatrzymane."</string>
+    <string name="nui_06" formatted="false">"Pomiar nieobsługiwany"</string>
+    <string name="nui_07" formatted="false">"Połączenie: "</string>
+    <string name="nui_08" formatted="false">" • Monitorowanie: "</string>
+    <string name="nui_09" formatted="false">" min "</string>
+    <string name="nui_10" formatted="false">" s\nZużycie danych aplikacji: "</string>
+    <string name="nui_11" formatted="false">"\nUdostępniony ruch: 0 GB • Zarobki: €0.00"</string>
+    <string name="nui_12" formatted="false">"Wyraźna zgoda • tylko TEST"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network ma na celu udostępnianie twojego połączenia internetowego do obsługi ruchu klientów zewnętrznych za pośrednictwem przyszłego zatwierdzonego partnera. Może to wpłynąć na limit danych, baterię i połączenie; klienci partnera mogą używać adresu IP twojej sieci. Nie ma gwarancji ruchu ani dochodu. Rzeczywiste udostępnianie jest obecnie wyłączone. Możesz wycofać zgodę w dowolnym momencie. Kontynuowanie zapisuje jedynie preferencję testową."</string>
+    <string name="nui_14" formatted="false">"Anuluj"</string>
+    <string name="nui_15" formatted="false">"Zapisz zgodę testową"</string>
+    <string name="nui_16" formatted="false">"Najpierw przeczytaj i zaakceptuj informacje o teście."</string>
+    <string name="nui_17" formatted="false">"Monitorowanie wymaga Wi-Fi lub internetu komórkowego."</string>
+    <string name="nui_18" formatted="false">"Rozpocznij monitorowanie połączenia. Ten test nie udostępnia twojego internetu ani nie generuje zarobków. Możesz go zatrzymać w dowolnym momencie."</string>
+    <string name="nui_19" formatted="false">"Start"</string>
+    <string name="nui_20" formatted="false">"Stop • monitorowanie połączenia"</string>
+    <string name="nui_21" formatted="false">"Środki fiat oczekujące: €0.00\nŚrodki fiat rozliczone: €0.00\nŚrodki fiat do wypłaty: €0.00"</string>
+    <string name="nui_22" formatted="false">"Saldo nie powstaje bez potwierdzenia od partnera."</string>
+    <string name="nui_23" formatted="false">"Dodaj adres portfela odbiorcy"</string>
+    <string name="nui_24" formatted="false">"Wybierz sieć USDC"</string>
+    <string name="nui_25" formatted="false">" adres odbiorcy"</string>
+    <string name="nui_26" formatted="false">"Wpisz tylko publiczny adres odbiorcy. Nie wpisuj kluczy prywatnych ani słów odzyskiwania. Ten test nie przesyła środków."</string>
+    <string name="nui_27" formatted="false">"Usuń adres"</string>
+    <string name="nui_28" formatted="false">"Dodaj adres portfela"</string>
+    <string name="nui_29" formatted="false">"Zapisz"</string>
+    <string name="nui_30" formatted="false">"Nieprawidłowy format adresu dla wybranej sieci."</string>
+    <string name="nui_31" formatted="false">"Brak zleceń wypłaty. Nie wykonano rzeczywistych przelewów."</string>
+    <string name="nui_32" formatted="false">"4  •  USTAWIENIA"</string>
+    <string name="nui_33" formatted="false">"Język"</string>
+    <string name="nui_34" formatted="false">"Kod wybranego języka: "</string>
+    <string name="nui_35" formatted="false">"\nTest lokalny: mierzy tylko ruch aplikacji.\nPołączenie: Wi-Fi lub dane komórkowe (wymagany internet)\nOchrona przy niskim poziomie baterii (&lt;15%): WŁ. podczas monitorowania\nOchrona termiczna: niedostępna\nMonitorowanie w tle: WYŁ.\nMonitorowanie zatrzymuje się po wycofaniu zgody"</string>
+    <string name="nui_36" formatted="false">"Ostrzeżenie: zgoda testowa nie upoważnia do przyszłego rzeczywistego udostępniania sieci. Przed włączeniem rzeczywistego Network SDK wymagana jest oddzielna wyraźna zgoda."</string>
+    <string name="nui_37" formatted="false">"Monitorowanie połączenia wyłączone • Rzeczywiste udostępnianie: WYŁ."</string>
+    <string name="nui_38" formatted="false">"Ostatnia sesja monitorowania: "</string>
+    <string name="nui_39" formatted="false">" s • Dane aplikacji: "</string>
+    <string name="nui_40" formatted="false">"\nŁączny zarejestrowany ruch aplikacji: "</string>
+    <string name="nui_41" formatted="false">"\nŁączny czas monitorowania: "</string>
+    <string name="nui_42" formatted="false">" min"</string>
+    <string name="nui_43" formatted="false">"\nTen pomiar nie oznacza dochodu ani udostępnionego pasma."</string>
+    <string name="nui_44" formatted="false">"Wyraźna zgoda: UDZIELONA • Rzeczywiste udostępnianie pozostaje WYŁ."</string>
+    <string name="nui_45" formatted="false">"Wyraźna zgoda: NIEUDZIELONA • Rzeczywiste udostępnianie WYŁ."</string>
+    <string name="nui_46" formatted="false">"Wycofaj zgodę"</string>
+    <string name="nui_47" formatted="false">"Udziel wyraźnej zgody"</string>
+</resources>

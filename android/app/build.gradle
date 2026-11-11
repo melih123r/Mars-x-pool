@@ -34,14 +34,16 @@ android {
         applicationId "com.marsx.pool"
         minSdk 26
         targetSdk 36
-        versionCode 13
-        versionName "0.9.0-beta"
+        versionCode 18
+        versionName "0.9.3-network-test"
         buildConfigField "String", "QONVERSION_PROJECT_KEY", "\"${escapedQonversionProjectKey}\""
         buildConfigField "String", "QONVERSION_PRODUCT_PRO", "\"pro_monthly\""
         buildConfigField "String", "QONVERSION_PRODUCT_FARM", "\"farm_monthly\""
         buildConfigField "String", "MARSX_API_BASE_URL", "\"${escapedMarsxApiBaseUrl}\""
         buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${escapedGoogleWebClientId}\""
         buildConfigField "String", "MARSX_VRSC_POOL_ADDRESS", "\"${escapedMarsxVrscPoolAddress}\""
+        // Both debug and release DEMO builds use Google's non-monetizing test banner.
+        buildConfigField "String", "DEMO_BANNER_UNIT", '"ca-app-pub-3940256099942544/6300978111"'
     }
 
     buildFeatures { buildConfig true }
@@ -56,8 +58,24 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
+    def releaseStoreFile = providers.environmentVariable("MARSX_UPLOAD_KEYSTORE_PATH").orElse("").get()
+    def releaseStorePassword = providers.environmentVariable("MARSX_UPLOAD_STORE_PASSWORD").orElse("").get()
+    def releaseKeyAlias = providers.environmentVariable("MARSX_UPLOAD_KEY_ALIAS").orElse("").get()
+    def releaseKeyPassword = providers.environmentVariable("MARSX_UPLOAD_KEY_PASSWORD").orElse("").get()
+    def hasUploadSigning = [releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword].every { !it.isEmpty() }
+    signingConfigs {
+        uploadRelease {
+            if (hasUploadSigning) {
+                storeFile file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasUploadSigning) signingConfig signingConfigs.uploadRelease
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
@@ -66,6 +84,8 @@ android {
 }
 
 dependencies {
+    implementation "com.google.android.gms:play-services-ads:25.5.0"
+    implementation "com.google.android.ump:user-messaging-platform:4.0.0"
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.json:json:20240303"
     implementation "io.qonversion.android.sdk:sdk:9.7.0"

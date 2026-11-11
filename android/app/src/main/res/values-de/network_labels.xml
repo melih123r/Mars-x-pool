@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_consent_button">Ausdrücklich einwilligen</string>
+    <string name="network_earnings_heading">2 • EINNAHMEN</string>
+    <string name="network_history_heading">3 • AUSZAHLUNGSVERLAUF</string>
+</resources>

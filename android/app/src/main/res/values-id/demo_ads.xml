@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">IKLAN • DEMO</string>
+    <string name="ads_disabled">Iklan uji coba opsional nonaktif. Tidak ada imbalan iklan atau pendapatan nyata.</string>
+    <string name="ads_checking">Memeriksa pilihan privasi iklan…</string>
+    <string name="ads_unavailable">Iklan uji coba tidak tersedia. Anda dapat terus menggunakan demo tanpa iklan.</string>
+    <string name="ads_test_notice">Iklan uji coba Google • tidak ada pendapatan. Lalu lintas iklan termasuk dalam penggunaan data aplikasi.</string>
+    <string name="ads_enable">Aktifkan iklan uji coba opsional</string>
+    <string name="ads_disable">Nonaktifkan iklan</string>
+    <string name="ads_privacy">Opsi privasi iklan</string>
+</resources>

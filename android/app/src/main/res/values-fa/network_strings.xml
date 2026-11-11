@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_demo_heading">MARS-X NETWORK</string>
+    <string name="network_start_monitoring">شروع • پایش اتصال</string>
+    <string name="network_monitor_off">پایش اتصال خاموش • اشتراک‌گذاری واقعی: خاموش</string>
+    <string name="network_demo_disclaimer">نسخه نمایشی • پرداخت‌ها، پراکسی، انتقال رمزارز و Network SDK واقعی غیرفعال هستند</string>
+</resources>

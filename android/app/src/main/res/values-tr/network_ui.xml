@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Bağlantı yok"</string>
+    <string name="nui_01" formatted="false">"Diğer ağ"</string>
+    <string name="nui_02" formatted="false">"Mobil veri"</string>
+    <string name="nui_03" formatted="false">"Başlat • bağlantıyı izle"</string>
+    <string name="nui_04" formatted="false">"İnternet bağlantısı kesildi; izleme durduruldu."</string>
+    <string name="nui_05" formatted="false">"Pil %15 altında; izleme durduruldu."</string>
+    <string name="nui_06" formatted="false">"ölçüm desteklenmiyor"</string>
+    <string name="nui_07" formatted="false">"Bağlantı: "</string>
+    <string name="nui_08" formatted="false">" • İzleme: "</string>
+    <string name="nui_09" formatted="false">" dk "</string>
+    <string name="nui_10" formatted="false">" sn\nUygulamanın veri kullanımı: "</string>
+    <string name="nui_11" formatted="false">"\nPaylaşılan trafik: 0 GB • Kazanç: €0,00"</string>
+    <string name="nui_12" formatted="false">"Açık rıza • yalnızca TEST"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network, ileride onaylı bir partnerle cihazınızın internet bağlantısını üçüncü taraf müşteri trafiği için paylaşmayı hedefler. Bu işlem veri kotanızı, pilinizi ve bağlantınızı etkileyebilir; ağınızın IP adresi partnerin müşterileri tarafından kullanılabilir. Gelir veya trafik garantisi yoktur. Şu anda gerçek paylaşım yapılmaz. Rızayı istediğiniz an iptal edebilirsiniz. Devam etmek yalnızca test tercihini kaydeder."</string>
+    <string name="nui_14" formatted="false">"Vazgeç"</string>
+    <string name="nui_15" formatted="false">"Test rızasını kaydet"</string>
+    <string name="nui_16" formatted="false">"Önce test bilgilendirmesini okuyup onaylayın."</string>
+    <string name="nui_17" formatted="false">"İzleme için Wi-Fi veya mobil internet gerekiyor."</string>
+    <string name="nui_18" formatted="false">"Bağlantı durumunu izlemeyi başlat. Bu testte internetin başkalarıyla paylaşılmaz ve kazanç oluşmaz. İstediğin zaman durdurabilirsin."</string>
+    <string name="nui_19" formatted="false">"Başlat"</string>
+    <string name="nui_20" formatted="false">"Durdur • bağlantı izleme"</string>
+    <string name="nui_21" formatted="false">"Bekleyen fiat: €0,00\nKesinleşmiş fiat: €0,00\nÇekilebilir fiat: €0,00"</string>
+    <string name="nui_22" formatted="false">"Partner makbuzu olmadan bakiye oluşturulmaz."</string>
+    <string name="nui_23" formatted="false">"Alıcı cüzdan adresi ekle"</string>
+    <string name="nui_24" formatted="false">"USDC ağı seç"</string>
+    <string name="nui_25" formatted="false">" alıcı adresi"</string>
+    <string name="nui_26" formatted="false">"Yalnızca herkese açık alıcı adresini girin. Özel anahtar veya kurtarma kelimesi girmeyin. Bu testte transfer yapılmaz."</string>
+    <string name="nui_27" formatted="false">"Adresi sil"</string>
+    <string name="nui_28" formatted="false">"Cüzdan adresi ekle"</string>
+    <string name="nui_29" formatted="false">"Kaydet"</string>
+    <string name="nui_30" formatted="false">"Seçilen ağ için adres biçimi geçersiz."</string>
+    <string name="nui_31" formatted="false">"Henüz çekim talebi yok. Canlı transfer yapılmadı."</string>
+    <string name="nui_32" formatted="false">"4  •  AYARLAR / SETTINGS"</string>
+    <string name="nui_33" formatted="false">"Language / Dil"</string>
+    <string name="nui_34" formatted="false">"Seçilen dil kodu: "</string>
+    <string name="nui_35" formatted="false">"\nYerel test: yalnızca uygulama trafiği izlenir.\nBağlantı: Wi-Fi veya mobil veri (internet gereklidir)\nDüşük pil (&lt;%15) koruması: AÇIK (izleme sırasında)\nIsınma koruması: YOK\nArka planda izleme: KAPALI\nİzin iptalinde izleme: KAPALI"</string>
+    <string name="nui_36" formatted="false">"Uyarı: Test rızası gelecekteki gerçek ağ paylaşımı için geçerli değildir. Gerçek SDK devreye alınmadan önce yeniden ve ayrı açık onay gerekir."</string>
+    <string name="nui_37" formatted="false">"Bağlantı izleme kapalı • Gerçek paylaşım: KAPALI"</string>
+    <string name="nui_38" formatted="false">"Son izleme oturumu: "</string>
+    <string name="nui_39" formatted="false">" sn • Uygulama verisi: "</string>
+    <string name="nui_40" formatted="false">"\nToplam kayıtlı uygulama trafiği: "</string>
+    <string name="nui_41" formatted="false">"\nToplam izleme süresi: "</string>
+    <string name="nui_42" formatted="false">" dk"</string>
+    <string name="nui_43" formatted="false">"\nBu ölçüm gelir veya paylaşılan bant genişliği değildir."</string>
+    <string name="nui_44" formatted="false">"Açık rıza: VERİLDİ • Network yine kapalı"</string>
+    <string name="nui_45" formatted="false">"Açık rıza: VERİLMEDİ • Network kapalı"</string>
+    <string name="nui_46" formatted="false">"Rızayı iptal et"</string>
+    <string name="nui_47" formatted="false">"Açık rıza ver"</string>
+</resources>

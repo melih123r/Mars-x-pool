@@ -1,0 +1,11 @@
+{
+  "app_name": "MARS-X Network DEMO",
+  "start": "Start monitoring",
+  "stop": "Stop monitoring",
+  "wifi": "Wi-Fi",
+  "cellular": "Mobile data",
+  "no_connection": "No internet connection",
+  "demo_notice": "Demo only. No real network sharing or earnings.",
+  "consent": "Demo monitoring consent",
+  "revoke": "Revoke consent"
+}

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">IKLAN • DEMO</string>
+    <string name="ads_disabled">Iklan ujian pilihan dimatikan. Tiada ganjaran iklan atau hasil sebenar.</string>
+    <string name="ads_checking">Menyemak pilihan privasi pengiklanan…</string>
+    <string name="ads_unavailable">Iklan ujian tidak tersedia. Anda boleh terus menggunakan demo tanpa iklan.</string>
+    <string name="ads_test_notice">Iklan ujian Google • tiada pendapatan. Trafik pengiklanan termasuk dalam penggunaan data aplikasi.</string>
+    <string name="ads_enable">Dayakan iklan ujian pilihan</string>
+    <string name="ads_disable">Matikan iklan</string>
+    <string name="ads_privacy">Pilihan privasi pengiklanan</string>
+</resources>

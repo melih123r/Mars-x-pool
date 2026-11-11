@@ -1,0 +1,11 @@
+{
+  "app_name": "MARS-X Network DEMO",
+  "start": "Démarrer le suivi",
+  "stop": "Arrêter le suivi",
+  "wifi": "Wi-Fi",
+  "cellular": "Données mobiles",
+  "no_connection": "Pas de connexion Internet",
+  "demo_notice": "Démo uniquement. Aucun partage réseau ni gain réel.",
+  "consent": "Consentement au suivi de démonstration",
+  "revoke": "Retirer le consentement"
+}

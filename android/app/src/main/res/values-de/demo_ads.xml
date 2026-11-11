@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title">WERBUNG • DEMO</string>
+    <string name="ads_disabled">Optionale Testwerbung ist aus. Keine Werbeprämien oder echten Einnahmen.</string>
+    <string name="ads_checking">Datenschutzeinstellungen für Werbung werden geprüft…</string>
+    <string name="ads_unavailable">Testwerbung nicht verfügbar. Sie können die Demo ohne Werbung weiter nutzen.</string>
+    <string name="ads_test_notice">Google-Testwerbung • keine Einnahmen. Werbedatenverkehr ist im App-Datenverbrauch enthalten.</string>
+    <string name="ads_enable">Optionale Testwerbung aktivieren</string>
+    <string name="ads_disable">Werbung ausschalten</string>
+    <string name="ads_privacy">Datenschutzoptionen für Werbung</string>
+</resources>

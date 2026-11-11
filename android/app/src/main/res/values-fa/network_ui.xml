@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"بدون اتصال"</string>
+    <string name="nui_01" formatted="false">"شبکه دیگر"</string>
+    <string name="nui_02" formatted="false">"داده تلفن همراه"</string>
+    <string name="nui_03" formatted="false">"شروع • پایش اتصال"</string>
+    <string name="nui_04" formatted="false">"اتصال قطع شد؛ پایش متوقف شد."</string>
+    <string name="nui_05" formatted="false">"باتری کمتر از 15% است؛ پایش متوقف شد."</string>
+    <string name="nui_06" formatted="false">"اندازه‌گیری پشتیبانی نمی‌شود"</string>
+    <string name="nui_07" formatted="false">"اتصال: "</string>
+    <string name="nui_08" formatted="false">" • پایش: "</string>
+    <string name="nui_09" formatted="false">" دقیقه "</string>
+    <string name="nui_10" formatted="false">" ثانیه\nمصرف داده برنامه: "</string>
+    <string name="nui_11" formatted="false">"\nترافیک اشتراکی: 0 GB • درآمد: €0.00"</string>
+    <string name="nui_12" formatted="false">"رضایت صریح • فقط آزمایشی"</string>
+    <string name="nui_13" formatted="false">"هدف MARS-X Network اشتراک‌گذاری اتصال اینترنت شما برای ترافیک مشتریان شخص ثالث از طریق یک شریک تأییدشده در آینده است. این کار ممکن است بر سهمیه داده، باتری و اتصال شما تأثیر بگذارد؛ مشتریان شریک ممکن است از نشانی IP شبکه شما استفاده کنند. هیچ تضمینی برای ترافیک یا درآمد وجود ندارد. اشتراک‌گذاری واقعی اکنون غیرفعال است. هر زمان می‌توانید رضایت خود را پس بگیرید. ادامه فقط یک ترجیح آزمایشی را ذخیره می‌کند."</string>
+    <string name="nui_14" formatted="false">"لغو"</string>
+    <string name="nui_15" formatted="false">"ذخیره رضایت آزمایشی"</string>
+    <string name="nui_16" formatted="false">"ابتدا توضیحات آزمایش را بخوانید و بپذیرید."</string>
+    <string name="nui_17" formatted="false">"پایش به اینترنت Wi-Fi یا تلفن همراه نیاز دارد."</string>
+    <string name="nui_18" formatted="false">"پایش اتصال را شروع کنید. این آزمایش اینترنت شما را به اشتراک نمی‌گذارد و درآمدی ایجاد نمی‌کند. هر زمان می‌توانید آن را متوقف کنید."</string>
+    <string name="nui_19" formatted="false">"شروع"</string>
+    <string name="nui_20" formatted="false">"توقف • پایش اتصال"</string>
+    <string name="nui_21" formatted="false">"پول رایج در انتظار: €0.00\nپول رایج تسویه‌شده: €0.00\nپول رایج قابل برداشت: €0.00"</string>
+    <string name="nui_22" formatted="false">"بدون رسید شریک هیچ موجودی ایجاد نمی‌شود."</string>
+    <string name="nui_23" formatted="false">"افزودن نشانی کیف پول گیرنده"</string>
+    <string name="nui_24" formatted="false">"انتخاب شبکه USDC"</string>
+    <string name="nui_25" formatted="false">" نشانی گیرنده"</string>
+    <string name="nui_26" formatted="false">"فقط نشانی عمومی گیرنده را وارد کنید. کلیدهای خصوصی یا کلمات بازیابی را وارد نکنید. این آزمایش وجهی منتقل نمی‌کند."</string>
+    <string name="nui_27" formatted="false">"حذف نشانی"</string>
+    <string name="nui_28" formatted="false">"افزودن نشانی کیف پول"</string>
+    <string name="nui_29" formatted="false">"ذخیره"</string>
+    <string name="nui_30" formatted="false">"قالب نشانی برای شبکه انتخاب‌شده نامعتبر است."</string>
+    <string name="nui_31" formatted="false">"درخواست برداشتی وجود ندارد. هیچ انتقال واقعی انجام نشده است."</string>
+    <string name="nui_32" formatted="false">"4  •  تنظیمات"</string>
+    <string name="nui_33" formatted="false">"زبان"</string>
+    <string name="nui_34" formatted="false">"کد زبان انتخاب‌شده: "</string>
+    <string name="nui_35" formatted="false">"\nآزمایش محلی: فقط ترافیک برنامه را اندازه می‌گیرد.\nاتصال: Wi-Fi یا داده تلفن همراه (اینترنت لازم است)\nمحافظت باتری کم (&lt;15%): هنگام پایش روشن\nمحافظت حرارتی: در دسترس نیست\nپایش پس‌زمینه: خاموش\nبا لغو رضایت، پایش متوقف می‌شود"</string>
+    <string name="nui_36" formatted="false">"هشدار: رضایت آزمایشی مجوز اشتراک‌گذاری واقعی شبکه در آینده نیست. پیش از فعال‌سازی Network SDK واقعی، رضایت صریح جداگانه لازم است."</string>
+    <string name="nui_37" formatted="false">"پایش اتصال خاموش • اشتراک‌گذاری واقعی: خاموش"</string>
+    <string name="nui_38" formatted="false">"آخرین نشست پایش: "</string>
+    <string name="nui_39" formatted="false">" ثانیه • داده برنامه: "</string>
+    <string name="nui_40" formatted="false">"\nکل ترافیک ثبت‌شده برنامه: "</string>
+    <string name="nui_41" formatted="false">"\nکل زمان پایش: "</string>
+    <string name="nui_42" formatted="false">" دقیقه"</string>
+    <string name="nui_43" formatted="false">"\nاین اندازه‌گیری درآمد یا پهنای باند اشتراکی نیست."</string>
+    <string name="nui_44" formatted="false">"رضایت صریح: داده شده • اشتراک‌گذاری واقعی همچنان خاموش است"</string>
+    <string name="nui_45" formatted="false">"رضایت صریح: داده نشده • اشتراک‌گذاری واقعی خاموش"</string>
+    <string name="nui_46" formatted="false">"پس گرفتن رضایت"</string>
+    <string name="nui_47" formatted="false">"اعلام رضایت صریح"</string>
+</resources>

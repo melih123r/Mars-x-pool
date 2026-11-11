@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"Δεν υπάρχει σύνδεση"</string>
+    <string name="nui_01" formatted="false">"Άλλο δίκτυο"</string>
+    <string name="nui_02" formatted="false">"Δεδομένα κινητής"</string>
+    <string name="nui_03" formatted="false">"Έναρξη • παρακολούθηση σύνδεσης"</string>
+    <string name="nui_04" formatted="false">"Η σύνδεση χάθηκε· η παρακολούθηση σταμάτησε."</string>
+    <string name="nui_05" formatted="false">"Μπαταρία κάτω από 15%· η παρακολούθηση σταμάτησε."</string>
+    <string name="nui_06" formatted="false">"Η μέτρηση δεν υποστηρίζεται"</string>
+    <string name="nui_07" formatted="false">"Σύνδεση: "</string>
+    <string name="nui_08" formatted="false">" • Παρακολούθηση: "</string>
+    <string name="nui_09" formatted="false">" λεπ. "</string>
+    <string name="nui_10" formatted="false">" δευτ.\nΧρήση δεδομένων εφαρμογής: "</string>
+    <string name="nui_11" formatted="false">"\nΚοινόχρηστη κίνηση: 0 GB • Έσοδα: €0.00"</string>
+    <string name="nui_12" formatted="false">"Ρητή συγκατάθεση • μόνο ΔΟΚΙΜΗ"</string>
+    <string name="nui_13" formatted="false">"Το MARS-X Network στοχεύει να μοιράζεται τη σύνδεσή σας στο διαδίκτυο για κίνηση πελατών τρίτων μέσω ενός μελλοντικού εγκεκριμένου συνεργάτη. Αυτό μπορεί να επηρεάσει το όριο δεδομένων, την μπαταρία και τη σύνδεσή σας· οι πελάτες του συνεργάτη ενδέχεται να χρησιμοποιούν τη διεύθυνση IP του δικτύου σας. Δεν υπάρχει εγγύηση κίνησης ή εισοδήματος. Η πραγματική κοινή χρήση είναι προς το παρόν απενεργοποιημένη. Μπορείτε να ανακαλέσετε τη συγκατάθεσή σας οποτεδήποτε. Η συνέχεια αποθηκεύει μόνο μια δοκιμαστική προτίμηση."</string>
+    <string name="nui_14" formatted="false">"Ακύρωση"</string>
+    <string name="nui_15" formatted="false">"Αποθήκευση δοκιμαστικής συγκατάθεσης"</string>
+    <string name="nui_16" formatted="false">"Διαβάστε και αποδεχτείτε πρώτα τη δοκιμαστική ενημέρωση."</string>
+    <string name="nui_17" formatted="false">"Η παρακολούθηση απαιτεί Wi-Fi ή διαδίκτυο κινητής."</string>
+    <string name="nui_18" formatted="false">"Ξεκινήστε την παρακολούθηση της σύνδεσης. Αυτή η δοκιμή δεν μοιράζεται το διαδίκτυό σας και δεν δημιουργεί έσοδα. Μπορείτε να σταματήσετε οποτεδήποτε."</string>
+    <string name="nui_19" formatted="false">"Έναρξη"</string>
+    <string name="nui_20" formatted="false">"Διακοπή • παρακολούθηση σύνδεσης"</string>
+    <string name="nui_21" formatted="false">"Εκκρεμές παραστατικό χρήμα: €0.00\nΕκκαθαρισμένο παραστατικό χρήμα: €0.00\nΑναλήψιμο παραστατικό χρήμα: €0.00"</string>
+    <string name="nui_22" formatted="false">"Δεν δημιουργείται υπόλοιπο χωρίς παραστατικό συνεργάτη."</string>
+    <string name="nui_23" formatted="false">"Προσθήκη διεύθυνσης πορτοφολιού παραλήπτη"</string>
+    <string name="nui_24" formatted="false">"Επιλογή δικτύου USDC"</string>
+    <string name="nui_25" formatted="false">" διεύθυνση παραλήπτη"</string>
+    <string name="nui_26" formatted="false">"Εισαγάγετε μόνο δημόσια διεύθυνση παραλήπτη. Μην εισάγετε ιδιωτικά κλειδιά ή λέξεις ανάκτησης. Αυτή η δοκιμή δεν μεταφέρει χρήματα."</string>
+    <string name="nui_27" formatted="false">"Διαγραφή διεύθυνσης"</string>
+    <string name="nui_28" formatted="false">"Προσθήκη διεύθυνσης πορτοφολιού"</string>
+    <string name="nui_29" formatted="false">"Αποθήκευση"</string>
+    <string name="nui_30" formatted="false">"Μη έγκυρη μορφή διεύθυνσης για το επιλεγμένο δίκτυο."</string>
+    <string name="nui_31" formatted="false">"Δεν υπάρχουν αιτήματα ανάληψης. Δεν έχουν πραγματοποιηθεί πραγματικές μεταφορές."</string>
+    <string name="nui_32" formatted="false">"4  •  ΡΥΘΜΙΣΕΙΣ"</string>
+    <string name="nui_33" formatted="false">"Γλώσσα"</string>
+    <string name="nui_34" formatted="false">"Κωδικός επιλεγμένης γλώσσας: "</string>
+    <string name="nui_35" formatted="false">"\nΤοπική δοκιμή: μετρά μόνο την κίνηση της εφαρμογής.\nΣύνδεση: Wi-Fi ή δεδομένα κινητής (απαιτείται διαδίκτυο)\nΠροστασία χαμηλής μπαταρίας (&lt;15%): ΕΝΕΡΓΗ κατά την παρακολούθηση\nΘερμική προστασία: μη διαθέσιμη\nΠαρακολούθηση παρασκηνίου: ΑΝΕΝΕΡΓΗ\nΗ παρακολούθηση σταματά όταν ανακαλείται η συγκατάθεση"</string>
+    <string name="nui_36" formatted="false">"Προειδοποίηση: η δοκιμαστική συγκατάθεση δεν επιτρέπει μελλοντική πραγματική κοινή χρήση δικτύου. Απαιτείται ξεχωριστή ρητή συγκατάθεση πριν ενεργοποιηθεί ένα πραγματικό Network SDK."</string>
+    <string name="nui_37" formatted="false">"Παρακολούθηση σύνδεσης ανενεργή • Πραγματική κοινή χρήση: ΑΝΕΝΕΡΓΗ"</string>
+    <string name="nui_38" formatted="false">"Τελευταία περίοδος παρακολούθησης: "</string>
+    <string name="nui_39" formatted="false">" δευτ. • Δεδομένα εφαρμογής: "</string>
+    <string name="nui_40" formatted="false">"\nΣυνολική καταγεγραμμένη κίνηση εφαρμογής: "</string>
+    <string name="nui_41" formatted="false">"\nΣυνολικός χρόνος παρακολούθησης: "</string>
+    <string name="nui_42" formatted="false">" λεπ."</string>
+    <string name="nui_43" formatted="false">"\nΑυτή η μέτρηση δεν είναι εισόδημα ή κοινόχρηστο εύρος ζώνης."</string>
+    <string name="nui_44" formatted="false">"Ρητή συγκατάθεση: ΔΟΘΗΚΕ • Η πραγματική κοινή χρήση παραμένει ΑΝΕΝΕΡΓΗ"</string>
+    <string name="nui_45" formatted="false">"Ρητή συγκατάθεση: ΔΕΝ ΔΟΘΗΚΕ • Πραγματική κοινή χρήση ΑΝΕΝΕΡΓΗ"</string>
+    <string name="nui_46" formatted="false">"Ανάκληση συγκατάθεσης"</string>
+    <string name="nui_47" formatted="false">"Παροχή ρητής συγκατάθεσης"</string>
+</resources>

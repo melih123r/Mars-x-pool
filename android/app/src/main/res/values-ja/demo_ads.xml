@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title" formatted="false">広告 • デモ</string>
+    <string name="ads_disabled" formatted="false">任意のテスト広告はオフです。広告報酬や実際の収入はありません。</string>
+    <string name="ads_checking" formatted="false">広告のプライバシー設定を確認中…</string>
+    <string name="ads_unavailable" formatted="false">テスト広告を利用できません。広告なしでデモを引き続き使用できます。</string>
+    <string name="ads_test_notice" formatted="false">Google テスト広告 • 収益なし。広告の通信量はアプリのデータ使用量に含まれます。</string>
+    <string name="ads_enable" formatted="false">任意のテスト広告を有効にする</string>
+    <string name="ads_disable" formatted="false">広告をオフにする</string>
+    <string name="ads_privacy" formatted="false">広告のプライバシー設定</string>
+</resources>

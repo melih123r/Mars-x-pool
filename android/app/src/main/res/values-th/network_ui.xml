@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"ไม่มีการเชื่อมต่อ"</string>
+    <string name="nui_01" formatted="false">"เครือข่ายอื่น"</string>
+    <string name="nui_02" formatted="false">"ข้อมูลมือถือ"</string>
+    <string name="nui_03" formatted="false">"เริ่ม • ตรวจสอบการเชื่อมต่อ"</string>
+    <string name="nui_04" formatted="false">"การเชื่อมต่อขาดหาย จึงหยุดการตรวจสอบแล้ว"</string>
+    <string name="nui_05" formatted="false">"แบตเตอรี่ต่ำกว่า 15% จึงหยุดการตรวจสอบแล้ว"</string>
+    <string name="nui_06" formatted="false">"ไม่รองรับการวัด"</string>
+    <string name="nui_07" formatted="false">"การเชื่อมต่อ: "</string>
+    <string name="nui_08" formatted="false">" • ตรวจสอบ: "</string>
+    <string name="nui_09" formatted="false">" นาที "</string>
+    <string name="nui_10" formatted="false">" วินาที\nการใช้ข้อมูลของแอป: "</string>
+    <string name="nui_11" formatted="false">"\nปริมาณข้อมูลที่แชร์: 0 GB • รายได้: €0.00"</string>
+    <string name="nui_12" formatted="false">"ความยินยอมอย่างชัดเจน • ทดสอบเท่านั้น"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network มีเป้าหมายที่จะแชร์การเชื่อมต่ออินเทอร์เน็ตของคุณให้กับการรับส่งข้อมูลของลูกค้าบุคคลที่สามผ่านพันธมิตรที่ได้รับอนุมัติในอนาคต ซึ่งอาจกระทบโควตาข้อมูล แบตเตอรี่ และการเชื่อมต่อของคุณ ลูกค้าของพันธมิตรอาจใช้ที่อยู่ IP ของเครือข่ายคุณ ไม่มีการรับประกันปริมาณการรับส่งข้อมูลหรือรายได้ ขณะนี้ปิดใช้งานการแชร์จริง คุณถอนความยินยอมได้ทุกเมื่อ การดำเนินการต่อจะบันทึกเฉพาะค่ากำหนดสำหรับการทดสอบเท่านั้น"</string>
+    <string name="nui_14" formatted="false">"ยกเลิก"</string>
+    <string name="nui_15" formatted="false">"บันทึกความยินยอมทดสอบ"</string>
+    <string name="nui_16" formatted="false">"โปรดอ่านและยอมรับคำชี้แจงการทดสอบก่อน"</string>
+    <string name="nui_17" formatted="false">"การตรวจสอบต้องใช้ Wi-Fi หรืออินเทอร์เน็ตมือถือ"</string>
+    <string name="nui_18" formatted="false">"เริ่มตรวจสอบการเชื่อมต่อ การทดสอบนี้ไม่แชร์อินเทอร์เน็ตหรือสร้างรายได้ คุณหยุดได้ทุกเมื่อ"</string>
+    <string name="nui_19" formatted="false">"เริ่ม"</string>
+    <string name="nui_20" formatted="false">"หยุด • ตรวจสอบการเชื่อมต่อ"</string>
+    <string name="nui_21" formatted="false">"เงินตราที่รอชำระ: €0.00\nเงินตราที่ชำระแล้ว: €0.00\nเงินตราที่ถอนได้: €0.00"</string>
+    <string name="nui_22" formatted="false">"จะไม่มีการสร้างยอดเงินหากไม่มีใบรับจากพันธมิตร"</string>
+    <string name="nui_23" formatted="false">"เพิ่มที่อยู่กระเป๋าเงินผู้รับ"</string>
+    <string name="nui_24" formatted="false">"เลือกเครือข่าย USDC"</string>
+    <string name="nui_25" formatted="false">" ที่อยู่ผู้รับ"</string>
+    <string name="nui_26" formatted="false">"ป้อนเฉพาะที่อยู่สาธารณะของผู้รับ ห้ามป้อนคีย์ส่วนตัวหรือวลีกู้คืน การทดสอบนี้ไม่โอนเงิน"</string>
+    <string name="nui_27" formatted="false">"ลบที่อยู่"</string>
+    <string name="nui_28" formatted="false">"เพิ่มที่อยู่กระเป๋าเงิน"</string>
+    <string name="nui_29" formatted="false">"บันทึก"</string>
+    <string name="nui_30" formatted="false">"รูปแบบที่อยู่ไม่ถูกต้องสำหรับเครือข่ายที่เลือก"</string>
+    <string name="nui_31" formatted="false">"ไม่มีคำขอถอนเงิน ไม่มีการโอนเงินจริงเกิดขึ้น"</string>
+    <string name="nui_32" formatted="false">"4  •  การตั้งค่า"</string>
+    <string name="nui_33" formatted="false">"ภาษา"</string>
+    <string name="nui_34" formatted="false">"รหัสภาษาที่เลือก: "</string>
+    <string name="nui_35" formatted="false">"\nการทดสอบในเครื่อง: วัดเฉพาะการรับส่งข้อมูลของแอป\nการเชื่อมต่อ: Wi-Fi หรือข้อมูลมือถือ (ต้องใช้อินเทอร์เน็ต)\nการป้องกันแบตเตอรี่ต่ำ (&lt;15%): เปิดระหว่างตรวจสอบ\nการป้องกันความร้อน: ไม่พร้อมใช้งาน\nการตรวจสอบเบื้องหลัง: ปิด\nการตรวจสอบจะหยุดเมื่อถอนความยินยอม"</string>
+    <string name="nui_36" formatted="false">"คำเตือน: ความยินยอมทดสอบไม่อนุญาตให้แชร์เครือข่ายจริงในอนาคต ต้องได้รับความยินยอมอย่างชัดเจนแยกต่างหากก่อนเปิดใช้ Network SDK จริง"</string>
+    <string name="nui_37" formatted="false">"ปิดการตรวจสอบการเชื่อมต่อ • การแชร์จริง: ปิด"</string>
+    <string name="nui_38" formatted="false">"การตรวจสอบครั้งล่าสุด: "</string>
+    <string name="nui_39" formatted="false">" วินาที • ข้อมูลของแอป: "</string>
+    <string name="nui_40" formatted="false">"\nการรับส่งข้อมูลของแอปที่บันทึกทั้งหมด: "</string>
+    <string name="nui_41" formatted="false">"\nเวลาตรวจสอบทั้งหมด: "</string>
+    <string name="nui_42" formatted="false">" นาที"</string>
+    <string name="nui_43" formatted="false">"\nการวัดนี้ไม่ใช่รายได้หรือแบนด์วิดท์ที่แชร์"</string>
+    <string name="nui_44" formatted="false">"ความยินยอมอย่างชัดเจน: ให้แล้ว • การแชร์จริงยังปิดอยู่"</string>
+    <string name="nui_45" formatted="false">"ความยินยอมอย่างชัดเจน: ยังไม่ให้ • การแชร์จริงปิดอยู่"</string>
+    <string name="nui_46" formatted="false">"ถอนความยินยอม"</string>
+    <string name="nui_47" formatted="false">"ให้ความยินยอมอย่างชัดเจน"</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ads_title" formatted="false">광고 • 데모</string>
+    <string name="ads_disabled" formatted="false">선택적 테스트 광고가 꺼져 있습니다. 광고 보상이나 실제 수입은 없습니다.</string>
+    <string name="ads_checking" formatted="false">광고 개인정보 보호 설정 확인 중…</string>
+    <string name="ads_unavailable" formatted="false">테스트 광고를 사용할 수 없습니다. 광고 없이 데모를 계속 사용할 수 있습니다.</string>
+    <string name="ads_test_notice" formatted="false">Google 테스트 광고 • 수익 없음. 광고 트래픽은 앱 데이터 사용량에 포함됩니다.</string>
+    <string name="ads_enable" formatted="false">선택적 테스트 광고 활성화</string>
+    <string name="ads_disable" formatted="false">광고 끄기</string>
+    <string name="ads_privacy" formatted="false">광고 개인정보 보호 옵션</string>
+</resources>

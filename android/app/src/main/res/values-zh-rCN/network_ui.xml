@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nui_00" formatted="false">"无连接"</string>
+    <string name="nui_01" formatted="false">"其他网络"</string>
+    <string name="nui_02" formatted="false">"移动数据"</string>
+    <string name="nui_03" formatted="false">"开始 • 监测连接"</string>
+    <string name="nui_04" formatted="false">"连接已断开；监测已停止。"</string>
+    <string name="nui_05" formatted="false">"电量低于15%；监测已停止。"</string>
+    <string name="nui_06" formatted="false">"不支持测量"</string>
+    <string name="nui_07" formatted="false">"连接： "</string>
+    <string name="nui_08" formatted="false">" • 监测时长： "</string>
+    <string name="nui_09" formatted="false">" 分 "</string>
+    <string name="nui_10" formatted="false">" 秒\n应用数据用量： "</string>
+    <string name="nui_11" formatted="false">"\n共享流量：0 GB • 收益：€0.00"</string>
+    <string name="nui_12" formatted="false">"明确同意 • 仅供测试"</string>
+    <string name="nui_13" formatted="false">"MARS-X Network 计划通过未来获批准的合作伙伴，将您的互联网连接用于第三方客户流量。这可能影响您的流量额度、电池和连接；合作伙伴的客户可能使用您的网络 IP 地址。不保证流量或收入。目前已禁用实际共享。您可以随时撤回同意。继续操作仅保存测试偏好。"</string>
+    <string name="nui_14" formatted="false">"取消"</string>
+    <string name="nui_15" formatted="false">"保存测试同意"</string>
+    <string name="nui_16" formatted="false">"请先阅读并接受测试说明。"</string>
+    <string name="nui_17" formatted="false">"监测需要 Wi-Fi 或移动互联网。"</string>
+    <string name="nui_18" formatted="false">"开始监测连接。本测试不会共享您的互联网或产生收益。您可以随时停止。"</string>
+    <string name="nui_19" formatted="false">"开始"</string>
+    <string name="nui_20" formatted="false">"停止 • 连接监测"</string>
+    <string name="nui_21" formatted="false">"待结算法币：€0.00\n已结算法币：€0.00\n可提取法币：€0.00"</string>
+    <string name="nui_22" formatted="false">"没有合作伙伴收据，不会生成余额。"</string>
+    <string name="nui_23" formatted="false">"添加收款钱包地址"</string>
+    <string name="nui_24" formatted="false">"选择 USDC 网络"</string>
+    <string name="nui_25" formatted="false">" 收款地址"</string>
+    <string name="nui_26" formatted="false">"仅输入公开的收款地址。请勿输入私钥或助记词。本测试不会转移资金。"</string>
+    <string name="nui_27" formatted="false">"删除地址"</string>
+    <string name="nui_28" formatted="false">"添加钱包地址"</string>
+    <string name="nui_29" formatted="false">"保存"</string>
+    <string name="nui_30" formatted="false">"地址格式不适用于所选网络。"</string>
+    <string name="nui_31" formatted="false">"没有提现请求。未进行任何真实转账。"</string>
+    <string name="nui_32" formatted="false">"4  •  设置"</string>
+    <string name="nui_33" formatted="false">"语言"</string>
+    <string name="nui_34" formatted="false">"所选语言代码： "</string>
+    <string name="nui_35" formatted="false">"\n本地测试：仅测量应用流量。\n连接：Wi-Fi 或移动数据（需要互联网）\n低电量（&lt;15%）保护：监测时开启\n过热保护：不可用\n后台监测：关闭\n撤回同意后监测将停止"</string>
+    <string name="nui_36" formatted="false">"警告：测试同意不授权未来的实际网络共享。启用真实 Network SDK 前，需要另行获得明确同意。"</string>
+    <string name="nui_37" formatted="false">"连接监测已关闭 • 实际共享：关闭"</string>
+    <string name="nui_38" formatted="false">"上次监测时长： "</string>
+    <string name="nui_39" formatted="false">" 秒 • 应用数据： "</string>
+    <string name="nui_40" formatted="false">"\n累计记录的应用流量： "</string>
+    <string name="nui_41" formatted="false">"\n累计监测时长： "</string>
+    <string name="nui_42" formatted="false">" 分"</string>
+    <string name="nui_43" formatted="false">"\n此测量值并非收入或共享带宽。"</string>
+    <string name="nui_44" formatted="false">"明确同意：已授予 • 实际共享仍关闭"</string>
+    <string name="nui_45" formatted="false">"明确同意：未授予 • 实际共享关闭"</string>
+    <string name="nui_46" formatted="false">"撤回同意"</string>
+    <string name="nui_47" formatted="false">"授予明确同意"</string>
+</resources>
