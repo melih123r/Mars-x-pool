@@ -1,6 +1,6 @@
 # Network DEMO advertising release gate
 
-- Package: com.marsx.pool. Network DEMO versionCode 17.
+- Package: com.marsx.pool. Network DEMO versionCode 19.
 - AdMob app: ca-app-pub-8880818291071953~6929328204.
 - Publisher banner reserved for a future monetized build: ca-app-pub-8880818291071953/5989897037.
 - This build always uses Google test banner ca-app-pub-3940256099942544/6300978111. No real ad income or user rewards.
