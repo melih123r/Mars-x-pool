@@ -1,0 +1,48 @@
+name: MARS-X Independent AI Review
+on:
+  workflow_dispatch:
+    inputs:
+      focus:
+        description: 'Review target (Android, gateway, charts, tests)'
+        required: false
+        default: 'Android and gateway build health'
+  schedule:
+    - cron: '23 */6 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: marsx-independent-ai-review
+  cancel-in-progress: false
+jobs:
+  review:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check agent credentials
+        id: credentials
+        env:
+          OPENHANDS_API_KEY: ${{ secrets.OPENHANDS_API_KEY }}
+        run: |
+          if [ -n "$OPENHANDS_API_KEY" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::OpenHands is not enabled: configure OPENHANDS_API_KEY in repository Actions secrets."
+          fi
+      - name: Independent OpenHands review
+        if: steps.credentials.outputs.available == 'true'
+        uses: All-Hands-AI/openhands-github-action@v1
+        with:
+          repository: ${{ github.repository }}
+          selected-branch: finance-open-source-integration-20261012
+          openhands-api-key: ${{ secrets.OPENHANDS_API_KEY }}
+          timeout-seconds: '900'
+          prompt: |
+            Review melih123r/Mars-x-pool branch finance-open-source-integration-20261012.
+            Inspect Android Gradle/TradingView integration and Python gateway tests.
+            Identify highest impact reproducible errors and propose exact fixes.
+            READ ONLY: do not push, create branches, merge, deploy, change secrets,
+            activate financial orders, transfers, swaps or withdrawals.
+            Summarize findings with affected paths and verification steps.

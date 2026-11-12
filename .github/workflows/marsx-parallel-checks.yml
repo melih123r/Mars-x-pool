@@ -1,0 +1,55 @@
+name: MARS-X Parallel Engineering Checks
+on:
+  push:
+    branches: [finance-open-source-integration-20261012]
+    paths:
+      - 'marsx-finance/**'
+      - '.github/workflows/marsx-parallel-checks.yml'
+  pull_request:
+    paths:
+      - 'marsx-finance/**'
+      - '.github/workflows/marsx-parallel-checks.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  python-gateway:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and test Python gateway
+        working-directory: marsx-finance/market-gateway
+        run: |
+          python -m compileall -q .
+          python -m unittest discover -v
+  android-static:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Android security and project configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f marsx-finance/exchange-ui/app/build.gradle.kts
+          test -f marsx-finance/exchange-ui/app/src/main/java/com/marsx/exchange/TradingViewChart.kt
+          grep -q 'minSdk = 26' marsx-finance/exchange-ui/app/build.gradle.kts
+          grep -q 'com.tradingview:lightweightcharts' marsx-finance/exchange-ui/app/build.gradle.kts
+          echo 'Android configuration checks passed'
+  security-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect accidentally committed credential file names
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git ls-files | grep -E '(^|/)(\.env$|id_rsa$|.*\.p12$|.*\.keystore$|service-account\.json$)'; then
+            echo 'Potential secret file committed'; exit 1
+          fi
+          echo 'No known secret file names found'
