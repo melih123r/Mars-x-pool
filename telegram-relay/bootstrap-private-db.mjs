@@ -13,9 +13,14 @@ export async function bootstrapPrivateDatabase({ adminUrl, password, approved, a
       (!localTest && (url.hostname !== 'dpg-db25p4rtqb8s73c5mii0-a' || url.pathname !== '/marsx_pool_db')) ||
       url.search || url.hash) throw new Error('private_database_required');
   if (!/^[a-f0-9]{64}$/.test(password || '')) throw new Error('random_32_byte_password_required');
-  const sql = await readFile(new URL('./sql/001_durable_queue.sql', import.meta.url), 'utf8');
-  // The migration is already transactional; keep it inside our larger transaction.
-  const migration = sql.replace(/^BEGIN;\s*$/m, '').replace(/^COMMIT;\s*$/m, '');
+  const migrations = await Promise.all([
+    readFile(new URL('./sql/001_durable_queue.sql', import.meta.url), 'utf8'),
+    readFile(new URL('./sql/003_command_inbox.sql', import.meta.url), 'utf8'),
+    readFile(new URL('./sql/004_command_audit_log.sql', import.meta.url), 'utf8'),
+    readFile(new URL('./sql/005_command_recovery_audit_guard.sql', import.meta.url), 'utf8')
+  ]);
+  // The migrations are already transactional; keep them inside our larger transaction.
+  const migration = migrations.map(sql => sql.replace(/^BEGIN;\s*$/m, '').replace(/^COMMIT;\s*$/m, '')).join('\n');
   const client = new pg.Client({ connectionString: adminUrl, connectionTimeoutMillis: 5000 });
   try {
     await client.connect();

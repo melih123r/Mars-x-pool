@@ -37,7 +37,7 @@ jobs:
       - name: Check JavaScript syntax
         run: node --check telegram-relay/server.mjs && node --check telegram-relay/gemini-client.mjs
       - name: Run relay regression tests
-        run: node --test telegram-relay/intake.test.mjs telegram-relay/webhook.integration.test.mjs telegram-relay/gemini-client.test.mjs telegram-relay/lane-planner.test.mjs telegram-relay/ten-lane-planner.test.mjs telegram-relay/task-state.test.mjs telegram-relay/task-queue.test.mjs telegram-relay/durable-queue-contract.test.mjs telegram-relay/message-crypto.test.mjs telegram-relay/postgres-task-queue.test.mjs telegram-relay/outbox-delivery.test.mjs telegram-relay/outbox-flush.test.mjs telegram-relay/unconfigured-worker.test.mjs
+        run: node --test telegram-relay/intake.test.mjs telegram-relay/webhook.integration.test.mjs telegram-relay/gemini-client.test.mjs telegram-relay/command-inbox.test.mjs telegram-relay/lane-planner.test.mjs telegram-relay/ten-lane-planner.test.mjs telegram-relay/task-state.test.mjs telegram-relay/task-queue.test.mjs telegram-relay/durable-queue-contract.test.mjs telegram-relay/message-crypto.test.mjs telegram-relay/postgres-task-queue.test.mjs telegram-relay/outbox-delivery.test.mjs telegram-relay/outbox-flush.test.mjs telegram-relay/unconfigured-worker.test.mjs
       - name: Verify isolated database bootstrap and concurrent intake
         env:
           MARSX_TEST_DATABASE_URL: postgres://postgres:disposable_ci_password@127.0.0.1:5432/telegram_test

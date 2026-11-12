@@ -8,6 +8,14 @@ Standalone Node 22+ webhook receiver for the existing Render web service. It can
 3. After the service is deployed and healthy, register the webhook with Telegram using `setWebhook` and `secret_token` pointed at `https://YOUR-SERVICE.onrender.com/telegram/webhook`. Keep the bot token out of logs, commits, and chat.
 4. Send a private message to the bot from the allowed user. When `GEMINI_API_KEY` is configured, expect Gemini's reply. Without it, the existing metadata/queue behavior remains active.
 
+## Command Center inbox
+- `/chat <project> <message>` stores an encrypted, project-scoped handoff record in the private PostgreSQL inbox.
+- `/task <project> <instruction>` stores an encrypted task record; it does not run shell commands, merge code, or inject text into ChatGPT conversations.
+- `/status <telegram-ID-chat|task>` reads verified database status without returning the private payload.
+- Telegram `update_id` is unique, so webhook retries return the original record instead of creating duplicates.
+- Claimed records use bounded leases, at most 10 attempts, and safe retry metadata without storing error text or secrets.
+- These commands fail closed when PostgreSQL mode or its schema is unavailable. Normal non-command Gemini messages keep their existing behavior.
+
 ## Limitations
 - Render free web services may sleep when idle, causing delayed delivery.
 - The bot token and Telegram user ID are not present in this repository.
