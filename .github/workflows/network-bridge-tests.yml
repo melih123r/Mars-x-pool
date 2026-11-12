@@ -1,0 +1,27 @@
+name: Network Bridge Tests
+on:
+  push:
+    paths:
+      - 'integrations/network-bridge/**'
+      - '.github/workflows/network-bridge-tests.yml'
+  pull_request:
+    paths:
+      - 'integrations/network-bridge/**'
+      - '.github/workflows/network-bridge-tests.yml'
+permissions:
+  contents: read
+jobs:
+  bridge-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check bridge JavaScript syntax
+        run: |
+          node --check integrations/network-bridge/network-bridge.mjs
+          node --check integrations/network-bridge/network-bridge.test.mjs
+      - name: Run opt-in bridge security regression tests
+        run: node --test integrations/network-bridge/network-bridge.test.mjs
