@@ -1,0 +1,41 @@
+name: Finance storage contract
+on:
+  pull_request:
+    paths:
+      - 'finance/**'
+      - '.github/workflows/finance-schema-tests.yml'
+  push:
+    branches: [bot1/finance-readonly-ledger]
+    paths:
+      - 'finance/**'
+      - '.github/workflows/finance-schema-tests.yml'
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_PASSWORD: disposable_ci_password
+          POSTGRES_DB: finance_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts
+      - name: Run schema and upgrade contracts
+        env:
+          MARSX_FINANCE_TEST_DATABASE_URL: postgres://postgres:disposable_ci_password@127.0.0.1:5432/finance_test
+        run: node --test finance/schema-contract.test.mjs finance/migration-integration.test.mjs
