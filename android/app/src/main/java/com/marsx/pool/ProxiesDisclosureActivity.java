@@ -1,28 +1,29 @@
 package com.marsx.pool;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 /**
- * Explicit, revocable preparation consent. This Activity NEVER starts traffic.
- * Consent is not a substitute for supplier approval or SDK credential security.
+ * Google Play build: informational screen only. No SDK, opt-in or traffic.
+ * Old preparation-stage permissions are invalidated on entry.
  */
 public final class ProxiesDisclosureActivity extends Activity {
     private static final String PREFS = "proxies_sx_preferences";
-    private static final String CONSENT_KEY = "proxy_consent_" + ProxiesConsentPolicy.CONSENT_VERSION;
-    private TextView status;
-    private CheckBox confirmation;
-    private Button accept;
+    private static final String CONSENT_KEY =
+            "proxy_consent_" + ProxiesConsentPolicy.CONSENT_VERSION;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        SharedPreferences prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+        // Invalidate any consent saved by earlier preview builds: it must not
+        // carry over into a future, materially different implementation.
+        prefs.edit().remove(CONSENT_KEY).apply();
+
         ScrollView scroll = new ScrollView(this);
         LinearLayout content = new LinearLayout(this);
         content.setOrientation(LinearLayout.VERTICAL);
@@ -30,61 +31,22 @@ public final class ProxiesDisclosureActivity extends Activity {
         content.setPadding(pad, pad, pad, pad);
 
         TextView title = new TextView(this);
-        title.setText("Proxies.sx — sharing permission");
+        title.setText("Proxies.sx — not available");
         title.setTextSize(22);
         content.addView(title);
 
-        TextView disclosure = new TextView(this);
-        disclosure.setText(
-                "Sharing is currently DISABLED. No Proxies.sx traffic will run in this build.\n\n"
-                + "If activated in a future build, your internet connection and public IP address "
-                + "would carry traffic requested by third parties. This may consume Wi-Fi or mobile "
-                + "data, incur carrier charges, drain battery and affect your IP reputation. "
-                + "The supplier has not published a verified protection against access to private "
-                + "devices on your local network.\n\n"
-                + "You can refuse or withdraw permission without affecting existing MARS-X features. "
-                + "A separate, visible Start action will be required once a reviewed SDK integration "
-                + "is available. No earnings are guaranteed and MARS-X sandbox credits are separate.");
-        disclosure.setTextSize(16);
-        disclosure.setPadding(0, pad, 0, pad);
-        content.addView(disclosure);
-
-        status = new TextView(this);
-        status.setTextSize(16);
-        content.addView(status);
-
-        confirmation = new CheckBox(this);
-        confirmation.setText("I understand the risks and voluntarily allow future proxy sharing, "
-                + "subject to a separate Start action.");
-        confirmation.setChecked(false);
-        content.addView(confirmation);
-
-        accept = new Button(this);
-        accept.setText("Save permission (does not start)");
-        accept.setEnabled(false);
-        confirmation.setOnCheckedChangeListener((button, checked) -> accept.setEnabled(checked));
-        accept.setOnClickListener(v -> {
-            preferences().edit().putBoolean(CONSENT_KEY, true).apply();
-            confirmation.setChecked(false);
-            updateStatus();
-            new AlertDialog.Builder(this).setTitle("Permission saved")
-                    .setMessage("Proxy sharing remains disabled. No traffic has started.")
-                    .setPositiveButton("OK", null).show();
-        });
-        content.addView(accept);
-
-        Button revoke = new Button(this);
-        revoke.setText("Withdraw permission / Stop sharing");
-        revoke.setOnClickListener(v -> {
-            preferences().edit().remove(CONSENT_KEY).apply();
-            confirmation.setChecked(false);
-            updateStatus();
-            // There is deliberately no SDK instance in this build.
-            new AlertDialog.Builder(this).setTitle("Permission withdrawn")
-                    .setMessage("No proxy service is installed or running in this build.")
-                    .setPositiveButton("OK", null).show();
-        });
-        content.addView(revoke);
+        TextView details = new TextView(this);
+        details.setText("MARS-X Pool does not offer third-party proxy or bandwidth sharing. "
+                + "No Proxies.sx SDK is installed in this build; your internet connection "
+                + "and IP address are not shared with Proxies.sx by this feature.\n\n"
+                + "Google Play permits third-party proxy functionality only when it is "
+                + "the app's primary user-facing purpose. MARS-X Pool is a remote node "
+                + "and pool management application, so this feature remains unavailable.\n\n"
+                + "No permission is requested or stored. No proxy earnings are offered. "
+                + "Existing MARS-X sandbox balances are unrelated.");
+        details.setTextSize(16);
+        details.setPadding(0, pad, 0, pad);
+        content.addView(details);
 
         Button close = new Button(this);
         close.setText("Close");
@@ -93,17 +55,5 @@ public final class ProxiesDisclosureActivity extends Activity {
 
         scroll.addView(content);
         setContentView(scroll);
-        updateStatus();
-    }
-
-    private SharedPreferences preferences() {
-        return getSharedPreferences(PREFS, MODE_PRIVATE);
-    }
-
-    private void updateStatus() {
-        boolean consented = preferences().getBoolean(CONSENT_KEY, false);
-        boolean canStart = ProxiesConsentPolicy.canStart(consented, false, false, false);
-        status.setText("Sharing: " + (canStart ? "READY" : "OFF")
-                + " • Permission: " + (consented ? "saved" : "not granted"));
     }
 }
