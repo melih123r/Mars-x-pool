@@ -68,6 +68,10 @@ android {
 dependencies {
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.json:json:20240303"
+    // Optional compile verification only. No runtime SDK is bundled or started by default.
+    if (providers.gradleProperty("VERIFY_PROXIES_SX_SDK").map { it == "true" }.getOrElse(false)) {
+        compileOnly "com.github.bolivian-peru:android-peer-sdk:1.3.2"
+    }
     implementation "io.qonversion.android.sdk:sdk:9.7.0"
     implementation "androidx.credentials:credentials:1.6.0"
     implementation "androidx.credentials:credentials-play-services-auth:1.6.0"
