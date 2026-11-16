@@ -26,3 +26,22 @@ Status: **not connected**. This branch deliberately does not run proxy traffic.
 
 ## Credential incident
 Any previously pasted SDK key should be revoked and rotated in the supplier dashboard. Never commit the replacement.
+
+## Verified current vendor release (checked 2026-11-16)
+
+- Latest published Android SDK: **1.3.2**, tagged 2026-09-02.
+- Vendor-documented Gradle artifact: `com.github.bolivian-peru:android-peer-sdk:1.3.2`; JitPack must be added to `android/settings.gradle` under `dependencyResolutionManagement.repositories` when dependency activation is approved.
+- Java Android host must verify Kotlin SDK interoperability against the actual published artifact before invoking methods. No speculative method signatures.
+- SDK manifest merges INTERNET, ACCESS_NETWORK_STATE, ACCESS_WIFI_STATE, FOREGROUND_SERVICE, FOREGROUND_SERVICE_DATA_SYNC, WAKE_LOCK and READ_PHONE_STATE. The app already declares POST_NOTIFICATIONS; Android 13+ requires runtime handling.
+- SDK 1.3.2 **does not provide a functioning data usage cap**. Published configuration supports apiUrl, relayUrl, userId and status/earnings callbacks, not the older documented maxBandwidthMBPerHour/onlyWhenCharging/mobileDataOnly options. Do not claim those limits are enforced.
+- IP rotation is not available in SDK 1.3.2.
+- Vendor notes Google Play permits third-party proxying only when it is the app's primary user-facing purpose. MARS-X Pool currently has a different primary purpose; shipping the SDK through Play needs a distribution/policy decision first.
+- SDK requires a farmer key for account linkage. Vendor has not established a safe scoped credential distribution mechanism for this app. A key fetched from Supabase still becomes accessible to the app runtime and is not inherently secret from the device owner.
+- Vendor documents no verified restriction against customer tunnels reaching private LAN addresses. Do not enable sharing on a network with sensitive devices without independent mitigation and review.
+- SDK is intentionally **not** included in the Gradle build in this PR, and there is no network proxy start path.
+
+References:
+- https://www.proxies.sx/sdk/android
+- https://www.proxies.sx/sdk
+- https://github.com/bolivian-peru/android-peer-sdk
+- https://www.proxies.sx/earn/what-runs-on-my-device
