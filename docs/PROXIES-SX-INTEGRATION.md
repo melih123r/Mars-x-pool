@@ -19,7 +19,7 @@ Status: **not connected**. This branch deliberately does not run proxy traffic.
 8. Add integration tests for consent accepted/denied/revoked, restart, log-out, network loss, quota exhaustion, and credential expiry; then test a real device and CI build before any release.
 
 ## Scope of this PR
-- Adds a Java-only, SDK-independent disclosure screen that stores no approval and cannot start sharing.
+- Adds a Java-only, SDK-independent disclosure screen with an unchecked explicit opt-in and revocation control; consent is versioned in private SharedPreferences, but cannot start sharing.
 - Adds documentation for the integration gates.
 - Does not change Gradle dependencies, Android manifest permissions, Supabase functions, or production networking.
 - Requires follow-up PR after SDK and credential verification.
