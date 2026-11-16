@@ -71,3 +71,16 @@ Vendor references:
 - https://www.proxies.sx/peers
 - https://www.proxies.sx/sdk/platform-policy/google-play
 - https://www.proxies.sx/earn/what-runs-on-my-device
+
+## Optional dependency resolution (not runtime integration)
+
+The Android Gradle files now include JitPack and an **opt-in `compileOnly` dependency** on `com.github.bolivian-peru:android-peer-sdk:1.3.2`. By default the vendor dependency is not resolved or packaged. The flag is only for checking that Gradle can resolve the published artifact; no SDK Java calls are compiled yet.
+
+Run in a development environment with Android SDK and network access:
+
+```sh
+gradle -p android :app:testDebugUnitTest
+gradle -p android :app:assembleDebug -PVERIFY_PROXIES_SX_SDK=true
+```
+
+The second command does **not** include the SDK in the APK because it is `compileOnly`. It also does not validate Java method signatures: that requires an isolated Java interoperability test against the resolved AAR. These commands have not been executed in this session.
