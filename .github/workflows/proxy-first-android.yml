@@ -44,6 +44,32 @@ jobs:
             echo "Merged manifest permissions:"
             grep -o 'android.permission.[A-Z_]*' "$MANIFEST" | sort -u || true
           fi
+      - name: Inspect vendor SDK public API
+        run: |
+          echo "Vendor SDK artifact files:"
+          find "$HOME/.gradle/caches/modules-2/files-2.1/com.github.bolivian-peru/android-peer-sdk" -type f \\( -name '*.aar' -o -name '*.jar' \\) -print || true
+          python3 - <<'PY'
+          import glob, zipfile, os
+          paths=glob.glob(os.path.expanduser('~/.gradle/caches/modules-2/files-2.1/com.github.bolivian-peru/android-peer-sdk/**/*.aar'),recursive=True)
+          if not paths:
+              print('No AAR found; inspect resolved SDK artifact format.')
+          for path in paths:
+              with zipfile.ZipFile(path) as archive:
+                  if 'classes.jar' in archive.namelist():
+                      with open('/tmp/proxies-sdk-classes.jar','wb') as f:
+                          f.write(archive.read('classes.jar'))
+          PY
+          if [ -f /tmp/proxies-sdk-classes.jar ]; then
+            jar tf /tmp/proxies-sdk-classes.jar | grep -E 'ProxiesPeerSDK|PeerConfig' || true
+            for cls in $(jar tf /tmp/proxies-sdk-classes.jar | grep -E '(ProxiesPeerSDK|PeerConfig)\\.class        uses: actions/upload-artifact@v4
+        with:
+          name: proxy-first-prototype-debug
+          path: proxy-first-android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+ | sed 's@/@.@g;s@.class$@@'); do
+              javap -classpath /tmp/proxies-sdk-classes.jar -public "$cls" || true
+            done
+          fi
       - name: Upload debug prototype
         uses: actions/upload-artifact@v4
         with:
