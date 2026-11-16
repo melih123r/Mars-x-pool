@@ -7,11 +7,10 @@ import static org.junit.Assert.*;
 
 public final class NetworkStatusClientTest {
     private static final String CHECKS =
-            "\"readiness_checks\":{"
-            + "\"partner_agreement\":\"unverified\","
-            + "\"per_device_sdk_credentials\":\"unverified\","
-            + "\"private_network_isolation\":\"unverified\","
-            + "\"distribution_policy\":\"unverified\"}";
+        "\"readiness_checks\":{\"partner_agreement\":\"unverified\","
+        + "\"per_device_sdk_credentials\":\"unverified\","
+        + "\"private_network_isolation\":\"unverified\","
+        + "\"distribution_policy\":\"unverified\"}";
 
     @Test public void parsesRealisticBlockedStatus() throws Exception {
         NetworkStatusClient.Result result = NetworkStatusClient.parse(
@@ -35,20 +34,20 @@ public final class NetworkStatusClientTest {
     }
 
     @Test(expected = JSONException.class)
-    public void rejectsMissingReadinessChecks() throws Exception {
+    public void rejectsMissingSafetyChecks() throws Exception {
         NetworkStatusClient.parse(
             "{\"schema_version\":1,\"service\":\"marsx-network-status\","
-            + "\"status\":\"not_ready\",\"sharing_enabled\":false,"
-            + "\"proxies_relay_connected\":false}");
+            + "\"status\":\"ready\",\"sharing_enabled\":true,"
+            + "\"proxies_relay_connected\":true}");
     }
 
     @Test(expected = JSONException.class)
-    public void rejectsUnknownReadinessFlag() throws Exception {
+    public void rejectsUnknownSafetyState() throws Exception {
         NetworkStatusClient.parse(
             "{\"schema_version\":1,\"service\":\"marsx-network-status\","
             + "\"status\":\"not_ready\",\"sharing_enabled\":false,"
             + "\"proxies_relay_connected\":false,"
-            + CHECKS.replace("\"unverified\"", "\"maybe\"") + "}");
+            + CHECKS.replace("unverified", "maybe") + "}");
     }
 
     @Test public void endpointUsesHttps() {
