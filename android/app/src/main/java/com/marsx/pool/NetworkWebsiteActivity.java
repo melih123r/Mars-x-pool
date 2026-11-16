@@ -120,7 +120,7 @@ public final class NetworkWebsiteActivity extends Activity {
             String cost = manager.isActiveNetworkMetered()
                     ? " • Tarifeli bağlantı: kota/ücret riski" : " • Tarifesiz olarak bildirildi";
             transportStatus.setText("Telefon bağlantısı: " + type + cost
-                    + "\\nBu bilgi yereldir; sunucuya iletilmez.");
+                    + "\nBu bilgi yereldir; sunucuya iletilmez.");
         } catch (SecurityException error) {
             transportStatus.setText("Telefon bağlantısı kontrol edilemedi; paylaşım KAPALI");
         }
@@ -143,9 +143,9 @@ public final class NetworkWebsiteActivity extends Activity {
                     resultText = "● Sunucu yanıtı değişti; paylaşım güvenlik nedeniyle KAPALI";
                 }
                 checklistText = "Partner sözleşmesi: " + checkLabel(result.partnerAgreement)
-                        + "\\nCihaz başına güvenli SDK kimliği: " + checkLabel(result.perDeviceCredentials)
-                        + "\\nYerel ağ izolasyonu: " + checkLabel(result.privateNetworkIsolation)
-                        + "\\nMağaza/dağıtım uygunluğu: " + checkLabel(result.distributionPolicy);
+                        + "\nCihaz başına güvenli SDK kimliği: " + checkLabel(result.perDeviceCredentials)
+                        + "\nYerel ağ izolasyonu: " + checkLabel(result.privateNetworkIsolation)
+                        + "\nMağaza/dağıtım uygunluğu: " + checkLabel(result.distributionPolicy);
             } catch (Exception ignored) {
                 resultText = "○ Supabase durum servisine erişilemedi; paylaşım KAPALI";
                 checklistText = "Koşullar doğrulanamadı; uygulama güvenli şekilde kapalı kalıyor.";
