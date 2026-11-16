@@ -2,6 +2,10 @@ package com.marsx.pool;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -36,6 +40,8 @@ public final class NetworkWebsiteActivity extends Activity {
     private TextView connectionStatus;
     private TextView consentStatus;
     private TextView backendStatus;
+    private TextView prerequisiteStatus;
+    private TextView transportStatus;
     private Button refreshButton;
 
     private int dp(int size) {
@@ -93,11 +99,41 @@ public final class NetworkWebsiteActivity extends Activity {
                 : "Rıza verilmedi. Paylaşım kapalı.");
     }
 
+    private String checkLabel(String status) {
+        return "verified".equals(status) ? "DOĞRULANDI" : "HENÜZ DOĞRULANMADI";
+    }
+
+    private void refreshTransportStatus() {
+        try {
+            ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            Network active = manager == null ? null : manager.getActiveNetwork();
+            NetworkCapabilities capabilities = manager == null || active == null
+                    ? null : manager.getNetworkCapabilities(active);
+            if (capabilities == null) {
+                transportStatus.setText("Telefon bağlantısı: YOK veya kontrol edilemedi");
+                return;
+            }
+            String type = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                    ? "Wi-Fi" : capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    ? "Mobil veri" : capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                    ? "Ethernet" : "Diğer ağ";
+            String cost = manager.isActiveNetworkMetered()
+                    ? " • Tarifeli bağlantı: kota/ücret riski" : " • Tarifesiz olarak bildirildi";
+            transportStatus.setText("Telefon bağlantısı: " + type + cost
+                    + "\\nBu bilgi yereldir; sunucuya iletilmez.");
+        } catch (SecurityException error) {
+            transportStatus.setText("Telefon bağlantısı kontrol edilemedi; paylaşım KAPALI");
+        }
+    }
+
     private void queryServerStatus() {
         backendStatus.setText("Supabase durumu kontrol ediliyor…");
+        prerequisiteStatus.setText("Güvenlik koşulları sorgulanıyor…");
+        refreshTransportStatus();
         refreshButton.setEnabled(false);
         new Thread(() -> {
             String resultText;
+            String checklistText;
             try {
                 NetworkStatusClient.Result result = NetworkStatusClient.fetch();
                 if ("not_ready".equals(result.status)
@@ -106,13 +142,20 @@ public final class NetworkWebsiteActivity extends Activity {
                 } else {
                     resultText = "● Sunucu yanıtı değişti; paylaşım güvenlik nedeniyle KAPALI";
                 }
+                checklistText = "Partner sözleşmesi: " + checkLabel(result.partnerAgreement)
+                        + "\\nCihaz başına güvenli SDK kimliği: " + checkLabel(result.perDeviceCredentials)
+                        + "\\nYerel ağ izolasyonu: " + checkLabel(result.privateNetworkIsolation)
+                        + "\\nMağaza/dağıtım uygunluğu: " + checkLabel(result.distributionPolicy);
             } catch (Exception ignored) {
                 resultText = "○ Supabase durum servisine erişilemedi; paylaşım KAPALI";
+                checklistText = "Koşullar doğrulanamadı; uygulama güvenli şekilde kapalı kalıyor.";
             }
             final String message = resultText;
+            final String checksMessage = checklistText;
             runOnUiThread(() -> {
                 if (isFinishing() || isDestroyed()) return;
                 backendStatus.setText(message);
+                prerequisiteStatus.setText(checksMessage);
                 refreshButton.setEnabled(true);
                 refreshUi();
             });
@@ -141,11 +184,13 @@ public final class NetworkWebsiteActivity extends Activity {
         line(statusCard, "Bu telefonda üçüncü taraf proxy trafiği çalışmıyor. MARS-X havuz oturumu, internet paylaşımı anlamına gelmez.", 14, MUTED, false);
         line(statusCard, "Proxies.sx cihaz kaydı: YOK\nSDK paylaşımı: KAPALI\nSupabase yetkilendirme: KURULU; CİHAZ İZNİ VERİLMEDİ\nAktarılan trafik: YOK\nDoğrulanmış kazanç: YOK", 14, WHITE, false);
         backendStatus = line(statusCard, "Supabase durumu: henüz sorgulanmadı", 14, ORANGE, true);
+        transportStatus = line(statusCard, "Telefon bağlantısı: kontrol edilmedi", 14, WHITE, false);
+        prerequisiteStatus = line(statusCard, "Güvenlik koşulları: durum kontrolü yapılmadı", 13, MUTED, false);
 
         LinearLayout consentCard = section(root);
         line(consentCard, "AÇIK RIZA VE RİSK BİLGİLENDİRMESİ", 15, ORANGE, true);
         line(consentCard, "Proxies.sx etkinleştirilirse başka şirketlerin ve müşterilerin internet talepleri cihazınızın bağlantısından ve herkese açık IP adresinizden geçebilir. Bu trafik sizin kişisel kullanımınız değildir.", 14, WHITE, false);
-        line(consentCard, "Mobil veri kotanız tüketilebilir, operatörünüz ek ücret uygulayabilir, pil ve performans etkilenebilir. IP adresinizin itibarı ve güvenliği açısından riskler vardır. Paylaşım yalnızca cihaz sahibinin açık izniyle yapılmalıdır.", 14, WHITE, false);
+        line(consentCard, "Mobil veri kotanız tüketilebilir, operatörünüz ek ücret uygulayabilir, pil ve performans etkilenebilir. IP adresinizin itibarı ve güvenliği açısından riskler vardır. Yerel ağdaki yazıcı, kamera ve diğer cihazlar için izolasyon henüz doğrulanmamıştır. Paylaşım yalnızca cihaz sahibinin açık izniyle yapılmalıdır.", 14, WHITE, false);
         line(consentCard, "Sağlayıcı bağlantı ve cihaz bilgilerini, IP adresini, ağ/operatör bilgisini, trafik miktarını ve bağlantı zamanlarını hizmeti yürütmek, güvenlik ve ödeme hesapları için işleyebilir. Gerçek veri akışı başlamadan önce güncel gizlilik ve saklama koşulları ayrıca sunulmalıdır.", 14, WHITE, false);
         line(consentCard, "Kazanç garanti değildir. Gelecekte hizmet açılırsa dilediğiniz an durdurabilmeli ve rızanızı geri çekebilmelisiniz. Şu anda çalışan bir Proxies.sx hizmeti yoktur; bu ekran yalnızca hazırlık amaçlıdır.", 14, MUTED, false);
 
@@ -180,6 +225,7 @@ public final class NetworkWebsiteActivity extends Activity {
         refreshButton.setOnClickListener(view -> queryServerStatus());
         line(controlsCard, "Bu düğme Supabase'e yalnızca bir HTTPS durum isteği gönderir (IP adresi sunucu kayıtlarında görünebilir). Proxies.sx relay bağlantısını test etmez. Hiçbir tuş üçüncü taraf trafiğini başlatmaz.", 12, MUTED, false);
         refreshUi();
+        refreshTransportStatus();
         setContentView(scroll);
     }
 }
