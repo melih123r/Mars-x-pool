@@ -82,3 +82,40 @@ print(sqlite_test.stdout.strip())
 print("Network UI contract: PASS")
 subprocess.run([sys.executable, "scripts/check-demo-ads.py"], check=True)
 subprocess.run([sys.executable, "scripts/check-network-locale.py"], check=True)
+
+
+# Proxies.sx preview is built on the exact v19 Network edition, not legacy v13.
+import xml.etree.ElementTree as ET
+build=Path("android/app/build.gradle").read_text(encoding="utf-8")
+assert 'versionCode 19' in build and 'versionName "0.9.4-network-demo"' in build
+assert 'NetworkStatusClient.fetch()' in source
+assert 'proxyDisclosureAcknowledgement' in source
+assert 'proxyStatusButton.setOnClickListener' in source
+assert 'startDisabled.setEnabled(false)' in source
+assert 'putBoolean("psx_read_notice_v1",false)' in source
+assert 'putBoolean("consented",false)' in source
+assert 'ProxiesPeerSDK' not in source
+assert 'PROXIES_SX_API_KEY' not in source and 'apiKey' not in source
+root=Path("android/app/src/main/res")
+translations={
+    "tr":"values-tr","en":"values-en","fr":"values-fr","de":"values-de",
+    "es":"values-es","it":"values-it","pt-BR":"values-pt-rBR","ru":"values-ru",
+    "ar":"values-ar","nl":"values-nl","pl":"values-pl","uk":"values-uk",
+    "ro":"values-ro","el":"values-el","cs":"values-cs","hu":"values-hu",
+    "sv":"values-sv","zh-CN":"values-zh-rCN","zh-TW":"values-zh-rTW",
+    "ja":"values-ja","ko":"values-ko","hi":"values-hi","id":"values-id",
+    "vi":"values-vi","th":"values-th","fa":"values-fa","bn":"values-bn",
+    "ur":"values-ur","ms":"values-ms","fil":"values-fil",
+}
+keys={
+    "psx_page_title","psx_risk_extra","psx_acknowledgement",
+    "psx_off_status","psx_zero_earnings","psx_start_disabled",
+    "psx_stop_revoke","psx_prerequisites","psx_check_backend",
+    "psx_checking","psx_backend_available","psx_backend_unavailable"
+}
+for folder in ["values", *translations.values(), "values-in"]:
+    path=root/folder/"proxies_readiness.xml"
+    xml=ET.parse(path).getroot()
+    found={s.attrib["name"] for s in xml.findall("string")}
+    assert found==keys, (folder,sorted(keys-found),sorted(found-keys))
+print("MARS-X v19 proxy readiness: fail-closed, 30 languages, default resources PASS")
