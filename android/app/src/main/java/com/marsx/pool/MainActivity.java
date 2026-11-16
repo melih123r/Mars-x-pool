@@ -177,6 +177,12 @@ public class MainActivity extends Activity {
         button(vrscCard, "BAŞLAT", view ->
                 startActivity(new Intent(this, VrscPoolActivity.class)));
 
+        LinearLayout proxiesCard = card(root);
+        addText(proxiesCard, "Proxies.sx — not connected", 18);
+        addText(proxiesCard, "Optional proxy sharing is not enabled in this build.", 14);
+        button(proxiesCard, "Read proxy-sharing disclosure", view ->
+                startActivity(new Intent(this, ProxiesDisclosureActivity.class)));
+
         LinearLayout deviceCard = card(root);
         addText(deviceCard, getString(R.string.device_title), 14);
         String worker = prefs.getString("worker_id", "");
