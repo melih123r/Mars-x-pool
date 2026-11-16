@@ -57,7 +57,7 @@ def set_locale(code):
 def shot(name):
     with (OUT/(name+'.png')).open('wb') as f:sp.run(['adb','exec-out','screencap','-p'],stdout=f,check=True)
 API=int(adb('shell','getprop','ro.build.version.sdk').strip())
-report={'device':f'Android emulator API {API}','physical_device':False,'source_app_version':18,'checks':{}}
+report={'device':f'Android emulator API {API}','physical_device':False,'source_app_version':19,'checks':{}}
 try:
     assert API in (26,33)
     adb('shell','wm','size','1080x1920');adb('shell','wm','density','420')
@@ -76,6 +76,19 @@ try:
     assert en['nui_46'] in textset(ui())
     tap(en['nui_46']);assert en['nui_47'] in textset(ui())
     report['checks']['consent grant and opt-out']='PASS'
+
+    # The Proxies.sx preview is on this very same v19 page.
+    proxy=strings('en')
+    tap(proxy['psx_acknowledgement'],scroll=True)
+    prefs_xml=adb('shell','run-as',PKG,'cat','shared_prefs/network_consent_v1.xml')
+    assert 'name="psx_read_notice_v1" value="true"' in prefs_xml, prefs_xml
+    tap(proxy['psx_stop_revoke'],scroll=True)
+    prefs_xml=adb('shell','run-as',PKG,'cat','shared_prefs/network_consent_v1.xml')
+    assert 'name="psx_read_notice_v1" value="false"' in prefs_xml, prefs_xml
+    assert 'name="consented" value="false"' in prefs_xml, prefs_xml
+    report['checks']['same-page Proxies.sx disclosure and revoke']='PASS'
+    shot('en-proxy-off')
+
     shot('en-home')
     tap(en['nui_33'],scroll=True)
     assert any(n.get('text')=='English' and n.get('checked')=='true' for n in ui().iter('node'))
