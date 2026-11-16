@@ -25,3 +25,14 @@ Before enabling traffic, obtain written answers from the vendor:
 5. What data and device identifiers does SDK 1.3.2 collect, and which foreground-service permissions and notifications are required?
 
 Until these are answered and tested, no SDK or proxy networking is permitted in the prototype.
+
+## Proxies.sx vendor review screenshots
+
+Open the installed **debug APK on an Android device/emulator** and capture three authentic screenshots:
+1. `1. Disclosure` — third-party traffic risks and voluntary opt-in (unchecked by default).
+2. `2. Stop control` — Stop sharing button and default OFF status.
+3. `3. Connection status` — truthful DISCONNECTED / SDK NOT INSTALLED state.
+
+**Do not submit these as screenshots of a working Proxies.sx SDK integration.** They demonstrate UI only. Maya requested screenshots of a *working version*, so vendor approval for these prototypes must be sought before representing them as sufficient. The app does not share traffic or generate earnings.
+
+The vendor's request to onboard ~11,000 devices in stages (starting with ~1,000) is a future rollout plan, **not authorization** to turn on traffic. Require agreement, Play review, individual user consent, device-scoped credentials and security verification first.
