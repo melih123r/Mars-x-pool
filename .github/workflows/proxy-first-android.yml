@@ -35,6 +35,15 @@ jobs:
           ! grep -R -E 'psx_[A-Za-z0-9]{12,}|ProxiesPeerSDK\\.start\\(|ProxiesPeerSDK\\.init\\(' app/src/main
       - name: Unit tests and APK build
         run: gradle --no-daemon :app:testDebugUnitTest :app:assembleDebug
+      - name: Inspect merged permissions and SDK resolution
+        run: |
+          gradle --no-daemon :app:dependencies --configuration debugRuntimeClasspath > /tmp/proxy-deps.txt
+          grep -F 'android-peer-sdk:1.3.2' /tmp/proxy-deps.txt
+          MANIFEST="$(find app/build/intermediates -path '*/merged_manifests/*/AndroidManifest.xml' -type f | head -n 1)"
+          if [ -n "$MANIFEST" ]; then
+            echo "Merged manifest permissions:"
+            grep -o 'android.permission.[A-Z_]*' "$MANIFEST" | sort -u || true
+          fi
       - name: Upload debug prototype
         uses: actions/upload-artifact@v4
         with:
