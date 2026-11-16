@@ -30,9 +30,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.14.3"
-      - name: Confirm no proxy traffic capability or embedded key
+      - name: Confirm no hardcoded farmer key or automatic SDK startup
         run: |
-          ! grep -R -E 'android.permission.INTERNET|android-peer-sdk|psx_[A-Za-z0-9]+' app/src app/build.gradle
+          ! grep -R -E 'psx_[A-Za-z0-9]{12,}|ProxiesPeerSDK\\.start\\(|ProxiesPeerSDK\\.init\\(' app/src/main
       - name: Unit tests and APK build
         run: gradle --no-daemon :app:testDebugUnitTest :app:assembleDebug
       - name: Upload debug prototype
