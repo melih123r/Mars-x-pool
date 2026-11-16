@@ -45,4 +45,12 @@ Ask the vendor to provide official SDK initialization API documentation, a devic
 
 ## SDK wiring status (2026-11-16)
 
-JitPack and `com.github.bolivian-peru:android-peer-sdk:v1.3.2` are configured **only in this separate prototype**. This validates dependency resolution/build compatibility. SDK initialization and `start()` are deliberately not called: the published API currently documents a farmer key as the initialization credential, and distributing that key in an APK would expose it to extraction. The final merged manifest may include SDK-added network and foreground-service permissions. A successful build does not mean production authorization or actual traffic sharing.
+JitPack and `com.github.bolivian-peru:android-peer-sdk:1.3.2` are configured **only in this separate prototype**. This validates dependency resolution/build compatibility. SDK initialization and `start()` are deliberately not called: the published API currently documents a farmer key as the initialization credential, and distributing that key in an APK would expose it to extraction. The final merged manifest may include SDK-added network and foreground-service permissions. A successful build does not mean production authorization or actual traffic sharing.
+
+## Vendor dashboard findings
+
+The vendor's dashboard explicitly documents the Android artifact `com.github.bolivian-peru:android-peer-sdk:1.3.2`, relay `wss://relay.proxies.sx`, and `ProxiesPeerSDK.init(context, API_KEY, PeerConfig(...))` followed by `getInstance().start()/stop()`. These are **Kotlin examples**; Java API signatures must be verified against the downloaded SDK before wiring an Activity.
+
+The vendor also offers a separate SDK/device API key, but its documented example passes that key directly into the SDK. A separate key is **not necessarily safe to embed in a public APK**: anyone extracting it could register or impersonate devices. Obtain a vendor-supported, revocable per-device token flow or other secure provisioning design before production activation. Keep SDK Start disabled until then.
+
+The dashboard reports zero registered/online peers and zero traffic at the time the user shared it; this is not evidence of a live integration.
