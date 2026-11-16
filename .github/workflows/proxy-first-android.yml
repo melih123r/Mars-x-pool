@@ -32,43 +32,33 @@ jobs:
           gradle-version: "8.14.3"
       - name: Confirm no hardcoded farmer key or automatic SDK startup
         run: |
-          ! grep -R -E 'psx_[A-Za-z0-9]{12,}|ProxiesPeerSDK\\.start\\(|ProxiesPeerSDK\\.init\\(' app/src/main
+          ! grep -R -E 'psx_[A-Za-z0-9]{12,}|ProxiesPeerSDK\.start\(|ProxiesPeerSDK\.init\(' app/src/main
       - name: Unit tests and APK build
         run: gradle --no-daemon :app:testDebugUnitTest :app:assembleDebug
-      - name: Inspect merged permissions and SDK resolution
+      - name: Inspect SDK resolution and merged manifest
         run: |
           gradle --no-daemon :app:dependencies --configuration debugRuntimeClasspath > /tmp/proxy-deps.txt
           grep -F 'android-peer-sdk:1.3.2' /tmp/proxy-deps.txt
-          MANIFEST="$(find app/build/intermediates -path '*/merged_manifests/*/AndroidManifest.xml' -type f | head -n 1)"
-          if [ -n "$MANIFEST" ]; then
-            echo "Merged manifest permissions:"
-            grep -o 'android.permission.[A-Z_]*' "$MANIFEST" | sort -u || true
-          fi
+          find app/build/intermediates -path '*/merged_manifests/*/AndroidManifest.xml' -type f -exec grep -o 'android.permission.[A-Z_]*' {} \; | sort -u || true
       - name: Inspect vendor SDK public API
         run: |
-          echo "Vendor SDK artifact files:"
-          find "$HOME/.gradle/caches/modules-2/files-2.1/com.github.bolivian-peru/android-peer-sdk" -type f \\( -name '*.aar' -o -name '*.jar' \\) -print || true
           python3 - <<'PY'
           import glob, zipfile, os
-          paths=glob.glob(os.path.expanduser('~/.gradle/caches/modules-2/files-2.1/com.github.bolivian-peru/android-peer-sdk/**/*.aar'),recursive=True)
-          if not paths:
-              print('No AAR found; inspect resolved SDK artifact format.')
+          base=os.path.expanduser('~/.gradle/caches/modules-2/files-2.1/com.github.bolivian-peru/android-peer-sdk')
+          paths=glob.glob(base+'/**/*.aar',recursive=True)
+          print('SDK AAR count:',len(paths))
           for path in paths:
               with zipfile.ZipFile(path) as archive:
                   if 'classes.jar' in archive.namelist():
-                      with open('/tmp/proxies-sdk-classes.jar','wb') as f:
-                          f.write(archive.read('classes.jar'))
+                      with open('/tmp/proxies-sdk-classes.jar','wb') as output:
+                          output.write(archive.read('classes.jar'))
           PY
           if [ -f /tmp/proxies-sdk-classes.jar ]; then
             jar tf /tmp/proxies-sdk-classes.jar | grep -E 'ProxiesPeerSDK|PeerConfig' || true
-            for cls in $(jar tf /tmp/proxies-sdk-classes.jar | grep -E '(ProxiesPeerSDK|PeerConfig)\\.class        uses: actions/upload-artifact@v4
-        with:
-          name: proxy-first-prototype-debug
-          path: proxy-first-android/app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
- | sed 's@/@.@g;s@.class$@@'); do
+            jar tf /tmp/proxies-sdk-classes.jar | grep -E '(ProxiesPeerSDK|PeerConfig)\.class$' | sed 's@/@.@g;s@.class$@@' > /tmp/proxy-classes.txt
+            while IFS= read -r cls; do
               javap -classpath /tmp/proxies-sdk-classes.jar -public "$cls" || true
-            done
+            done < /tmp/proxy-classes.txt
           fi
       - name: Upload debug prototype
         uses: actions/upload-artifact@v4
