@@ -177,12 +177,6 @@ public class MainActivity extends Activity {
         button(vrscCard, "BAŞLAT", view ->
                 startActivity(new Intent(this, VrscPoolActivity.class)));
 
-        LinearLayout proxiesCard = card(root);
-        addText(proxiesCard, "Proxies.sx — unavailable on Google Play", 18);
-        addText(proxiesCard, "Third-party proxy sharing is not offered in MARS-X Pool.", 14);
-        button(proxiesCard, "Why this feature is unavailable", view ->
-                startActivity(new Intent(this, ProxiesDisclosureActivity.class)));
-
         LinearLayout deviceCard = card(root);
         addText(deviceCard, getString(R.string.device_title), 14);
         String worker = prefs.getString("worker_id", "");
