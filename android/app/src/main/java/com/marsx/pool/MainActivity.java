@@ -178,9 +178,9 @@ public class MainActivity extends Activity {
                 startActivity(new Intent(this, VrscPoolActivity.class)));
 
         LinearLayout proxiesCard = card(root);
-        addText(proxiesCard, "Proxies.sx — not connected", 18);
-        addText(proxiesCard, "Optional proxy sharing is not enabled in this build.", 14);
-        button(proxiesCard, "Read proxy-sharing disclosure", view ->
+        addText(proxiesCard, "Proxies.sx — unavailable on Google Play", 18);
+        addText(proxiesCard, "Third-party proxy sharing is not offered in MARS-X Pool.", 14);
+        button(proxiesCard, "Why this feature is unavailable", view ->
                 startActivity(new Intent(this, ProxiesDisclosureActivity.class)));
 
         LinearLayout deviceCard = card(root);
