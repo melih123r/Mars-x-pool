@@ -54,3 +54,9 @@ The vendor's dashboard explicitly documents the Android artifact `com.github.bol
 The vendor also offers a separate SDK/device API key, but its documented example passes that key directly into the SDK. A separate key is **not necessarily safe to embed in a public APK**: anyone extracting it could register or impersonate devices. Obtain a vendor-supported, revocable per-device token flow or other secure provisioning design before production activation. Keep SDK Start disabled until then.
 
 The dashboard reports zero registered/online peers and zero traffic at the time the user shared it; this is not evidence of a live integration.
+
+## Supabase deployment verification
+
+The existing MARS-X Supabase project now hosts an active `marsx-proxy-provisioning` Edge Function with JWT verification enabled. The deployed endpoint is intentionally fail-closed: authenticated requests return `503 not_ready`, no SDK credentials are issued, and no Proxies.sx registration call is made. This is a deployment check, **not a working device authorization integration**.
+
+Never expose a shared Proxies.sx SDK key to the app. Before activation, verify whether the Android SDK supports the per-device JWT/refreshToken from `/v1/peer/agents/register`, and verify revocation and immediate stop behavior. Do not register 11,000 devices before user consent and vendor agreement.
