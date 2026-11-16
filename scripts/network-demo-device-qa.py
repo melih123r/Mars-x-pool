@@ -21,21 +21,23 @@ def ui():
 def textset(tree):
     return {n.get('text','') for n in tree.iter('node')}
 def tap(label,scroll=False):
-    attempts=9 if scroll else 8
-    for attempt in range(attempts):
-        for n in ui().iter('node'):
-            if n.get('text','').casefold()==label.casefold() or n.get('content-desc','').casefold()==label.casefold():
-                x1,y1,x2,y2=map(int,re.findall(r'\d+',n.get('bounds')))
-                if x2>x1 and y2>y1:
-                    adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2));time.sleep(.5);return
-        if scroll:
-            if attempt % 2 == 0:
-                adb('shell','input','swipe','540','450','540','1600','350')
+    # Scan forward to the page bottom, then backwards. Alternating scrolls
+    # on every attempt can oscillate around the middle of a long disclosure page.
+    for direction in ([1, -1] if scroll else [0]):
+        for attempt in range(18 if scroll else 8):
+            for n in ui().iter('node'):
+                if n.get('text','').casefold()==label.casefold() or n.get('content-desc','').casefold()==label.casefold():
+                    x1,y1,x2,y2=map(int,re.findall(r'\d+',n.get('bounds')))
+                    if x2>x1 and y2>y1:
+                        adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+                        time.sleep(.5)
+                        return
+            if scroll:
+                start,end=(1600,450) if direction==1 else (450,1600)
+                adb('shell','input','swipe','540',str(start),'540',str(end),'250')
             else:
-                adb('shell','input','swipe','540','1600','540','450','350')
-        else:
-            time.sleep(.25)
-    raise AssertionError('Control not found after waiting: '+label)
+                time.sleep(.25)
+    raise AssertionError('Control not found after full-page scan: '+label)
 def strings(code):
     folder='values-'+code.replace('-','-r')
     data={}
