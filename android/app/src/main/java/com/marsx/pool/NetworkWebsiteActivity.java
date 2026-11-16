@@ -42,6 +42,8 @@ public final class NetworkWebsiteActivity extends Activity {
     private TextView backendStatus;
     private TextView prerequisiteStatus;
     private TextView transportStatus;
+    private TextView relayTlsStatus;
+    private Button relayCheckButton;
     private Button refreshButton;
 
     private int dp(int size) {
@@ -162,6 +164,27 @@ public final class NetworkWebsiteActivity extends Activity {
         }, "marsx-network-status-check").start();
     }
 
+    private void queryRelayTls() {
+        relayTlsStatus.setText("Proxies.sx relay: TLS erişimi kontrol ediliyor…");
+        relayCheckButton.setEnabled(false);
+        new Thread(() -> {
+            String result;
+            try {
+                RelayTlsDiagnostic.verifyTls();
+                result = "● Proxies.sx relay: TLS erişimi başarılı • CİHAZ BAĞLI DEĞİL";
+            } catch (Exception ignored) {
+                result = "○ Proxies.sx relay: TLS erişimi doğrulanamadı • CİHAZ BAĞLI DEĞİL";
+            }
+            final String message = result;
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                relayTlsStatus.setText(message);
+                relayCheckButton.setEnabled(true);
+                refreshUi();
+            });
+        }, "marsx-relay-tls-check").start();
+    }
+
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         preferences = getSharedPreferences(PREFS, MODE_PRIVATE);
@@ -184,6 +207,7 @@ public final class NetworkWebsiteActivity extends Activity {
         line(statusCard, "Bu telefonda üçüncü taraf proxy trafiği çalışmıyor. MARS-X havuz oturumu, internet paylaşımı anlamına gelmez.", 14, MUTED, false);
         line(statusCard, "Proxies.sx cihaz kaydı: YOK\nSDK paylaşımı: KAPALI\nSupabase yetkilendirme: KURULU; CİHAZ İZNİ VERİLMEDİ\nAktarılan trafik: YOK\nDoğrulanmış kazanç: YOK", 14, WHITE, false);
         backendStatus = line(statusCard, "Supabase durumu: henüz sorgulanmadı", 14, ORANGE, true);
+        relayTlsStatus = line(statusCard, "Proxies.sx relay TLS erişimi: kontrol edilmedi", 14, WHITE, false);
         transportStatus = line(statusCard, "Telefon bağlantısı: kontrol edilmedi", 14, WHITE, false);
         prerequisiteStatus = line(statusCard, "Güvenlik koşulları: durum kontrolü yapılmadı", 13, MUTED, false);
 
@@ -223,7 +247,9 @@ public final class NetworkWebsiteActivity extends Activity {
         });
         refreshButton = button(controlsCard, "Supabase Sunucu Durumunu Kontrol Et", true);
         refreshButton.setOnClickListener(view -> queryServerStatus());
-        line(controlsCard, "Bu düğme Supabase'e yalnızca bir HTTPS durum isteği gönderir (IP adresi sunucu kayıtlarında görünebilir). Proxies.sx relay bağlantısını test etmez. Hiçbir tuş üçüncü taraf trafiğini başlatmaz.", 12, MUTED, false);
+        relayCheckButton = button(controlsCard, "Proxies.sx Relay TLS Erişimini Test Et", true);
+        relayCheckButton.setOnClickListener(view -> queryRelayTls());
+        line(controlsCard, "Supabase düğmesi HTTPS ile yalnızca durum sorgular. Relay düğmesi relay.proxies.sx:443 adresine sertifikası doğrulanan bir TLS bağlantısı kurar. IP adresin ilgili sunucuya görünür. TLS erişimi cihaz kaydı, WebSocket yetkisi veya paylaşım değildir. Hiçbir tuş üçüncü taraf trafiğini başlatmaz.", 12, MUTED, false);
         refreshUi();
         refreshTransportStatus();
         setContentView(scroll);
