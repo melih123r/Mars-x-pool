@@ -16,10 +16,14 @@ for path in candidates:
     perms={p.get(android+'name') for p in root.findall('uses-permission')}
     forbidden={'com.google.android.gms.permission.AD_ID','android.permission.ACCESS_ADSERVICES_AD_ID',
                'android.permission.ACCESS_ADSERVICES_ATTRIBUTION','android.permission.ACCESS_ADSERVICES_TOPICS',
-               'com.android.vending.BILLING','android.permission.FOREGROUND_SERVICE','android.permission.WAKE_LOCK'}
+               'com.android.vending.BILLING','android.permission.READ_PHONE_STATE'}
     assert not (perms & forbidden), f'Forbidden transitive permissions: {sorted(perms & forbidden)}'
+    required={'android.permission.INTERNET','android.permission.ACCESS_NETWORK_STATE',
+              'android.permission.FOREGROUND_SERVICE','android.permission.FOREGROUND_SERVICE_DATA_SYNC',
+              'android.permission.WAKE_LOCK'}
+    assert required <= perms, f'Missing partner service permissions: {sorted(required-perms)}'
     assert root.get('package')=='com.marsx.pool'
     launchers=[a.get(android+'name') for a in root.findall('application/activity')
                if a.find("intent-filter/category[@"+android+"name='android.intent.category.LAUNCHER']") is not None]
     assert launchers==['com.marsx.pool.NetworkHomeActivity'], launchers
-print('Merged DEMO manifest safety: PASS')
+print('Merged Network partner manifest safety: PASS')

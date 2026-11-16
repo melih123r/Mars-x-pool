@@ -1,0 +1,50 @@
+name: Network Proxies.sx pilot APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pilot-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.11.1
+      - name: Prepare Android SDK
+        run: |
+          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+      - name: Require restricted Proxies.sx SDK device key
+        env:
+          PROXIES_SX_API_KEY: ${{ secrets.PROXIES_SX_API_KEY }}
+        run: |
+          case "$PROXIES_SX_API_KEY" in
+            psx_?*) ;;
+            *) echo "BLOCKED: PROXIES_SX_API_KEY secret is missing or invalid"; exit 1 ;;
+          esac
+      - name: Build and verify pilot APK
+        env:
+          PROXIES_SX_API_KEY: ${{ secrets.PROXIES_SX_API_KEY }}
+        run: |
+          python3 scripts/check-network-home-ui.py
+          python3 scripts/check-translations.py
+          python3 scripts/check-release.py
+          gradle -p android :app:testDebugUnitTest :app:lintDebug :app:assembleDebug --no-daemon
+          python3 scripts/check-demo-manifest.py android/app/build/intermediates/merged_manifest/debug/processDebugMainManifest/AndroidManifest.xml
+          sha256sum android/app/build/outputs/apk/debug/app-debug.apk > "$RUNNER_TEMP/apk-sha256.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: marsx-network-proxies-pilot-v19-debug-apk
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            ${{ runner.temp }}/apk-sha256.txt
+          if-no-files-found: error

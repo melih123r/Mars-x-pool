@@ -1,5 +1,5 @@
 -- Network partner boundary. Apply only after reviewing the existing Supabase project.
--- The Android client never receives a TraffMonetizer publisher token.
+-- Proxies.sx SDK credentials remain outside SQL and are injected into Android builds.
 create extension if not exists pgcrypto;
 
 create table if not exists public.profiles (
@@ -15,7 +15,7 @@ create table if not exists public.profiles (
 -- The partner device identifier is stored once here, never copied to users.
 create table if not exists public.publisher_nodes (
   id uuid primary key default gen_random_uuid(),
-  partner_name text not null default 'traffmonetizer',
+  partner_name text not null default 'proxies_sx',
   publisher_account_ref text not null,
   partner_device_id text not null,
   live_enabled boolean not null default false,
@@ -52,7 +52,7 @@ create table if not exists public.consent_events (
 create table if not exists public.traffic_reports (
   id uuid primary key default gen_random_uuid(),
   device_id uuid not null references public.devices(id) on delete restrict,
-  partner_name text not null default 'traffmonetizer',
+  partner_name text not null default 'proxies_sx',
   partner_report_id text not null,
   period_start timestamptz not null,
   period_end timestamptz not null,
@@ -95,7 +95,7 @@ create table if not exists public.withdrawal_requests (
 
 create table if not exists public.publisher_reconciliation (
   id uuid primary key default gen_random_uuid(),
-  partner_name text not null default 'traffmonetizer',
+  partner_name text not null default 'proxies_sx',
   partner_period text not null,
   partner_gross_minor bigint not null check (partner_gross_minor >= 0),
   allocated_user_minor bigint not null check (allocated_user_minor >= 0),

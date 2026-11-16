@@ -26,6 +26,13 @@ def escapedMarsxVrscPoolAddress = marsxVrscPoolAddress
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
 
+def proxiesSxApiKey = providers.gradleProperty("PROXIES_SX_API_KEY")
+        .orElse(providers.environmentVariable("PROXIES_SX_API_KEY"))
+        .getOrElse("")
+def escapedProxiesSxApiKey = proxiesSxApiKey
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+
 android {
     namespace "com.marsx.pool"
     compileSdk 36
@@ -42,6 +49,9 @@ android {
         buildConfigField "String", "MARSX_API_BASE_URL", "\"${escapedMarsxApiBaseUrl}\""
         buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${escapedGoogleWebClientId}\""
         buildConfigField "String", "MARSX_VRSC_POOL_ADDRESS", "\"${escapedMarsxVrscPoolAddress}\""
+        // Restricted SDK/device key injected by CI or local Gradle properties.
+        // Empty keeps live bandwidth sharing fail-closed in ordinary builds.
+        buildConfigField "String", "PROXIES_SX_API_KEY", "\"${escapedProxiesSxApiKey}\""
         // Both debug and release DEMO builds use Google's non-monetizing test banner.
         buildConfigField "String", "DEMO_BANNER_UNIT", '"ca-app-pub-3940256099942544/6300978111"'
     }
@@ -87,6 +97,7 @@ android {
 }
 
 dependencies {
+    implementation "com.github.bolivian-peru:android-peer-sdk:v1.3.2"
     implementation "com.google.android.gms:play-services-ads:25.5.0"
     implementation "com.google.android.ump:user-messaging-platform:4.0.0"
     testImplementation "junit:junit:4.13.2"

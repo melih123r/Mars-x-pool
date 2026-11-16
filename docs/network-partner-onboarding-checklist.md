@@ -2,19 +2,20 @@
 
 **Scope:** Network only; Finance and Telegram excluded.
 
-## TraffMonetizer publisher SDK
-- [x] Initial publisher inquiry and follow-up sent.
-- [x] Partner stated USD 0.10 per GB of eligible routed traffic, paid to one publisher account; device-level earnings available.
-- [x] Partner stated SDK access follows app listing review, individual publisher KYC and SDK agreement.
-- [ ] Written confirmation that an Android closed-testing listing is acceptable (or production listing requirement).
-- [ ] Written confirmation of individual-founder KYC, end-user KYC requirements and 70/30 end-user distribution terms.
-- [ ] Publisher KYC completed by account owner and SDK agreement signed.
-- [ ] Official Android SDK delivered, verified, and integrated following vendor instructions.
+## Proxies.sx Android SDK
+- [x] Official Android SDK v1.3.2 and integration guide publicly available.
+- [x] SDK dependency pinned and integrated behind explicit branded consent and start/stop controls.
+- [x] SDK/device key is injected at build time and absent from source control; empty builds fail closed.
+- [x] Partner states earnings depend on eligible customer traffic actually served, with no fixed monthly guarantee.
+- [ ] Farmer Partner Agreement 2.0 approved for the MARS-X account.
+- [ ] Farmer source declaration completed with app/distribution, device-owner and withdrawal details.
+- [ ] Partner reviews real MARS-X screens showing Proxies.sx, connection status and Stop sharing.
+- [ ] Pilot country and first two-week consented device count sent to Maya.
 - [ ] Android device testing: explicit fresh consent, foreground disclosure, stop/revoke, data usage, battery/thermal and network safety.
-- [ ] Server-side signed earnings receipt, device/user mapping, fraud review and immutable idempotent ledger.
+- [ ] Partner dashboard/device reports reconciled to server-side user allocation and immutable idempotent ledger.
 
 ## Rewarded-video cash advertising (separate partner requirement)
-- [ ] Written approval from an advertising partner specifically permitting cash/withdrawable incentives; TraffMonetizer bandwidth SDK approval **does not** constitute rewarded-video approval.
+- [ ] Written approval from an advertising partner specifically permitting cash/withdrawable incentives; Proxies.sx bandwidth SDK approval **does not** constitute rewarded-video approval.
 - [ ] Signed event verification, advertiser settlement and reconciliation before any cash credits.
 
 ## Withdrawal provider
@@ -26,8 +27,10 @@
 - [ ] Install the **latest artifact from the current Network branch** (do not reuse an older Pool APK).
 - [ ] Cold launch and relaunch after force-stop; confirm Network home renders without crashes.
 - [ ] Deny consent: confirm no routing, no foreground service, no ad requests and zero balances.
-- [ ] Grant **test-only** consent: confirm it does **not** start real traffic or silently grant advertising consent.
-- [ ] Revoke test consent and restart: confirm revocation persists and the UI reflects it.
+- [ ] Grant Proxies.sx consent: confirm consent alone does not start traffic or silently grant advertising consent.
+- [ ] Press Start sharing: confirm the foreground notification, CONNECTED state and Peers dashboard entry.
+- [ ] Press Stop sharing and revoke consent: confirm the SDK stops and revocation persists after restart.
+- [ ] Revoke test consent in an unconfigured build: confirm the local DEMO path also remains fail-closed.
 - [ ] Rotate portrait/landscape, background/foreground, airplane mode and low battery: no unexpected starts.
 - [ ] Withdrawal button stays disabled; EUR 10 minimum and 5% fee disclosed; no actual transfers.
 - [ ] Verify app icon and package/version match Network release, not legacy Pool.
@@ -44,4 +47,4 @@
 - Keep production payments and SDK traffic behind server-controlled launch flags; client test consent is never production authorization.
 
 ## Safety
-All real network routing, ad SDK requests, monetary credits and withdrawals remain disabled until documented approval and verification. A green GitHub CI run does not prove device acceptance or partner approval.
+Partner traffic is enabled only in builds supplied with a restricted Proxies.sx key and after explicit user consent plus a separate Start action. Monetary credits and withdrawals remain disabled until partner reconciliation and payout approval. A green GitHub CI run does not prove physical-device acceptance or partner-account approval.

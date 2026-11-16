@@ -1,8 +1,11 @@
 package com.marsx.pool;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -12,6 +15,7 @@ import android.net.NetworkCapabilities;
 import android.net.TrafficStats;
 import android.content.Context;
 import java.util.Locale;
+import java.util.UUID;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -24,9 +28,12 @@ import android.text.InputType;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import sx.proxies.peer.ProxiesPeerSDK;
 
-/** Offline Network-first test dashboard. No proxy, partner SDK, custody or payout execution. */
-public final class NetworkHomeActivity extends Activity {
+/** Network dashboard with a fail-closed Proxies.sx pilot integration. */
+public final class NetworkHomeActivity extends Activity implements ProxiesSxPartner.Listener {
+    private static final int REQUEST_NOTIFICATIONS=4102;
+    private static final String CONSENT_VERSION="proxies-sx-2026-11-16-v1";
     private static final int BG=Color.rgb(9,14,24), PANEL=Color.rgb(23,31,46);
     private static final int WHITE=Color.WHITE, MUTED=Color.rgb(171,183,201), ORANGE=Color.rgb(255,128,43);
     private SharedPreferences prefs;
@@ -36,7 +43,11 @@ public final class NetworkHomeActivity extends Activity {
     private TextView monitorStatus;
     private Button monitorButton;
     private TextView historyStatus;
+    private TextView partnerEarningsStatus;
     private DemoBanner demoBanner;
+    private ProxiesSxPartner partner;
+    private boolean partnerReady;
+    private boolean pendingPartnerStart;
     private long sessionBytes;
     private long totalSessionBytes;
     private long totalSessionSeconds;
@@ -84,6 +95,15 @@ public final class NetworkHomeActivity extends Activity {
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         prefs=getSharedPreferences("network_consent_v1",MODE_PRIVATE);
+        partnerReady=ProxiesSxPartner.isConfigured(BuildConfig.PROXIES_SX_API_KEY);
+        if(partnerReady){
+            String installationId=prefs.getString("partner_installation_id","");
+            if(installationId.isEmpty()){
+                installationId=UUID.randomUUID().toString();
+                prefs.edit().putString("partner_installation_id",installationId).apply();
+            }
+            partner=ProxiesSxPartner.get(this,BuildConfig.PROXIES_SX_API_KEY,installationId);
+        }
         totalSessionBytes=prefs.getLong("total_session_bytes",0);
         totalSessionSeconds=prefs.getLong("total_session_seconds",0);
         ScrollView scroll=new ScrollView(this);
@@ -102,17 +122,25 @@ public final class NetworkHomeActivity extends Activity {
         consentButton=button(network,getString(R.string.network_consent_button));
         consentButton.setOnClickListener(v->{
             if (prefs.getBoolean("consented",false)) {
-                prefs.edit().putBoolean("consented",false).putBoolean("monitor_active",false).apply();
+                if(partner!=null)partner.stop();
+                prefs.edit()
+                    .putBoolean("consented",false)
+                    .putBoolean("monitor_active",false)
+                    .putBoolean("partner_active_requested",false)
+                    .remove("partner_consent_version")
+                    .apply();
                 stopMonitor();
-                if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
+                if(monitorButton!=null)monitorButton.setText(partnerReady?getString(R.string.psx_start):getString(R.string.nui_03));
                 refreshConsent();
             } else {
                 new AlertDialog.Builder(this)
-                    .setTitle(getString(R.string.nui_12))
-                    .setMessage(getString(R.string.nui_13))
+                    .setTitle(partnerReady?getString(R.string.psx_consent_title):getString(R.string.nui_12))
+                    .setMessage(partnerReady?getString(R.string.psx_consent_message):getString(R.string.nui_13))
                     .setNegativeButton(getString(R.string.nui_14), (dialog, which) -> dialog.dismiss())
-                    .setPositiveButton(getString(R.string.nui_15), (dialog, which) -> {
-                        prefs.edit().putBoolean("consented",true).apply();
+                    .setPositiveButton(partnerReady?getString(R.string.psx_consent_accept):getString(R.string.nui_15), (dialog, which) -> {
+                        SharedPreferences.Editor edit=prefs.edit().putBoolean("consented",true);
+                        if(partnerReady)edit.putString("partner_consent_version",CONSENT_VERSION);
+                        edit.apply();
                         refreshConsent();
                     })
                     .show();
@@ -121,6 +149,10 @@ public final class NetworkHomeActivity extends Activity {
         Button start=button(network,getString(R.string.network_start_monitoring));
         monitorButton=start;
         start.setOnClickListener(v -> {
+            if(partnerReady){
+                handlePartnerToggle();
+                return;
+            }
             boolean active=prefs.getBoolean("monitor_active",false);
             if (active) {
                 prefs.edit().putBoolean("monitor_active",false).apply();
@@ -148,12 +180,20 @@ public final class NetworkHomeActivity extends Activity {
                     }).show();
             }
         });
-        monitorStatus=text(network,getString(R.string.network_monitor_off),13,MUTED,false);
+        monitorStatus=text(network,partnerReady?getString(R.string.psx_stopped):getString(R.string.network_monitor_off),13,MUTED,false);
+        if(partnerReady)start.setText(getString(R.string.psx_start));
         refreshConsent();
 
         LinearLayout earnings=card(getString(R.string.network_earnings_heading));
         text(earnings,getString(R.string.nui_21),16,WHITE,true);
         text(earnings,getString(R.string.nui_22),12,MUTED,false);
+        partnerEarningsStatus=text(
+            earnings,
+            partnerReady?getString(R.string.psx_earnings,0.0,0.0):getString(R.string.psx_not_configured),
+            13,
+            MUTED,
+            false
+        );
 
         // Never ship an operator-owned wallet address as a user payout default.
         Button walletAddress=button(earnings,getString(R.string.nui_23));
@@ -228,8 +268,89 @@ public final class NetworkHomeActivity extends Activity {
         button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->demoBanner.withdraw());
         button(advertising,getString(R.string.ads_privacy)).setOnClickListener(v->demoBanner.privacy());
 
-        text(page,getString(R.string.network_demo_disclaimer),12,MUTED,false);
-        text(page,getString(R.string.nui_36),12,ORANGE,false);
+        text(page,partnerReady?getString(R.string.psx_disclaimer):getString(R.string.network_demo_disclaimer),12,MUTED,false);
+        text(page,partnerReady?getString(R.string.psx_revoke):getString(R.string.nui_36),12,ORANGE,false);
+        if(partner!=null)partner.setListener(this);
+    }
+
+    private void handlePartnerToggle(){
+        boolean requested=prefs.getBoolean("partner_active_requested",false);
+        if(requested || (partner!=null && partner.isRunning())){
+            prefs.edit().putBoolean("partner_active_requested",false).apply();
+            partner.stop();
+            monitorButton.setText(getString(R.string.psx_start));
+            monitorStatus.setText(getString(R.string.psx_stopped));
+            return;
+        }
+        if(!prefs.getBoolean("consented",false)
+            || !CONSENT_VERSION.equals(prefs.getString("partner_consent_version",""))){
+            android.widget.Toast.makeText(this,getString(R.string.psx_consent_missing),android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+        ConnectivityManager connectivity=(ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkCapabilities caps=connectivity.getNetworkCapabilities(connectivity.getActiveNetwork());
+        if(caps==null || !caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)){
+            android.widget.Toast.makeText(this,getString(R.string.nui_17),android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+        new AlertDialog.Builder(this)
+            .setTitle("MARS-X × Proxies.sx")
+            .setMessage(getString(R.string.psx_confirm_start))
+            .setNegativeButton(getString(R.string.nui_14),null)
+            .setPositiveButton(getString(R.string.nui_19),(dialog,which)->requestNotificationAndStart())
+            .show();
+    }
+
+    private void requestNotificationAndStart(){
+        if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED){
+            pendingPartnerStart=true;
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},REQUEST_NOTIFICATIONS);
+            return;
+        }
+        beginPartnerSharing();
+    }
+
+    private void beginPartnerSharing(){
+        if(partner==null || !prefs.getBoolean("consented",false))return;
+        prefs.edit().putBoolean("partner_active_requested",true).apply();
+        monitorButton.setText(getString(R.string.psx_stop));
+        monitorStatus.setText(getString(R.string.psx_connecting));
+        partner.start();
+    }
+
+    @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        if(requestCode==REQUEST_NOTIFICATIONS && pendingPartnerStart){
+            pendingPartnerStart=false;
+            if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED)beginPartnerSharing();
+            else android.widget.Toast.makeText(this,getString(R.string.psx_notification_required),android.widget.Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override public void onPartnerStatus(ProxiesPeerSDK.Status status){
+        runOnUiThread(()->{
+            if(monitorStatus==null)return;
+            int message=status==ProxiesPeerSDK.Status.CONNECTED?R.string.psx_connected
+                :status==ProxiesPeerSDK.Status.CONNECTING?R.string.psx_connecting
+                :status==ProxiesPeerSDK.Status.ERROR?R.string.psx_error
+                :R.string.psx_stopped;
+            monitorStatus.setText(getString(message));
+            boolean active=status==ProxiesPeerSDK.Status.CONNECTED || status==ProxiesPeerSDK.Status.CONNECTING;
+            if(monitorButton!=null)monitorButton.setText(active?getString(R.string.psx_stop):getString(R.string.psx_start));
+            if(status==ProxiesPeerSDK.Status.ERROR)prefs.edit().putBoolean("partner_active_requested",false).apply();
+        });
+    }
+
+    @Override public void onPartnerEarnings(ProxiesPeerSDK.EarningsInfo earnings){
+        runOnUiThread(()->{
+            if(partnerEarningsStatus!=null){
+                partnerEarningsStatus.setText(getString(
+                    R.string.psx_earnings,
+                    earnings.getTotalTrafficMB(),
+                    earnings.getTotalEarnedCents()/100.0
+                ));
+            }
+        });
     }
 
     private void startMonitor(){
@@ -263,6 +384,10 @@ public final class NetworkHomeActivity extends Activity {
         }
     }
     @Override protected void onStop(){
+        if(partnerReady){
+            super.onStop();
+            return;
+        }
         if(prefs.getBoolean("monitor_active",false)){
             prefs.edit().putBoolean("monitor_active",false).apply();
             stopMonitor();
@@ -272,6 +397,11 @@ public final class NetworkHomeActivity extends Activity {
     }
     @Override protected void onStart(){
         super.onStart();
+        if(partnerReady){
+            refreshConsent();
+            if(partner!=null)onPartnerStatus(partner.getStatus());
+            return;
+        }
         boolean active=prefs.getBoolean("monitor_active",false);
         if(monitorButton!=null)monitorButton.setText(active?getString(R.string.nui_20):getString(R.string.nui_03));
         totalSessionBytes=prefs.getLong("total_session_bytes",0);
@@ -282,7 +412,8 @@ public final class NetworkHomeActivity extends Activity {
     }
     @Override protected void onDestroy(){
         if(demoBanner!=null)demoBanner.destroy();
-        stopMonitor();
+        if(partner!=null)partner.clearListener(this);
+        if(!partnerReady)stopMonitor();
         super.onDestroy();
     }
     @Override protected void onPause(){
@@ -296,6 +427,12 @@ public final class NetworkHomeActivity extends Activity {
 
     private void refreshConsent(){
         boolean consent=prefs.getBoolean("consented",false);
+        if(partnerReady){
+            boolean current=consent && CONSENT_VERSION.equals(prefs.getString("partner_consent_version",""));
+            consentStatus.setText(current?getString(R.string.psx_consent_granted):getString(R.string.psx_consent_missing));
+            consentButton.setText(current?getString(R.string.psx_revoke):getString(R.string.psx_consent_accept));
+            return;
+        }
         consentStatus.setText(consent
             ?getString(R.string.nui_44)
             :getString(R.string.nui_45));
