@@ -22,14 +22,30 @@ public final class NetworkStatusClient {
         public final boolean sharingEnabled;
         public final boolean relayConnected;
         public final String status;
+        public final String partnerAgreement;
+        public final String perDeviceCredentials;
+        public final String privateNetworkIsolation;
+        public final String distributionPolicy;
 
         private Result(boolean serverReachable, boolean sharingEnabled,
-                       boolean relayConnected, String status) {
+                       boolean relayConnected, String status, JSONObject checks) throws JSONException {
             this.serverReachable = serverReachable;
             this.sharingEnabled = sharingEnabled;
             this.relayConnected = relayConnected;
             this.status = status;
+            this.partnerAgreement = validatedCheck(checks, "partner_agreement");
+            this.perDeviceCredentials = validatedCheck(checks, "per_device_sdk_credentials");
+            this.privateNetworkIsolation = validatedCheck(checks, "private_network_isolation");
+            this.distributionPolicy = validatedCheck(checks, "distribution_policy");
         }
+    }
+
+    private static String validatedCheck(JSONObject checks, String key) throws JSONException {
+        String value = checks.getString(key);
+        if (!"verified".equals(value) && !"unverified".equals(value)) {
+            throw new JSONException("Unexpected readiness check: " + key);
+        }
+        return value;
     }
 
     public static Result parse(String response) throws JSONException {
@@ -38,11 +54,13 @@ public final class NetworkStatusClient {
                 || !"marsx-network-status".equals(value.optString("service", ""))
                 || !value.has("status")
                 || !value.has("sharing_enabled")
-                || !value.has("proxies_relay_connected")) {
+                || !value.has("proxies_relay_connected")
+                || !value.has("readiness_checks")) {
             throw new JSONException("Unexpected readiness response");
         }
         return new Result(true, value.getBoolean("sharing_enabled"),
-                value.getBoolean("proxies_relay_connected"), value.getString("status"));
+                value.getBoolean("proxies_relay_connected"), value.getString("status"),
+                value.getJSONObject("readiness_checks"));
     }
 
     /** Invoke only in a background thread and only after explicit user action. */
