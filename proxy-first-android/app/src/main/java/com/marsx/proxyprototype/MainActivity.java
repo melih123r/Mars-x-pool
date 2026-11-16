@@ -72,7 +72,7 @@ public final class MainActivity extends Activity {
             text("3 / 3 — Connection status", 20);
             status = text("Status: DISCONNECTED", 20);
             text("Proxies.sx SDK: NOT INSTALLED", 16);
-            text("Device authorization: NOT CONFIGURED", 16);
+            text("Device authorization: SUPABASE GATE DEPLOYED (not provisioned)", 16);
             text("Traffic transferred: NOT AVAILABLE", 16);
             text("Earnings: NOT AVAILABLE", 16);
             action("Refresh status", v -> status.setText("Status: DISCONNECTED"), true);
