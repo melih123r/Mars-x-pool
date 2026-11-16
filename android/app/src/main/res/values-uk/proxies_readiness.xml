@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • згода і стан"</string>
+    <string name="psx_risk_extra" formatted="false">"Сторонній трафік може використовувати вашу IP, інтернет і батарею. Репутація IP може постраждати; ізоляція локальної мережі не перевірена. Дохід не гарантовано."</string>
+    <string name="psx_acknowledgement" formatted="false">"Я ознайомився з ризиками. Позначка не вмикає передачу."</string>
+    <string name="psx_off_status" formatted="false">"Передача Proxies.sx: ВИМК."</string>
+    <string name="psx_zero_earnings" formatted="false">"Переданий трафік: 0 МБ • Підтверджений дохід: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Почати передачу • недоступно"</string>
+    <string name="psx_stop_revoke" formatted="false">"Зупинити й відкликати згоду"</string>
+    <string name="psx_prerequisites" formatted="false">"Угода, ключ пристрою, ізоляція LAN і дозвіл на поширення: не перевірені."</string>
+    <string name="psx_check_backend" formatted="false">"Перевірити сервер Supabase"</string>
+    <string name="psx_checking" formatted="false">"Перевірка Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase доступний • Проксі ВИМК."</string>
+    <string name="psx_backend_unavailable" formatted="false">"Сервер не перевірено • Проксі ВИМК."</string>
+</resources>

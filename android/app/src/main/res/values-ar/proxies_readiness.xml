@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • الموافقة والحالة"</string>
+    <string name="psx_risk_extra" formatted="false">"قد تستخدم حركة مرور الآخرين عنوان IP وبياناتك وبطاريتك. قد تتأثر سمعة العنوان؛ لم يتم التحقق من عزل الشبكة المحلية. لا ضمان للأرباح."</string>
+    <string name="psx_acknowledgement" formatted="false">"قرأت المخاطر. تحديد المربع لا يبدأ المشاركة."</string>
+    <string name="psx_off_status" formatted="false">"مشاركة Proxies.sx: متوقفة"</string>
+    <string name="psx_zero_earnings" formatted="false">"المرور المشترك: 0 ميغابايت • الأرباح المؤكدة: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"بدء المشاركة • غير متاح"</string>
+    <string name="psx_stop_revoke" formatted="false">"إيقاف المشاركة وسحب الموافقة"</string>
+    <string name="psx_prerequisites" formatted="false">"اتفاقية الشريك ومفتاح الجهاز وعزل الشبكة وتصريح التوزيع: غير مؤكدة."</string>
+    <string name="psx_check_backend" formatted="false">"فحص حالة خادم Supabase"</string>
+    <string name="psx_checking" formatted="false">"جارٍ فحص Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase متاح • مشاركة البروكسي متوقفة"</string>
+    <string name="psx_backend_unavailable" formatted="false">"تعذر التحقق من الخادم • المشاركة متوقفة"</string>
+</resources>

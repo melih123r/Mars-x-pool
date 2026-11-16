@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • consent and status"</string>
+    <string name="psx_risk_extra" formatted="false">"Third-party traffic could use your IP address, data plan and battery. IP reputation may be affected; local-network isolation is not verified. No earnings are guaranteed."</string>
+    <string name="psx_acknowledgement" formatted="false">"I have read the risks. Checking this box does not start sharing."</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx sharing: OFF"</string>
+    <string name="psx_zero_earnings" formatted="false">"Shared traffic: 0 MB • Verified earnings: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Start sharing • unavailable"</string>
+    <string name="psx_stop_revoke" formatted="false">"Stop and withdraw consent"</string>
+    <string name="psx_prerequisites" formatted="false">"Partner agreement, per-device key, local-network isolation and distribution approval: not verified."</string>
+    <string name="psx_check_backend" formatted="false">"Check Supabase server status"</string>
+    <string name="psx_checking" formatted="false">"Checking Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase reachable • Proxy sharing remains OFF"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Server not verified • Proxy sharing remains OFF"</string>
+</resources>

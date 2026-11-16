@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • ความยินยอมและสถานะ"</string>
+    <string name="psx_risk_extra" formatted="false">"ทราฟฟิกของบุคคลที่สามอาจใช้ IP อินเทอร์เน็ตและแบตเตอรี่ของคุณ ชื่อเสียง IP อาจได้รับผลกระทบ และยังไม่ยืนยันการแยกเครือข่ายภายใน ไม่มีการรับประกันรายได้"</string>
+    <string name="psx_acknowledgement" formatted="false">"ฉันอ่านความเสี่ยงแล้ว การติ๊กไม่ได้เริ่มแชร์"</string>
+    <string name="psx_off_status" formatted="false">"การแชร์ Proxies.sx: ปิด"</string>
+    <string name="psx_zero_earnings" formatted="false">"ทราฟฟิกที่แชร์: 0 MB • รายได้ที่ยืนยัน: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"เริ่มแชร์ • ไม่พร้อมใช้งาน"</string>
+    <string name="psx_stop_revoke" formatted="false">"หยุดและถอนความยินยอม"</string>
+    <string name="psx_prerequisites" formatted="false">"ข้อตกลงพันธมิตร คีย์อุปกรณ์ การแยก LAN และการอนุมัติแจกจ่าย: ยังไม่ยืนยัน"</string>
+    <string name="psx_check_backend" formatted="false">"ตรวจสอบสถานะเซิร์ฟเวอร์ Supabase"</string>
+    <string name="psx_checking" formatted="false">"กำลังตรวจสอบ Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"เข้าถึง Supabase ได้ • การแชร์ยังปิด"</string>
+    <string name="psx_backend_unavailable" formatted="false">"ยังไม่ยืนยันเซิร์ฟเวอร์ • การแชร์ปิด"</string>
+</resources>

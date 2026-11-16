@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • rıza ve durum"</string>
+    <string name="psx_risk_extra" formatted="false">"Üçüncü taraf trafiği IP adresinizi, internet kotanızı ve pilinizi kullanabilir. IP itibarınız etkilenebilir; yerel ağ izolasyonu doğrulanmadı. Kazanç garantisi yoktur."</string>
+    <string name="psx_acknowledgement" formatted="false">"Riskleri okudum. Bu kutu paylaşımı başlatmaz."</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx paylaşımı: KAPALI"</string>
+    <string name="psx_zero_earnings" formatted="false">"Paylaşılan trafik: 0 MB • Doğrulanmış kazanç: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Paylaşımı başlat • kullanılamıyor"</string>
+    <string name="psx_stop_revoke" formatted="false">"Durdur ve rızayı geri çek"</string>
+    <string name="psx_prerequisites" formatted="false">"İş ortağı sözleşmesi, cihaz anahtarı, yerel ağ izolasyonu ve dağıtım onayı: doğrulanmadı."</string>
+    <string name="psx_check_backend" formatted="false">"Supabase sunucu durumunu kontrol et"</string>
+    <string name="psx_checking" formatted="false">"Supabase kontrol ediliyor…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase erişilebilir • Proxy paylaşımı KAPALI"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Sunucu doğrulanamadı • Proxy paylaşımı KAPALI"</string>
+</resources>

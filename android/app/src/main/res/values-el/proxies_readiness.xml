@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • συναίνεση και κατάσταση"</string>
+    <string name="psx_risk_extra" formatted="false">"Η κίνηση τρίτων μπορεί να χρησιμοποιεί IP, δεδομένα και μπαταρία. Η φήμη της IP κινδυνεύει· η απομόνωση του τοπικού δικτύου δεν έχει επαληθευτεί. Χωρίς εγγύηση κερδών."</string>
+    <string name="psx_acknowledgement" formatted="false">"Διάβασα τους κινδύνους. Η επιλογή δεν αρχίζει την κοινή χρήση."</string>
+    <string name="psx_off_status" formatted="false">"Κοινή χρήση Proxies.sx: ΑΝΕΝΕΡΓΗ"</string>
+    <string name="psx_zero_earnings" formatted="false">"Κοινόχρηστη κίνηση: 0 MB • Επιβεβαιωμένα κέρδη: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Έναρξη κοινής χρήσης • μη διαθέσιμη"</string>
+    <string name="psx_stop_revoke" formatted="false">"Διακοπή και ανάκληση συναίνεσης"</string>
+    <string name="psx_prerequisites" formatted="false">"Συμφωνία, κλειδί συσκευής, απομόνωση LAN και άδεια διανομής: μη επαληθευμένα."</string>
+    <string name="psx_check_backend" formatted="false">"Έλεγχος διακομιστή Supabase"</string>
+    <string name="psx_checking" formatted="false">"Έλεγχος Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Το Supabase λειτουργεί • Proxy ΑΝΕΝΕΡΓΟ"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Μη επαληθευμένος διακομιστής • Proxy ΑΝΕΝΕΡΓΟ"</string>
+</resources>

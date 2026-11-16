@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • согласие и статус"</string>
+    <string name="psx_risk_extra" formatted="false">"Сторонний трафик может использовать ваш IP, интернет и батарею. Репутация IP может пострадать; изоляция локальной сети не проверена. Доход не гарантируется."</string>
+    <string name="psx_acknowledgement" formatted="false">"Я прочитал риски. Галочка не включает раздачу."</string>
+    <string name="psx_off_status" formatted="false">"Раздача Proxies.sx: ВЫКЛ."</string>
+    <string name="psx_zero_earnings" formatted="false">"Переданный трафик: 0 МБ • Подтверждённый доход: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Начать раздачу • недоступно"</string>
+    <string name="psx_stop_revoke" formatted="false">"Остановить и отозвать согласие"</string>
+    <string name="psx_prerequisites" formatted="false">"Договор, ключ устройства, изоляция сети и разрешение на выпуск: не проверены."</string>
+    <string name="psx_check_backend" formatted="false">"Проверить статус Supabase"</string>
+    <string name="psx_checking" formatted="false">"Проверка Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase доступен • Прокси ВЫКЛ."</string>
+    <string name="psx_backend_unavailable" formatted="false">"Сервер не проверен • Прокси ВЫКЛ."</string>
+</resources>
