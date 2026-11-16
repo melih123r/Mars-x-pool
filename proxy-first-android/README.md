@@ -1,6 +1,6 @@
 # Standalone proxy-first Android prototype
 
-This is an isolated development app, not the existing MARS-X Pool application. Package `com.marsx.proxyprototype` is a development identifier. **No Proxies.sx SDK, API key, INTERNET permission, service, earnings, or network sharing.** Start is disabled and consent is session-only. This is not approved for Google Play.
+This is an isolated development app, not the existing MARS-X Pool application. Package `com.marsx.proxyprototype` is a development identifier. **The official Proxies.sx SDK v1.3.2 is now declared as a build dependency, but it is never initialized or started. There is no API key, earnings, or network sharing.** The SDK may merge network and foreground-service permissions into the final manifest; inspect the merged manifest before distribution. Start is disabled and consent is session-only. This is not approved for Google Play.
 
 Build with Java 17, Android SDK 36 and Gradle 8.x: `gradle :app:testDebugUnitTest :app:assembleDebug` from this folder. No build has been run here.
 
@@ -33,7 +33,7 @@ Open the installed **debug APK on an Android device/emulator** and capture three
 2. `2. Stop control` — Stop sharing button and default OFF status.
 3. `3. Connection status` — truthful DISCONNECTED / SDK NOT INSTALLED state.
 
-**Do not submit these as screenshots of a working Proxies.sx SDK integration.** They demonstrate UI only. Maya requested screenshots of a *working version*, so vendor approval for these prototypes must be sought before representing them as sufficient. The app does not share traffic or generate earnings.
+**Do not submit these as screenshots of a working Proxies.sx SDK integration.** They demonstrate UI only. Maya requested screenshots of a *working version*, so vendor approval for these prototypes must be sought before representing them as sufficient. The app does not share traffic or generate earnings; the SDK is present as a dependency but remains uninitialized.
 
 The vendor's request to onboard ~11,000 devices in stages (starting with ~1,000) is a future rollout plan, **not authorization** to turn on traffic. Require agreement, Play review, individual user consent, device-scoped credentials and security verification first.
 
@@ -42,3 +42,7 @@ The vendor's request to onboard ~11,000 devices in stages (starting with ~1,000)
 Before sending screenshots, confirm whether Proxies.sx will accept **UI-only prototype screenshots**. Their email requests screenshots from a working application; this prototype is deliberately disconnected. Do not claim it is connected, or that it has handled traffic.
 
 Ask the vendor to provide official SDK initialization API documentation, a device-scoped provisioning design, private-network blocking details, and a testing/sandbox method **without production customer traffic**. Do not share farmer credentials by email or place them in this repository.
+
+## SDK wiring status (2026-11-16)
+
+JitPack and `com.github.bolivian-peru:android-peer-sdk:v1.3.2` are configured **only in this separate prototype**. This validates dependency resolution/build compatibility. SDK initialization and `start()` are deliberately not called: the published API currently documents a farmer key as the initialization credential, and distributing that key in an APK would expose it to extraction. The final merged manifest may include SDK-added network and foreground-service permissions. A successful build does not mean production authorization or actual traffic sharing.
