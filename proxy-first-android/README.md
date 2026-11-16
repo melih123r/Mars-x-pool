@@ -36,3 +36,9 @@ Open the installed **debug APK on an Android device/emulator** and capture three
 **Do not submit these as screenshots of a working Proxies.sx SDK integration.** They demonstrate UI only. Maya requested screenshots of a *working version*, so vendor approval for these prototypes must be sought before representing them as sufficient. The app does not share traffic or generate earnings.
 
 The vendor's request to onboard ~11,000 devices in stages (starting with ~1,000) is a future rollout plan, **not authorization** to turn on traffic. Require agreement, Play review, individual user consent, device-scoped credentials and security verification first.
+
+## Vendor communication gate
+
+Before sending screenshots, confirm whether Proxies.sx will accept **UI-only prototype screenshots**. Their email requests screenshots from a working application; this prototype is deliberately disconnected. Do not claim it is connected, or that it has handled traffic.
+
+Ask the vendor to provide official SDK initialization API documentation, a device-scoped provisioning design, private-network blocking details, and a testing/sandbox method **without production customer traffic**. Do not share farmer credentials by email or place them in this repository.
