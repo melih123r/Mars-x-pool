@@ -45,3 +45,29 @@ References:
 - https://www.proxies.sx/sdk
 - https://github.com/bolivian-peru/android-peer-sdk
 - https://www.proxies.sx/earn/what-runs-on-my-device
+
+## Vendor credential verification — 2026-11-16
+
+The official Android integration guide documents `ProxiesPeerSDK.init(context, apiKey, config)` using a farmer dashboard **SDK/device key**. The key associates **every device** initialized with it to the farmer account. The guide does **not** document a server-side exchange for individually scoped, short-lived Android SDK bootstrap credentials or an API to revoke just one exposed SDK key without affecting other devices.
+
+The public peer protocol has device JWTs and refresh tokens **after registration**; these are not a documented substitute for the farmer key required by the Android SDK's initialization. A key fetched from Supabase would still be accessible to the Android process. Android Keystore encrypts local storage, not the key while in memory.
+
+**Decision:** Do not provision the farmer key to MARS-X APKs or enable the SDK on this existing general-purpose Google Play app. A follow-up implementation requires vendor-confirmed revocable per-device bootstrap credentials (or an independently security-reviewed isolated distribution model) and a separate Play-policy decision.
+
+### Verified Java interoperability boundary
+
+Official examples are Kotlin and SDK 1.3.2's public methods include `init`, `getInstance`, `start`, `stop`, `getStatus`, and `isRunning`. The published guide also documents `getEarnings()` as a Kotlin suspend function; **do not call it directly from Java as though it were synchronous**. Before writing Java calls, resolve the AAR in an isolated test project and inspect JVM signatures with `javap` (including `Config` constructor/default arguments and `Continuation` parameters). This verification has not been run in this PR.
+
+### Build and release checks
+
+- Confirm vendor JitPack coordinate against the tagged release (vendor pages differ on the optional `v` prefix).
+- Verify merged manifest and Android 14+ foreground-service restrictions; the SDK declares a `dataSync` service.
+- Keep consent revocation working offline and before authentication.
+- SDK 1.3.2 provides **no enforced bandwidth cap** and supplier has not published verified private-LAN isolation; do not market those protections.
+- Run Gradle compile, Android instrumentation, dependency vulnerability scan, and Google Play policy review before considering release.
+
+Vendor references:
+- https://www.proxies.sx/sdk/android
+- https://www.proxies.sx/peers
+- https://www.proxies.sx/sdk/platform-policy/google-play
+- https://www.proxies.sx/earn/what-runs-on-my-device
