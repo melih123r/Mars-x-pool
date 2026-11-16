@@ -17,6 +17,13 @@ assert payload["status"] == "not_ready", payload
 assert payload["sharing_enabled"] is False, payload
 assert payload["sdk_credentials_issued"] is False, payload
 assert payload["proxies_relay_connected"] is False, payload
+assert payload["readiness_checks"] == {
+    "partner_agreement": "unverified",
+    "per_device_sdk_credentials": "unverified",
+    "private_network_isolation": "unverified",
+    "distribution_policy": "unverified",
+}, payload
+assert payload["supported_actions"] == ["read_status"], payload
 print("Live readiness GET: 200, sharing disabled, credentials not issued.")
 
 try:
