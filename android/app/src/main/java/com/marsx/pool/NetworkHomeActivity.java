@@ -17,6 +17,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.view.View;
@@ -37,6 +38,10 @@ public final class NetworkHomeActivity extends Activity {
     private Button monitorButton;
     private TextView historyStatus;
     private DemoBanner demoBanner;
+    private TextView proxyServerStatus;
+    private TextView proxyPrerequisites;
+    private CheckBox proxyDisclosureAcknowledgement;
+    private Button proxyStatusButton;
     private long sessionBytes;
     private long totalSessionBytes;
     private long totalSessionSeconds;
@@ -151,6 +156,39 @@ public final class NetworkHomeActivity extends Activity {
         monitorStatus=text(network,getString(R.string.network_monitor_off),13,MUTED,false);
         refreshConsent();
 
+        // Proxies.sx disclosures and controls share this ONE existing Network screen.
+        // Acknowledgement only records reading the notice; it never starts a peer.
+        LinearLayout proxy=card(getString(R.string.psx_page_title));
+        text(proxy,getString(R.string.nui_13),14,WHITE,false);
+        text(proxy,getString(R.string.psx_risk_extra),13,MUTED,false);
+        text(proxy,getString(R.string.nui_36),12,ORANGE,false);
+        proxyDisclosureAcknowledgement=new CheckBox(this);
+        proxyDisclosureAcknowledgement.setText(getString(R.string.psx_acknowledgement));
+        proxyDisclosureAcknowledgement.setTextColor(WHITE);
+        proxyDisclosureAcknowledgement.setTextSize(14);
+        proxyDisclosureAcknowledgement.setChecked(prefs.getBoolean("psx_read_notice_v1",false));
+        proxyDisclosureAcknowledgement.setOnCheckedChangeListener((button,checked)->
+            prefs.edit().putBoolean("psx_read_notice_v1",checked).apply());
+        proxy.addView(proxyDisclosureAcknowledgement,new LinearLayout.LayoutParams(-1,-2));
+        text(proxy,getString(R.string.psx_off_status),15,ORANGE,true);
+        text(proxy,getString(R.string.psx_zero_earnings),13,MUTED,false);
+        Button startDisabled=button(proxy,getString(R.string.psx_start_disabled));
+        startDisabled.setEnabled(false);
+        Button stopProxy=button(proxy,getString(R.string.psx_stop_revoke));
+        stopProxy.setOnClickListener(v->{
+            prefs.edit().putBoolean("psx_read_notice_v1",false)
+                .putBoolean("consented",false).putBoolean("monitor_active",false).apply();
+            proxyDisclosureAcknowledgement.setChecked(false);
+            stopMonitor();
+            if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
+            refreshConsent();
+            if(proxyServerStatus!=null)proxyServerStatus.setText(getString(R.string.psx_off_status));
+        });
+        proxyServerStatus=text(proxy,getString(R.string.psx_off_status),13,MUTED,false);
+        proxyPrerequisites=text(proxy,getString(R.string.psx_prerequisites),12,MUTED,false);
+        proxyStatusButton=button(proxy,getString(R.string.psx_check_backend));
+        proxyStatusButton.setOnClickListener(v->queryProxiesReadiness());
+
         LinearLayout earnings=card(getString(R.string.network_earnings_heading));
         text(earnings,getString(R.string.nui_21),16,WHITE,true);
         text(earnings,getString(R.string.nui_22),12,MUTED,false);
@@ -230,6 +268,34 @@ public final class NetworkHomeActivity extends Activity {
 
         text(page,getString(R.string.network_demo_disclaimer),12,MUTED,false);
         text(page,getString(R.string.nui_36),12,ORANGE,false);
+    }
+
+    /** Manually checks the read-only Supabase status API, NOT the Proxies.sx relay. */
+    private void queryProxiesReadiness() {
+        proxyStatusButton.setEnabled(false);
+        proxyServerStatus.setText(getString(R.string.psx_checking));
+        new Thread(()->{
+            boolean expectedBlocked=false;
+            try {
+                NetworkStatusClient.Result result=NetworkStatusClient.fetch();
+                expectedBlocked="not_ready".equals(result.status)
+                    && !result.sharingEnabled && !result.relayConnected
+                    && "unverified".equals(result.partnerAgreement)
+                    && "unverified".equals(result.perDeviceCredentials)
+                    && "unverified".equals(result.privateNetworkIsolation)
+                    && "unverified".equals(result.distributionPolicy);
+            } catch(Exception ignored) {
+                // Fail closed. Do not log network identifiers or response contents.
+            }
+            final boolean safe=expectedBlocked;
+            runOnUiThread(()->{
+                if(isFinishing() || isDestroyed())return;
+                proxyServerStatus.setText(getString(safe
+                    ?R.string.psx_backend_available:R.string.psx_backend_unavailable));
+                proxyPrerequisites.setText(getString(R.string.psx_prerequisites));
+                proxyStatusButton.setEnabled(true);
+            });
+        },"marsx-v19-proxy-readiness").start();
     }
 
     private void startMonitor(){
