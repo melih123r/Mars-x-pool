@@ -16,7 +16,7 @@ import android.widget.TextView;
  */
 public final class ProxiesDisclosureActivity extends Activity {
     private static final String PREFS = "proxies_sx_preferences";
-    private static final String CONSENT_KEY = "proxy_consent_2026_11_v1";
+    private static final String CONSENT_KEY = "proxy_consent_" + ProxiesConsentPolicy.CONSENT_VERSION;
     private TextView status;
     private CheckBox confirmation;
     private Button accept;
@@ -102,6 +102,8 @@ public final class ProxiesDisclosureActivity extends Activity {
 
     private void updateStatus() {
         boolean consented = preferences().getBoolean(CONSENT_KEY, false);
-        status.setText("Sharing: OFF • Permission: " + (consented ? "saved" : "not granted"));
+        boolean canStart = ProxiesConsentPolicy.canStart(consented, false, false, false);
+        status.setText("Sharing: " + (canStart ? "READY" : "OFF")
+                + " • Permission: " + (consented ? "saved" : "not granted"));
     }
 }
