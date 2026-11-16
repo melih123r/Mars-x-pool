@@ -20,7 +20,16 @@ Deno.serve((request: Request) => {
     sharing_enabled: false,
     sdk_credentials_issued: false,
     proxies_relay_connected: false,
-    reason_code: "DEVICE_CREDENTIAL_INTEGRATION_PENDING",
+    reason_code: "PARTNER_AND_DEVICE_SAFETY_VERIFICATION_PENDING",
+    // "unverified" means the operator has not demonstrated the requirement.
+    // It does NOT claim the vendor has denied an agreement or approval.
+    readiness_checks: {
+      partner_agreement: "unverified",
+      per_device_sdk_credentials: "unverified",
+      private_network_isolation: "unverified",
+      distribution_policy: "unverified"
+    },
+    supported_actions: ["read_status"],
     checked_at: new Date().toISOString()
   }), { status: 200, headers });
 });
