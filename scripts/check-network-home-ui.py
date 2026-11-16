@@ -54,6 +54,21 @@ for forbidden in ("MobileAds.initialize(", "loadAd(", "AdRequest.Builder(", "sta
     if forbidden in source:
         raise SystemExit("Unsafe live action in Network test UI: " + forbidden)
 
+partner = Path("android/app/src/main/java/com/marsx/pool/ProxiesSxPartner.java").read_text(encoding="utf-8")
+gradle = Path("android/app/build.gradle").read_text(encoding="utf-8")
+manifest = Path("android/app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
+for marker in ("android-peer-sdk:v1.3.2", "PROXIES_SX_API_KEY"):
+    if marker not in gradle:
+        raise SystemExit("Missing pinned partner integration: " + marker)
+for marker in ("ProxiesPeerSDK.init", "sdk.start()", "sdk.stop()", "isConfigured"):
+    if marker not in partner:
+        raise SystemExit("Missing partner boundary: " + marker)
+for marker in ("psx_consent_message", "partner_consent_version", "requestNotificationAndStart", "partner.stop()"):
+    if marker not in source:
+        raise SystemExit("Missing live consent/stop control: " + marker)
+if 'android.permission.READ_PHONE_STATE" tools:node="remove"' not in manifest:
+    raise SystemExit("Partner SDK phone-state permission must be removed")
+
 contract = Path("docs/network-rewarded-ads-70-30.md").read_text(encoding="utf-8")
 for marker in ("70% MARS-X / 30% user", "0%", "floor(net_cents * 30 / 100)", "written partner approval", "5% of requested gross withdrawal", "EUR 10.00"):
     if marker not in contract:

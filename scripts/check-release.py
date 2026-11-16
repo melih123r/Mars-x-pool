@@ -48,10 +48,9 @@ declared_permissions={p.get('{http://schemas.android.com/apk/res/android}name')
                       if p.get('{http://schemas.android.com/tools}node')!='remove'}
 
 for forbidden in (
-    "android.permission.WAKE_LOCK",
-    "android.permission.FOREGROUND_SERVICE",
     "android.permission.RECEIVE_BOOT_COMPLETED",
     "android.permission.REQUEST_INSTALL_PACKAGES",
+    "android.permission.READ_PHONE_STATE",
 ):
     if forbidden in declared_permissions:
         raise SystemExit(f"Forbidden beta permission present: {forbidden}")
@@ -71,6 +70,11 @@ if network_version:
         raise SystemExit("Network test launcher activity is missing")
     if not re.search(r'<activity\s+android:name="\.NetworkHomeActivity"[^>]*>[\s\S]*?android.intent.action.MAIN[\s\S]*?android.intent.category.LAUNCHER', manifest):
         raise SystemExit("Network test must launch NetworkHomeActivity")
+    for required in ("android.permission.FOREGROUND_SERVICE", "android.permission.WAKE_LOCK"):
+        if required not in declared_permissions:
+            raise SystemExit(f"Partner foreground service permission missing: {required}")
+    if "android-peer-sdk:v1.3.2" not in gradle or "PROXIES_SX_API_KEY" not in gradle:
+        raise SystemExit("Pinned Proxies.sx SDK and fail-closed build key are required")
 if '"version": "0.9.0"' not in package:
     raise SystemExit("Package version must match Beta 0.9.0")
 if 'APP_VERSION = "0.9.0-beta"' not in main_activity:

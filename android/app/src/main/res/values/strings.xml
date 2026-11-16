@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">MARS-X Network DEMO</string>
+    <string name="app_name" translatable="false">MARS-X Network Pilot</string>
     <string name="app_title" translatable="false">MARS-X NETWORK</string>
     <string name="beta_label">Beta 0.8.4 • serverless licensed sandbox</string>
     <string name="product_disclaimer">Remote node/pool management prototype. This version does not mine on the phone, run hidden computing or guarantee earnings.</string>
@@ -175,6 +175,25 @@
     <string name="account_delete_failed">The account could not be deleted. Try again.</string>
     <string name="save_server_button">Save server</string>
     <string name="sandbox_payout_created_with_fee">Net test amount: %1$s USDT_TEST • fee: %2$s • status: %3$s. This is not a real payment.</string>
+
+    <!-- Partner pilot copy is deliberately one reviewed contract text in every locale. -->
+    <string name="psx_consent_title" translatable="false">Proxies.sx bandwidth sharing consent</string>
+    <string name="psx_consent_message" translatable="false">MARS-X uses the Proxies.sx SDK to route approved customer traffic through this device’s internet connection. Customers may use your public IP address. Sharing can consume mobile data, battery and bandwidth, and may affect IP reputation. Earnings depend only on eligible traffic actually served; being online does not guarantee traffic or income. Tap Stop sharing or revoke consent at any time. By enabling, you confirm that you own or are authorized to use this device and connection.</string>
+    <string name="psx_consent_accept" translatable="false">Allow Proxies.sx sharing</string>
+    <string name="psx_consent_granted" translatable="false">Proxies.sx consent: GRANTED • You can revoke it at any time</string>
+    <string name="psx_consent_missing" translatable="false">Proxies.sx consent: NOT GRANTED • Sharing is off</string>
+    <string name="psx_start" translatable="false">Start sharing with Proxies.sx</string>
+    <string name="psx_stop" translatable="false">Stop sharing</string>
+    <string name="psx_confirm_start" translatable="false">Start Proxies.sx bandwidth sharing now? A persistent Android notification will remain visible while sharing. You can stop from this screen at any time.</string>
+    <string name="psx_not_configured" translatable="false">Partner SDK is installed, but this build has no Proxies.sx device key. Sharing remains off.</string>
+    <string name="psx_stopped" translatable="false">Proxies.sx: stopped • No bandwidth is being shared</string>
+    <string name="psx_connecting" translatable="false">Proxies.sx: connecting…</string>
+    <string name="psx_connected" translatable="false">Proxies.sx: connected • Bandwidth sharing is active</string>
+    <string name="psx_error" translatable="false">Proxies.sx: connection error • Check the agreement, API key and network</string>
+    <string name="psx_earnings" translatable="false">Partner-reported traffic: %1$.2f MB\nPartner-reported earnings: $%2$.2f\nTraffic and earnings are not guaranteed.</string>
+    <string name="psx_notification_required" translatable="false">Notification permission is required to show the active sharing service on Android 13 or later.</string>
+    <string name="psx_revoke" translatable="false">Revoke consent and stop sharing</string>
+    <string name="psx_disclaimer" translatable="false">Proxies.sx is an independent traffic partner. MARS-X is not its subsidiary. Only partner-verified eligible traffic can become payable.</string>
 
     <string name="network_demo_heading">MARS-X NETWORK</string>
     <string name="network_start_monitoring">Start • monitor connection</string>
