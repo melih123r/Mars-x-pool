@@ -35,6 +35,8 @@ public final class NetworkWebsiteActivity extends Activity {
     private CheckBox acknowledged;
     private TextView connectionStatus;
     private TextView consentStatus;
+    private TextView backendStatus;
+    private Button refreshButton;
 
     private int dp(int size) {
         return Math.round(size * getResources().getDisplayMetrics().density);
@@ -91,6 +93,32 @@ public final class NetworkWebsiteActivity extends Activity {
                 : "Rıza verilmedi. Paylaşım kapalı.");
     }
 
+    private void queryServerStatus() {
+        backendStatus.setText("Supabase durumu kontrol ediliyor…");
+        refreshButton.setEnabled(false);
+        new Thread(() -> {
+            String resultText;
+            try {
+                NetworkStatusClient.Result result = NetworkStatusClient.fetch();
+                if ("not_ready".equals(result.status)
+                        && !result.sharingEnabled && !result.relayConnected) {
+                    resultText = "● Supabase durum servisi: ERİŞİLEBİLİR • Proxies.sx: HAZIR DEĞİL";
+                } else {
+                    resultText = "● Sunucu yanıtı değişti; paylaşım güvenlik nedeniyle KAPALI";
+                }
+            } catch (Exception ignored) {
+                resultText = "○ Supabase durum servisine erişilemedi; paylaşım KAPALI";
+            }
+            final String message = resultText;
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                backendStatus.setText(message);
+                refreshButton.setEnabled(true);
+                refreshUi();
+            });
+        }, "marsx-network-status-check").start();
+    }
+
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         preferences = getSharedPreferences(PREFS, MODE_PRIVATE);
@@ -112,6 +140,7 @@ public final class NetworkWebsiteActivity extends Activity {
         connectionStatus = line(statusCard, "", 19, WHITE, true);
         line(statusCard, "Bu telefonda üçüncü taraf proxy trafiği çalışmıyor. MARS-X havuz oturumu, internet paylaşımı anlamına gelmez.", 14, MUTED, false);
         line(statusCard, "Proxies.sx cihaz kaydı: YOK\nSDK paylaşımı: KAPALI\nSupabase yetkilendirme: KURULU; CİHAZ İZNİ VERİLMEDİ\nAktarılan trafik: YOK\nDoğrulanmış kazanç: YOK", 14, WHITE, false);
+        backendStatus = line(statusCard, "Supabase durumu: henüz sorgulanmadı", 14, ORANGE, true);
 
         LinearLayout consentCard = section(root);
         line(consentCard, "AÇIK RIZA VE RİSK BİLGİLENDİRMESİ", 15, ORANGE, true);
@@ -147,9 +176,9 @@ public final class NetworkWebsiteActivity extends Activity {
             acknowledged.setChecked(false);
             refreshUi();
         });
-        Button refresh = button(controlsCard, "Bağlantı Durumunu Yenile", true);
-        refresh.setOnClickListener(view -> refreshUi());
-        line(controlsCard, "Yenile, yalnızca uygulamanın mevcut kapalı durumunu gösterir; gerçek ağ testi değildir. Hiçbir tuş üçüncü taraf trafiğini başlatmaz.", 12, MUTED, false);
+        refreshButton = button(controlsCard, "Supabase Sunucu Durumunu Kontrol Et", true);
+        refreshButton.setOnClickListener(view -> queryServerStatus());
+        line(controlsCard, "Bu düğme Supabase'e yalnızca bir HTTPS durum isteği gönderir (IP adresi sunucu kayıtlarında görünebilir). Proxies.sx relay bağlantısını test etmez. Hiçbir tuş üçüncü taraf trafiğini başlatmaz.", 12, MUTED, false);
         refreshUi();
         setContentView(scroll);
     }
