@@ -1,48 +1,156 @@
 package com.marsx.pool;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebSettings;
-import android.content.Intent;
-import android.net.Uri;
+import android.view.Gravity;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
-/** Offline, read-only MARS-X Network partner information screen. */
+/**
+ * MARS-X Network's single-page, native disclosure and control panel.
+ *
+ * This is a non-operational partner preview: it never initializes a proxy SDK,
+ * registers the phone as a peer, or carries customer traffic. Do not interpret
+ * the saved acknowledgement as permission for a future live release.
+ */
 public final class NetworkWebsiteActivity extends Activity {
-    private WebView webView;
+    private static final String PREFS = "marsx_network_preview";
+    private static final String READ_KEY = "read_notice_2026_11";
+    private static final int BG = Color.rgb(8, 10, 15);
+    private static final int CARD = Color.rgb(20, 25, 34);
+    private static final int WHITE = Color.rgb(242, 245, 250);
+    private static final int MUTED = Color.rgb(175, 187, 205);
+    private static final int ORANGE = Color.rgb(255, 154, 61);
+
+    private SharedPreferences preferences;
+    private NetworkSharingState sharingState;
+    private CheckBox acknowledged;
+    private TextView connectionStatus;
+    private TextView consentStatus;
+
+    private int dp(int size) {
+        return Math.round(size * getResources().getDisplayMetrics().density);
+    }
+
+    private GradientDrawable panelBackground() {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setColor(CARD);
+        drawable.setCornerRadius(dp(18));
+        drawable.setStroke(dp(1), Color.rgb(58, 68, 79));
+        return drawable;
+    }
+
+    private TextView line(LinearLayout parent, String value, int size, int color, boolean bold) {
+        TextView text = new TextView(this);
+        text.setText(value);
+        text.setTextColor(color);
+        text.setTextSize(size);
+        if (bold) text.setTypeface(Typeface.DEFAULT_BOLD);
+        text.setPadding(0, dp(5), 0, dp(7));
+        text.setLineSpacing(dp(2), 1f);
+        parent.addView(text);
+        return text;
+    }
+
+    private LinearLayout section(LinearLayout root) {
+        LinearLayout panel = new LinearLayout(this);
+        panel.setOrientation(LinearLayout.VERTICAL);
+        panel.setPadding(dp(18), dp(16), dp(18), dp(16));
+        panel.setBackground(panelBackground());
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.setMargins(0, dp(8), 0, dp(10));
+        root.addView(panel, params);
+        return panel;
+    }
+
+    private Button button(LinearLayout parent, String title, boolean enabled) {
+        Button button = new Button(this);
+        button.setText(title);
+        button.setAllCaps(false);
+        button.setEnabled(enabled);
+        button.setMinHeight(dp(48));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.setMargins(0, dp(5), 0, dp(3));
+        parent.addView(button, params);
+        return button;
+    }
+
+    private void refreshUi() {
+        // Readiness is a local fail-closed state, not a network connection probe.
+        connectionStatus.setText("● PROXIES.SX BAĞLANTISI: KAPALI");
+        consentStatus.setText(sharingState.hasReadAcknowledgement()
+                ? "Bilgilendirme okundu. Bu, canlı paylaşımı başlatmaz."
+                : "Rıza verilmedi. Paylaşım kapalı.");
+    }
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        webView = new WebView(this);
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(false);
-        settings.setAllowFileAccess(true);
-        settings.setAllowContentAccess(false);
-        settings.setDomStorageEnabled(false);
-        webView.setWebViewClient(new WebViewClient() {
-            @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                Uri uri = request.getUrl();
-                if ("file".equalsIgnoreCase(uri.getScheme())
-                        && "android_asset".equalsIgnoreCase(uri.getHost())) {
-                    return false;
-                }
-                if ("https".equalsIgnoreCase(uri.getScheme())) {
-                    startActivity(new Intent(Intent.ACTION_VIEW, uri));
-                }
-                return true;
-            }
-        });
-        setContentView(webView);
-        webView.loadUrl("file:///android_asset/network/index.html");
-    }
+        preferences = getSharedPreferences(PREFS, MODE_PRIVATE);
+        sharingState = new NetworkSharingState(preferences.getBoolean(READ_KEY, false));
 
-    @Override public void onDestroy() {
-        if (webView != null) {
-            webView.destroy();
-            webView = null;
-        }
-        super.onDestroy();
+        ScrollView scroll = new ScrollView(this);
+        scroll.setFillViewport(true);
+        scroll.setBackgroundColor(BG);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp(18), dp(20), dp(18), dp(24));
+        scroll.addView(root);
+
+        line(root, "MARS-X  /  NETWORK", 26, WHITE, true);
+        line(root, "Tek ekranda rıza, kontrol ve bağlantı durumu", 14, MUTED, false);
+
+        LinearLayout statusCard = section(root);
+        line(statusCard, "AĞ DURUMU", 12, ORANGE, true);
+        connectionStatus = line(statusCard, "", 19, WHITE, true);
+        line(statusCard, "Bu telefonda üçüncü taraf proxy trafiği çalışmıyor. MARS-X havuz oturumu, internet paylaşımı anlamına gelmez.", 14, MUTED, false);
+        line(statusCard, "Proxies.sx cihaz kaydı: YOK\nSDK paylaşımı: KAPALI\nSupabase yetkilendirme: KURULU; CİHAZ İZNİ VERİLMEDİ\nAktarılan trafik: YOK\nDoğrulanmış kazanç: YOK", 14, WHITE, false);
+
+        LinearLayout consentCard = section(root);
+        line(consentCard, "AÇIK RIZA VE RİSK BİLGİLENDİRMESİ", 15, ORANGE, true);
+        line(consentCard, "Proxies.sx etkinleştirilirse başka şirketlerin ve müşterilerin internet talepleri cihazınızın bağlantısından ve herkese açık IP adresinizden geçebilir. Bu trafik sizin kişisel kullanımınız değildir.", 14, WHITE, false);
+        line(consentCard, "Mobil veri kotanız tüketilebilir, operatörünüz ek ücret uygulayabilir, pil ve performans etkilenebilir. IP adresinizin itibarı ve güvenliği açısından riskler vardır. Paylaşım yalnızca cihaz sahibinin açık izniyle yapılmalıdır.", 14, WHITE, false);
+        line(consentCard, "Sağlayıcı bağlantı ve cihaz bilgilerini, IP adresini, ağ/operatör bilgisini, trafik miktarını ve bağlantı zamanlarını hizmeti yürütmek, güvenlik ve ödeme hesapları için işleyebilir. Gerçek veri akışı başlamadan önce güncel gizlilik ve saklama koşulları ayrıca sunulmalıdır.", 14, WHITE, false);
+        line(consentCard, "Kazanç garanti değildir. Gelecekte hizmet açılırsa dilediğiniz an durdurabilmeli ve rızanızı geri çekebilmelisiniz. Şu anda çalışan bir Proxies.sx hizmeti yoktur; bu ekran yalnızca hazırlık amaçlıdır.", 14, MUTED, false);
+
+        acknowledged = new CheckBox(this);
+        acknowledged.setText("Yukarıdaki riskleri okudum. Gerçek paylaşım başlamadan önce yeniden açık rıza vermem gerekeceğini anlıyorum.");
+        acknowledged.setTextColor(WHITE);
+        acknowledged.setTextSize(14);
+        acknowledged.setPadding(0, dp(8), 0, dp(10));
+        acknowledged.setButtonTintList(ColorStateList.valueOf(ORANGE));
+        acknowledged.setChecked(sharingState.hasReadAcknowledgement());
+        consentCard.addView(acknowledged);
+        acknowledged.setOnCheckedChangeListener((view, checked) -> {
+            sharingState.setReadAcknowledgement(checked);
+            preferences.edit().putBoolean(READ_KEY, checked).apply();
+            refreshUi();
+        });
+        consentStatus = line(consentCard, "", 13, ORANGE, false);
+
+        LinearLayout controlsCard = section(root);
+        line(controlsCard, "PAYLAŞIM KONTROLLERİ", 15, ORANGE, true);
+        line(controlsCard, "Paylaşım: KAPALI (varsayılan)", 16, WHITE, true);
+        Button start = button(controlsCard, "Paylaşımı Başlat — bağlantı hazır değil", false);
+        start.setContentDescription("Paylaşımı başlatma devre dışı. SDK ve cihaz yetkilendirmesi tamamlanmadı.");
+        Button stop = button(controlsCard, "Paylaşımı Durdur / Rızayı Geri Çek", true);
+        stop.setOnClickListener(view -> {
+            sharingState.stopAndRevoke();
+            preferences.edit().remove(READ_KEY).apply();
+            acknowledged.setChecked(false);
+            refreshUi();
+        });
+        Button refresh = button(controlsCard, "Bağlantı Durumunu Yenile", true);
+        refresh.setOnClickListener(view -> refreshUi());
+        line(controlsCard, "Yenile, yalnızca uygulamanın mevcut kapalı durumunu gösterir; gerçek ağ testi değildir. Hiçbir tuş üçüncü taraf trafiğini başlatmaz.", 12, MUTED, false);
+        refreshUi();
+        setContentView(scroll);
     }
 }
