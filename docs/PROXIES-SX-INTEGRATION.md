@@ -1,3 +1,20 @@
+# CURRENT DECISION — GOOGLE PLAY REVIEW (2026-11-16)
+
+**Do not ship third-party proxy functionality in the existing MARS-X Pool Play app.** Google Play's Device and Network Abuse policy permits third-party proxy services only when proxy sharing is the app's primary, user-facing core purpose. MARS-X Pool currently manages remote nodes/pools; a proxy earnings add-on is not compliant merely because it has an opt-in screen.
+
+**Implemented on this branch:** the Play build has no Proxies.sx SDK dependency or JitPack repository, no service, no proxy traffic, and no consent capture for an unavailable feature. The informational screen removes any consent saved by the earlier preparation preview and explains that sharing is unavailable. `ProxiesConsentPolicy` remains as a pure, unused policy helper with unit tests; it cannot start traffic.
+
+**Before any new Play-facing proxy app:** design a genuinely proxy-first product, verify actual SDK permissions, Google Play SDK/foreground service rules, clear prominent disclosure and opt-in, privacy policy, Data Safety form, account deletion, revocation, device credentials, private LAN isolation and user data costs. A separate package and listing may be appropriate; a new app is not automatically approved.
+
+Official policy:
+- https://support.google.com/googleplay/android-developer/answer/16559646
+- https://support.google.com/googleplay/android-developer/answer/10144311
+- https://support.google.com/googleplay/android-developer/answer/18265346
+
+**Historical notes below describe previous experimental preparation and are superseded by this decision.** Do not follow their Gradle instructions on the Play branch.
+
+---
+
 # Proxies.sx Android integration — gated preparation
 
 Status: **not connected**. This branch deliberately does not run proxy traffic.
