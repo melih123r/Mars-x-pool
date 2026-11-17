@@ -87,15 +87,21 @@ subprocess.run([sys.executable, "scripts/check-network-locale.py"], check=True)
 # Proxies.sx preview is built on the exact v19 Network edition, not legacy v13.
 import xml.etree.ElementTree as ET
 build=Path("android/app/build.gradle").read_text(encoding="utf-8")
-assert 'versionCode 19' in build and 'versionName "0.9.4-network-demo"' in build
+assert 'versionCode 19' in build and 'versionName "0.9.4-network-pilot"' in build
 assert 'NetworkStatusClient.fetch()' in source
 assert 'proxyDisclosureAcknowledgement' in source
 assert 'proxyStatusButton.setOnClickListener' in source
-assert 'startDisabled.setEnabled(false)' in source
+assert 'proxyPilotStart.setOnClickListener' in source
+assert 'proxyPilot.start(key,installId)' in source
+assert 'proxyPilot.stop()' in source
 assert 'putBoolean("psx_read_notice_v1",false)' in source
 assert 'putBoolean("consented",false)' in source
-assert 'ProxiesPeerSDK' not in source
 assert 'PROXIES_SX_API_KEY' not in source and 'apiKey' not in source
+assert 'android-peer-sdk:1.3.2' in build
+pilot=Path("android/app/src/main/java/com/marsx/pool/ProxiesPilotController.java").read_text(encoding="utf-8")
+for marker in ('ProxiesPeerSDK.init', 'sdk.start()', 'sdk.stop()', 'validFarmerKey', 'Settings.Secure.ANDROID_ID'):
+    assert marker in pilot, marker
+assert not re.search(r'psx_[0-9a-fA-F]{32}', source+pilot+build), 'Farmer key must never enter Android sources'
 root=Path("android/app/src/main/res")
 translations={
     "tr":"values-tr","en":"values-en","fr":"values-fr","de":"values-de",
@@ -119,6 +125,21 @@ for folder in ["values", *translations.values(), "values-in"]:
     found={s.attrib["name"] for s in xml.findall("string")}
     assert found==keys, (folder,sorted(keys-found),sorted(found-keys))
 print("MARS-X v19 proxy readiness: fail-closed, 30 languages, default resources PASS")
+
+pilot_keys={
+    "network_pilot_disclaimer","psx_pilot_warning","psx_pilot_stopped",
+    "psx_pilot_connecting","psx_pilot_connected","psx_pilot_error",
+    "psx_pilot_key_hint","psx_pilot_key_notice","psx_pilot_start",
+    "psx_pilot_consent_required","psx_pilot_key_invalid",
+    "psx_pilot_confirm_title","psx_pilot_confirm_message",
+    "psx_pilot_device_id","psx_pilot_notification_required"
+}
+for folder in ["values", *translations.values(), "values-in"]:
+    path=root/folder/"proxies_pilot.xml"
+    xml=ET.parse(path).getroot()
+    found={s.attrib["name"] for s in xml.findall("string")}
+    assert found==pilot_keys,(folder,sorted(pilot_keys-found),sorted(found-pilot_keys))
+print("MARS-X v19 LIVE pilot SDK controls and 30-language resources: PASS")
 
 diagnostic_keys={
     "psx_check_partner","psx_check_credential","psx_check_isolation",

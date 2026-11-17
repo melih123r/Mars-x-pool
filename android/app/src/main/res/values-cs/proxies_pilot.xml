@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_pilot_disclaimer" formatted="false">"PILOT • Payments and crypto transfers are disabled. Real proxy sharing starts only after explicit consent."</string>
+    <string name="psx_pilot_warning" formatted="false">"PILOT: Real third-party traffic can use this device’s connection and IP address. Use only a device and connection you own or are authorized to share. You can stop at any time."</string>
+    <string name="psx_pilot_stopped" formatted="false">"Sharing stopped"</string>
+    <string name="psx_pilot_connecting" formatted="false">"Connecting to Proxies.sx…"</string>
+    <string name="psx_pilot_connected" formatted="false">"Connected to Proxies.sx • sharing active"</string>
+    <string name="psx_pilot_error" formatted="false">"Connection failed • sharing is not confirmed"</string>
+    <string name="psx_pilot_key_hint" formatted="false">"Farmer SDK API key (psx_…)"</string>
+    <string name="psx_pilot_key_notice" formatted="false">"Pilot only: the key is used in memory by SDK 1.3.2, is cleared from this field and is not compiled into or saved by MARS-X."</string>
+    <string name="psx_pilot_start" formatted="false">"Start live pilot sharing"</string>
+    <string name="psx_pilot_consent_required" formatted="false">"Accept both Network consent and the Proxies.sx disclosure before starting."</string>
+    <string name="psx_pilot_key_invalid" formatted="false">"Enter the SDK API key created in your Proxies.sx farmer account."</string>
+    <string name="psx_pilot_confirm_title" formatted="false">"Start real proxy sharing?"</string>
+    <string name="psx_pilot_confirm_message" formatted="false">"This will start the Proxies.sx foreground service and may route eligible customer traffic through this device. Traffic and earnings are not guaranteed. Continue only on your own authorized device."</string>
+    <string name="psx_pilot_device_id" formatted="false">"Provider device ID"</string>
+    <string name="psx_pilot_notification_required" formatted="false">"Notification permission is required so active sharing remains visible."</string>
+</resources>

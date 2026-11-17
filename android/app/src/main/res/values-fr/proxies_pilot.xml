@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_pilot_disclaimer" formatted="false">"PILOTE • Les paiements et transferts crypto sont désactivés. Le partage proxy réel ne démarre qu’après un consentement explicite."</string>
+    <string name="psx_pilot_warning" formatted="false">"PILOTE : du trafic réel de tiers peut utiliser la connexion et l’adresse IP de cet appareil. Utilisez uniquement un appareil et une connexion que vous possédez ou êtes autorisé à partager. Vous pouvez arrêter à tout moment."</string>
+    <string name="psx_pilot_stopped" formatted="false">"Partage arrêté"</string>
+    <string name="psx_pilot_connecting" formatted="false">"Connexion à Proxies.sx…"</string>
+    <string name="psx_pilot_connected" formatted="false">"Connecté à Proxies.sx • partage actif"</string>
+    <string name="psx_pilot_error" formatted="false">"Échec de connexion • partage non confirmé"</string>
+    <string name="psx_pilot_key_hint" formatted="false">"Clé API SDK du compte farmer (psx_…)"</string>
+    <string name="psx_pilot_key_notice" formatted="false">"Pilote uniquement : la clé est utilisée en mémoire par le SDK 1.3.2, effacée de ce champ et n’est ni intégrée ni enregistrée par MARS-X."</string>
+    <string name="psx_pilot_start" formatted="false">"Démarrer le partage pilote réel"</string>
+    <string name="psx_pilot_consent_required" formatted="false">"Acceptez le consentement Network et l’information Proxies.sx avant de démarrer."</string>
+    <string name="psx_pilot_key_invalid" formatted="false">"Saisissez la clé API SDK créée dans votre compte farmer Proxies.sx."</string>
+    <string name="psx_pilot_confirm_title" formatted="false">"Démarrer le partage proxy réel ?"</string>
+    <string name="psx_pilot_confirm_message" formatted="false">"Cela démarre le service de premier plan Proxies.sx et peut acheminer du trafic client éligible via cet appareil. Trafic et revenus ne sont pas garantis. Continuez uniquement sur votre appareil autorisé."</string>
+    <string name="psx_pilot_device_id" formatted="false">"Identifiant d’appareil fournisseur"</string>
+    <string name="psx_pilot_notification_required" formatted="false">"L’autorisation de notification est requise pour que le partage actif reste visible."</string>
+</resources>

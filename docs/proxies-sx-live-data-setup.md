@@ -23,8 +23,17 @@
 - Android birim testleri `NetworkLiveBoardClientTest`, `NetworkFarmerLiveClientTest` ve `NetworkStatusClientTest` ile veri kaynağı/izin sınırlarını doğrular.
 - Android 8/13 emülatörleri 30 dil, tek sayfa ve yenileme kontrolünü sınar.
 
+## Redmi 15C canlı pilotu
+
+- Pilot APK, açık kaynak Proxies.sx Android SDK **1.3.2** sürümünü sabitler. Farmer anahtarı kaynak kodda, `BuildConfig` içinde, GitHub'da veya APK içinde bulunmaz.
+- Resmî SDK cihaz kaydı için farmer anahtarını doğrudan `init()` çağrısında istediği ve sağlayıcı cihaz başına kayıt anahtarı üretme uç noktası belgelemediği için, yalnızca operatörün kendi pilot telefonunda maskeli alana anahtar bir kez girilir. MARS-X bu değeri diske kaydetmez ve alanı başlatmadan hemen sonra temizler. Bu pilot APK genel dağıtıma uygun değildir.
+- Başlatma için hem MARS-X Network rızası hem Proxies.sx bilgilendirme kutusu gerekir; ardından gerçek trafik konusunda ikinci bir onay penceresi gösterilir. Android 13 ve sonrasında görünür foreground bildirim izni de zorunludur.
+- `Durdur ve rızayı geri çek`, SDK `stop()` çağrısını yapar; genel rızanın veya Proxies.sx kutusunun kaldırılması da servisi durdurur. Cihazın offline olduğu farmer panelinden ayrıca doğrulanmalıdır.
+- Ekrandaki sağlayıcı cihaz kimliği SDK 1.3.2'nin kayıt sırasında gönderdiği aynı `psx_…` kimliğidir. Maya'ya yalnız bu cihaz kimliği gönderilir; farmer anahtarı gönderilmez.
+- Canlı pilot için uygulama sürümü `0.9.4-network-pilot` / versionCode `19` olarak ayırt edilir. Ödemeler ve kripto transferleri kapalı kalır.
+
 ## Önemli ayrım
 
 Eski `GET /v1/peer/board` artık yönetici erişimine kapalıdır. Genel kart yalnızca belgelenmiş özet uç noktası eksiksiz ve geçerli sayılar döndürürse gösterilir. Çiftçi hesabı rakamları ayrı, kimlik doğrulamalı kartta yer alır.
 
-Bu uygulamada **gerçek bant genişliği satışı veya SDK.start() yoktur**. MARS-X uygulaması Play Store'a çıkmadan önce proxy temel amacı, açık rıza, cihaz başına güvenli yetkilendirme ve LAN izolasyonu ayrı onay gerektirir.
+Bu dalda gerçek SDK yalnızca operatörün kendi cihazındaki sınırlı pilot için açılabilir. SDK 1.3.2 yerel yardımcı sunucuyu `127.0.0.1` adresine bağlayarak LAN erişimini kapatır; yine de farmer panelindeki online/offline durumu, yönlendirme testi ve gerçek durdurma davranışı Maya tarafından doğrulanmadan genel kullanıcı dağıtımı veya Play yayını yapılmaz.

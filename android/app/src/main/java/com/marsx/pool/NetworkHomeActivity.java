@@ -2,6 +2,9 @@ package com.marsx.pool;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,8 +30,9 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-/** Offline Network-first test dashboard. No proxy, partner SDK, custody or payout execution. */
+/** Network-first pilot dashboard. Payments remain disabled; proxy requires explicit consent. */
 public final class NetworkHomeActivity extends Activity {
+    private static final int REQUEST_PROXY_NOTIFICATIONS=812;
     private static final int BG=Color.rgb(9,14,24), PANEL=Color.rgb(23,31,46);
     private static final int WHITE=Color.WHITE, MUTED=Color.rgb(171,183,201), ORANGE=Color.rgb(255,128,43);
     private SharedPreferences prefs;
@@ -43,6 +47,10 @@ public final class NetworkHomeActivity extends Activity {
     private TextView proxyPrerequisites;
     private CheckBox proxyDisclosureAcknowledgement;
     private Button proxyStatusButton;
+    private EditText proxyPilotKey;
+    private Button proxyPilotStart;
+    private TextView proxyPilotStatus;
+    private ProxiesPilotController proxyPilot;
     private TextView liveBoardStatus;
     private Button liveBoardButton;
     private int liveBoardGeneration;
@@ -102,6 +110,8 @@ public final class NetworkHomeActivity extends Activity {
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         prefs=getSharedPreferences("network_consent_v1",MODE_PRIVATE);
+        proxyPilot=new ProxiesPilotController(this,(status,deviceId)->runOnUiThread(()->
+            updatePilotStatus(status.name(),deviceId)));
         totalSessionBytes=prefs.getLong("total_session_bytes",0);
         totalSessionSeconds=prefs.getLong("total_session_seconds",0);
         ScrollView scroll=new ScrollView(this);
@@ -120,7 +130,9 @@ public final class NetworkHomeActivity extends Activity {
         consentButton=button(network,getString(R.string.network_consent_button));
         consentButton.setOnClickListener(v->{
             if (prefs.getBoolean("consented",false)) {
+                if(prefs.getBoolean("psx_sharing_active",false))proxyPilot.stop();
                 prefs.edit().putBoolean("consented",false).putBoolean("monitor_active",false).apply();
+                prefs.edit().putBoolean("psx_sharing_active",false).apply();
                 stopMonitor();
                 if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
                 refreshConsent();
@@ -174,25 +186,42 @@ public final class NetworkHomeActivity extends Activity {
         LinearLayout proxy=card(getString(R.string.psx_page_title));
         text(proxy,getString(R.string.nui_13),14,WHITE,false);
         text(proxy,getString(R.string.psx_risk_extra),13,MUTED,false);
-        text(proxy,getString(R.string.nui_36),12,ORANGE,false);
+        text(proxy,getString(R.string.psx_pilot_warning),12,ORANGE,false);
         proxyDisclosureAcknowledgement=new CheckBox(this);
         proxyDisclosureAcknowledgement.setText(getString(R.string.psx_acknowledgement));
         proxyDisclosureAcknowledgement.setTextColor(WHITE);
         proxyDisclosureAcknowledgement.setTextSize(14);
         proxyDisclosureAcknowledgement.setChecked(prefs.getBoolean("psx_read_notice_v1",false));
-        proxyDisclosureAcknowledgement.setOnCheckedChangeListener((button,checked)->
-            prefs.edit().putBoolean("psx_read_notice_v1",checked).apply());
+        proxyDisclosureAcknowledgement.setOnCheckedChangeListener((button,checked)->{
+            if(!checked&&prefs.getBoolean("psx_sharing_active",false))proxyPilot.stop();
+            prefs.edit().putBoolean("psx_read_notice_v1",checked)
+                .putBoolean("psx_sharing_active",checked
+                    && prefs.getBoolean("psx_sharing_active",false)).apply();
+        });
         proxy.addView(proxyDisclosureAcknowledgement,new LinearLayout.LayoutParams(-1,-2));
-        text(proxy,getString(R.string.psx_off_status),15,ORANGE,true);
+        proxyPilotStatus=text(proxy,getString(R.string.psx_pilot_stopped),15,ORANGE,true);
         text(proxy,getString(R.string.psx_zero_earnings),13,MUTED,false);
-        Button startDisabled=button(proxy,getString(R.string.psx_start_disabled));
-        startDisabled.setEnabled(false);
+        proxyPilotKey=new EditText(this);
+        proxyPilotKey.setHint(getString(R.string.psx_pilot_key_hint));
+        proxyPilotKey.setTextColor(WHITE);
+        proxyPilotKey.setHintTextColor(MUTED);
+        proxyPilotKey.setSingleLine(true);
+        proxyPilotKey.setInputType(InputType.TYPE_CLASS_TEXT
+            | InputType.TYPE_TEXT_VARIATION_PASSWORD
+            | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        proxy.addView(proxyPilotKey,new LinearLayout.LayoutParams(-1,-2));
+        text(proxy,getString(R.string.psx_pilot_key_notice),12,MUTED,false);
+        proxyPilotStart=button(proxy,getString(R.string.psx_pilot_start));
+        proxyPilotStart.setOnClickListener(v->requestPilotStart());
         Button stopProxy=button(proxy,getString(R.string.psx_stop_revoke));
         stopProxy.setOnClickListener(v->{
+            proxyPilot.stop();
             proxyStatusGeneration++;
             proxyStatusButton.setEnabled(true);
             prefs.edit().putBoolean("psx_read_notice_v1",false)
-                .putBoolean("consented",false).putBoolean("monitor_active",false).apply();
+                .putBoolean("consented",false).putBoolean("monitor_active",false)
+                .putBoolean("psx_sharing_active",false).apply();
+            if(proxyPilotKey!=null)proxyPilotKey.setText("");
             proxyDisclosureAcknowledgement.setChecked(false);
             stopMonitor();
             if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
@@ -299,8 +328,75 @@ public final class NetworkHomeActivity extends Activity {
         button(advertising,getString(R.string.ads_disable)).setOnClickListener(v->demoBanner.withdraw());
         button(advertising,getString(R.string.ads_privacy)).setOnClickListener(v->demoBanner.privacy());
 
-        text(page,getString(R.string.network_demo_disclaimer),12,MUTED,false);
-        text(page,getString(R.string.nui_36),12,ORANGE,false);
+        text(page,getString(R.string.network_pilot_disclaimer),12,MUTED,false);
+        text(page,getString(R.string.psx_pilot_warning),12,ORANGE,false);
+    }
+
+    private void requestPilotStart(){
+        if(!prefs.getBoolean("consented",false)
+            || !prefs.getBoolean("psx_read_notice_v1",false)){
+            android.widget.Toast.makeText(this,getString(R.string.psx_pilot_consent_required),
+                android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+        if(Build.VERSION.SDK_INT>=33
+            && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                !=PackageManager.PERMISSION_GRANTED){
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                REQUEST_PROXY_NOTIFICATIONS);
+            return;
+        }
+        String key=proxyPilotKey.getText().toString().trim();
+        if(!ProxiesPilotController.validFarmerKey(key)){
+            android.widget.Toast.makeText(this,getString(R.string.psx_pilot_key_invalid),
+                android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+        new AlertDialog.Builder(this)
+            .setTitle(getString(R.string.psx_pilot_confirm_title))
+            .setMessage(getString(R.string.psx_pilot_confirm_message))
+            .setNegativeButton(getString(R.string.nui_14),null)
+            .setPositiveButton(getString(R.string.psx_pilot_start),(dialog,which)->startPilot(key))
+            .show();
+    }
+
+    private void startPilot(String key){
+        try{
+            String installId=getSharedPreferences("marsx_beta",MODE_PRIVATE)
+                .getString("worker_id","");
+            proxyPilot.start(key,installId);
+            proxyPilotKey.setText("");
+            prefs.edit().putBoolean("psx_sharing_active",true).apply();
+            proxyPilotStart.setEnabled(false);
+        }catch(RuntimeException error){
+            prefs.edit().putBoolean("psx_sharing_active",false).apply();
+            proxyPilotStatus.setText(getString(R.string.psx_pilot_error));
+            proxyPilotStart.setEnabled(true);
+        }
+    }
+
+    private void updatePilotStatus(String status,String deviceId){
+        if(proxyPilotStatus==null)return;
+        int label;
+        if("CONNECTED".equals(status))label=R.string.psx_pilot_connected;
+        else if("CONNECTING".equals(status))label=R.string.psx_pilot_connecting;
+        else if("ERROR".equals(status))label=R.string.psx_pilot_error;
+        else label=R.string.psx_pilot_stopped;
+        String value=getString(label);
+        if(deviceId!=null&&!deviceId.isEmpty())value+="\n"+getString(R.string.psx_pilot_device_id)+": "+deviceId;
+        proxyPilotStatus.setText(value);
+        boolean running="CONNECTED".equals(status)||"CONNECTING".equals(status);
+        prefs.edit().putBoolean("psx_sharing_active",running).apply();
+        if(proxyPilotStart!=null)proxyPilotStart.setEnabled(!running);
+    }
+
+    @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] results){
+        super.onRequestPermissionsResult(requestCode,permissions,results);
+        if(requestCode==REQUEST_PROXY_NOTIFICATIONS){
+            if(results.length>0&&results[0]==PackageManager.PERMISSION_GRANTED)requestPilotStart();
+            else android.widget.Toast.makeText(this,getString(R.string.psx_pilot_notification_required),
+                android.widget.Toast.LENGTH_LONG).show();
+        }
     }
 
     private String readinessLine(int name, String state) {
