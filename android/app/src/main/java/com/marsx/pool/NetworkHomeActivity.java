@@ -42,6 +42,9 @@ public final class NetworkHomeActivity extends Activity {
     private TextView proxyPrerequisites;
     private CheckBox proxyDisclosureAcknowledgement;
     private Button proxyStatusButton;
+    private TextView liveBoardStatus;
+    private Button liveBoardButton;
+    private int liveBoardGeneration;
     // Invalidate an outstanding HTTPS callback if consent is withdrawn.
     private int proxyStatusGeneration;
     private long sessionBytes;
@@ -194,6 +197,13 @@ public final class NetworkHomeActivity extends Activity {
         proxyStatusButton=button(proxy,getString(R.string.psx_check_backend));
         proxyStatusButton.setOnClickListener(v->queryProxiesReadiness());
 
+        // Separate, real-time GLOBAL public vendor counts. Never confused with
+        // the current farmer account, registered device traffic or earnings.
+        text(proxy,getString(R.string.psx_live_scope),13,ORANGE,true);
+        liveBoardStatus=text(proxy,getString(R.string.psx_live_initial),14,WHITE,false);
+        liveBoardButton=button(proxy,getString(R.string.psx_live_refresh));
+        liveBoardButton.setOnClickListener(v->queryLiveGlobalBoard());
+
         LinearLayout earnings=card(getString(R.string.network_earnings_heading));
         text(earnings,getString(R.string.nui_21),16,WHITE,true);
         text(earnings,getString(R.string.nui_22),12,MUTED,false);
@@ -313,6 +323,37 @@ public final class NetworkHomeActivity extends Activity {
                 proxyStatusButton.setEnabled(true);
             });
         }, "marsx-v19-proxy-readiness").start();
+    }
+
+    /** Manual, user-triggered LIVE vendor statistics via read-only Supabase. */
+    private void queryLiveGlobalBoard() {
+        final int requestId=++liveBoardGeneration;
+        liveBoardButton.setEnabled(false);
+        liveBoardStatus.setText(getString(R.string.psx_live_loading));
+        new Thread(()->{
+            NetworkLiveBoardClient.Result fetched=null;
+            try {
+                fetched=NetworkLiveBoardClient.fetch();
+            } catch(Exception ignored) {
+                // Do not invent zeros on network errors, bad upstream data or timeout.
+            }
+            final NetworkLiveBoardClient.Result result=fetched;
+            runOnUiThread(()->{
+                if(isFinishing() || isDestroyed() || requestId!=liveBoardGeneration) return;
+                if(result==null) {
+                    liveBoardStatus.setText(getString(R.string.psx_live_unavailable));
+                } else {
+                    liveBoardStatus.setText(
+                        getString(R.string.psx_live_total)+": "+result.total+"\\n"
+                        +getString(R.string.psx_live_online)+": "+result.online+"\\n"
+                        +getString(R.string.psx_live_mobile)+": "+result.mobile+"\\n"
+                        +getString(R.string.psx_live_residential)+": "+result.residential+"\\n"
+                        +getString(R.string.psx_live_datacenter)+": "+result.datacenter+"\\n"
+                        +getString(R.string.psx_live_updated)+": "+result.sampledAt);
+                }
+                liveBoardButton.setEnabled(true);
+            });
+        },"marsx-v19-public-live-board").start();
     }
 
     private void startMonitor(){
