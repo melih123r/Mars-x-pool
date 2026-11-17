@@ -19,21 +19,27 @@ def fetch(method="GET", data=None):
         return error.code, json.loads(error.read().decode("utf-8"))
 
 code, body = fetch()
-if code != 200:
-    raise RuntimeError(f"Proxies.sx GLOBAL live board not available (HTTP {code}): {body.get('error')}")
-assert body["schema_version"] == 1, body
-assert body["source"] == "proxies.sx", body
-assert body["scope"] == "global_public_peer_board", body
-assert body["account_specific"] is False, body
-assert body["status"] == "live", body
-assert body["sharing_enabled"] is False, body
-assert body["sdk_credentials_issued"] is False, body
-stats = body["metrics"]
-assert set(stats) == {"total", "online", "mobile", "residential", "datacenter"}, stats
-assert all(type(stats[k]) is int and stats[k] >= 0 for k in stats), stats
-assert stats["online"] <= stats["total"], stats
-assert body["sampled_at"].endswith("Z"), body
-print("PASS: REAL GLOBAL peer data returned by Proxies.sx, not account numbers:", stats)
+if code == 503:
+    assert body["status"] == "not_configured", body
+    assert body["error"] == "provider_authentication_required", body
+    assert "metrics" not in body, body
+    print("PASS: Vendor API requires farmer credentials; no fabricated live counts.")
+elif code == 200:
+    assert body["schema_version"] == 1, body
+    assert body["source"] == "proxies.sx", body
+    assert body["scope"] == "global_public_peer_board", body
+    assert body["account_specific"] is False, body
+    assert body["status"] == "live", body
+    assert body["sharing_enabled"] is False, body
+    assert body["sdk_credentials_issued"] is False, body
+    stats = body["metrics"]
+    assert set(stats) == {"total", "online", "mobile", "residential", "datacenter"}, stats
+    assert all(type(stats[k]) is int and stats[k] >= 0 for k in stats), stats
+    assert stats["online"] <= stats["total"], stats
+    assert body["sampled_at"].endswith("Z"), body
+    print("PASS: REAL GLOBAL peer data returned by Proxies.sx, not account numbers:", stats)
+else:
+    raise RuntimeError(f"Proxies.sx GLOBAL board API not verified (HTTP {code}): {body.get('error')}")
 
 code, body = fetch("POST", b"{}")
 assert code == 405, (code, body)
