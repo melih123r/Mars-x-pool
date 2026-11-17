@@ -18,7 +18,7 @@
 
 ## Test
 
-- `python3 scripts/test-network-live-board.py`: Gerçek kaynak verisi varsa doğrular; sağlayıcı kimlik doğrulaması istiyorsa `503 not_configured` yanıtını ve **sahte metrik olmamasını** doğrular.
+- `python3 scripts/test-network-live-board.py`: Gerçek kaynak verisi varsa doğrular; sağlayıcı özet uç noktası eksik/erişilemezse `502 unavailable` yanıtını ve **sahte metrik olmamasını** doğrular.
 - `scripts/check-network-home-ui.py`: 30 dilde genel ve özel veri etiketlerini, güvenli oturumu ve 60 saniyelik yenilemeyi doğrular.
 - Android birim testleri `NetworkLiveBoardClientTest`, `NetworkFarmerLiveClientTest` ve `NetworkStatusClientTest` ile veri kaynağı/izin sınırlarını doğrular.
 - Android 8/13 emülatörleri 30 dil, tek sayfa ve yenileme kontrolünü sınar.

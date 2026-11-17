@@ -24,6 +24,13 @@ if code == 503:
     assert body["error"] == "provider_authentication_required", body
     assert "metrics" not in body, body
     print("PASS: Vendor API requires farmer credentials; no fabricated live counts.")
+elif code == 502:
+    assert body["status"] == "unavailable", body
+    assert body["error"] in {
+        "provider_unavailable", "provider_unavailable_or_invalid_response"
+    }, body
+    assert "metrics" not in body, body
+    print("PASS: Vendor global summary is unavailable/incomplete; no fabricated live counts.")
 elif code == 200:
     assert body["schema_version"] == 1, body
     assert body["source"] == "proxies.sx", body
