@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Rangkaian GLOBAL Proxies.sx • Bukan akaun anda"</string>
+  <string name="psx_live_refresh" formatted="false">"Dapatkan data rangkaian langsung"</string>
+  <string name="psx_live_loading" formatted="false">"Mendapatkan data sebenar…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Data tidak tersedia • Bilangan tidak diketahui"</string>
+  <string name="psx_live_initial" formatted="false">"Belum disemak"</string>
+  <string name="psx_live_total" formatted="false">"Jumlah peer"</string>
+  <string name="psx_live_online" formatted="false">"Dalam talian sekarang"</string>
+  <string name="psx_live_mobile" formatted="false">"Mudah alih"</string>
+  <string name="psx_live_residential" formatted="false">"Kediaman"</string>
+  <string name="psx_live_datacenter" formatted="false">"Pusat data"</string>
+  <string name="psx_live_updated" formatted="false">"Diukur (UTC)"</string>
+</resources>

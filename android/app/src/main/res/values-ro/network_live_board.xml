@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Rețea GLOBALĂ Proxies.sx • Nu este contul tău"</string>
+  <string name="psx_live_refresh" formatted="false">"Obține datele de rețea live"</string>
+  <string name="psx_live_loading" formatted="false">"Se preiau date reale…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Date indisponibile • Numere necunoscute"</string>
+  <string name="psx_live_initial" formatted="false">"Neverificat încă"</string>
+  <string name="psx_live_total" formatted="false">"Total dispozitive"</string>
+  <string name="psx_live_online" formatted="false">"Online acum"</string>
+  <string name="psx_live_mobile" formatted="false">"Mobile"</string>
+  <string name="psx_live_residential" formatted="false">"Rezidențiale"</string>
+  <string name="psx_live_datacenter" formatted="false">"Centre de date"</string>
+  <string name="psx_live_updated" formatted="false">"Măsurat (UTC)"</string>
+</resources>

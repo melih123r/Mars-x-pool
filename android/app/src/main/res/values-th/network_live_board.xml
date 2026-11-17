@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"เครือข่าย Proxies.sx ทั่วโลก • ไม่ใช่บัญชีของคุณ"</string>
+  <string name="psx_live_refresh" formatted="false">"ดึงข้อมูลเครือข่ายสด"</string>
+  <string name="psx_live_loading" formatted="false">"กำลังดึงข้อมูลจริง…"</string>
+  <string name="psx_live_unavailable" formatted="false">"ไม่มีข้อมูลสด • ไม่ทราบจำนวน"</string>
+  <string name="psx_live_initial" formatted="false">"ยังไม่ตรวจสอบ"</string>
+  <string name="psx_live_total" formatted="false">"อุปกรณ์ทั้งหมด"</string>
+  <string name="psx_live_online" formatted="false">"ออนไลน์ตอนนี้"</string>
+  <string name="psx_live_mobile" formatted="false">"มือถือ"</string>
+  <string name="psx_live_residential" formatted="false">"ที่อยู่อาศัย"</string>
+  <string name="psx_live_datacenter" formatted="false">"ศูนย์ข้อมูล"</string>
+  <string name="psx_live_updated" formatted="false">"วัดเวลา (UTC)"</string>
+</resources>

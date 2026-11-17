@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Proxies.sx 全球网络 • 非您的供应商账户"</string>
+  <string name="psx_live_refresh" formatted="false">"获取实时网络数据"</string>
+  <string name="psx_live_loading" formatted="false">"正在获取真实网络数据…"</string>
+  <string name="psx_live_unavailable" formatted="false">"实时数据不可用 • 数量未知"</string>
+  <string name="psx_live_initial" formatted="false">"尚未查询"</string>
+  <string name="psx_live_total" formatted="false">"节点总数"</string>
+  <string name="psx_live_online" formatted="false">"当前在线"</string>
+  <string name="psx_live_mobile" formatted="false">"移动网络"</string>
+  <string name="psx_live_residential" formatted="false">"住宅网络"</string>
+  <string name="psx_live_datacenter" formatted="false">"数据中心"</string>
+  <string name="psx_live_updated" formatted="false">"测量时间 (UTC)"</string>
+</resources>

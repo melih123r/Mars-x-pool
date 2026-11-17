@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Proxies.sx 全球網路 • 非您的供應商帳戶"</string>
+  <string name="psx_live_refresh" formatted="false">"取得即時網路資料"</string>
+  <string name="psx_live_loading" formatted="false">"正在取得真實網路資料…"</string>
+  <string name="psx_live_unavailable" formatted="false">"即時資料無法取得 • 數量未知"</string>
+  <string name="psx_live_initial" formatted="false">"尚未查詢"</string>
+  <string name="psx_live_total" formatted="false">"節點總數"</string>
+  <string name="psx_live_online" formatted="false">"目前上線"</string>
+  <string name="psx_live_mobile" formatted="false">"行動網路"</string>
+  <string name="psx_live_residential" formatted="false">"住宅網路"</string>
+  <string name="psx_live_datacenter" formatted="false">"資料中心"</string>
+  <string name="psx_live_updated" formatted="false">"測量時間 (UTC)"</string>
+</resources>

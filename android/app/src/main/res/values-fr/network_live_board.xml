@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Réseau GLOBAL Proxies.sx • Pas votre compte fermier"</string>
+  <string name="psx_live_refresh" formatted="false">"Charger les données réseau en direct"</string>
+  <string name="psx_live_loading" formatted="false">"Chargement des données réelles…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Données indisponibles • Chiffres inconnus"</string>
+  <string name="psx_live_initial" formatted="false">"Pas encore vérifié"</string>
+  <string name="psx_live_total" formatted="false">"Pairs au total"</string>
+  <string name="psx_live_online" formatted="false">"En ligne"</string>
+  <string name="psx_live_mobile" formatted="false">"Mobile"</string>
+  <string name="psx_live_residential" formatted="false">"Résidentiel"</string>
+  <string name="psx_live_datacenter" formatted="false">"Centre de données"</string>
+  <string name="psx_live_updated" formatted="false">"Mesuré (UTC)"</string>
+</resources>

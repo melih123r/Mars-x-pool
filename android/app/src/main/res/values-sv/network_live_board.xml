@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Proxies.sx GLOBALT nätverk • Inte ditt konto"</string>
+  <string name="psx_live_refresh" formatted="false">"Hämta nätverksdata live"</string>
+  <string name="psx_live_loading" formatted="false">"Hämtar faktiska data…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Data saknas • Antal okända"</string>
+  <string name="psx_live_initial" formatted="false">"Inte kontrollerat ännu"</string>
+  <string name="psx_live_total" formatted="false">"Totalt antal noder"</string>
+  <string name="psx_live_online" formatted="false">"Online nu"</string>
+  <string name="psx_live_mobile" formatted="false">"Mobil"</string>
+  <string name="psx_live_residential" formatted="false">"Bostad"</string>
+  <string name="psx_live_datacenter" formatted="false">"Datacenter"</string>
+  <string name="psx_live_updated" formatted="false">"Mätt (UTC)"</string>
+</resources>

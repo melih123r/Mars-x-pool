@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Mạng TOÀN CẦU Proxies.sx • Không phải tài khoản của bạn"</string>
+  <string name="psx_live_refresh" formatted="false">"Lấy dữ liệu mạng trực tiếp"</string>
+  <string name="psx_live_loading" formatted="false">"Đang lấy dữ liệu thực…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Không có dữ liệu • Không rõ số lượng"</string>
+  <string name="psx_live_initial" formatted="false">"Chưa kiểm tra"</string>
+  <string name="psx_live_total" formatted="false">"Tổng số nút"</string>
+  <string name="psx_live_online" formatted="false">"Đang trực tuyến"</string>
+  <string name="psx_live_mobile" formatted="false">"Di động"</string>
+  <string name="psx_live_residential" formatted="false">"Dân cư"</string>
+  <string name="psx_live_datacenter" formatted="false">"Trung tâm dữ liệu"</string>
+  <string name="psx_live_updated" formatted="false">"Đo lúc (UTC)"</string>
+</resources>

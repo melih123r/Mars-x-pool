@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Proxies.sx GLOBAL network • Not your farmer account"</string>
+  <string name="psx_live_refresh" formatted="false">"Fetch live network data"</string>
+  <string name="psx_live_loading" formatted="false">"Fetching actual network data…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Live data unavailable • Counts unknown"</string>
+  <string name="psx_live_initial" formatted="false">"Not checked yet"</string>
+  <string name="psx_live_total" formatted="false">"Total peers"</string>
+  <string name="psx_live_online" formatted="false">"Online now"</string>
+  <string name="psx_live_mobile" formatted="false">"Mobile"</string>
+  <string name="psx_live_residential" formatted="false">"Residential"</string>
+  <string name="psx_live_datacenter" formatted="false">"Datacenter"</string>
+  <string name="psx_live_updated" formatted="false">"Measured (UTC)"</string>
+</resources>
