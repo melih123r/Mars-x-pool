@@ -42,6 +42,8 @@ public final class NetworkHomeActivity extends Activity {
     private TextView proxyPrerequisites;
     private CheckBox proxyDisclosureAcknowledgement;
     private Button proxyStatusButton;
+    // Invalidate an outstanding HTTPS callback if consent is withdrawn.
+    private int proxyStatusGeneration;
     private long sessionBytes;
     private long totalSessionBytes;
     private long totalSessionSeconds;
@@ -176,6 +178,8 @@ public final class NetworkHomeActivity extends Activity {
         startDisabled.setEnabled(false);
         Button stopProxy=button(proxy,getString(R.string.psx_stop_revoke));
         stopProxy.setOnClickListener(v->{
+            proxyStatusGeneration++;
+            proxyStatusButton.setEnabled(true);
             prefs.edit().putBoolean("psx_read_notice_v1",false)
                 .putBoolean("consented",false).putBoolean("monitor_active",false).apply();
             proxyDisclosureAcknowledgement.setChecked(false);
@@ -183,6 +187,7 @@ public final class NetworkHomeActivity extends Activity {
             if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
             refreshConsent();
             if(proxyServerStatus!=null)proxyServerStatus.setText(getString(R.string.psx_off_status));
+            if(proxyPrerequisites!=null)proxyPrerequisites.setText(getString(R.string.psx_prerequisites));
         });
         proxyServerStatus=text(proxy,getString(R.string.psx_off_status),13,MUTED,false);
         proxyPrerequisites=text(proxy,getString(R.string.psx_prerequisites),12,MUTED,false);
@@ -270,32 +275,44 @@ public final class NetworkHomeActivity extends Activity {
         text(page,getString(R.string.nui_36),12,ORANGE,false);
     }
 
-    /** Manually checks the read-only Supabase status API, NOT the Proxies.sx relay. */
+    private String readinessLine(int name, String state) {
+        return "• " + getString(name) + ": " + getString(
+            "verified".equals(state) ? R.string.psx_check_verified : R.string.psx_check_unverified);
+    }
+
+    private String readinessChecklist(NetworkStatusClient.Result result) {
+        return readinessLine(R.string.psx_check_partner, result.partnerAgreement) + "\\n"
+            + readinessLine(R.string.psx_check_credential, result.perDeviceCredentials) + "\\n"
+            + readinessLine(R.string.psx_check_isolation, result.privateNetworkIsolation) + "\\n"
+            + readinessLine(R.string.psx_check_distribution, result.distributionPolicy);
+    }
+
+    /** Manually checks read-only Supabase readiness; does NOT reach the Proxies.sx relay. */
     private void queryProxiesReadiness() {
+        final int requestGeneration = ++proxyStatusGeneration;
         proxyStatusButton.setEnabled(false);
         proxyServerStatus.setText(getString(R.string.psx_checking));
-        new Thread(()->{
-            boolean expectedBlocked=false;
+        new Thread(() -> {
+            NetworkStatusClient.Result fetched = null;
             try {
-                NetworkStatusClient.Result result=NetworkStatusClient.fetch();
-                expectedBlocked="not_ready".equals(result.status)
-                    && !result.sharingEnabled && !result.relayConnected
-                    && "unverified".equals(result.partnerAgreement)
-                    && "unverified".equals(result.perDeviceCredentials)
-                    && "unverified".equals(result.privateNetworkIsolation)
-                    && "unverified".equals(result.distributionPolicy);
+                fetched = NetworkStatusClient.fetch();
             } catch(Exception ignored) {
-                // Fail closed. Do not log network identifiers or response contents.
+                // A failed/changed server contract never enables sharing.
+                // Do not log network identifiers or remote response contents.
             }
-            final boolean safe=expectedBlocked;
-            runOnUiThread(()->{
-                if(isFinishing() || isDestroyed())return;
-                proxyServerStatus.setText(getString(safe
-                    ?R.string.psx_backend_available:R.string.psx_backend_unavailable));
-                proxyPrerequisites.setText(getString(R.string.psx_prerequisites));
+            final NetworkStatusClient.Result result = fetched;
+            runOnUiThread(() -> {
+                if(isFinishing() || isDestroyed() || requestGeneration != proxyStatusGeneration) return;
+                if(result != null) {
+                    proxyServerStatus.setText(getString(R.string.psx_backend_available));
+                    proxyPrerequisites.setText(readinessChecklist(result));
+                } else {
+                    proxyServerStatus.setText(getString(R.string.psx_backend_unavailable));
+                    proxyPrerequisites.setText(getString(R.string.psx_prerequisites));
+                }
                 proxyStatusButton.setEnabled(true);
             });
-        },"marsx-v19-proxy-readiness").start();
+        }, "marsx-v19-proxy-readiness").start();
     }
 
     private void startMonitor(){
