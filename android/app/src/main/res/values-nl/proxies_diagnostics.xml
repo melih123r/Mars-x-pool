@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"Partnerovereenkomst"</string>
+    <string name="psx_check_credential" formatted="false">"SDK-sleutels per apparaat"</string>
+    <string name="psx_check_isolation" formatted="false">"Isolatie van lokaal netwerk"</string>
+    <string name="psx_check_distribution" formatted="false">"Goedkeuring distributie/Play"</string>
+    <string name="psx_check_verified" formatted="false">"Geverifieerd"</string>
+    <string name="psx_check_unverified" formatted="false">"Niet geverifieerd"</string>
+</resources>

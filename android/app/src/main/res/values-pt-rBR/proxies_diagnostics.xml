@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"Acordo com parceiro"</string>
+    <string name="psx_check_credential" formatted="false">"Credenciais SDK por dispositivo"</string>
+    <string name="psx_check_isolation" formatted="false">"Isolamento da rede local"</string>
+    <string name="psx_check_distribution" formatted="false">"Aprovação distribuição/Play"</string>
+    <string name="psx_check_verified" formatted="false">"Verificado"</string>
+    <string name="psx_check_unverified" formatted="false">"Não verificado"</string>
+</resources>

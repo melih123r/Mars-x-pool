@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"Perjanjian rakan"</string>
+    <string name="psx_check_credential" formatted="false">"Identiti SDK setiap peranti"</string>
+    <string name="psx_check_isolation" formatted="false">"Pengasingan rangkaian setempat"</string>
+    <string name="psx_check_distribution" formatted="false">"Kelulusan edaran/Play"</string>
+    <string name="psx_check_verified" formatted="false">"Disahkan"</string>
+    <string name="psx_check_unverified" formatted="false">"Belum disahkan"</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"অংশীদার চুক্তি"</string>
+    <string name="psx_check_credential" formatted="false">"প্রতি ডিভাইস SDK পরিচয়"</string>
+    <string name="psx_check_isolation" formatted="false">"স্থানীয় নেটওয়ার্ক বিচ্ছিন্নতা"</string>
+    <string name="psx_check_distribution" formatted="false">"বিতরণ/Play অনুমোদন"</string>
+    <string name="psx_check_verified" formatted="false">"যাচাইকৃত"</string>
+    <string name="psx_check_unverified" formatted="false">"যাচাই হয়নি"</string>
+</resources>

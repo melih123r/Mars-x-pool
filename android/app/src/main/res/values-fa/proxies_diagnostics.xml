@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"قرارداد شریک"</string>
+    <string name="psx_check_credential" formatted="false">"شناسه SDK ویژه هر دستگاه"</string>
+    <string name="psx_check_isolation" formatted="false">"جداسازی شبکه محلی"</string>
+    <string name="psx_check_distribution" formatted="false">"مجوز انتشار/Play"</string>
+    <string name="psx_check_verified" formatted="false">"تأیید شده"</string>
+    <string name="psx_check_unverified" formatted="false">"تأیید نشده"</string>
+</resources>

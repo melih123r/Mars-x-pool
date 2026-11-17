@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"Perjanjian mitra"</string>
+    <string name="psx_check_credential" formatted="false">"Kredensial SDK per perangkat"</string>
+    <string name="psx_check_isolation" formatted="false">"Isolasi jaringan lokal"</string>
+    <string name="psx_check_distribution" formatted="false">"Persetujuan distribusi/Play"</string>
+    <string name="psx_check_verified" formatted="false">"Terverifikasi"</string>
+    <string name="psx_check_unverified" formatted="false">"Belum diverifikasi"</string>
+</resources>

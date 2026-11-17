@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"Partneravtal"</string>
+    <string name="psx_check_credential" formatted="false">"SDK-uppgifter per enhet"</string>
+    <string name="psx_check_isolation" formatted="false">"Isolering av lokalt nätverk"</string>
+    <string name="psx_check_distribution" formatted="false">"Godkännande för distribution/Play"</string>
+    <string name="psx_check_verified" formatted="false">"Verifierad"</string>
+    <string name="psx_check_unverified" formatted="false">"Inte verifierad"</string>
+</resources>
