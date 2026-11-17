@@ -281,9 +281,9 @@ public final class NetworkHomeActivity extends Activity {
     }
 
     private String readinessChecklist(NetworkStatusClient.Result result) {
-        return readinessLine(R.string.psx_check_partner, result.partnerAgreement) + "\\n"
-            + readinessLine(R.string.psx_check_credential, result.perDeviceCredentials) + "\\n"
-            + readinessLine(R.string.psx_check_isolation, result.privateNetworkIsolation) + "\\n"
+        return readinessLine(R.string.psx_check_partner, result.partnerAgreement) + "\n"
+            + readinessLine(R.string.psx_check_credential, result.perDeviceCredentials) + "\n"
+            + readinessLine(R.string.psx_check_isolation, result.privateNetworkIsolation) + "\n"
             + readinessLine(R.string.psx_check_distribution, result.distributionPolicy);
     }
 
