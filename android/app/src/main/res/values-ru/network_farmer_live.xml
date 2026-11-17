@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Частный аккаунт поставщика Proxies.sx • Не данные глобальной сети"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Войдите в MARS-X для просмотра разрешённых данных аккаунта"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Войти через Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Обновить частный аккаунт"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Данные частного аккаунта недоступны"</string>
+  <string name="psx_farmer_verified" formatted="false">"Проверено"</string>
+  <string name="psx_farmer_listed" formatted="false">"Опубликовано"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Реальный трафик"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Доход по данным провайдера"</string>
+</resources>

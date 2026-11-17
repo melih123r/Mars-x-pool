@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Akaun pembekal Proxies.sx peribadi • Bukan data rangkaian global"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Log masuk ke MARS-X untuk melihat data peribadi yang dibenarkan"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Log masuk dengan Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Muat semula akaun peribadi"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Data akaun peribadi tidak tersedia"</string>
+  <string name="psx_farmer_verified" formatted="false">"Disahkan"</string>
+  <string name="psx_farmer_listed" formatted="false">"Disenaraikan"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Trafik sebenar"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Pendapatan dilaporkan penyedia"</string>
+</resources>

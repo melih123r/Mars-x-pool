@@ -156,3 +156,23 @@ live_client=Path("android/app/src/main/java/com/marsx/pool/NetworkLiveBoardClien
 for marker in ("global_public_peer_board", '"account_specific"', '"source"', 'setInstanceFollowRedirects(false)'):
     assert marker in live_client, marker
 print("MARS-X v19 GLOBAL live network data labels, 30 languages and client: PASS")
+
+farmer_keys={
+    "psx_farmer_scope","psx_farmer_sign_in_required","psx_farmer_sign_in",
+    "psx_farmer_refresh","psx_farmer_unavailable","psx_farmer_verified",
+    "psx_farmer_listed","psx_farmer_traffic","psx_farmer_earnings"
+}
+for folder in ["values", *translations.values(), "values-in"]:
+    path=root/folder/"network_farmer_live.xml"
+    xml=ET.parse(path).getroot()
+    found={item.attrib["name"] for item in xml.findall("string")}
+    assert found==farmer_keys,(folder,sorted(farmer_keys-found),sorted(found-farmer_keys))
+assert "NetworkFarmerLiveClient.fetch(session,installId)" in source
+assert "farmerLiveHandler.postDelayed(farmerLiveRefresh,60000)" in source
+assert "startActivity(new Intent(this,MainActivity.class))" in source
+farmer_client=Path("android/app/src/main/java/com/marsx/pool/NetworkFarmerLiveClient.java").read_text(encoding="utf-8")
+for marker in ("farmer_account_private", '"account_specific"', '"Authorization"',
+               '"X-Install-Id"', "setInstanceFollowRedirects(false)"):
+    assert marker in farmer_client, marker
+assert "psx_" not in farmer_client
+print("MARS-X v19 PRIVATE farmer totals, MARS-X auth, 30 languages and auto-refresh: PASS")

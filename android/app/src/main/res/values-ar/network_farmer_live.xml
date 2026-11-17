@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"حساب مزوّد Proxies.sx الخاص • ليس بيانات الشبكة العامة"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"سجّل الدخول إلى MARS-X لعرض بيانات الحساب الخاص المصرّح بها"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"تسجيل الدخول باستخدام Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"تحديث الحساب الخاص"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"بيانات الحساب الخاص غير متاحة"</string>
+  <string name="psx_farmer_verified" formatted="false">"تم التحقق"</string>
+  <string name="psx_farmer_listed" formatted="false">"مدرج"</string>
+  <string name="psx_farmer_traffic" formatted="false">"حركة البيانات الفعلية"</string>
+  <string name="psx_farmer_earnings" formatted="false">"الأرباح المبلّغ عنها من المزوّد"</string>
+</resources>

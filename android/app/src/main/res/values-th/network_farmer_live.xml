@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"บัญชีผู้ให้บริการ Proxies.sx ส่วนตัว • ไม่ใช่ข้อมูลเครือข่ายทั่วโลก"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"ลงชื่อเข้าใช้ MARS-X เพื่อดูข้อมูลบัญชีส่วนตัวที่ได้รับอนุญาต"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"ลงชื่อเข้าใช้ด้วย Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"รีเฟรชบัญชีส่วนตัว"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"ไม่สามารถรับข้อมูลบัญชีส่วนตัวได้"</string>
+  <string name="psx_farmer_verified" formatted="false">"ยืนยันแล้ว"</string>
+  <string name="psx_farmer_listed" formatted="false">"ลงรายการแล้ว"</string>
+  <string name="psx_farmer_traffic" formatted="false">"ปริมาณข้อมูลจริง"</string>
+  <string name="psx_farmer_earnings" formatted="false">"รายได้ที่ผู้ให้บริการรายงาน"</string>
+</resources>

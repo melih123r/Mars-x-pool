@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Proxies.sx 非公開プロバイダーアカウント • グローバルネットワークデータではありません"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"認証済みの非公開データを見るには MARS-X にログインしてください"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Google でログイン"</string>
+  <string name="psx_farmer_refresh" formatted="false">"非公開アカウントを更新"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"非公開アカウントデータを取得できません"</string>
+  <string name="psx_farmer_verified" formatted="false">"確認済み"</string>
+  <string name="psx_farmer_listed" formatted="false">"掲載中"</string>
+  <string name="psx_farmer_traffic" formatted="false">"実トラフィック"</string>
+  <string name="psx_farmer_earnings" formatted="false">"プロバイダー報告の収益"</string>
+</resources>

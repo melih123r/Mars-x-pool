@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Tài khoản nhà cung cấp Proxies.sx riêng tư • Không phải dữ liệu mạng toàn cầu"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Đăng nhập MARS-X để xem dữ liệu tài khoản riêng tư được phép"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Đăng nhập bằng Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Làm mới tài khoản riêng tư"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Không thể lấy dữ liệu tài khoản riêng tư"</string>
+  <string name="psx_farmer_verified" formatted="false">"Đã xác minh"</string>
+  <string name="psx_farmer_listed" formatted="false">"Đã niêm yết"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Lưu lượng thực"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Thu nhập do nhà cung cấp báo cáo"</string>
+</resources>

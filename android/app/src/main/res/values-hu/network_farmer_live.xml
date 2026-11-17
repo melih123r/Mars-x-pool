@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Privát Proxies.sx szolgáltatói fiók • Nem globális hálózati adat"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Jelentkezz be a MARS-X-be az engedélyezett privát adatokhoz"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Bejelentkezés Google-lel"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Privát fiók frissítése"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"A privát fiók adatai nem érhetők el"</string>
+  <string name="psx_farmer_verified" formatted="false">"Ellenőrzött"</string>
+  <string name="psx_farmer_listed" formatted="false">"Listázott"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Valós forgalom"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Szolgáltató által jelentett bevétel"</string>
+</resources>

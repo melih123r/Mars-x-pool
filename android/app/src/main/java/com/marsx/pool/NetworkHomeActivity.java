@@ -11,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.TrafficStats;
 import android.content.Context;
+import android.content.Intent;
 import java.util.Locale;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -45,6 +46,13 @@ public final class NetworkHomeActivity extends Activity {
     private TextView liveBoardStatus;
     private Button liveBoardButton;
     private int liveBoardGeneration;
+    private TextView farmerLiveStatus;
+    private Button farmerLiveButton;
+    private int farmerLiveGeneration;
+    private boolean farmerLiveLoading;
+    private boolean farmerLiveResumed;
+    private final Handler farmerLiveHandler=new Handler(Looper.getMainLooper());
+    private final Runnable farmerLiveRefresh=()->queryPrivateFarmerAccount(true);
     // Invalidate an outstanding HTTPS callback if consent is withdrawn.
     private int proxyStatusGeneration;
     private long sessionBytes;
@@ -204,6 +212,16 @@ public final class NetworkHomeActivity extends Activity {
         liveBoardButton=button(proxy,getString(R.string.psx_live_refresh));
         liveBoardButton.setOnClickListener(v->queryLiveGlobalBoard());
 
+        // PRIVATE publisher-account aggregates. Authentication uses the existing
+        // encrypted MARS-X Google session; the Proxies.sx key remains server-side.
+        text(proxy,getString(R.string.psx_farmer_scope),13,ORANGE,true);
+        farmerLiveStatus=text(proxy,getString(R.string.psx_farmer_sign_in_required),14,WHITE,false);
+        farmerLiveButton=button(proxy,getString(R.string.psx_farmer_sign_in));
+        farmerLiveButton.setOnClickListener(v->{
+            if(currentAuthSession()==null) startActivity(new Intent(this,MainActivity.class));
+            else queryPrivateFarmerAccount(false);
+        });
+
         LinearLayout earnings=card(getString(R.string.network_earnings_heading));
         text(earnings,getString(R.string.nui_21),16,WHITE,true);
         text(earnings,getString(R.string.nui_22),12,MUTED,false);
@@ -356,6 +374,60 @@ public final class NetworkHomeActivity extends Activity {
         },"marsx-v19-public-live-board").start();
     }
 
+    private String currentAuthSession() {
+        return new SecureStore(this).get("auth_session");
+    }
+
+    private String privateMetric(Double value, String suffix) {
+        return value==null ? getString(R.string.psx_live_unavailable)
+            : String.format(Locale.US,"%.6f %s",value,suffix);
+    }
+
+    /** Read-only private account refresh. It cannot initialize or start the SDK. */
+    private void queryPrivateFarmerAccount(boolean automatic) {
+        if(!farmerLiveResumed || farmerLiveLoading) return;
+        String session=currentAuthSession();
+        String installId=getSharedPreferences("marsx_beta",MODE_PRIVATE)
+            .getString("worker_id","");
+        if(session==null || installId.isEmpty()) {
+            farmerLiveStatus.setText(getString(R.string.psx_farmer_sign_in_required));
+            farmerLiveButton.setText(getString(R.string.psx_farmer_sign_in));
+            return;
+        }
+        final int requestId=++farmerLiveGeneration;
+        farmerLiveLoading=true;
+        farmerLiveButton.setEnabled(false);
+        farmerLiveButton.setText(getString(R.string.psx_live_loading));
+        new Thread(()->{
+            NetworkFarmerLiveClient.Result fetched=null;
+            try { fetched=NetworkFarmerLiveClient.fetch(session,installId); }
+            catch(Exception ignored) { /* Unknown stays unknown; no fake zero values. */ }
+            final NetworkFarmerLiveClient.Result result=fetched;
+            runOnUiThread(()->{
+                if(isFinishing() || isDestroyed() || requestId!=farmerLiveGeneration) return;
+                farmerLiveLoading=false;
+                farmerLiveButton.setEnabled(true);
+                farmerLiveButton.setText(getString(R.string.psx_farmer_refresh));
+                if(result==null) {
+                    farmerLiveStatus.setText(getString(R.string.psx_farmer_unavailable));
+                } else {
+                    farmerLiveStatus.setText(
+                        getString(R.string.psx_live_total)+": "+result.total+"\n"
+                        +getString(R.string.psx_live_online)+": "+result.online+"\n"
+                        +getString(R.string.psx_farmer_verified)+": "+result.verified+"\n"
+                        +getString(R.string.psx_farmer_listed)+": "+result.listed+"\n"
+                        +getString(R.string.psx_live_mobile)+": "+result.mobile+"\n"
+                        +getString(R.string.psx_live_residential)+": "+result.residential+"\n"
+                        +getString(R.string.psx_live_datacenter)+": "+result.datacenter+"\n"
+                        +getString(R.string.psx_farmer_traffic)+": "+privateMetric(result.trafficGb,"GB")+"\n"
+                        +getString(R.string.psx_farmer_earnings)+": "+privateMetric(result.providerEarnings,"USD")+"\n"
+                        +getString(R.string.psx_live_updated)+": "+result.sampledAt);
+                }
+                if(farmerLiveResumed) farmerLiveHandler.postDelayed(farmerLiveRefresh,60000);
+            });
+        },automatic?"marsx-v19-farmer-auto":"marsx-v19-farmer-manual").start();
+    }
+
     private void startMonitor(){
         stopMonitor();
         monitorStart=SystemClock.elapsedRealtime();
@@ -405,17 +477,30 @@ public final class NetworkHomeActivity extends Activity {
         else if(active)monitorHandler.post(monitorTick);
     }
     @Override protected void onDestroy(){
+        farmerLiveHandler.removeCallbacks(farmerLiveRefresh);
+        farmerLiveGeneration++;
         if(demoBanner!=null)demoBanner.destroy();
         stopMonitor();
         super.onDestroy();
     }
     @Override protected void onPause(){
+        farmerLiveResumed=false;
+        farmerLiveLoading=false;
+        farmerLiveGeneration++;
+        farmerLiveHandler.removeCallbacks(farmerLiveRefresh);
         if(demoBanner!=null)demoBanner.pause();
         super.onPause();
     }
     @Override protected void onResume(){
         super.onResume();
+        farmerLiveResumed=true;
         if(demoBanner!=null)demoBanner.resume();
+        if(farmerLiveButton!=null) {
+            farmerLiveButton.setText(currentAuthSession()==null
+                ?getString(R.string.psx_farmer_sign_in):getString(R.string.psx_farmer_refresh));
+            farmerLiveHandler.removeCallbacks(farmerLiveRefresh);
+            queryPrivateFarmerAccount(true);
+        }
     }
 
     private void refreshConsent(){
