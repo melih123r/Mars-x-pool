@@ -4,9 +4,13 @@
  * Critical: this is the vendor's *GLOBAL* board, NOT the current publisher's
  * device fleet, earnings, account balance, or proof of proxy admission.
  * Do not expose peer names, IPs, device IDs, earnings, or upstream JSON.
- * No secrets, SDK initialization or outbound proxy traffic are involved.
+ * The optional SDK/device key, if configured, stays SERVER-SIDE and is used
+ * only to read aggregate upstream stats. No SDK initialization or proxy
+ * traffic is involved. Avoid logging upstream responses or secrets.
  */
 const BOARD_URL = "https://api.proxies.sx/v1/peer/board";
+// 60-second best-effort per-isolate cache limits vendor polling for public reads.
+let cache: { expires: number; response: Record<string, unknown> } | null = null;
 const COMMON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store, max-age=0",
@@ -34,15 +38,31 @@ Deno.serve(async (request: Request) => {
     });
   }
 
+  if (cache && cache.expires > Date.now()) {
+    return respond(cache.response, 200);
+  }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 7000);
   try {
+    const serverKey = Deno.env.get("PROXIES_SX_FARMER_API_KEY");
     const upstream = await fetch(BOARD_URL, {
       method: "GET",
-      headers: { accept: "application/json" },
+      headers: {
+        accept: "application/json",
+        ...(serverKey ? { "X-API-Key": serverKey } : {}),
+      },
       signal: controller.signal,
       redirect: "error",
     });
+    if (upstream.status === 401 || upstream.status === 403) {
+      return respond({
+        schema_version: 1,
+        source: "proxies.sx",
+        scope: "global_public_peer_board",
+        status: "not_configured",
+        error: "provider_authentication_required",
+      }, 503);
+    }
     if (!upstream.ok) {
       return respond({
         schema_version: 1,
@@ -69,7 +89,7 @@ Deno.serve(async (request: Request) => {
       || online! > total!) {
       throw new Error("invalid_provider_board");
     }
-    return respond({
+    const result = {
       schema_version: 1,
       source: "proxies.sx",
       scope: "global_public_peer_board",
@@ -79,7 +99,9 @@ Deno.serve(async (request: Request) => {
       account_specific: false,
       sdk_credentials_issued: false,
       sharing_enabled: false,
-    }, 200);
+    };
+    cache = { expires: Date.now() + 60000, response: result };
+    return respond(result, 200);
   } catch (_error) {
     return respond({
       schema_version: 1,
