@@ -197,3 +197,12 @@ for marker in ("farmer_account_private", '"account_specific"', '"Authorization"'
     assert marker in farmer_client, marker
 assert "psx_" not in farmer_client
 print("MARS-X v19 PRIVATE farmer totals, MARS-X auth, 30 languages and auto-refresh: PASS")
+
+# The public AGENT summary has no API-key requirement in provider docs.
+# Never forward the farmer key to public/global statistics endpoints.
+public_board=Path("android/supabase/network-live-board/index.ts").read_text(encoding="utf-8")
+assert "/v1/peer/agents/stats/summary" in public_board
+assert "/v1/peer/board" not in public_board
+assert "PROXIES_SX_FARMER_API_KEY" not in public_board
+assert '"X-API-Key"' not in public_board
+print("MARS-X public AGENT stats use official read-only route with NO farmer key: PASS")
