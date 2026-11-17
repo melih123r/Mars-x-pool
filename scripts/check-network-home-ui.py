@@ -119,3 +119,21 @@ for folder in ["values", *translations.values(), "values-in"]:
     found={s.attrib["name"] for s in xml.findall("string")}
     assert found==keys, (folder,sorted(keys-found),sorted(found-keys))
 print("MARS-X v19 proxy readiness: fail-closed, 30 languages, default resources PASS")
+
+diagnostic_keys={
+    "psx_check_partner","psx_check_credential","psx_check_isolation",
+    "psx_check_distribution","psx_check_verified","psx_check_unverified"
+}
+for folder in ["values", *translations.values(), "values-in"]:
+    path=root/folder/"proxies_diagnostics.xml"
+    xml=ET.parse(path).getroot()
+    found={s.attrib["name"] for s in xml.findall("string")}
+    assert found==diagnostic_keys, (folder,sorted(diagnostic_keys-found),sorted(found-diagnostic_keys))
+assert "readinessChecklist(result)" in source
+assert "requestGeneration != proxyStatusGeneration" in source
+assert "proxyStatusGeneration++;" in source
+client=Path("android/app/src/main/java/com/marsx/pool/NetworkStatusClient.java").read_text(encoding="utf-8")
+for contract_marker in ('"sdk_credentials_issued"', '"supported_actions"', '"read_status"',
+                        'setInstanceFollowRedirects(false)', 'allowed.length() != 1'):
+    assert contract_marker in client, contract_marker
+print("MARS-X v19 diagnostic gate translations & strict read-only client: PASS")
