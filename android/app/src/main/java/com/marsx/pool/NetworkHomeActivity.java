@@ -344,11 +344,11 @@ public final class NetworkHomeActivity extends Activity {
                     liveBoardStatus.setText(getString(R.string.psx_live_unavailable));
                 } else {
                     liveBoardStatus.setText(
-                        getString(R.string.psx_live_total)+": "+result.total+"\\n"
-                        +getString(R.string.psx_live_online)+": "+result.online+"\\n"
-                        +getString(R.string.psx_live_mobile)+": "+result.mobile+"\\n"
-                        +getString(R.string.psx_live_residential)+": "+result.residential+"\\n"
-                        +getString(R.string.psx_live_datacenter)+": "+result.datacenter+"\\n"
+                        getString(R.string.psx_live_total)+": "+result.total+"\n"
+                        +getString(R.string.psx_live_online)+": "+result.online+"\n"
+                        +getString(R.string.psx_live_mobile)+": "+result.mobile+"\n"
+                        +getString(R.string.psx_live_residential)+": "+result.residential+"\n"
+                        +getString(R.string.psx_live_datacenter)+": "+result.datacenter+"\n"
                         +getString(R.string.psx_live_updated)+": "+result.sampledAt);
                 }
                 liveBoardButton.setEnabled(true);
