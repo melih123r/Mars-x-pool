@@ -30,6 +30,8 @@ jobs:
         run: python3 scripts/check-network-home-ui.py
       - name: Live read-only proxy readiness check
         run: python3 scripts/test-network-status-live.py
+      - name: Live Proxies.sx public network telemetry
+        run: python3 scripts/test-network-live-board.py
 
   android:
     runs-on: ubuntu-latest
