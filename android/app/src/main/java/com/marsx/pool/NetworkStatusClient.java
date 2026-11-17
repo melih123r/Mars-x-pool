@@ -21,6 +21,7 @@ public final class NetworkStatusClient {
         public final boolean serverReachable;
         public final boolean sharingEnabled;
         public final boolean relayConnected;
+        public final boolean sdkCredentialsIssued;
         public final String status;
         public final String partnerAgreement;
         public final String perDeviceCredentials;
@@ -28,10 +29,12 @@ public final class NetworkStatusClient {
         public final String distributionPolicy;
 
         private Result(boolean serverReachable, boolean sharingEnabled,
-                       boolean relayConnected, String status, JSONObject checks) throws JSONException {
+                       boolean relayConnected, boolean sdkCredentialsIssued,
+                       String status, JSONObject checks) throws JSONException {
             this.serverReachable = serverReachable;
             this.sharingEnabled = sharingEnabled;
             this.relayConnected = relayConnected;
+            this.sdkCredentialsIssued = sdkCredentialsIssued;
             this.status = status;
             this.partnerAgreement = validatedCheck(checks, "partner_agreement");
             this.perDeviceCredentials = validatedCheck(checks, "per_device_sdk_credentials");
@@ -55,11 +58,23 @@ public final class NetworkStatusClient {
                 || !value.has("status")
                 || !value.has("sharing_enabled")
                 || !value.has("proxies_relay_connected")
-                || !value.has("readiness_checks")) {
+                || !value.has("readiness_checks")
+                || !value.has("sdk_credentials_issued")
+                || !value.has("supported_actions")) {
             throw new JSONException("Unexpected readiness response");
         }
-        return new Result(true, value.getBoolean("sharing_enabled"),
-                value.getBoolean("proxies_relay_connected"), value.getString("status"),
+        boolean sharing = value.getBoolean("sharing_enabled");
+        boolean connected = value.getBoolean("proxies_relay_connected");
+        boolean credentialsIssued = value.getBoolean("sdk_credentials_issued");
+        org.json.JSONArray allowed = value.getJSONArray("supported_actions");
+        // Only accept a strictly read-only, disabled response. Server-side readiness
+        // is never authorization to activate a local proxy agent.
+        if (!"not_ready".equals(value.getString("status")) || sharing || connected
+                || credentialsIssued || allowed.length() != 1
+                || !"read_status".equals(allowed.getString(0))) {
+            throw new JSONException("Unexpected proxy service readiness state");
+        }
+        return new Result(true, false, false, false, "not_ready",
                 value.getJSONObject("readiness_checks"));
     }
 
@@ -71,6 +86,7 @@ public final class NetworkStatusClient {
         connection.setReadTimeout(7000);
         connection.setRequestProperty("Accept", "application/json");
         connection.setUseCaches(false);
+        connection.setInstanceFollowRedirects(false);
         try {
             if (connection.getResponseCode() != 200) {
                 throw new IOException("HTTP " + connection.getResponseCode());
