@@ -1,14 +1,15 @@
 /**
- * Live, PUBLIC Proxies.sx peer-network board.
+ * Live, public Proxies.sx aggregate agent summary.
  *
- * Critical: this is the vendor's *GLOBAL* board, NOT the current publisher's
+ * Critical: this is the vendor's *GLOBAL AGENT* summary, NOT the publisher's
  * device fleet, earnings, account balance, or proof of proxy admission.
  * Do not expose peer names, IPs, device IDs, earnings, or upstream JSON.
- * The optional SDK/device key, if configured, stays SERVER-SIDE and is used
- * only to read aggregate upstream stats. No SDK initialization or proxy
- * traffic is involved. Avoid logging upstream responses or secrets.
+ * This endpoint does not need credentials according to the official API
+ * contract. Do NOT forward any farmer credentials here. No SDK initialization,
+ * payouts, or proxy traffic is involved. Avoid logging raw responses or secrets.
  */
-const BOARD_URL = "https://api.proxies.sx/v1/peer/board";
+// Documented no-auth aggregate agent summary (NOT a farmer-account dashboard).
+const BOARD_URL = "https://api.proxies.sx/v1/peer/agents/stats/summary";
 // 60-second best-effort per-isolate cache limits vendor polling for public reads.
 let cache: { expires: number; response: Record<string, unknown> } | null = null;
 const COMMON_HEADERS = {
@@ -44,13 +45,11 @@ Deno.serve(async (request: Request) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 7000);
   try {
-    const serverKey = Deno.env.get("PROXIES_SX_FARMER_API_KEY");
+    // This endpoint is listed as public in the official API matrix.
+    // NEVER send the farmer credential to a global public counter.
     const upstream = await fetch(BOARD_URL, {
       method: "GET",
-      headers: {
-        accept: "application/json",
-        ...(serverKey ? { "X-API-Key": serverKey } : {}),
-      },
+      headers: { accept: "application/json" },
       signal: controller.signal,
       redirect: "error",
     });
@@ -78,6 +77,8 @@ Deno.serve(async (request: Request) => {
     if (raw.length > 2000000) throw new Error("upstream_too_large");
     const board = JSON.parse(raw);
     const stats = board?.stats;
+    // Vendor response fields were not verifiable without live provider access.
+    // Do not assume the payload is valid or manufacture zero counts.
     // Data stays unavailable until the vendor produces the documented shape.
     // Missing data MUST NOT be displayed as zero devices.
     const total = nonnegativeInteger(stats?.total);
