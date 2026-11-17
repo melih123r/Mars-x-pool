@@ -137,3 +137,22 @@ for contract_marker in ('"sdk_credentials_issued"', '"supported_actions"', '"rea
                         'setInstanceFollowRedirects(false)', 'allowed.length() != 1'):
     assert contract_marker in client, contract_marker
 print("MARS-X v19 diagnostic gate translations & strict read-only client: PASS")
+
+# Real telemetry is Proxies.sx GLOBAL public counts, never farmer account balance.
+board_keys={
+    "psx_live_scope","psx_live_refresh","psx_live_loading",
+    "psx_live_unavailable","psx_live_initial","psx_live_total",
+    "psx_live_online","psx_live_mobile","psx_live_residential",
+    "psx_live_datacenter","psx_live_updated"
+}
+for folder in ["values", *translations.values(), "values-in"]:
+    path=root/folder/"network_live_board.xml"
+    xml=ET.parse(path).getroot()
+    found={item.attrib["name"] for item in xml.findall("string")}
+    assert found==board_keys,(folder,sorted(board_keys-found),sorted(found-board_keys))
+assert "NetworkLiveBoardClient.fetch()" in source
+assert "liveBoardButton.setOnClickListener" in source
+live_client=Path("android/app/src/main/java/com/marsx/pool/NetworkLiveBoardClient.java").read_text(encoding="utf-8")
+for marker in ("global_public_peer_board", '"account_specific"', '"source"', 'setInstanceFollowRedirects(false)'):
+    assert marker in live_client, marker
+print("MARS-X v19 GLOBAL live network data labels, 30 languages and client: PASS")

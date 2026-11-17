@@ -89,6 +89,11 @@ try:
     assert 'name="psx_read_notice_v1" value="false"' in prefs_xml, prefs_xml
     assert 'name="consented" value="false"' in prefs_xml, prefs_xml
     report['checks']['same-page Proxies.sx disclosure and revoke']='PASS'
+    # The live public network button is on the same single scroll page.
+    tap(proxy['psx_live_refresh'],scroll=True)
+    assert proxy['psx_live_scope'] in textset(ui())
+    report['checks']['same-page GLOBAL live network refresh control']='PASS'
+    shot('en-global-live-network')
     shot('en-proxy-off')
 
     shot('en-home')
