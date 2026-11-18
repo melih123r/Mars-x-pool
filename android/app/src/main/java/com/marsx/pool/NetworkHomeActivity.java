@@ -50,6 +50,7 @@ public final class NetworkHomeActivity extends Activity {
     private EditText proxyPilotKey;
     private Button proxyPilotForgetKey;
     private TextView proxyPilotSavedKeyStatus;
+    private boolean keyChangeRestartRequired;
     private Button proxyPilotStart;
     private TextView proxyPilotStatus;
     private ProxiesPilotController proxyPilot;
@@ -225,7 +226,6 @@ public final class NetworkHomeActivity extends Activity {
             | InputType.TYPE_TEXT_VARIATION_PASSWORD
             | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         proxy.addView(proxyPilotKey,new LinearLayout.LayoutParams(-1,-2));
-        text(proxy,getString(R.string.psx_pilot_key_notice),12,MUTED,false);
         proxyPilotSavedKeyStatus=text(proxy,"",12,MUTED,false);
         proxyPilotForgetKey=button(proxy,getString(R.string.psx_key_forget));
         proxyPilotForgetKey.setOnClickListener(v->new AlertDialog.Builder(this)
@@ -236,9 +236,9 @@ public final class NetworkHomeActivity extends Activity {
                 try {
                     proxyPilot.forgetFarmerKey();
                     proxyPilotKey.setText("");
+                    keyChangeRestartRequired=true;
                     refreshSavedSdkKeyUi();
-                    // The vendor SDK init() is process-global. Changing the key
-                    // requires restarting the app, not reusing its old instance.
+                    // SDK init() is process-global. Do not reuse the old instance.
                     proxyPilotStart.setEnabled(false);
                     proxyPilotStatus.setText(getString(R.string.psx_key_restart_required));
                 } catch (RuntimeException ignored) {
@@ -376,6 +376,11 @@ public final class NetworkHomeActivity extends Activity {
     }
 
     private void requestPilotStart(){
+        if(keyChangeRestartRequired){
+            android.widget.Toast.makeText(this,getString(R.string.psx_key_restart_required),
+                android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
         if(!prefs.getBoolean("consented",false)
             || !prefs.getBoolean("psx_read_notice_v1",false)){
             android.widget.Toast.makeText(this,getString(R.string.psx_pilot_consent_required),
@@ -446,7 +451,7 @@ public final class NetworkHomeActivity extends Activity {
         proxyPilotStatus.setText(value);
         boolean running="CONNECTED".equals(status)||"CONNECTING".equals(status);
         prefs.edit().putBoolean("psx_sharing_active",running).apply();
-        if(proxyPilotStart!=null)proxyPilotStart.setEnabled(!running);
+        if(proxyPilotStart!=null)proxyPilotStart.setEnabled(!running && !keyChangeRestartRequired);
     }
 
     @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] results){
