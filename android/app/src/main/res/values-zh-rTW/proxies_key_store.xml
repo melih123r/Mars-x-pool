@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"SDK 金鑰已加密儲存在手機。分享不會自動啟動。"</string>
+  <string name="psx_key_first_time" formatted="false">"只須輸入一次新的 SDK 裝置金鑰，便會安全儲存。"</string>
+  <string name="psx_key_forget" formatted="false">"忘記已儲存的 SDK 金鑰"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"停止分享並從手機刪除金鑰？使用其他金鑰前請重新啟動應用程式。"</string>
+  <string name="psx_key_restart_required" formatted="false">"金鑰已刪除。重新啟動應用程式後可輸入另一個金鑰。"</string>
+</resources>

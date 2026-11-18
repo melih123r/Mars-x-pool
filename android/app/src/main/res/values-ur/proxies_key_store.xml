@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"SDK کلید فون میں خفیہ طور پر محفوظ ہے۔ شیئرنگ خود شروع نہیں ہوگی۔"</string>
+  <string name="psx_key_first_time" formatted="false">"نئی SDK کلید ایک بار درج کریں۔ اگلی بار کے لیے محفوظ ہوگی۔"</string>
+  <string name="psx_key_forget" formatted="false">"محفوظ SDK کلید حذف کریں"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"شیئرنگ بند کرکے کلید حذف کریں؟ نئی کلید کے لیے ایپ دوبارہ کھولیں۔"</string>
+  <string name="psx_key_restart_required" formatted="false">"کلید حذف ہوگئی۔ نئی کلید کے لیے ایپ دوبارہ چلائیں۔"</string>
+</resources>

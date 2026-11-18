@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"کلید SDK به‌صورت رمزگذاری‌شده در گوشی ذخیره شد. اشتراک‌گذاری خودکار شروع نمی‌شود."</string>
+  <string name="psx_key_first_time" formatted="false">"کلید جدید SDK را یک بار وارد کنید تا امن ذخیره شود."</string>
+  <string name="psx_key_forget" formatted="false">"فراموش کردن کلید SDK ذخیره‌شده"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"اشتراک را متوقف و کلید را حذف کنیم؟ برای کلید دیگر برنامه را دوباره باز کنید."</string>
+  <string name="psx_key_restart_required" formatted="false">"کلید حذف شد. برای کلید دیگر برنامه را دوباره باز کنید."</string>
+</resources>

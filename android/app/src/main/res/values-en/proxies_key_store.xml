@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"SDK key securely saved on this phone. Sharing never auto-starts."</string>
+  <string name="psx_key_first_time" formatted="false">"Enter a new SDK device key once. It will be remembered securely for next time."</string>
+  <string name="psx_key_forget" formatted="false">"Forget saved SDK key"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Stop sharing and erase the saved key from this phone? Restart the app before using a new key."</string>
+  <string name="psx_key_restart_required" formatted="false">"Key erased. Restart the app to enter a different key."</string>
+</resources>

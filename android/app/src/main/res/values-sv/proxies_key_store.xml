@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"SDK-nyckeln sparas krypterad på telefonen. Delning startar aldrig automatiskt."</string>
+  <string name="psx_key_first_time" formatted="false">"Ange en ny SDK-nyckel en gång. Den sparas säkert för nästa gång."</string>
+  <string name="psx_key_forget" formatted="false">"Glöm sparad SDK-nyckel"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Stoppa delning och radera nyckeln? Starta om appen för att byta nyckel."</string>
+  <string name="psx_key_restart_required" formatted="false">"Nyckeln raderad. Starta om appen för att ange en annan."</string>
+</resources>

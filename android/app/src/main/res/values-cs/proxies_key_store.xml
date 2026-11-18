@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"Klíč SDK je šifrovaně uložen v telefonu. Sdílení se samo nespouští."</string>
+  <string name="psx_key_first_time" formatted="false">"Nový klíč SDK zadejte jen jednou. Bezpečně se uloží."</string>
+  <string name="psx_key_forget" formatted="false">"Zapomenout uložený klíč SDK"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Zastavit sdílení a smazat klíč z telefonu? Pro jiný klíč restartujte aplikaci."</string>
+  <string name="psx_key_restart_required" formatted="false">"Klíč smazán. Pro další klíč restartujte aplikaci."</string>
+</resources>

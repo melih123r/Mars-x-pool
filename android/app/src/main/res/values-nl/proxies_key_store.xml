@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"SDK-sleutel versleuteld opgeslagen op dit toestel. Delen start nooit automatisch."</string>
+  <string name="psx_key_first_time" formatted="false">"Voer een nieuwe SDK-sleutel één keer in. Die wordt veilig bewaard."</string>
+  <string name="psx_key_forget" formatted="false">"Opgeslagen SDK-sleutel vergeten"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Delen stoppen en de sleutel van dit toestel wissen? Start de app opnieuw voor een andere sleutel."</string>
+  <string name="psx_key_restart_required" formatted="false">"Sleutel gewist. Start de app opnieuw voor een andere sleutel."</string>
+</resources>

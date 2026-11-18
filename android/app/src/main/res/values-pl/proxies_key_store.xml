@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"Klucz SDK zapisany szyfrowany na telefonie. Udostępnianie nie włączy się samo."</string>
+  <string name="psx_key_first_time" formatted="false">"Wpisz nowy klucz SDK tylko raz. Zostanie bezpiecznie zapamiętany."</string>
+  <string name="psx_key_forget" formatted="false">"Usuń zapisany klucz SDK"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Zatrzymać udostępnianie i usunąć klucz z telefonu? Uruchom aplikację ponownie, aby zmienić klucz."</string>
+  <string name="psx_key_restart_required" formatted="false">"Klucz usunięty. Uruchom aplikację ponownie, aby użyć innego."</string>
+</resources>

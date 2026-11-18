@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"Ключ SDK зашифрован и сохранён на телефоне. Раздача не включается автоматически."</string>
+  <string name="psx_key_first_time" formatted="false">"Введите новый ключ SDK один раз. Он будет безопасно сохранён."</string>
+  <string name="psx_key_forget" formatted="false">"Забыть сохранённый ключ SDK"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Остановить раздачу и удалить ключ с телефона? Для нового ключа перезапустите приложение."</string>
+  <string name="psx_key_restart_required" formatted="false">"Ключ удалён. Перезапустите приложение для другого ключа."</string>
+</resources>

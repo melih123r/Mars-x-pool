@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"Το κλειδί SDK αποθηκεύτηκε κρυπτογραφημένο. Η κοινή χρήση δεν ξεκινά αυτόματα."</string>
+  <string name="psx_key_first_time" formatted="false">"Πληκτρολογήστε νέο κλειδί SDK μία φορά. Θα αποθηκευτεί με ασφάλεια."</string>
+  <string name="psx_key_forget" formatted="false">"Διαγραφή αποθηκευμένου κλειδιού SDK"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Διακοπή κοινής χρήσης και διαγραφή κλειδιού; Επανεκκινήστε την εφαρμογή για νέο κλειδί."</string>
+  <string name="psx_key_restart_required" formatted="false">"Το κλειδί διαγράφηκε. Επανεκκινήστε την εφαρμογή για άλλο."</string>
+</resources>

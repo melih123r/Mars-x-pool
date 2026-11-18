@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"SDK কী ফোনে এনক্রিপ্ট করে সংরক্ষিত। শেয়ারিং নিজে থেকে চালু হবে না।"</string>
+  <string name="psx_key_first_time" formatted="false">"নতুন SDK কী একবার দিন। পরের ব্যবহারের জন্য নিরাপদে রাখা হবে।"</string>
+  <string name="psx_key_forget" formatted="false">"সংরক্ষিত SDK কী মুছুন"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"শেয়ারিং বন্ধ করে কী মুছবেন? অন্য কী ব্যবহার করতে অ্যাপ পুনরায় চালু করুন।"</string>
+  <string name="psx_key_restart_required" formatted="false">"কী মুছে গেছে। অন্য কী দিতে অ্যাপ পুনরায় চালু করুন।"</string>
+</resources>

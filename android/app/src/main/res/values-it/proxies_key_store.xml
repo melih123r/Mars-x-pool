@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"Chiave SDK salvata e cifrata sul telefono. La condivisione non parte automaticamente."</string>
+  <string name="psx_key_first_time" formatted="false">"Inserisci una nuova chiave SDK una sola volta. Verrà conservata in modo sicuro."</string>
+  <string name="psx_key_forget" formatted="false">"Dimentica la chiave SDK salvata"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Interrompere la condivisione ed eliminare la chiave? Riavvia l'app per cambiarla."</string>
+  <string name="psx_key_restart_required" formatted="false">"Chiave eliminata. Riavvia l'app per inserirne un'altra."</string>
+</resources>

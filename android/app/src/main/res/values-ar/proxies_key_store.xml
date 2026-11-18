@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"تم حفظ مفتاح SDK مشفرًا على هذا الهاتف. لن تبدأ المشاركة تلقائيًا."</string>
+  <string name="psx_key_first_time" formatted="false">"أدخل مفتاح SDK جديدًا مرة واحدة. سيُحفظ بأمان للاستخدام القادم."</string>
+  <string name="psx_key_forget" formatted="false">"حذف مفتاح SDK المحفوظ"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"هل تريد إيقاف المشاركة وحذف المفتاح؟ أعد تشغيل التطبيق لاستخدام مفتاح آخر."</string>
+  <string name="psx_key_restart_required" formatted="false">"تم حذف المفتاح. أعد تشغيل التطبيق لإدخال مفتاح آخر."</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"Ключ SDK зашифровано збережено на телефоні. Передача не вмикається автоматично."</string>
+  <string name="psx_key_first_time" formatted="false">"Введіть новий ключ SDK один раз. Він зберігатиметься безпечно."</string>
+  <string name="psx_key_forget" formatted="false">"Забути збережений ключ SDK"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Зупинити передачу й видалити ключ? Для іншого ключа перезапустіть застосунок."</string>
+  <string name="psx_key_restart_required" formatted="false">"Ключ видалено. Перезапустіть застосунок для нового ключа."</string>
+</resources>

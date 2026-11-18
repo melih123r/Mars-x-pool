@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"SDK-Schlüssel auf diesem Telefon verschlüsselt gespeichert. Freigabe startet nie automatisch."</string>
+  <string name="psx_key_first_time" formatted="false">"Neuen SDK-Geräteschlüssel einmal eingeben. Er wird sicher für später gespeichert."</string>
+  <string name="psx_key_forget" formatted="false">"Gespeicherten SDK-Schlüssel löschen"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Freigabe stoppen und Schlüssel von diesem Telefon löschen? Für einen neuen Schlüssel App neu starten."</string>
+  <string name="psx_key_restart_required" formatted="false">"Schlüssel gelöscht. App für einen anderen Schlüssel neu starten."</string>
+</resources>

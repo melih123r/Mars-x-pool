@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"Kunci SDK tersimpan terenkripsi di ponsel. Berbagi tidak otomatis dimulai."</string>
+  <string name="psx_key_first_time" formatted="false">"Masukkan kunci SDK baru sekali saja. Akan disimpan aman untuk berikutnya."</string>
+  <string name="psx_key_forget" formatted="false">"Lupakan kunci SDK tersimpan"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Hentikan berbagi dan hapus kunci? Mulai ulang aplikasi untuk kunci lainnya."</string>
+  <string name="psx_key_restart_required" formatted="false">"Kunci dihapus. Mulai ulang aplikasi untuk memasukkan kunci lain."</string>
+</resources>

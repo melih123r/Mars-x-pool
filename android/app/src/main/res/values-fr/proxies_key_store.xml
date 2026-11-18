@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"Clé SDK chiffrée et enregistrée sur ce téléphone. Le partage ne démarre jamais seul."</string>
+  <string name="psx_key_first_time" formatted="false">"Saisissez une nouvelle clé SDK une seule fois. Elle sera conservée de manière sécurisée."</string>
+  <string name="psx_key_forget" formatted="false">"Oublier la clé SDK enregistrée"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Arrêter le partage et effacer la clé de ce téléphone ? Redémarrez l'application pour changer de clé."</string>
+  <string name="psx_key_restart_required" formatted="false">"Clé effacée. Redémarrez l'application pour utiliser une autre clé."</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"SDK 密钥已加密保存在此手机。共享不会自动启动。"</string>
+  <string name="psx_key_first_time" formatted="false">"只需输入一次新的 SDK 设备密钥，即可安全保存供下次使用。"</string>
+  <string name="psx_key_forget" formatted="false">"忘记已保存的 SDK 密钥"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"停止共享并从手机删除密钥？使用其他密钥前请重启应用。"</string>
+  <string name="psx_key_restart_required" formatted="false">"密钥已删除。重启应用后可输入其他密钥。"</string>
+</resources>

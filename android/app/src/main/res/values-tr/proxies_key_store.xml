@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_key_secure_saved" formatted="false">"SDK anahtarı bu telefonda şifreli kaydedildi. Paylaşım otomatik başlamaz."</string>
+  <string name="psx_key_first_time" formatted="false">"Yeni SDK cihaz anahtarını bir kez gir. Sonraki kullanım için güvenle saklanacak."</string>
+  <string name="psx_key_forget" formatted="false">"Kaydedilen SDK anahtarını unut"</string>
+  <string name="psx_key_forget_confirm" formatted="false">"Paylaşım durdurulsun ve kaydedilen anahtar bu telefondan silinsin mi? Yeni anahtar için uygulamayı yeniden açmalısın."</string>
+  <string name="psx_key_restart_required" formatted="false">"Anahtar silindi. Farklı anahtar girmek için uygulamayı yeniden başlat."</string>
+</resources>
