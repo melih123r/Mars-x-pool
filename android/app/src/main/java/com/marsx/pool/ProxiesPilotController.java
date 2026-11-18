@@ -2,6 +2,8 @@ package com.marsx.pool;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.util.Base64;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -12,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import kotlin.Unit;
 import sx.proxies.peer.ProxiesPeerSDK;
 import sx.proxies.peer.service.PeerProxyService;
+import sx.proxies.peer.util.SecurePreferences;
 
 /**
  * Single-operator SDK pilot for devices explicitly controlled by the account owner.
@@ -56,6 +59,26 @@ final class ProxiesPilotController {
         return key != null && key.matches("psx_[A-Za-z0-9]{20,160}");
     }
 
+    /** A key fingerprint (not the key) prevents reusing another key's saved device. */
+    private void resetOtherKeyDeviceCredentials(byte[] requestedDigest) {
+        String fingerprint = Base64.encodeToString(requestedDigest,
+            Base64.NO_WRAP | Base64.NO_PADDING | Base64.URL_SAFE);
+        SharedPreferences keyGuard = context.getSharedPreferences(
+            "marsx_proxy_pilot_guard", Context.MODE_PRIVATE);
+        String previous = keyGuard.getString("sdk_key_sha256", null);
+        if (fingerprint.equals(previous)) return;
+        // SDK 1.3.2 stores these four fields in Keystore-backed preferences.
+        // Changing the key requires a NEW registration, not refreshing the
+        // prior key\'s token and silently attributing traffic to that device.
+        boolean cleared = SecurePreferences.INSTANCE.get(context).edit()
+            .remove("device_id").remove("device_token")
+            .remove("refresh_token").remove("relay_url").commit();
+        if (!cleared || !keyGuard.edit()
+                .putString("sdk_key_sha256", fingerprint).commit()) {
+            throw new IllegalStateException("Cannot safely rotate SDK registration");
+        }
+    }
+
     private static byte[] digest(String key) {
         try {
             return MessageDigest.getInstance("SHA-256").digest(
@@ -81,6 +104,7 @@ final class ProxiesPilotController {
         consentedToRun = true;
         try {
             if (sdk == null) {
+                resetOtherKeyDeviceCredentials(requestedKeyDigest);
                 ProxiesPeerSDK.Config config = new ProxiesPeerSDK.Config(
                     "https://api.proxies.sx/v1",
                     null,
