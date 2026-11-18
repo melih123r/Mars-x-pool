@@ -23,16 +23,33 @@ final class ProxiesPilotController {
         void onStatus(ProxiesPeerSDK.Status status, String deviceId);
     }
 
+    private static ProxiesPilotController shared;
     private final Context context;
-    private final Listener listener;
+    private volatile Listener listener;
     private ProxiesPeerSDK sdk;
     private byte[] initializedKeyDigest;
     private volatile boolean consentedToRun;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    ProxiesPilotController(Context context, Listener listener) {
+    private ProxiesPilotController(Context context, Listener listener) {
         this.context = context.getApplicationContext();
         this.listener = listener;
+    }
+
+    /** SDK init() is process-global; keep its key and listener guard process-global too. */
+    static synchronized ProxiesPilotController attach(Context context, Listener listener) {
+        if (shared == null) shared = new ProxiesPilotController(context, listener);
+        else shared.listener = listener;
+        return shared;
+    }
+
+    synchronized void detach(Listener expected) {
+        if (listener == expected) listener = null;
+    }
+
+    private void notifyStatus(ProxiesPeerSDK.Status status) {
+        Listener current = listener;
+        if (current != null) current.onStatus(status, deviceId());
     }
 
     static boolean validFarmerKey(String key) {
@@ -72,7 +89,7 @@ final class ProxiesPilotController {
                     status -> {
                         // An old asynchronous CONNECTED event must not undo Stop/Revoke.
                         if (consentedToRun || status == ProxiesPeerSDK.Status.STOPPED) {
-                            listener.onStatus(status, deviceId());
+                            notifyStatus(status);
                         } else {
                             // SDK 1.3.2 registers/connects asynchronously. A late
                             // connection after a user-initiated stop MUST be shut down.
@@ -87,7 +104,7 @@ final class ProxiesPilotController {
                 initializedKeyDigest = requestedKeyDigest;
             }
             sdk.start();
-            if (consentedToRun) listener.onStatus(sdk.getStatus(), deviceId());
+            if (consentedToRun) notifyStatus(sdk.getStatus());
         } catch (RuntimeException error) {
             consentedToRun = false;
             throw error;
@@ -109,7 +126,7 @@ final class ProxiesPilotController {
             // SDK's ACTION_STOP startService() path, stopService() is legal
             // when the application is backgrounded on modern Android.
             context.stopService(new Intent(context, PeerProxyService.class));
-            listener.onStatus(ProxiesPeerSDK.Status.STOPPED, deviceId());
+            notifyStatus(ProxiesPeerSDK.Status.STOPPED);
         }
     }
 }
