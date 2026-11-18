@@ -206,3 +206,27 @@ assert "/v1/peer/board" not in public_board
 assert "PROXIES_SX_FARMER_API_KEY" not in public_board
 assert '"X-API-Key"' not in public_board
 print("MARS-X public AGENT stats use official read-only route with NO farmer key: PASS")
+
+# Operator-only SDK pilot safety: no optimistic CONNECTION, no stale callbacks,
+# no SDK key retention in the UI, and no re-use of a different initialized key.
+pilot=Path("android/app/src/main/java/com/marsx/pool/ProxiesPilotController.java").read_text(encoding="utf-8")
+for marker in (
+    "consentedToRun = false;",
+    "consentedToRun = true;",
+    "MessageDigest.isEqual(initializedKeyDigest, requestedKeyDigest)",
+    "PeerProxyService.Companion.stop(context)",
+    "if (consentedToRun || status == ProxiesPeerSDK.Status.STOPPED)",
+    "listener.onStatus(ProxiesPeerSDK.Status.STOPPED, deviceId())",
+):
+    assert marker in pilot, marker
+for marker in (
+    'proxyPilotKey.setSaveEnabled(false);',
+    'proxyPilotKey.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);',
+    'proxyPilotKey.setText("");',
+    'proxyPilot.stop();',
+    'if(("CONNECTED".equals(status)||"CONNECTING".equals(status))',
+    'Do not mark online until the SDK status callback confirms it.',
+):
+    assert marker in source, marker
+assert 'prefs.edit().putBoolean("psx_sharing_active",true).apply()' not in source
+print("Operator pilot STOP/key-mismatch/restart/consent safeguards: PASS")
