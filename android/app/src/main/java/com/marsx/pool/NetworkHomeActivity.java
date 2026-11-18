@@ -112,6 +112,15 @@ public final class NetworkHomeActivity extends Activity {
         prefs=getSharedPreferences("network_consent_v1",MODE_PRIVATE);
         proxyPilot=new ProxiesPilotController(this,(status,deviceId)->runOnUiThread(()->
             updatePilotStatus(status.name(),deviceId)));
+        // A fresh activity must not trust a saved 'sharing_active' flag as
+        // evidence that the foreground SDK service is really connected.
+        // The single-operator pilot requires deliberate restart after reopening.
+        if(prefs.getBoolean("psx_sharing_active",false)
+            || !prefs.getBoolean("consented",false)
+            || !prefs.getBoolean("psx_read_notice_v1",false)) {
+            prefs.edit().putBoolean("psx_sharing_active",false).apply();
+            proxyPilot.stop();
+        }
         totalSessionBytes=prefs.getLong("total_session_bytes",0);
         totalSessionSeconds=prefs.getLong("total_session_seconds",0);
         ScrollView scroll=new ScrollView(this);
@@ -206,6 +215,8 @@ public final class NetworkHomeActivity extends Activity {
         proxyPilotKey.setTextColor(WHITE);
         proxyPilotKey.setHintTextColor(MUTED);
         proxyPilotKey.setSingleLine(true);
+        proxyPilotKey.setSaveEnabled(false);
+        proxyPilotKey.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
         proxyPilotKey.setInputType(InputType.TYPE_CLASS_TEXT
             | InputType.TYPE_TEXT_VARIATION_PASSWORD
             | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
@@ -352,6 +363,9 @@ public final class NetworkHomeActivity extends Activity {
                 android.widget.Toast.LENGTH_LONG).show();
             return;
         }
+        // Clear the visible key field before opening the confirmation dialog;
+        // the one-use value lives only in this short-lived callback.
+        proxyPilotKey.setText("");
         new AlertDialog.Builder(this)
             .setTitle(getString(R.string.psx_pilot_confirm_title))
             .setMessage(getString(R.string.psx_pilot_confirm_message))
@@ -364,10 +378,10 @@ public final class NetworkHomeActivity extends Activity {
         try{
             String installId=getSharedPreferences("marsx_beta",MODE_PRIVATE)
                 .getString("worker_id","");
-            proxyPilot.start(key,installId);
-            proxyPilotKey.setText("");
-            prefs.edit().putBoolean("psx_sharing_active",true).apply();
             proxyPilotStart.setEnabled(false);
+            proxyPilot.start(key,installId);
+            // Do not mark online until the SDK status callback confirms it.
+            // CONNECTING is distinct from CONNECTED and from verified earnings.
         }catch(RuntimeException error){
             prefs.edit().putBoolean("psx_sharing_active",false).apply();
             proxyPilotStatus.setText(getString(R.string.psx_pilot_error));
@@ -377,6 +391,12 @@ public final class NetworkHomeActivity extends Activity {
 
     private void updatePilotStatus(String status,String deviceId){
         if(proxyPilotStatus==null)return;
+        if(("CONNECTED".equals(status)||"CONNECTING".equals(status))
+            && (!prefs.getBoolean("consented",false)
+                || !prefs.getBoolean("psx_read_notice_v1",false))) {
+            proxyPilot.stop();
+            return;
+        }
         int label;
         if("CONNECTED".equals(status))label=R.string.psx_pilot_connected;
         else if("CONNECTING".equals(status))label=R.string.psx_pilot_connecting;
