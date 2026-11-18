@@ -220,6 +220,10 @@ for marker in (
     "notifyStatus(ProxiesPeerSDK.Status.STOPPED)",
     "static synchronized ProxiesPilotController attach(Context context, Listener listener)",
     "synchronized void detach(Listener expected)",
+    "SecurePreferences.INSTANCE.get(context).edit()",
+    '"sdk_key_sha256"',
+    '.remove("device_id").remove("device_token")',
+    '.remove("refresh_token").remove("relay_url").commit()',
 ):
     assert marker in pilot, marker
 for marker in (
