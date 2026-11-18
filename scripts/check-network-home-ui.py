@@ -239,3 +239,36 @@ for marker in (
     assert marker in source, marker
 assert 'prefs.edit().putBoolean("psx_sharing_active",true).apply()' not in source
 print("Operator pilot STOP/key-mismatch/restart/consent safeguards: PASS")
+
+# Operator-only encrypted key retention: never embedded in APK, raw SharedPreferences,
+# a backend response, or automatic traffic startup.
+encrypted_key_labels={
+    "psx_key_secure_saved", "psx_key_first_time", "psx_key_forget",
+    "psx_key_forget_confirm", "psx_key_restart_required"
+}
+for folder in ["values", *translations.values(), "values-in"]:
+    resource=root/folder/"proxies_key_store.xml"
+    names={s.attrib["name"] for s in ET.parse(resource).getroot().findall("string")}
+    assert names == encrypted_key_labels, (folder, sorted(encrypted_key_labels-names))
+for marker in (
+    "private static final String LOCAL_SDK_KEY",
+    "SecurePreferences.INSTANCE.get(context).getString(LOCAL_SDK_KEY, null)",
+    ".putString(LOCAL_SDK_KEY, key).commit()",
+    ".remove(LOCAL_SDK_KEY).commit()",
+    "synchronized String savedFarmerKey()",
+    "synchronized void forgetFarmerKey()",
+):
+    assert marker in pilot, marker
+for marker in (
+    "String key=entered.isEmpty()?proxyPilot.savedFarmerKey():entered;",
+    "proxyPilot.rememberFarmerKey(key);",
+    "refreshSavedSdkKeyUi();",
+    "proxyPilotKey.setVisibility(saved?View.GONE:View.VISIBLE)",
+    "keyChangeRestartRequired=true;",
+    "if(keyChangeRestartRequired)",
+    "proxyPilotStart.setEnabled(!running && !keyChangeRestartRequired)",
+):
+    assert marker in source, marker
+assert 'getString(R.string.psx_pilot_key_notice)' not in source
+assert 'sdk.start();' not in source  # only the guarded, consent-checked wrapper starts it
+print("MARS-X 30-language encrypted key reuse and explicit forget contract: PASS")
