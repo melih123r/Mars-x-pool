@@ -217,7 +217,9 @@ for marker in (
     "context.stopService(new Intent(context, PeerProxyService.class))",
     "mainHandler.post(() -> {",
     "if (consentedToRun || status == ProxiesPeerSDK.Status.STOPPED)",
-    "listener.onStatus(ProxiesPeerSDK.Status.STOPPED, deviceId())",
+    "notifyStatus(ProxiesPeerSDK.Status.STOPPED)",
+    "static synchronized ProxiesPilotController attach(Context context, Listener listener)",
+    "synchronized void detach(Listener expected)",
 ):
     assert marker in pilot, marker
 for marker in (
@@ -225,6 +227,8 @@ for marker in (
     'proxyPilotKey.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);',
     'proxyPilotKey.setText("");',
     'proxyPilot.stop();',
+    'ProxiesPilotController.attach(this,proxyPilotListener)',
+    'proxyPilot.detach(proxyPilotListener);',
     'if(("CONNECTED".equals(status)||"CONNECTING".equals(status))',
     'Do not mark online until the SDK status callback confirms it.',
 ):
