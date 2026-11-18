@@ -1,6 +1,9 @@
 package com.marsx.pool;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 
 import java.nio.charset.StandardCharsets;
@@ -25,6 +28,7 @@ final class ProxiesPilotController {
     private ProxiesPeerSDK sdk;
     private byte[] initializedKeyDigest;
     private volatile boolean consentedToRun;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     ProxiesPilotController(Context context, Listener listener) {
         this.context = context.getApplicationContext();
@@ -69,6 +73,12 @@ final class ProxiesPilotController {
                         // An old asynchronous CONNECTED event must not undo Stop/Revoke.
                         if (consentedToRun || status == ProxiesPeerSDK.Status.STOPPED) {
                             listener.onStatus(status, deviceId());
+                        } else {
+                            // SDK 1.3.2 registers/connects asynchronously. A late
+                            // connection after a user-initiated stop MUST be shut down.
+                            mainHandler.post(() -> {
+                                if (!consentedToRun) stop();
+                            });
                         }
                         return Unit.INSTANCE;
                     }
@@ -87,10 +97,18 @@ final class ProxiesPilotController {
     synchronized void stop() {
         consentedToRun = false;
         try {
-            if (sdk != null) sdk.stop();
+            if (sdk != null) {
+                try {
+                    sdk.stop();
+                } catch (RuntimeException ignored) {
+                    // Foreground-service restrictions must not prevent direct stop.
+                }
+            }
         } finally {
-            // Also stop a foreground service left over from a previous process.
-            PeerProxyService.Companion.stop(context);
+            // Terminate even an orphaned SDK foreground service. Unlike the
+            // SDK's ACTION_STOP startService() path, stopService() is legal
+            // when the application is backgrounded on modern Android.
+            context.stopService(new Intent(context, PeerProxyService.class));
             listener.onStatus(ProxiesPeerSDK.Status.STOPPED, deviceId());
         }
     }
