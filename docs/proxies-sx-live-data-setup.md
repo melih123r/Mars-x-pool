@@ -26,9 +26,9 @@
 ## Redmi 15C canlı pilotu
 
 - Pilot APK, açık kaynak Proxies.sx Android SDK **1.3.2** sürümünü sabitler. Farmer anahtarı kaynak kodda, `BuildConfig` içinde, GitHub'da veya APK içinde bulunmaz.
-- Resmî SDK cihaz kaydı için farmer anahtarını doğrudan `init()` çağrısında istediği ve sağlayıcı cihaz başına kayıt anahtarı üretme uç noktası belgelemediği için, yalnızca operatörün kendi pilot telefonunda maskeli alana anahtar bir kez girilir. MARS-X bu değeri diske kaydetmez ve alanı başlatmadan hemen sonra temizler. Bu pilot APK genel dağıtıma uygun değildir.
+- Resmî SDK cihaz kaydı için farmer anahtarını doğrudan `init()` çağrısında istediği ve sağlayıcı cihaz başına kayıt anahtarı üretme uç noktası belgelemediği için, yalnızca operatörün kendi pilot telefonunda maskeli alana **yeni ve güvenilir** SDK anahtarı bir kez girilir. MARS-X bu değeri Android Keystore destekli **EncryptedSharedPreferences** içinde yerel olarak şifreli kaydeder; sonraki açılışlarda anahtar alanı gizlenir ve açık rızalı başlatma sırasında otomatik kullanılır. Anahtar **APK'ya gömülmez, GitHub'a veya Supabase'e istemci üzerinden aktarılmaz**. Bu pilot APK genel dağıtıma uygun değildir.
 - Başlatma için hem MARS-X Network rızası hem Proxies.sx bilgilendirme kutusu gerekir; ardından gerçek trafik konusunda ikinci bir onay penceresi gösterilir. Android 13 ve sonrasında görünür foreground bildirim izni de zorunludur.
-- `Durdur ve rızayı geri çek`, SDK `stop()` çağrısını yapar; genel rızanın veya Proxies.sx kutusunun kaldırılması da servisi durdurur. Cihazın offline olduğu farmer panelinden ayrıca doğrulanmalıdır.
+- `Durdur ve rızayı geri çek`, SDK `stop()` ve Android `stopService()` çağrılarını yapar; genel rızanın veya Proxies.sx kutusunun kaldırılması da servisi durdurur. Anahtar şifreli olarak cihazda tutulur ancak rıza kaldırıldığında trafik otomatik yeniden başlamaz. **Kaydedilen SDK anahtarını unut** seçeneği önce paylaşımı durdurur, sonra şifreli anahtarı siler. SDK process-singleton olduğundan farklı anahtar kullanılmadan önce uygulama yeniden başlatılmalıdır. Cihazın offline olduğu farmer panelinden ayrıca doğrulanmalıdır.
 - Ekrandaki sağlayıcı cihaz kimliği SDK 1.3.2'nin kayıt sırasında gönderdiği aynı `psx_…` kimliğidir. Maya'ya yalnız bu cihaz kimliği gönderilir; farmer anahtarı gönderilmez.
 - Canlı pilot için uygulama sürümü `0.9.4-network-pilot` / versionCode `19` olarak ayırt edilir. Ödemeler ve kripto transferleri kapalı kalır.
 
@@ -37,3 +37,11 @@
 Eski `GET /v1/peer/board` artık yönetici erişimine kapalıdır. Genel kart yalnızca belgelenmiş özet uç noktası eksiksiz ve geçerli sayılar döndürürse gösterilir. Çiftçi hesabı rakamları ayrı, kimlik doğrulamalı kartta yer alır.
 
 Bu dalda gerçek SDK yalnızca operatörün kendi cihazındaki sınırlı pilot için açılabilir. SDK 1.3.2 yerel yardımcı sunucuyu `127.0.0.1` adresine bağlayarak LAN erişimini kapatır; yine de farmer panelindeki online/offline durumu, yönlendirme testi ve gerçek durdurma davranışı Maya tarafından doğrulanmadan genel kullanıcı dağıtımı veya Play yayını yapılmaz.
+
+## Bir kez anahtar girişi / sonraki kullanımlar
+
+1. Sohbet içinde geçmişte paylaşılan SDK anahtarını **güvenli sayma**: Farmer panelindeki API Keys üzerinden iptal et ve yeni bir SDK/device anahtarı oluştur.
+2. APK'yı sadece kendi cihazında çalıştır. Network ve Proxies.sx rızalarını ver; yeni anahtarı ilk başlatmada **tek kez** maskeli alana gir. Onaydan sonra uygulama anahtarı yalnızca kendi telefonunun Android Keystore şifreli deposuna kaydeder.
+3. Sonraki açılışta giriş alanı gizlidir. Paylaşım **asla otomatik başlamaz**; başlatmak için yeni oturumda rızayı değerlendir ve başlatmayı onayla.
+4. Anahtarı değiştirmek/cihazı devretmek için **Kaydedilen SDK anahtarını unut** düğmesini kullan; uygulamayı yeniden başlatarak farklı anahtar gir. Kullanılmış anahtarın sağlayıcı panelinde iptali bu cihazda saklanan kaydı ayrıca geçersiz kılar.
+5. Anahtar Keystore tarafından korunmuş olsa da **cihaz ele geçirilmesine karşı mutlak koruma değildir**. Bu yöntem yalnızca sahip olunan pilot cihaz içindir; genel kullanıcı dağıtımında sunucudan cihaz-başına kapsamlı ve iptal edilebilir kimlik doğrulaması gerekir.
