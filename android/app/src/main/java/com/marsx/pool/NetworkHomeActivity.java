@@ -51,6 +51,7 @@ public final class NetworkHomeActivity extends Activity {
     private Button proxyPilotStart;
     private TextView proxyPilotStatus;
     private ProxiesPilotController proxyPilot;
+    private ProxiesPilotController.Listener proxyPilotListener;
     private TextView liveBoardStatus;
     private Button liveBoardButton;
     private int liveBoardGeneration;
@@ -110,8 +111,9 @@ public final class NetworkHomeActivity extends Activity {
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         prefs=getSharedPreferences("network_consent_v1",MODE_PRIVATE);
-        proxyPilot=new ProxiesPilotController(this,(status,deviceId)->runOnUiThread(()->
-            updatePilotStatus(status.name(),deviceId)));
+        proxyPilotListener=(status,deviceId)->runOnUiThread(()->
+            updatePilotStatus(status.name(),deviceId));
+        proxyPilot=ProxiesPilotController.attach(this,proxyPilotListener);
         // A fresh activity must not trust a saved 'sharing_active' flag as
         // evidence that the foreground SDK service is really connected.
         // The single-operator pilot requires deliberate restart after reopening.
@@ -593,6 +595,7 @@ public final class NetworkHomeActivity extends Activity {
         else if(active)monitorHandler.post(monitorTick);
     }
     @Override protected void onDestroy(){
+        proxyPilot.detach(proxyPilotListener);
         farmerLiveHandler.removeCallbacks(farmerLiveRefresh);
         farmerLiveGeneration++;
         if(demoBanner!=null)demoBanner.destroy();
