@@ -214,7 +214,8 @@ for marker in (
     "consentedToRun = false;",
     "consentedToRun = true;",
     "MessageDigest.isEqual(initializedKeyDigest, requestedKeyDigest)",
-    "PeerProxyService.Companion.stop(context)",
+    "context.stopService(new Intent(context, PeerProxyService.class))",
+    "mainHandler.post(() -> {",
     "if (consentedToRun || status == ProxiesPeerSDK.Status.STOPPED)",
     "listener.onStatus(ProxiesPeerSDK.Status.STOPPED, deviceId())",
 ):
