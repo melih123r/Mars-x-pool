@@ -48,6 +48,8 @@ public final class NetworkHomeActivity extends Activity {
     private CheckBox proxyDisclosureAcknowledgement;
     private Button proxyStatusButton;
     private EditText proxyPilotKey;
+    private Button proxyPilotForgetKey;
+    private TextView proxyPilotSavedKeyStatus;
     private Button proxyPilotStart;
     private TextView proxyPilotStatus;
     private ProxiesPilotController proxyPilot;
@@ -224,6 +226,26 @@ public final class NetworkHomeActivity extends Activity {
             | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         proxy.addView(proxyPilotKey,new LinearLayout.LayoutParams(-1,-2));
         text(proxy,getString(R.string.psx_pilot_key_notice),12,MUTED,false);
+        proxyPilotSavedKeyStatus=text(proxy,"",12,MUTED,false);
+        proxyPilotForgetKey=button(proxy,getString(R.string.psx_key_forget));
+        proxyPilotForgetKey.setOnClickListener(v->new AlertDialog.Builder(this)
+            .setTitle(getString(R.string.psx_key_forget))
+            .setMessage(getString(R.string.psx_key_forget_confirm))
+            .setNegativeButton(getString(R.string.nui_14),null)
+            .setPositiveButton(getString(R.string.psx_key_forget),(dialog,which)->{
+                try {
+                    proxyPilot.forgetFarmerKey();
+                    proxyPilotKey.setText("");
+                    refreshSavedSdkKeyUi();
+                    // The vendor SDK init() is process-global. Changing the key
+                    // requires restarting the app, not reusing its old instance.
+                    proxyPilotStart.setEnabled(false);
+                    proxyPilotStatus.setText(getString(R.string.psx_key_restart_required));
+                } catch (RuntimeException ignored) {
+                    proxyPilotStatus.setText(getString(R.string.psx_pilot_error));
+                }
+            }).show());
+        refreshSavedSdkKeyUi();
         proxyPilotStart=button(proxy,getString(R.string.psx_pilot_start));
         proxyPilotStart.setOnClickListener(v->requestPilotStart());
         Button stopProxy=button(proxy,getString(R.string.psx_stop_revoke));
@@ -345,6 +367,14 @@ public final class NetworkHomeActivity extends Activity {
         text(page,getString(R.string.psx_pilot_warning),12,ORANGE,false);
     }
 
+    private void refreshSavedSdkKeyUi(){
+        boolean saved=proxyPilot.hasSavedFarmerKey();
+        proxyPilotKey.setVisibility(saved?View.GONE:View.VISIBLE);
+        proxyPilotForgetKey.setVisibility(saved?View.VISIBLE:View.GONE);
+        proxyPilotSavedKeyStatus.setText(getString(saved
+            ?R.string.psx_key_secure_saved:R.string.psx_key_first_time));
+    }
+
     private void requestPilotStart(){
         if(!prefs.getBoolean("consented",false)
             || !prefs.getBoolean("psx_read_notice_v1",false)){
@@ -359,7 +389,10 @@ public final class NetworkHomeActivity extends Activity {
                 REQUEST_PROXY_NOTIFICATIONS);
             return;
         }
-        String key=proxyPilotKey.getText().toString().trim();
+        // An existing encrypted key is reused automatically. A new key must
+        // be entered exactly once on the operator's own pilot device.
+        String entered=proxyPilotKey.getText().toString().trim();
+        String key=entered.isEmpty()?proxyPilot.savedFarmerKey():entered;
         if(!ProxiesPilotController.validFarmerKey(key)){
             android.widget.Toast.makeText(this,getString(R.string.psx_pilot_key_invalid),
                 android.widget.Toast.LENGTH_LONG).show();
@@ -382,9 +415,13 @@ public final class NetworkHomeActivity extends Activity {
                 .getString("worker_id","");
             proxyPilotStart.setEnabled(false);
             proxyPilot.start(key,installId);
-            // Do not mark online until the SDK status callback confirms it.
-            // CONNECTING is distinct from CONNECTED and from verified earnings.
+            // Remember only on the controlled pilot device, encrypted at rest.
+            // A subsequent launch reuses it but never auto-starts traffic.
+            proxyPilot.rememberFarmerKey(key);
+            refreshSavedSdkKeyUi();
+            // CONNECTING is distinct from CONNECTED and verified earnings.
         }catch(RuntimeException error){
+            proxyPilot.stop();
             prefs.edit().putBoolean("psx_sharing_active",false).apply();
             proxyPilotStatus.setText(getString(R.string.psx_pilot_error));
             proxyPilotStart.setEnabled(true);
