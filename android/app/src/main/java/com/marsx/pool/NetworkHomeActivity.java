@@ -215,7 +215,6 @@ public final class NetworkHomeActivity extends Activity {
         // Users never enter or see a Proxies.sx SDK key.
         // Credentials are assigned to each approved MARS-X device by the
         // operator and obtained only after authenticated, explicit consent.
-        text(proxy,getString(R.string.psx_auto_setup_notice),12,MUTED,false);
         proxyPilotStart=button(proxy,getString(R.string.psx_auto_start));
         proxyPilotStart.setOnClickListener(v->requestPilotStart());
         Button stopProxy=button(proxy,getString(R.string.psx_stop_revoke));
@@ -236,6 +235,9 @@ public final class NetworkHomeActivity extends Activity {
         });
         proxyServerStatus=text(proxy,getString(R.string.psx_off_status),13,MUTED,false);
         proxyPrerequisites=text(proxy,getString(R.string.psx_prerequisites),12,MUTED,false);
+        // Keep verbose technical prerequisites internal; users only control
+        // informed consent, connectivity and stop. SDK keys are never shown.
+        proxyPrerequisites.setVisibility(View.GONE);
         proxyStatusButton=button(proxy,getString(R.string.psx_check_backend));
         proxyStatusButton.setOnClickListener(v->queryProxiesReadiness());
 
