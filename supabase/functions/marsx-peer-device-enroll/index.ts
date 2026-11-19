@@ -57,7 +57,7 @@ Deno.serve(async (req: Request) => {
   }
   const token = req.headers.get("authorization") ?? "";
   const installId = req.headers.get("x-install-id") ?? "";
-  if (!/^Bearer [A-Za-z0-9._~+/\\-]{24,512}$/.test(token)
+  if (!/^Bearer [A-Za-z0-9_-]{24,512}$/.test(token)
       || !installPattern.test(installId)) {
     return answer(401, "unauthorized", "marsx_login_required");
   }
