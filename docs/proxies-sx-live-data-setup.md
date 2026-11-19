@@ -20,7 +20,7 @@ Anahtarı APK'ya, GitHub'a, e-postaya veya ekran görüntüsüne koyma. Açığa
 1. Operatör aynı Network ekranında MARS-X ve Proxies.sx açıklamalarını kabul eder.
 2. Uygulama Google oturumunu aynı ekranda açar; eski Pool/Finance ekranına geçmez.
 3. `marsx-peer-enroll`, oturumu ve `X-Install-Id` bağını `marsx-pool-api/auth/me` ile doğrular.
-4. Sunucu Proxies.sx `POST /v1/peer/register` çağrısını çiftçi anahtarıyla yapar.
+4. Sunucu Proxies.sx `POST /v1/peer/agents/register` çağrısını çiftçi anahtarıyla yapar. Yanıttaki sağlayıcı `deviceId`, bir saatlik `jwt` ve atanmış `relay` adresi doğrulanır; hesap genelindeki anahtar APK'ya gönderilmez.
 5. Android yalnız cihaz tokenıyla SDK servisinin resmi foreground bağlantısını başlatır.
 6. Uygulama `GET /v1/peer/my-devices` sonucu cihazı gerçekten çevrimiçi göstermeden “bağlı” yazmaz.
 7. “Durdur ve rızayı geri çek” hem SDK servisini durdurur hem rızaları kaldırır.
@@ -34,7 +34,9 @@ Cihaz sayısı, çevrimiçi durum, trafik ve kazanç yalnız sağlayıcının he
 Bu sürüm yalnız anlaşmalı operatör pilotu içindir. Redmi 15C'ye kurulduktan sonra:
 
 1. Bir telefon bağlanır.
-2. Ekrandaki `psx_…` cihaz kimliği Maya'ya iletilir; API anahtarı gönderilmez.
+2. Ekrandaki sağlayıcının verdiği `deviceId` (ör. `agent_…`) Maya'ya iletilir; API anahtarı veya JWT gönderilmez.
 3. Maya çevrimiçi durumu ve routing kontrolünü doğrular.
 4. Durdur düğmesine basılır ve Farmer panelinde cihazın offline olduğu doğrulanır.
 5. Bu kanıtlar tamamlanmadan Play üretimine veya genel kullanıcı paylaşımına geçilmez.
+
+**Kapsam sınırı:** Bu otomatik akış, Supabase'de anahtarı ve operatör hesabı tanımlanmış **tek onaylı pilot operatör** içindir. Rastgele son kullanıcılara hesap anahtarı verilmez. Sağlayıcı güvenli çoklu-cihaz, dar kapsamlı yetki protokolünü doğrulamadan genel dağıtım yapılmaz. Proxies.sx kayıt/relay testi fiziksel telefonda tamamlanmış sayılmamalıdır.
