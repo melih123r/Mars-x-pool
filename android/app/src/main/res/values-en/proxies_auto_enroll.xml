@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"Network setup is automatic through your MARS-X account. No SDK key needed. Internet sharing starts only after your consent."</string>
+    <string name="psx_auto_start" formatted="false">"Start network sharing"</string>
+    <string name="psx_auto_enrolling" formatted="false">"Checking this device's network authorization…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"This device has not been approved for network sharing. The account operator must assign a separate device credential."</string>
+    <string name="psx_auto_sign_in" formatted="false">"Sign in to your MARS-X account with Google to continue."</string>
+</resources>

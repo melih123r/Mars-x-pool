@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"La rete si configura automaticamente con l’account MARS-X. Nessuna chiave SDK richiesta. La condivisione parte solo col consenso."</string>
+    <string name="psx_auto_start" formatted="false">"Avvia condivisione rete"</string>
+    <string name="psx_auto_enrolling" formatted="false">"Verifica autorizzazione del dispositivo…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"Dispositivo non autorizzato. Il gestore deve assegnare credenziali dedicate."</string>
+    <string name="psx_auto_sign_in" formatted="false">"Accedi a MARS-X con Google per continuare."</string>
+</resources>

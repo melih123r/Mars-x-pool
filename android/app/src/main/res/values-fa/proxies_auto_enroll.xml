@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"شبکه از طریق حساب MARS-X خودکار تنظیم می‌شود. به کلید SDK نیاز نیست. اشتراک تنها با رضایت شروع می‌شود."</string>
+    <string name="psx_auto_start" formatted="false">"شروع اشتراک شبکه"</string>
+    <string name="psx_auto_enrolling" formatted="false">"در حال بررسی مجوز دستگاه…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"دستگاه هنوز تأیید نشده است. مدیر باید اعتبارنامه اختصاصی تعیین کند."</string>
+    <string name="psx_auto_sign_in" formatted="false">"برای ادامه با Google وارد MARS-X شوید."</string>
+</resources>

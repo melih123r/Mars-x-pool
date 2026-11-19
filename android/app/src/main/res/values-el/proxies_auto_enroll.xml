@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"Το δίκτυο ρυθμίζεται αυτόματα μέσω MARS-X. Δεν χρειάζεται κλειδί SDK. Η κοινή χρήση απαιτεί συναίνεση."</string>
+    <string name="psx_auto_start" formatted="false">"Έναρξη κοινής χρήσης δικτύου"</string>
+    <string name="psx_auto_enrolling" formatted="false">"Έλεγχος άδειας συσκευής…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"Η συσκευή δεν έχει εγκριθεί. Ο διαχειριστής πρέπει να ορίσει ξεχωριστά διαπιστευτήρια."</string>
+    <string name="psx_auto_sign_in" formatted="false">"Συνδεθείτε στο MARS-X με Google για συνέχεια."</string>
+</resources>

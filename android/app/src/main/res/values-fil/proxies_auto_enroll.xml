@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"Awtomatikong isi-setup ang network sa MARS-X account. Hindi kailangan ng SDK key. Magbabahagi lang kapag pumayag ka."</string>
+    <string name="psx_auto_start" formatted="false">"Simulan ang network sharing"</string>
+    <string name="psx_auto_enrolling" formatted="false">"Sinusuri ang pahintulot ng device…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"Hindi pa aprubado ang device. Dapat magtalaga ang operator ng sariling credential."</string>
+    <string name="psx_auto_sign_in" formatted="false">"Mag-sign in sa MARS-X gamit ang Google para magpatuloy."</string>
+</resources>

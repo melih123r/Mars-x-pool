@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"ネットワークはMARS-Xアカウントで自動設定されます。SDKキー不要。共有は同意後のみ開始します。"</string>
+    <string name="psx_auto_start" formatted="false">"ネットワーク共有を開始"</string>
+    <string name="psx_auto_enrolling" formatted="false">"端末の利用権限を確認中…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"この端末は未承認です。管理者が端末専用の資格情報を割り当てる必要があります。"</string>
+    <string name="psx_auto_sign_in" formatted="false">"GoogleでMARS-Xにログインしてください。"</string>
+</resources>

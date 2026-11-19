@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"A rede é configurada automaticamente pela sua conta MARS-X. Não precisa de chave SDK. Compartilhamento só com seu consentimento."</string>
+    <string name="psx_auto_start" formatted="false">"Iniciar compartilhamento de rede"</string>
+    <string name="psx_auto_enrolling" formatted="false">"Verificando autorização do dispositivo…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"Este aparelho ainda não está autorizado. O administrador precisa atribuir uma credencial individual."</string>
+    <string name="psx_auto_sign_in" formatted="false">"Entre no MARS-X com Google para continuar."</string>
+</resources>

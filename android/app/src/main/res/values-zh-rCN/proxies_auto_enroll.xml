@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"通过 MARS-X 账户自动配置网络，无需 SDK 密钥。共享仅在您明确同意后开始。"</string>
+    <string name="psx_auto_start" formatted="false">"开始网络共享"</string>
+    <string name="psx_auto_enrolling" formatted="false">"正在验证设备网络授权…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"设备尚未获批。管理员必须分配专用设备凭据。"</string>
+    <string name="psx_auto_sign_in" formatted="false">"请使用 Google 登录 MARS-X 后继续。"</string>
+</resources>

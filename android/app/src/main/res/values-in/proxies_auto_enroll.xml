@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"Jaringan diatur otomatis melalui akun MARS-X. Tidak perlu kunci SDK. Berbagi hanya dimulai dengan persetujuan."</string>
+    <string name="psx_auto_start" formatted="false">"Mulai berbagi jaringan"</string>
+    <string name="psx_auto_enrolling" formatted="false">"Memeriksa izin perangkat…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"Perangkat belum disetujui. Pengelola harus memberikan kredensial khusus perangkat."</string>
+    <string name="psx_auto_sign_in" formatted="false">"Masuk ke MARS-X dengan Google untuk melanjutkan."</string>
+</resources>

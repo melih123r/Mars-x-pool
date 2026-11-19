@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"ตั้งค่าเครือข่ายอัตโนมัติผ่านบัญชี MARS-X ไม่ต้องใช้คีย์ SDK การแชร์เริ่มเมื่อยินยอมเท่านั้น"</string>
+    <string name="psx_auto_start" formatted="false">"เริ่มแชร์เครือข่าย"</string>
+    <string name="psx_auto_enrolling" formatted="false">"กำลังตรวจสอบสิทธิ์อุปกรณ์…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"อุปกรณ์ยังไม่ได้รับอนุมัติ ผู้ดูแลต้องกำหนดข้อมูลเฉพาะอุปกรณ์"</string>
+    <string name="psx_auto_sign_in" formatted="false">"เข้าสู่ระบบ MARS-X ด้วย Google เพื่อดำเนินการต่อ"</string>
+</resources>

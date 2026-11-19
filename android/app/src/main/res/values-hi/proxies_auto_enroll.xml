@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"MARS-X खाते से नेटवर्क अपने आप सेट होगा। SDK कुंजी की जरूरत नहीं। साझा करना सहमति के बाद ही शुरू होगा।"</string>
+    <string name="psx_auto_start" formatted="false">"नेटवर्क साझा करना शुरू करें"</string>
+    <string name="psx_auto_enrolling" formatted="false">"डिवाइस अनुमति जाँच रहे हैं…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"डिवाइस अभी स्वीकृत नहीं है। प्रबंधक को अलग डिवाइस क्रेडेंशियल देना होगा।"</string>
+    <string name="psx_auto_sign_in" formatted="false">"आगे बढ़ने के लिए Google से MARS-X में लॉग इन करें।"</string>
+</resources>

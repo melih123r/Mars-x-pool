@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"Síť se nastavuje automaticky přes MARS-X. Klíč SDK není potřeba. Sdílení začíná jen s vaším souhlasem."</string>
+    <string name="psx_auto_start" formatted="false">"Spustit sdílení sítě"</string>
+    <string name="psx_auto_enrolling" formatted="false">"Ověřování oprávnění zařízení…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"Zařízení zatím není schváleno. Správce musí přidělit samostatné přihlašovací údaje."</string>
+    <string name="psx_auto_sign_in" formatted="false">"Pokračujte přihlášením do MARS-X přes Google."</string>
+</resources>

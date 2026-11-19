@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"يتم إعداد الشبكة تلقائيًا عبر حساب MARS-X. لا حاجة إلى مفتاح SDK. لن تبدأ المشاركة دون موافقتك."</string>
+    <string name="psx_auto_start" formatted="false">"بدء مشاركة الشبكة"</string>
+    <string name="psx_auto_enrolling" formatted="false">"جارٍ التحقق من تصريح الجهاز…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"هذا الجهاز غير مصرح له بعد. يجب على المسؤول تعيين بيانات اعتماد خاصة به."</string>
+    <string name="psx_auto_sign_in" formatted="false">"سجّل الدخول إلى MARS-X باستخدام Google للمتابعة."</string>
+</resources>

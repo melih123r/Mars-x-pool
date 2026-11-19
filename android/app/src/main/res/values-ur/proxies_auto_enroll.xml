@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"MARS-X اکاؤنٹ سے نیٹ ورک خود ترتیب پائے گا۔ SDK کلید کی ضرورت نہیں۔ شیئرنگ صرف اجازت سے ہوگی۔"</string>
+    <string name="psx_auto_start" formatted="false">"نیٹ ورک شیئرنگ شروع کریں"</string>
+    <string name="psx_auto_enrolling" formatted="false">"ڈیوائس کی اجازت چیک ہو رہی ہے…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"ڈیوائس ابھی منظور نہیں۔ منتظم کو الگ شناخت دینی ہوگی۔"</string>
+    <string name="psx_auto_sign_in" formatted="false">"آگے بڑھنے کے لیے Google سے MARS-X میں لاگ ان کریں۔"</string>
+</resources>

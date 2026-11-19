@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_auto_setup_notice" formatted="false">"Sieć jest konfigurowana automatycznie przez MARS-X. Nie potrzebujesz klucza SDK. Udostępnianie wymaga Twojej zgody."</string>
+    <string name="psx_auto_start" formatted="false">"Rozpocznij udostępnianie sieci"</string>
+    <string name="psx_auto_enrolling" formatted="false">"Sprawdzanie uprawnień urządzenia…"</string>
+    <string name="psx_auto_unavailable" formatted="false">"Urządzenie nie jest zatwierdzone. Operator musi przypisać osobne dane dostępu."</string>
+    <string name="psx_auto_sign_in" formatted="false">"Zaloguj się do MARS-X przez Google, aby kontynuować."</string>
+</resources>
