@@ -65,6 +65,7 @@ public final class NetworkHomeActivity extends Activity {
     private boolean authLoading;
     private boolean pendingPilotStart;
     private int pilotStatusAttempts;
+    private int peerEnrollmentGeneration;
     private final Handler pilotStatusHandler=new Handler(Looper.getMainLooper());
     private final Handler farmerLiveHandler=new Handler(Looper.getMainLooper());
     private final Runnable farmerLiveRefresh=()->queryPrivateFarmerAccount(true);
@@ -154,8 +155,9 @@ public final class NetworkHomeActivity extends Activity {
         consentButton=button(network,getString(R.string.network_consent_button));
         consentButton.setOnClickListener(v->{
             if (prefs.getBoolean("consented",false)) {
+                peerEnrollmentGeneration++;
                 cancelPilotStatusChecks();
-                if(prefs.getBoolean("psx_sharing_active",false))proxyPilot.stop();
+                proxyPilot.stop();
                 prefs.edit().putBoolean("consented",false).putBoolean("monitor_active",false).apply();
                 prefs.edit().putBoolean("psx_sharing_active",false).apply();
                 stopMonitor();
@@ -218,7 +220,11 @@ public final class NetworkHomeActivity extends Activity {
         proxyDisclosureAcknowledgement.setTextSize(14);
         proxyDisclosureAcknowledgement.setChecked(prefs.getBoolean("psx_read_notice_v1",false));
         proxyDisclosureAcknowledgement.setOnCheckedChangeListener((button,checked)->{
-            if(!checked&&prefs.getBoolean("psx_sharing_active",false))proxyPilot.stop();
+            if(!checked){
+                peerEnrollmentGeneration++;
+                cancelPilotStatusChecks();
+                proxyPilot.stop();
+            }
             prefs.edit().putBoolean("psx_read_notice_v1",checked)
                 .putBoolean("psx_sharing_active",checked
                     && prefs.getBoolean("psx_sharing_active",false)).apply();
@@ -231,6 +237,7 @@ public final class NetworkHomeActivity extends Activity {
         proxyPilotStart.setOnClickListener(v->requestPilotStart());
         Button stopProxy=button(proxy,getString(R.string.psx_stop_revoke));
         stopProxy.setOnClickListener(v->{
+            peerEnrollmentGeneration++;
             cancelPilotStatusChecks();
             proxyPilot.stop();
             proxyStatusGeneration++;
@@ -378,6 +385,7 @@ public final class NetworkHomeActivity extends Activity {
     }
 
     private void startPilotAutomatic(){
+        final int enrollmentId=++peerEnrollmentGeneration;
         final String session=currentAuthSession();
         final String installId=accountPrefs.getString("worker_id","");
         final String deviceId=proxyPilot.deviceId();
@@ -392,7 +400,12 @@ public final class NetworkHomeActivity extends Activity {
             }catch(Exception ignored){ /* Never log credentials or provider responses. */ }
             final ProxiesAutomaticEnrollmentClient.Result credential=result;
             runOnUiThread(()->{
-                if(isFinishing()||isDestroyed())return;
+                if(isFinishing()||isDestroyed()||enrollmentId!=peerEnrollmentGeneration)return;
+                if(!prefs.getBoolean("consented",false)
+                    ||!prefs.getBoolean("psx_read_notice_v1",false)){
+                    proxyPilot.stop();
+                    return;
+                }
                 if(credential==null){
                     proxyPilot.stop();
                     prefs.edit().putBoolean("psx_sharing_active",false).apply();
@@ -716,6 +729,7 @@ public final class NetworkHomeActivity extends Activity {
         else if(active)monitorHandler.post(monitorTick);
     }
     @Override protected void onDestroy(){
+        peerEnrollmentGeneration++;
         cancelPilotStatusChecks();
         proxyPilot.detach(proxyPilotListener);
         farmerLiveHandler.removeCallbacks(farmerLiveRefresh);
