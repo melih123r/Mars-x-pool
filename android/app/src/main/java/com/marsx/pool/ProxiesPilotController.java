@@ -18,7 +18,7 @@ import sx.proxies.peer.util.SecurePreferences;
 
 /**
  * Single-operator SDK pilot for devices explicitly controlled by the account owner.
- * No key is stored on disk, logged, committed, or embedded into the APK.
+ * No farmer/master key is logged, committed, embedded in the APK or stored\n * by MARS-X. SDK 1.3.2 maintains its own device session encrypted at rest.
  * A fresh app process is required when changing the SDK key.
  */
 final class ProxiesPilotController {
@@ -37,6 +37,7 @@ final class ProxiesPilotController {
     private ProxiesPilotController(Context context, Listener listener) {
         this.context = context.getApplicationContext();
         this.listener = listener;
+        clearLegacyUserKey();
     }
 
     /** SDK init() is process-global; keep its key and listener guard process-global too. */
@@ -59,35 +60,13 @@ final class ProxiesPilotController {
         return key != null && key.matches("psx_[A-Za-z0-9]{20,160}");
     }
 
-    // A single-owner pilot device only. This value is encrypted with Android
-    // Keystore-backed EncryptedSharedPreferences (SDK 1.3.2 SecurePreferences).
-    // NEVER publish the API key as BuildConfig, source code, an endpoint
-    // response, or a plain-text preference.
-    private static final String LOCAL_SDK_KEY = "marsx_operator_sdk_key_v1";
-
-    synchronized String savedFarmerKey() {
-        String key = SecurePreferences.INSTANCE.get(context).getString(LOCAL_SDK_KEY, null);
-        return validFarmerKey(key) ? key : null;
-    }
-
-    synchronized boolean hasSavedFarmerKey() {
-        return savedFarmerKey() != null;
-    }
-
-    synchronized void rememberFarmerKey(String key) {
-        if (!validFarmerKey(key)) throw new IllegalArgumentException("Invalid SDK key");
-        if (!SecurePreferences.INSTANCE.get(context).edit()
-                .putString(LOCAL_SDK_KEY, key).commit()) {
-            throw new IllegalStateException("Secure device storage unavailable");
-        }
-    }
-
-    synchronized void forgetFarmerKey() {
-        stop();
-        if (!SecurePreferences.INSTANCE.get(context).edit()
-                .remove(LOCAL_SDK_KEY).commit()) {
-            throw new IllegalStateException("Unable to erase saved SDK key");
-        }
+    /**
+     * Upgrade cleanup: older pilot builds could retain a manually entered
+     * farmer key. This key must never be used by a consumer-facing build.
+     */
+    private void clearLegacyUserKey() {
+        SecurePreferences.INSTANCE.get(context).edit()
+            .remove("marsx_operator_sdk_key_v1").apply();
     }
 
     /** A key fingerprint (not the key) prevents reusing another key's saved device. */
