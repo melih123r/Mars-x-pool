@@ -42,7 +42,7 @@ final class NetworkPeerEnrollmentClient {
     }
 
     static String fetch(String session, String installId) throws IOException, JSONException {
-        if(session==null || !session.matches("[A-Za-z0-9._~+/\\-]{24,512}")
+        if(session==null || !session.matches("[A-Za-z0-9_-]{24,512}")
           || installId==null || !installId.matches("node-[0-9a-fA-F]{32}")) {
             throw new IOException("MARS-X sign-in required");
         }
