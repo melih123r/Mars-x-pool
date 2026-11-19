@@ -12,9 +12,11 @@ def marsxApiBaseUrl = providers.gradleProperty("MARSX_API_BASE_URL")
 def escapedMarsxApiBaseUrl = marsxApiBaseUrl
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
+// The OAuth WEB client ID is public (not a secret) and must be present in
+// debug APKs too, otherwise the modern Network-only login cannot work.
 def googleWebClientId = providers.gradleProperty("GOOGLE_WEB_CLIENT_ID")
         .orElse(providers.environmentVariable("GOOGLE_WEB_CLIENT_ID"))
-        .getOrElse("")
+        .getOrElse("391717958124-uvhj6atdg2am2vq41fhu1iq76to19qme.apps.googleusercontent.com")
 def escapedGoogleWebClientId = googleWebClientId
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
