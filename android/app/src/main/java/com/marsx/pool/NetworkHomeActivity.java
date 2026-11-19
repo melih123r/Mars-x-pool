@@ -377,11 +377,15 @@ public final class NetworkHomeActivity extends Activity {
         proxyPilotStatus.setText(getString(R.string.psx_auto_enrolling));
         new Thread(()->{
             String scopedKey=null;
+            boolean mustSignIn=false;
             try {
                 scopedKey=NetworkPeerEnrollmentClient.fetch(session,installId);
+            } catch(NetworkPeerEnrollmentClient.AuthenticationRequiredException ignored) {
+                mustSignIn=true;
             } catch(Exception ignored) {
                 // No provider key, token or response contents in logs.
             }
+            final boolean requiresSignIn=mustSignIn;
             final String verifiedDeviceKey=scopedKey;
             runOnUiThread(()->{
                 if(isFinishing() || isDestroyed()
@@ -390,6 +394,13 @@ public final class NetworkHomeActivity extends Activity {
                     || !prefs.getBoolean("psx_read_notice_v1",false)){
                     proxyPilotStatus.setText(getString(R.string.psx_pilot_stopped));
                     proxyPilotStart.setEnabled(true);
+                    return;
+                }
+                if(requiresSignIn){
+                    new SecureStore(this).remove("auth_session");
+                    proxyPilotStatus.setText(getString(R.string.psx_auto_sign_in));
+                    proxyPilotStart.setEnabled(true);
+                    startActivity(new Intent(this,NetworkSignInActivity.class));
                     return;
                 }
                 if(verifiedDeviceKey==null){
