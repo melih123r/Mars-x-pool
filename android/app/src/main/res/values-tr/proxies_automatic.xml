@@ -1,0 +1,7 @@
+<resources>
+    <string name="psx_auto_provisioning">Güvenli cihaz kaydı otomatiktir. Kullanıcılar sağlayıcı SDK anahtarını girmez veya görmez.</string>
+    <string name="psx_auto_enrolling">Cihaza özel güvenli bağlantı oluşturuluyor…</string>
+    <string name="psx_auto_auth_required">Pilot cihazı yetkilendirmek için bu ekranda Google ile oturum açın.</string>
+    <string name="psx_auto_auth_failed">Güvenli oturum açılamadı. Canlı paylaşım başlatılmadı.</string>
+    <string name="psx_auto_provider_waiting">Cihaz kaydedildi • sağlayıcının çevrimiçi onayı bekleniyor</string>
+</resources>

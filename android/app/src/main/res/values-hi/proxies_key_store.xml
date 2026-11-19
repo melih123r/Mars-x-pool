@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <string name="psx_key_secure_saved" formatted="false">"SDK कुंजी फ़ोन पर एन्क्रिप्टेड सेव है। शेयरिंग अपने आप शुरू नहीं होगी।"</string>
-  <string name="psx_key_first_time" formatted="false">"नई SDK कुंजी एक बार डालें। अगली बार के लिए सुरक्षित सहेजी जाएगी।"</string>
-  <string name="psx_key_forget" formatted="false">"सहेजी SDK कुंजी हटाएँ"</string>
-  <string name="psx_key_forget_confirm" formatted="false">"शेयरिंग रोककर कुंजी हटाएँ? दूसरी कुंजी के लिए ऐप फिर खोलना होगा।"</string>
-  <string name="psx_key_restart_required" formatted="false">"कुंजी हटा दी गई। दूसरी कुंजी के लिए ऐप पुनः शुरू करें।"</string>
-</resources>

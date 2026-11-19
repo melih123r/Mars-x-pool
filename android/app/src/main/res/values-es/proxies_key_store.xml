@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <string name="psx_key_secure_saved" formatted="false">"Clave SDK guardada cifrada en este teléfono. El uso compartido no empieza automáticamente."</string>
-  <string name="psx_key_first_time" formatted="false">"Introduce una nueva clave SDK una sola vez. Se guardará de forma segura."</string>
-  <string name="psx_key_forget" formatted="false">"Olvidar clave SDK guardada"</string>
-  <string name="psx_key_forget_confirm" formatted="false">"¿Detener el uso compartido y borrar la clave del teléfono? Reinicia la app para usar otra."</string>
-  <string name="psx_key_restart_required" formatted="false">"Clave borrada. Reinicia la app para introducir otra."</string>
-</resources>

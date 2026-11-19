@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <string name="psx_key_secure_saved" formatted="false">"SDK 키가 휴대전화에 암호화되어 저장됐습니다. 공유는 자동 시작되지 않습니다."</string>
-  <string name="psx_key_first_time" formatted="false">"새 SDK 키를 한 번 입력하면 다음 사용을 위해 안전하게 저장됩니다."</string>
-  <string name="psx_key_forget" formatted="false">"저장된 SDK 키 삭제"</string>
-  <string name="psx_key_forget_confirm" formatted="false">"공유를 중지하고 키를 삭제할까요? 새 키를 사용하려면 앱을 다시 실행하세요."</string>
-  <string name="psx_key_restart_required" formatted="false">"키가 삭제됐습니다. 다른 키를 입력하려면 앱을 다시 시작하세요."</string>
-</resources>

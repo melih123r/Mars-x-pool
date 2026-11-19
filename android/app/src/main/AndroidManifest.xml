@@ -33,9 +33,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- Single Network edition: no legacy 0.9.0-beta screens or WebView fallback. -->
-        <activity android:name=".NetworkSignInActivity" android:exported="false" />
-        <activity android:name=".VrscPoolActivity" android:exported="false" />
-        <activity android:name=".PremiumActivity" android:screenOrientation="portrait" android:exported="false" />
     </application>
 </manifest>

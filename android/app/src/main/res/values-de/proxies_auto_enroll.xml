@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="psx_auto_setup_notice" formatted="false">"Das Netzwerk wird über Ihr MARS-X-Konto automatisch eingerichtet. Kein SDK-Schlüssel nötig. Teilen nur mit ausdrücklicher Zustimmung."</string>
-    <string name="psx_auto_start" formatted="false">"Netzwerkfreigabe starten"</string>
-    <string name="psx_auto_enrolling" formatted="false">"Geräteberechtigung wird geprüft…"</string>
-    <string name="psx_auto_unavailable" formatted="false">"Dieses Gerät ist nicht freigegeben. Der Betreiber muss eigene Gerätezugangsdaten zuweisen."</string>
-    <string name="psx_auto_sign_in" formatted="false">"Melden Sie sich mit Google bei MARS-X an, um fortzufahren."</string>
-</resources>

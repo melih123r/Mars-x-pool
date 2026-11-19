@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="psx_auto_setup_notice" formatted="false">"透過 MARS-X 帳戶自動設定網路，無需 SDK 金鑰。分享僅在您明確同意後開始。"</string>
-    <string name="psx_auto_start" formatted="false">"開始網路分享"</string>
-    <string name="psx_auto_enrolling" formatted="false">"正在驗證裝置授權…"</string>
-    <string name="psx_auto_unavailable" formatted="false">"裝置尚未獲准。管理員必須指派專用憑證。"</string>
-    <string name="psx_auto_sign_in" formatted="false">"請使用 Google 登入 MARS-X 以繼續。"</string>
-</resources>

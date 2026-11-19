@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <string name="psx_key_secure_saved" formatted="false">"Naka-encrypt at naka-save ang SDK key sa telepono. Hindi awtomatikong magsisimula ang pagbabahagi."</string>
-  <string name="psx_key_first_time" formatted="false">"Ilagay ang bagong SDK key nang isang beses. Ligtas itong mase-save para sa susunod."</string>
-  <string name="psx_key_forget" formatted="false">"Burahin ang naka-save na SDK key"</string>
-  <string name="psx_key_forget_confirm" formatted="false">"Ihinto ang pagbabahagi at burahin ang key? I-restart ang app bago gumamit ng ibang key."</string>
-  <string name="psx_key_restart_required" formatted="false">"Nabura ang key. I-restart ang app para maglagay ng iba."</string>
-</resources>

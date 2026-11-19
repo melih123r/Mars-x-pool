@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <string name="psx_key_secure_saved" formatted="false">"Khóa SDK đã được lưu mã hóa trên điện thoại. Chia sẻ không tự khởi động."</string>
-  <string name="psx_key_first_time" formatted="false">"Nhập khóa SDK mới một lần. Khóa sẽ được lưu an toàn cho lần sau."</string>
-  <string name="psx_key_forget" formatted="false">"Quên khóa SDK đã lưu"</string>
-  <string name="psx_key_forget_confirm" formatted="false">"Dừng chia sẻ và xóa khóa khỏi điện thoại? Khởi động lại ứng dụng để đổi khóa."</string>
-  <string name="psx_key_restart_required" formatted="false">"Đã xóa khóa. Khởi động lại ứng dụng để nhập khóa khác."</string>
-</resources>

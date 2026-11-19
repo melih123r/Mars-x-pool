@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="psx_auto_setup_notice" formatted="false">"Rețeaua se configurează automat prin MARS-X. Nu este necesară cheia SDK. Partajarea începe doar cu acordul tău."</string>
-    <string name="psx_auto_start" formatted="false">"Pornește partajarea rețelei"</string>
-    <string name="psx_auto_enrolling" formatted="false">"Verificăm autorizarea dispozitivului…"</string>
-    <string name="psx_auto_unavailable" formatted="false">"Dispozitiv neautorizat. Administratorul trebuie să atribuie acreditări dedicate."</string>
-    <string name="psx_auto_sign_in" formatted="false">"Conectează-te la MARS-X cu Google pentru a continua."</string>
-</resources>

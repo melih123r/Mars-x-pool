@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <string name="psx_key_secure_saved" formatted="false">"Kunci SDK disimpan tersulit pada telefon. Perkongsian tidak bermula sendiri."</string>
-  <string name="psx_key_first_time" formatted="false">"Masukkan kunci SDK baharu sekali sahaja. Ia disimpan dengan selamat."</string>
-  <string name="psx_key_forget" formatted="false">"Padam kunci SDK tersimpan"</string>
-  <string name="psx_key_forget_confirm" formatted="false">"Henti perkongsian dan padam kunci? Mulakan semula aplikasi untuk kunci lain."</string>
-  <string name="psx_key_restart_required" formatted="false">"Kunci dipadam. Mulakan semula aplikasi untuk memasukkan kunci lain."</string>
-</resources>

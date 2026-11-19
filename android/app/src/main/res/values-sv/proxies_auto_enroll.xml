@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="psx_auto_setup_notice" formatted="false">"Nätverket konfigureras automatiskt via MARS-X. Ingen SDK-nyckel behövs. Delning sker endast med samtycke."</string>
-    <string name="psx_auto_start" formatted="false">"Starta nätverksdelning"</string>
-    <string name="psx_auto_enrolling" formatted="false">"Kontrollerar enhetens behörighet…"</string>
-    <string name="psx_auto_unavailable" formatted="false">"Enheten är inte godkänd. Operatören måste tilldela egna enhetsuppgifter."</string>
-    <string name="psx_auto_sign_in" formatted="false">"Logga in på MARS-X med Google för att fortsätta."</string>
-</resources>

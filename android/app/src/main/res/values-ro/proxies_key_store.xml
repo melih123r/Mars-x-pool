@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <string name="psx_key_secure_saved" formatted="false">"Cheia SDK este salvată criptat pe telefon. Partajarea nu pornește automat."</string>
-  <string name="psx_key_first_time" formatted="false">"Introdu o cheie SDK nouă o singură dată. Va fi păstrată în siguranță."</string>
-  <string name="psx_key_forget" formatted="false">"Șterge cheia SDK salvată"</string>
-  <string name="psx_key_forget_confirm" formatted="false">"Oprești partajarea și ștergi cheia din telefon? Repornește aplicația pentru altă cheie."</string>
-  <string name="psx_key_restart_required" formatted="false">"Cheie ștearsă. Repornește aplicația pentru a introduce alta."</string>
-</resources>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <string name="psx_key_secure_saved" formatted="false">"Az SDK-kulcs titkosítva tárolva a telefonon. A megosztás nem indul automatikusan."</string>
-  <string name="psx_key_first_time" formatted="false">"Új SDK-kulcsot csak egyszer adj meg. Biztonságosan megőrizzük."</string>
-  <string name="psx_key_forget" formatted="false">"Mentett SDK-kulcs törlése"</string>
-  <string name="psx_key_forget_confirm" formatted="false">"Leállítod a megosztást és törlöd a kulcsot? Másik kulcshoz indítsd újra az appot."</string>
-  <string name="psx_key_restart_required" formatted="false">"Kulcs törölve. Másik kulcshoz indítsd újra az appot."</string>
-</resources>

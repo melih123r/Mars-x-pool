@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="psx_auto_setup_notice" formatted="false">"Het netwerk wordt automatisch ingesteld via MARS-X. Geen SDK-sleutel nodig. Delen start alleen met toestemming."</string>
-    <string name="psx_auto_start" formatted="false">"Netwerk delen starten"</string>
-    <string name="psx_auto_enrolling" formatted="false">"Apparaattoegang controleren…"</string>
-    <string name="psx_auto_unavailable" formatted="false">"Dit apparaat is nog niet goedgekeurd. De beheerder moet een eigen apparaatsleutel toewijzen."</string>
-    <string name="psx_auto_sign_in" formatted="false">"Log in bij MARS-X met Google om door te gaan."</string>
-</resources>

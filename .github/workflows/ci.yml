@@ -38,6 +38,8 @@ jobs:
   android:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      GOOGLE_WEB_CLIENT_ID: ${{ secrets.GOOGLE_WEB_CLIENT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
@@ -54,6 +56,12 @@ jobs:
           gradle-version: 8.11.1
       - name: Network locale and DEMO safety checks
         run: python3 scripts/check-network-home-ui.py
+      - name: Verify Google sign-in build configuration
+        run: |
+          case "$GOOGLE_WEB_CLIENT_ID" in
+            *-*.apps.googleusercontent.com) ;;
+            *) echo "GOOGLE_WEB_CLIENT_ID secret is missing or invalid" >&2; exit 1 ;;
+          esac
       - name: Android unit tests
         run: gradle -p android :app:testDebugUnitTest --no-daemon
       - name: Android release lint

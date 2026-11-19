@@ -1,0 +1,7 @@
+<resources>
+    <string name="psx_auto_provisioning">L’inscription sécurisée de l’appareil est automatique. Les utilisateurs ne saisissent et ne voient jamais la clé SDK du fournisseur.</string>
+    <string name="psx_auto_enrolling">Création d’une connexion sécurisée propre à l’appareil…</string>
+    <string name="psx_auto_auth_required">Connectez-vous avec Google sur cet écran pour autoriser l’appareil pilote.</string>
+    <string name="psx_auto_auth_failed">Échec de la connexion sécurisée. Le partage en direct n’a pas démarré.</string>
+    <string name="psx_auto_provider_waiting">Appareil inscrit • en attente de la confirmation en ligne du fournisseur</string>
+</resources>

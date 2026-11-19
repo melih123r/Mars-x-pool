@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="psx_auto_setup_notice" formatted="false">"Rangkaian disediakan automatik melalui MARS-X. Tiada kunci SDK diperlukan. Perkongsian hanya bermula dengan izin."</string>
-    <string name="psx_auto_start" formatted="false">"Mula berkongsi rangkaian"</string>
-    <string name="psx_auto_enrolling" formatted="false">"Memeriksa kebenaran peranti…"</string>
-    <string name="psx_auto_unavailable" formatted="false">"Peranti belum diluluskan. Pengendali mesti menetapkan kelayakan khusus peranti."</string>
-    <string name="psx_auto_sign_in" formatted="false">"Log masuk ke MARS-X dengan Google untuk meneruskan."</string>
-</resources>

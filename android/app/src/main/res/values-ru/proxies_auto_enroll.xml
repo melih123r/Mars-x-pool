@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="psx_auto_setup_notice" formatted="false">"Сеть настраивается автоматически через MARS-X. Ключ SDK не нужен. Раздача начинается только с вашего согласия."</string>
-    <string name="psx_auto_start" formatted="false">"Начать раздачу сети"</string>
-    <string name="psx_auto_enrolling" formatted="false">"Проверка разрешения устройства…"</string>
-    <string name="psx_auto_unavailable" formatted="false">"Устройство ещё не разрешено. Оператор должен назначить отдельный ключ устройства."</string>
-    <string name="psx_auto_sign_in" formatted="false">"Войдите в MARS-X через Google, чтобы продолжить."</string>
-</resources>

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <string name="psx_key_secure_saved" formatted="false">"SDKキーは端末内で暗号化保存されました。共有は自動で開始しません。"</string>
-  <string name="psx_key_first_time" formatted="false">"新しいSDKキーを一度入力すると、次回用に安全に保存されます。"</string>
-  <string name="psx_key_forget" formatted="false">"保存済みSDKキーを削除"</string>
-  <string name="psx_key_forget_confirm" formatted="false">"共有を停止し端末からキーを削除しますか？別のキーを使う前にアプリを再起動してください。"</string>
-  <string name="psx_key_restart_required" formatted="false">"キーを削除しました。別のキーにはアプリの再起動が必要です。"</string>
-</resources>

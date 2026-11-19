@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="psx_auto_setup_notice" formatted="false">"Mạng được thiết lập tự động qua tài khoản MARS-X. Không cần khóa SDK. Chia sẻ chỉ bắt đầu khi bạn đồng ý."</string>
-    <string name="psx_auto_start" formatted="false">"Bắt đầu chia sẻ mạng"</string>
-    <string name="psx_auto_enrolling" formatted="false">"Đang xác minh quyền của thiết bị…"</string>
-    <string name="psx_auto_unavailable" formatted="false">"Thiết bị chưa được duyệt. Người quản lý phải cấp khóa riêng cho thiết bị."</string>
-    <string name="psx_auto_sign_in" formatted="false">"Đăng nhập MARS-X bằng Google để tiếp tục."</string>
-</resources>

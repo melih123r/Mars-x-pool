@@ -64,6 +64,11 @@ if network_version:
         raise SystemExit("Network test launcher activity is missing")
     if not re.search(r'<activity\s+android:name="\.NetworkHomeActivity"[^>]*>[\s\S]*?android.intent.action.MAIN[\s\S]*?android.intent.category.LAUNCHER', manifest):
         raise SystemExit("Network test must launch NetworkHomeActivity")
+    for legacy_activity in (".MainActivity", ".NetworkWebsiteActivity",
+                            ".NetworkSignInActivity", ".VrscPoolActivity",
+                            ".PremiumActivity"):
+        if f'android:name="{legacy_activity}"' in manifest:
+            raise SystemExit("Legacy/non-Network activity must not be packaged: " + legacy_activity)
 for forbidden in ("android.permission.RECEIVE_BOOT_COMPLETED",
                   "android.permission.REQUEST_INSTALL_PACKAGES",
                   "android.permission.READ_PHONE_STATE"):
@@ -80,14 +85,10 @@ else:
             raise SystemExit(f"Forbidden beta permission present: {forbidden}")
 if '"version": "0.9.0"' not in package:
     raise SystemExit("Package version must match Beta 0.9.0")
-if network_version:
-    if 'APP_VERSION = BuildConfig.VERSION_NAME' not in main_activity:
-        raise SystemExit("Network runtime must use the installed version")
-    if 'android:name=".MainActivity"' in manifest or 'android:name=".NetworkWebsiteActivity"' in manifest:
-        raise SystemExit("Legacy beta pages must not be navigable from Network")
-else:
-    if 'APP_VERSION = "0.9.0-beta"' not in main_activity:
-        raise SystemExit("Android runtime version must match Beta 0.9.0")
+if legacy_version and 'APP_VERSION = "0.9.0-beta"' not in main_activity:
+    raise SystemExit("Android runtime version must match Beta 0.9.0")
+if network_version and 'APP_VERSION = BuildConfig.VERSION_NAME' not in main_activity:
+    raise SystemExit("Network runtime version must use BuildConfig.VERSION_NAME")
 for runtime in (
     ROOT / "server.js",
     ROOT / "cloudflare/src/worker.js",

@@ -14,8 +14,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.TrafficStats;
 import android.content.Context;
-import android.content.Intent;
 import java.util.Locale;
+import java.util.UUID;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -36,6 +36,9 @@ public final class NetworkHomeActivity extends Activity {
     private static final int BG=Color.rgb(9,14,24), PANEL=Color.rgb(23,31,46);
     private static final int WHITE=Color.WHITE, MUTED=Color.rgb(171,183,201), ORANGE=Color.rgb(255,128,43);
     private SharedPreferences prefs;
+    private SharedPreferences accountPrefs;
+    private SecureStore secureStore;
+    private GoogleSignInManager googleSignIn;
     private LinearLayout page;
     private TextView consentStatus;
     private Button consentButton;
@@ -48,7 +51,6 @@ public final class NetworkHomeActivity extends Activity {
     private CheckBox proxyDisclosureAcknowledgement;
     private Button proxyStatusButton;
     private Button proxyPilotStart;
-    private int pendingEnrollmentGeneration;
     private TextView proxyPilotStatus;
     private ProxiesPilotController proxyPilot;
     private ProxiesPilotController.Listener proxyPilotListener;
@@ -60,6 +62,10 @@ public final class NetworkHomeActivity extends Activity {
     private int farmerLiveGeneration;
     private boolean farmerLiveLoading;
     private boolean farmerLiveResumed;
+    private boolean authLoading;
+    private boolean pendingPilotStart;
+    private int pilotStatusAttempts;
+    private final Handler pilotStatusHandler=new Handler(Looper.getMainLooper());
     private final Handler farmerLiveHandler=new Handler(Looper.getMainLooper());
     private final Runnable farmerLiveRefresh=()->queryPrivateFarmerAccount(true);
     // Invalidate an outstanding HTTPS callback if consent is withdrawn.
@@ -111,6 +117,13 @@ public final class NetworkHomeActivity extends Activity {
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
         prefs=getSharedPreferences("network_consent_v1",MODE_PRIVATE);
+        accountPrefs=getSharedPreferences("marsx_beta",MODE_PRIVATE);
+        if(!accountPrefs.contains("worker_id")){
+            accountPrefs.edit().putString("worker_id","node-"
+                +UUID.randomUUID().toString().replace("-","")).apply();
+        }
+        secureStore=new SecureStore(this);
+        googleSignIn=new GoogleSignInManager(this);
         proxyPilotListener=(status,deviceId)->runOnUiThread(()->
             updatePilotStatus(status.name(),deviceId));
         proxyPilot=ProxiesPilotController.attach(this,proxyPilotListener);
@@ -141,6 +154,7 @@ public final class NetworkHomeActivity extends Activity {
         consentButton=button(network,getString(R.string.network_consent_button));
         consentButton.setOnClickListener(v->{
             if (prefs.getBoolean("consented",false)) {
+                cancelPilotStatusChecks();
                 if(prefs.getBoolean("psx_sharing_active",false))proxyPilot.stop();
                 prefs.edit().putBoolean("consented",false).putBoolean("monitor_active",false).apply();
                 prefs.edit().putBoolean("psx_sharing_active",false).apply();
@@ -212,14 +226,12 @@ public final class NetworkHomeActivity extends Activity {
         proxy.addView(proxyDisclosureAcknowledgement,new LinearLayout.LayoutParams(-1,-2));
         proxyPilotStatus=text(proxy,getString(R.string.psx_pilot_stopped),15,ORANGE,true);
         text(proxy,getString(R.string.psx_zero_earnings),13,MUTED,false);
-        // Users never enter or see a Proxies.sx SDK key.
-        // Credentials are assigned to each approved MARS-X device by the
-        // operator and obtained only after authenticated, explicit consent.
-        proxyPilotStart=button(proxy,getString(R.string.psx_auto_start));
+        text(proxy,getString(R.string.psx_auto_provisioning),12,MUTED,false);
+        proxyPilotStart=button(proxy,getString(R.string.psx_pilot_start));
         proxyPilotStart.setOnClickListener(v->requestPilotStart());
         Button stopProxy=button(proxy,getString(R.string.psx_stop_revoke));
         stopProxy.setOnClickListener(v->{
-            pendingEnrollmentGeneration++; // Reject a late provisioning response.
+            cancelPilotStatusChecks();
             proxyPilot.stop();
             proxyStatusGeneration++;
             proxyStatusButton.setEnabled(true);
@@ -235,9 +247,6 @@ public final class NetworkHomeActivity extends Activity {
         });
         proxyServerStatus=text(proxy,getString(R.string.psx_off_status),13,MUTED,false);
         proxyPrerequisites=text(proxy,getString(R.string.psx_prerequisites),12,MUTED,false);
-        // Keep verbose technical prerequisites internal; users only control
-        // informed consent, connectivity and stop. SDK keys are never shown.
-        proxyPrerequisites.setVisibility(View.GONE);
         proxyStatusButton=button(proxy,getString(R.string.psx_check_backend));
         proxyStatusButton.setOnClickListener(v->queryProxiesReadiness());
 
@@ -254,7 +263,7 @@ public final class NetworkHomeActivity extends Activity {
         farmerLiveStatus=text(proxy,getString(R.string.psx_farmer_sign_in_required),14,WHITE,false);
         farmerLiveButton=button(proxy,getString(R.string.psx_farmer_sign_in));
         farmerLiveButton.setOnClickListener(v->{
-            if(currentAuthSession()==null) startActivity(new Intent(this,NetworkSignInActivity.class));
+            if(currentAuthSession()==null) beginNetworkGoogleSignIn(false);
             else queryPrivateFarmerAccount(false);
         });
 
@@ -353,73 +362,89 @@ public final class NetworkHomeActivity extends Activity {
                 REQUEST_PROXY_NOTIFICATIONS);
             return;
         }
-        if(currentAuthSession()==null) {
-            startActivity(new Intent(this,NetworkSignInActivity.class));
-            return; // Never auto-start sharing after sign-in.
+        if(currentAuthSession()==null){
+            pendingPilotStart=true;
+            android.widget.Toast.makeText(this,getString(R.string.psx_auto_auth_required),
+                android.widget.Toast.LENGTH_LONG).show();
+            beginNetworkGoogleSignIn(true);
+            return;
         }
         new AlertDialog.Builder(this)
             .setTitle(getString(R.string.psx_pilot_confirm_title))
             .setMessage(getString(R.string.psx_pilot_confirm_message))
             .setNegativeButton(getString(R.string.nui_14),null)
-            .setPositiveButton(getString(R.string.psx_auto_start),(dialog,which)->startPilot())
+            .setPositiveButton(getString(R.string.psx_pilot_start),(dialog,which)->startPilotAutomatic())
             .show();
     }
 
-    private void startPilot(){
-        final int generation=++pendingEnrollmentGeneration;
+    private void startPilotAutomatic(){
         final String session=currentAuthSession();
-        final String installId=getSharedPreferences("marsx_beta",MODE_PRIVATE)
-            .getString("worker_id","");
-        if(session==null || !installId.matches("node-[0-9a-fA-F]{32}")){
-            proxyPilotStatus.setText(getString(R.string.psx_auto_sign_in));
-            startActivity(new Intent(this,NetworkSignInActivity.class));
-            return;
-        }
+        final String installId=accountPrefs.getString("worker_id","");
+        final String deviceId=proxyPilot.deviceId();
         proxyPilotStart.setEnabled(false);
         proxyPilotStatus.setText(getString(R.string.psx_auto_enrolling));
         new Thread(()->{
-            String scopedKey=null;
-            boolean mustSignIn=false;
-            try {
-                scopedKey=NetworkPeerEnrollmentClient.fetch(session,installId);
-            } catch(NetworkPeerEnrollmentClient.AuthenticationRequiredException ignored) {
-                mustSignIn=true;
-            } catch(Exception ignored) {
-                // No provider key, token or response contents in logs.
-            }
-            final boolean requiresSignIn=mustSignIn;
-            final String verifiedDeviceKey=scopedKey;
+            ProxiesAutomaticEnrollmentClient.Result result=null;
+            try{
+                result=ProxiesAutomaticEnrollmentClient.enroll(session,installId,deviceId,
+                    Build.MODEL,"Android "+Build.VERSION.RELEASE,
+                    Locale.getDefault().getCountry().toUpperCase(Locale.ROOT));
+            }catch(Exception ignored){ /* Never log credentials or provider responses. */ }
+            final ProxiesAutomaticEnrollmentClient.Result credential=result;
             runOnUiThread(()->{
-                if(isFinishing() || isDestroyed()
-                    || generation != pendingEnrollmentGeneration) return;
-                if(!prefs.getBoolean("consented",false)
-                    || !prefs.getBoolean("psx_read_notice_v1",false)){
-                    proxyPilotStatus.setText(getString(R.string.psx_pilot_stopped));
+                if(isFinishing()||isDestroyed())return;
+                if(credential==null){
+                    proxyPilot.stop();
+                    prefs.edit().putBoolean("psx_sharing_active",false).apply();
+                    proxyPilotStatus.setText(getString(R.string.psx_pilot_error));
                     proxyPilotStart.setEnabled(true);
                     return;
                 }
-                if(requiresSignIn){
-                    new SecureStore(this).remove("auth_session");
-                    proxyPilotStatus.setText(getString(R.string.psx_auto_sign_in));
-                    proxyPilotStart.setEnabled(true);
-                    startActivity(new Intent(this,NetworkSignInActivity.class));
-                    return;
-                }
-                if(verifiedDeviceKey==null){
-                    proxyPilotStatus.setText(getString(R.string.psx_auto_unavailable));
-                    proxyPilotStart.setEnabled(true);
-                    return;
-                }
-                try {
-                    proxyPilot.start(verifiedDeviceKey,installId);
-                    // 'Connecting' is not proof of relay traffic or earnings.
-                } catch(RuntimeException error){
+                try{
+                    proxyPilot.start(credential);
+                    prefs.edit().putString("psx_device_id",credential.deviceId).apply();
+                    proxyPilotStatus.setText(getString(R.string.psx_auto_provider_waiting)
+                        +"\n"+getString(R.string.psx_pilot_device_id)+": "+credential.deviceId);
+                    beginPilotStatusChecks(credential.deviceId);
+                }catch(RuntimeException error){
                     proxyPilot.stop();
                     proxyPilotStatus.setText(getString(R.string.psx_pilot_error));
                     proxyPilotStart.setEnabled(true);
                 }
             });
-        },"marsx-peer-device-enrollment").start();
+        },"marsx-v19-device-enrollment").start();
+    }
+
+    private void beginPilotStatusChecks(String deviceId){
+        cancelPilotStatusChecks();
+        pilotStatusAttempts=0;
+        pollPilotStatus(deviceId);
+    }
+
+    private void pollPilotStatus(String deviceId){
+        if(++pilotStatusAttempts>12)return;
+        pilotStatusHandler.postDelayed(()->new Thread(()->{
+            boolean online=false;
+            try{
+                online=ProxiesAutomaticEnrollmentClient.online(currentAuthSession(),
+                    accountPrefs.getString("worker_id",""),deviceId);
+            }catch(Exception ignored){ /* Remain CONNECTING; never invent online state. */ }
+            final boolean confirmed=online;
+            runOnUiThread(()->{
+                if(isFinishing()||isDestroyed())return;
+                proxyPilot.providerOnline(confirmed);
+                if(confirmed){
+                    queryPrivateFarmerAccount(false);
+                }else if(pilotStatusAttempts<12){
+                    pollPilotStatus(deviceId);
+                }
+            });
+        },"marsx-v19-provider-status").start(),5000);
+    }
+
+    private void cancelPilotStatusChecks(){
+        pilotStatusAttempts=13;
+        pilotStatusHandler.removeCallbacksAndMessages(null);
     }
 
     private void updatePilotStatus(String status,String deviceId){
@@ -524,7 +549,72 @@ public final class NetworkHomeActivity extends Activity {
     }
 
     private String currentAuthSession() {
-        return new SecureStore(this).get("auth_session");
+        return secureStore==null?null:secureStore.get("auth_session");
+    }
+
+    private void beginNetworkGoogleSignIn(boolean continuePilot){
+        if(authLoading)return;
+        pendingPilotStart=pendingPilotStart||continuePilot;
+        if(!googleSignIn.isConfigured()){
+            pendingPilotStart=false;
+            android.widget.Toast.makeText(this,getString(R.string.psx_auto_auth_failed),
+                android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+        authLoading=true;
+        if(farmerLiveButton!=null){
+            farmerLiveButton.setEnabled(false);
+            farmerLiveButton.setText(getString(R.string.psx_live_loading));
+        }
+        final String installId=accountPrefs.getString("worker_id","");
+        new Thread(()->{
+            String nonce=null;
+            try{nonce=NetworkAuthClient.requestNonce(installId);}
+            catch(Exception ignored){ /* Authentication failure stays user-visible and generic. */ }
+            final String requestedNonce=nonce;
+            runOnUiThread(()->{
+                if(requestedNonce==null){finishNetworkAuth(false);return;}
+                googleSignIn.signIn(requestedNonce,false,new GoogleSignInManager.Callback(){
+                    @Override public void onToken(String idToken){
+                        new Thread(()->{
+                            String session=null;
+                            try{session=NetworkAuthClient.exchange(installId,requestedNonce,idToken);}
+                            catch(Exception ignored){ /* Do not log Google tokens. */ }
+                            final String authenticatedSession=session;
+                            runOnUiThread(()->{
+                                boolean stored=false;
+                                if(authenticatedSession!=null){
+                                    try{secureStore.put("auth_session",authenticatedSession);stored=true;}
+                                    catch(Exception ignored){ /* Keystore failure is a failed sign-in. */ }
+                                }
+                                finishNetworkAuth(stored);
+                            });
+                        },"marsx-v19-auth-exchange").start();
+                    }
+                    @Override public void onError(String message){finishNetworkAuth(false);}
+                });
+            });
+        },"marsx-v19-auth-nonce").start();
+    }
+
+    private void finishNetworkAuth(boolean success){
+        authLoading=false;
+        if(farmerLiveButton!=null){
+            farmerLiveButton.setEnabled(true);
+            farmerLiveButton.setText(success
+                ?getString(R.string.psx_farmer_refresh):getString(R.string.psx_farmer_sign_in));
+        }
+        if(!success){
+            pendingPilotStart=false;
+            android.widget.Toast.makeText(this,getString(R.string.psx_auto_auth_failed),
+                android.widget.Toast.LENGTH_LONG).show();
+            return;
+        }
+        queryPrivateFarmerAccount(false);
+        if(pendingPilotStart){
+            pendingPilotStart=false;
+            requestPilotStart();
+        }
     }
 
     private String privateMetric(Double value, String suffix) {
@@ -626,7 +716,7 @@ public final class NetworkHomeActivity extends Activity {
         else if(active)monitorHandler.post(monitorTick);
     }
     @Override protected void onDestroy(){
-        pendingEnrollmentGeneration++;
+        cancelPilotStatusChecks();
         proxyPilot.detach(proxyPilotListener);
         farmerLiveHandler.removeCallbacks(farmerLiveRefresh);
         farmerLiveGeneration++;

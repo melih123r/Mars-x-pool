@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="psx_auto_setup_notice" formatted="false">"A hálózat automatikusan beáll a MARS-X fiókkal. Nem kell SDK-kulcs. Megosztás csak engedéllyel indul."</string>
-    <string name="psx_auto_start" formatted="false">"Hálózatmegosztás indítása"</string>
-    <string name="psx_auto_enrolling" formatted="false">"Eszköz jogosultságának ellenőrzése…"</string>
-    <string name="psx_auto_unavailable" formatted="false">"Az eszköz még nem engedélyezett. Az üzemeltetőnek külön kulcsot kell rendelnie hozzá."</string>
-    <string name="psx_auto_sign_in" formatted="false">"Jelentkezz be a MARS-X-be a Google-fiókoddal."</string>
-</resources>

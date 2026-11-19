@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="psx_auto_setup_notice" formatted="false">"Ağ bağlantısı MARS-X hesabınızla otomatik hazırlanır. SDK anahtarı gerekmez. İnternet paylaşımı yalnızca açık onayınızla başlar."</string>
-    <string name="psx_auto_start" formatted="false">"Ağ paylaşımını başlat"</string>
-    <string name="psx_auto_enrolling" formatted="false">"Cihazın ağ yetkisi güvenli biçimde kontrol ediliyor…"</string>
-    <string name="psx_auto_unavailable" formatted="false">"Bu cihaz henüz ağ paylaşımı için yetkilendirilmedi. Hesap yöneticisinin cihaza özel yetki tanımlaması gerekiyor."</string>
-    <string name="psx_auto_sign_in" formatted="false">"Devam etmek için MARS-X hesabınıza Google ile giriş yapın."</string>
-</resources>

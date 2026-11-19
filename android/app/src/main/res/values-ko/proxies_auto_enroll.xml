@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="psx_auto_setup_notice" formatted="false">"네트워크는 MARS-X 계정으로 자동 설정됩니다. SDK 키가 필요 없습니다. 공유는 동의 후에만 시작됩니다."</string>
-    <string name="psx_auto_start" formatted="false">"네트워크 공유 시작"</string>
-    <string name="psx_auto_enrolling" formatted="false">"기기 사용 권한 확인 중…"</string>
-    <string name="psx_auto_unavailable" formatted="false">"기기가 아직 승인되지 않았습니다. 관리자가 기기별 인증 정보를 할당해야 합니다."</string>
-    <string name="psx_auto_sign_in" formatted="false">"Google로 MARS-X에 로그인해 주세요."</string>
-</resources>

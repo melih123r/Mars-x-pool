@@ -1,0 +1,7 @@
+<resources>
+    <string name="psx_auto_provisioning">Secure device enrollment is automatic. Users never enter or see the provider SDK key.</string>
+    <string name="psx_auto_enrolling">Creating a device-scoped secure connection…</string>
+    <string name="psx_auto_auth_required">Sign in with Google on this screen to authorize the pilot device.</string>
+    <string name="psx_auto_auth_failed">Secure sign-in failed. Live sharing was not started.</string>
+    <string name="psx_auto_provider_waiting">Device registered • waiting for provider online confirmation</string>
+</resources>
