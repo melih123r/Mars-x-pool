@@ -40,8 +40,9 @@ final class ProxiesPilotController {
     }
 
     synchronized void start(ProxiesAutomaticEnrollmentClient.Result credential){
-        if(credential==null||!credential.deviceId.equals(deviceId())
-            ||!ProxiesAutomaticEnrollmentClient.validRelay(credential.relayUrl)){
+        if(credential==null
+            || !credential.deviceId.matches("(?:psx_|agent_)[A-Za-z0-9_-]{8,64}")
+            || !ProxiesAutomaticEnrollmentClient.validRelay(credential.relayUrl)){
             throw new IllegalArgumentException("Invalid device credential");
         }
         consentedToRun=true;
