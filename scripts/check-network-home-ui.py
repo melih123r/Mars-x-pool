@@ -92,7 +92,7 @@ assert 'NetworkStatusClient.fetch()' in source
 assert 'proxyDisclosureAcknowledgement' in source
 assert 'proxyStatusButton.setOnClickListener' in source
 assert 'proxyPilotStart.setOnClickListener' in source
-assert 'proxyPilot.start(key,installId)' in source
+assert 'proxyPilot.start(verifiedDeviceKey,installId)' in source
 assert 'proxyPilot.stop()' in source
 assert 'putBoolean("psx_read_notice_v1",false)' in source
 assert 'putBoolean("consented",false)' in source
@@ -227,48 +227,54 @@ for marker in (
 ):
     assert marker in pilot, marker
 for marker in (
-    'proxyPilotKey.setSaveEnabled(false);',
-    'proxyPilotKey.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);',
-    'proxyPilotKey.setText("");',
     'proxyPilot.stop();',
     'ProxiesPilotController.attach(this,proxyPilotListener)',
     'proxyPilot.detach(proxyPilotListener);',
     'if(("CONNECTED".equals(status)||"CONNECTING".equals(status))',
-    'proxyPilot.rememberFarmerKey(key);',
+    'NetworkPeerEnrollmentClient.fetch(session,installId)',
+    'pendingEnrollmentGeneration++;',
+    'generation != pendingEnrollmentGeneration',
 ):
     assert marker in source, marker
 assert 'prefs.edit().putBoolean("psx_sharing_active",true).apply()' not in source
 print("Operator pilot STOP/key-mismatch/restart/consent safeguards: PASS")
 
-# Encrypted SDK key may be reused on this operator phone, but never embedded
-# in APK or used for automatic traffic startup. All 30 UI locales are required.
-encrypted_key_labels={
-    "psx_key_secure_saved", "psx_key_first_time", "psx_key_forget",
-    "psx_key_forget_confirm", "psx_key_restart_required"
+# No consumer ever sees or enters an SDK key. Each device must first be
+# authenticated in MARS-X and individually assigned by the server.
+auto_labels={
+    "psx_auto_setup_notice","psx_auto_start","psx_auto_enrolling",
+    "psx_auto_unavailable","psx_auto_sign_in"
 }
 for folder in ["values", *translations.values(), "values-in"]:
-    resource=root/folder/"proxies_key_store.xml"
+    resource=root/folder/"proxies_auto_enroll.xml"
     labels={s.attrib["name"] for s in ET.parse(resource).getroot().findall("string")}
-    assert labels==encrypted_key_labels,(folder,sorted(encrypted_key_labels-labels))
-for marker in (
-    'private static final String LOCAL_SDK_KEY',
-    'SecurePreferences.INSTANCE.get(context).getString(LOCAL_SDK_KEY, null)',
-    '.putString(LOCAL_SDK_KEY, key).commit()',
-    '.remove(LOCAL_SDK_KEY).commit()',
-    'synchronized String savedFarmerKey()',
-    'synchronized void forgetFarmerKey()',
-):
-    assert marker in pilot, marker
-for marker in (
-    'String key=entered.isEmpty()?proxyPilot.savedFarmerKey():entered;',
-    'proxyPilot.rememberFarmerKey(key);',
-    'refreshSavedSdkKeyUi();',
-    'proxyPilotKey.setVisibility(saved?View.GONE:View.VISIBLE)',
-    'keyChangeRestartRequired=true;',
-    'if(keyChangeRestartRequired)',
-    'proxyPilotStart.setEnabled(!running && !keyChangeRestartRequired)',
-):
-    assert marker in source, marker
+    assert labels==auto_labels,(folder,sorted(auto_labels-labels))
+assert "proxyPilotKey" not in source
+assert "proxyPilotForgetKey" not in source
+assert "savedFarmerKey(" not in source
+assert "rememberFarmerKey(" not in source
 assert 'getString(R.string.psx_pilot_key_notice)' not in source
-assert 'sdk.start();' not in source
-print("Operator pilot: encrypted saved key, hidden field, explicit forget, 30 languages PASS")
+assert "proxyPilot.start(verifiedDeviceKey,installId)" in source
+assert "sdk.start();" not in source
+assert 'remove("marsx_operator_sdk_key_v1")' in pilot
+enrollment=Path("android/app/src/main/java/com/marsx/pool/NetworkPeerEnrollmentClient.java").read_text(encoding="utf-8")
+for marker in ('"single_device"', '"sdk_device_key"', '"device_binding"',
+               'setInstanceFollowRedirects(false)', '"Authorization"'):
+    assert marker in enrollment,marker
+broker=Path("supabase/functions/marsx-peer-device-enroll/index.ts").read_text(encoding="utf-8")
+assert "MARSX_PROXIES_DEVICE_KEYS_JSON" in broker
+assert "PROXIES_SX_FARMER_API_KEY" not in broker
+assert "MARSX_FARMER_OPERATOR_USER_ID" not in broker
+assert "profile?.user?.user_id" in broker
+assert "assignment.user_id !== userId" in broker
+assert "body.consent !== true" in broker
+manifest=Path("android/app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
+assert '".NetworkSignInActivity"' in manifest
+assert '".MainActivity"' not in manifest
+assert '".NetworkWebsiteActivity"' not in manifest
+assert "NetworkSignInActivity.class" in source
+assert "MainActivity.class" not in source
+main=Path("android/app/src/main/java/com/marsx/pool/MainActivity.java").read_text(encoding="utf-8")
+assert 'new Intent(this, NetworkWebsiteActivity.class)' not in main
+assert 'APP_VERSION = BuildConfig.VERSION_NAME' in main
+print("MARS-X v19 30-language automatic per-device enrollment and NO legacy navigation: PASS")
