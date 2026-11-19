@@ -2,7 +2,7 @@
  * Operator-only Proxies.sx device enrollment and status endpoint.
  * The farmer API key is consumed server-side and is never returned to Android.
  */
-const REGISTER_URL = "https://api.proxies.sx/v1/peer/register";
+const REGISTER_URL = "https://api.proxies.sx/v1/peer/agents/register";
 const DEVICES_URL = "https://api.proxies.sx/v1/peer/my-devices";
 const AUTH_URL =
   "https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-pool-api/auth/me";
@@ -25,7 +25,7 @@ function validInstall(value: string) {
   return /^[A-Za-z0-9_-]{3,64}$/.test(value);
 }
 function validDevice(value: unknown): value is string {
-  return typeof value === "string" && /^psx_[A-Za-z0-9_-]{8,64}$/.test(value);
+  return typeof value === "string" && /^(?:psx_|agent_)[A-Za-z0-9_-]{8,64}$/.test(value);
 }
 function safeText(value: unknown, max: number) {
   if (typeof value !== "string") return "";
@@ -111,15 +111,13 @@ Deno.serve(async (request: Request) => {
           accept: "application/json",
         },
         body: JSON.stringify({
-          deviceId,
+          // Stable per-phone identity for re-registration.
+          name: deviceId,
+          type: "android",
+          apiKey: auth.providerKey,
           model,
           osVersion,
-          appVersion: "0.9.4-network-live",
           country,
-          carrier: "",
-          sdkVersion: "1.3.2",
-          apiKey: auth.providerKey,
-          userId: auth.installId,
         }),
         redirect: "error",
         signal: AbortSignal.timeout(12000),
@@ -131,10 +129,10 @@ Deno.serve(async (request: Request) => {
       const responseText = await upstream.text();
       if (responseText.length > 65536) throw new Error("response_too_large");
       const parsed = JSON.parse(responseText);
-      const returnedId = parsed?.device?.deviceId ?? parsed?.deviceId;
-      const token = parsed?.token;
+      const returnedId = parsed?.deviceId;
+      const token = parsed?.jwt;
       const relay = parsed?.relay;
-      if (returnedId !== deviceId || typeof token !== "string" ||
+      if (!validDevice(returnedId) || typeof token !== "string" ||
         !/^[A-Za-z0-9._~+\/=-]{24,4096}$/.test(token) || !validRelay(relay)) {
         throw new Error("unexpected_provider_response");
       }
@@ -143,7 +141,8 @@ Deno.serve(async (request: Request) => {
         status: "enrolled",
         source: "proxies.sx",
         scope: "pilot_device_credential",
-        device_id: deviceId,
+        device_id: returnedId,
+        client_request_id: deviceId,
         device_token: token,
         relay_url: relay,
         farmer_api_key_included: false,
