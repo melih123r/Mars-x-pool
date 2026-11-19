@@ -80,8 +80,10 @@ else:
             raise SystemExit(f"Forbidden beta permission present: {forbidden}")
 if '"version": "0.9.0"' not in package:
     raise SystemExit("Package version must match Beta 0.9.0")
-if 'APP_VERSION = "0.9.0-beta"' not in main_activity:
-    raise SystemExit("Android runtime version must match Beta 0.9.0")
+if legacy_version and 'APP_VERSION = "0.9.0-beta"' not in main_activity:
+    raise SystemExit("Legacy Android runtime version must match Beta 0.9.0")
+if network_version and "APP_VERSION = BuildConfig.VERSION_NAME" not in main_activity:
+    raise SystemExit("Network v19 runtime must use the packaged version name")
 for runtime in (
     ROOT / "server.js",
     ROOT / "cloudflare/src/worker.js",
