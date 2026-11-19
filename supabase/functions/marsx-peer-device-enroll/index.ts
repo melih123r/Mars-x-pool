@@ -21,7 +21,6 @@ const RET = {
   "cache-control": "no-store, max-age=0",
   "x-content-type-options": "nosniff",
   "referrer-policy": "no-referrer",
-  "access-control-allow-origin": "https://marsx.invalid",
 };
 function answer(status: number, state: string, error?: string,
   extra: Record<string, unknown> = {}) {
