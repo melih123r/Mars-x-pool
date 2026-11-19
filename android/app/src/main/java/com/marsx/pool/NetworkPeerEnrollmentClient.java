@@ -20,6 +20,10 @@ final class NetworkPeerEnrollmentClient {
         "https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-peer-device-enroll";
     private NetworkPeerEnrollmentClient() {}
 
+    static final class AuthenticationRequiredException extends IOException {
+        AuthenticationRequiredException() { super("MARS-X login required"); }
+    }
+
     static String parse(String response, String installId) throws JSONException {
         JSONObject object = new JSONObject(response);
         if(object.getInt("schema_version") != 1
@@ -58,7 +62,11 @@ final class NetworkPeerEnrollmentClient {
         try {
             connection.setFixedLengthStreamingMode(data.length);
             try(OutputStream out=connection.getOutputStream()){out.write(data);}
-            if(connection.getResponseCode()!=200) {
+            int responseCode=connection.getResponseCode();
+            if(responseCode==401 || responseCode==403) {
+                throw new AuthenticationRequiredException();
+            }
+            if(responseCode!=200) {
                 // Do not surface upstream authentication or secret configuration data.
                 throw new IOException("Peer provisioning not ready");
             }
