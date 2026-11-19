@@ -3,16 +3,19 @@
 import json
 import urllib.error
 import urllib.request
+import socket
 
 ENDPOINT = "https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-peer-enroll"
 
 def query(method, data=None, headers=None):
     req=urllib.request.Request(ENDPOINT, method=method, data=data, headers=headers or {})
     try:
-        with urllib.request.urlopen(req, timeout=20) as res:
+        with urllib.request.urlopen(req, timeout=8) as res:
             return res.status, json.loads(res.read(4096))
     except urllib.error.HTTPError as error:
         return error.code, json.loads(error.read(4096))
+    except (TimeoutError, socket.timeout, urllib.error.URLError) as error:
+        raise RuntimeError("Peer enrollment service failed to respond promptly") from error
 
 code, body = query("GET")
 assert code == 401, (code,body)
