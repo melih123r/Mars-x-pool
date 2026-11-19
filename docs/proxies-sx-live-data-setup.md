@@ -13,7 +13,7 @@
 3. Supabase Dashboard → MARS-X projesi `gcqcxiqhuzfudlfosqlp` → Edge Functions → Secrets bölümünde `PROXIES_SX_FARMER_API_KEY` adıyla anahtarı ekle. Bu tek secret tüm Edge Function'larda kullanılabilir; anahtar server tarafında kalır.
 4. Özel veriyi okuyacak Google hesabının e-postasını `MARSX_FARMER_OPERATOR_EMAIL` olarak ekle. MARS-X `user_id` biliniyorsa ayrıca `MARSX_FARMER_OPERATOR_USER_ID` eklenebilir; iki sır da varsa ikisi birden eşleşmelidir.
 5. Kaydettikten sonra `marsx-network-live-board` GET çağrısı Proxies.sx genel ağ verisini sunucudan döndürebilir. Bu endpoint genel ağ içindir, **kendi hesabının kazancı değildir**. Proxies.sx hâlâ 401, 403, 429 veya hatalı JSON döndürürse uygulama değer uydurmaz; kullanılamıyor der.
-6. `marsx-farmer-live`, uygulamanın Android Keystore ile koruduğu MARS-X oturumunu `marsx-pool-api/auth/me` üzerinden yeniden doğrular ve `X-Install-Id` bağını kontrol eder. Android ekranı oturum varsa açılışta ve 60 saniyede bir yeniler; oturum yoksa mevcut Google giriş ekranını açar.
+6. `marsx-farmer-live`, uygulamanın Android Keystore ile koruduğu MARS-X oturumunu `marsx-pool-api/auth/me` üzerinden yeniden doğrular ve `X-Install-Id` bağını kontrol eder. Android ekranı oturum varsa açılışta ve 60 saniyede bir yeniler; oturum yoksa yalnızca güncel Network'e ait Google giriş ekranını açar.
 7. Veriyi sadece test et: Özel API'de `devices.total`, `devices.online`, `traffic_gb`, `provider_reported_earnings` alanlarını doğrula. Bunlar sağlayıcıdan gelmezse `null`/erişilemez gösterilir; sıfır gösterilmez.
 
 ## Test
@@ -23,25 +23,33 @@
 - Android birim testleri `NetworkLiveBoardClientTest`, `NetworkFarmerLiveClientTest` ve `NetworkStatusClientTest` ile veri kaynağı/izin sınırlarını doğrular.
 - Android 8/13 emülatörleri 30 dil, tek sayfa ve yenileme kontrolünü sınar.
 
-## Redmi 15C canlı pilotu
+## SDK anahtarı kullanıcıdan istenmeden otomatik cihaz yetkilendirmesi
 
-- Pilot APK, açık kaynak Proxies.sx Android SDK **1.3.2** sürümünü sabitler. Farmer anahtarı kaynak kodda, `BuildConfig` içinde, GitHub'da veya APK içinde bulunmaz.
-- Resmî SDK cihaz kaydı için farmer anahtarını doğrudan `init()` çağrısında istediği ve sağlayıcı cihaz başına kayıt anahtarı üretme uç noktası belgelemediği için, yalnızca operatörün kendi pilot telefonunda maskeli alana **yeni ve güvenilir** SDK anahtarı bir kez girilir. MARS-X bu değeri Android Keystore destekli **EncryptedSharedPreferences** içinde yerel olarak şifreli kaydeder; sonraki açılışlarda anahtar alanı gizlenir ve açık rızalı başlatma sırasında otomatik kullanılır. Anahtar **APK'ya gömülmez, GitHub'a veya Supabase'e istemci üzerinden aktarılmaz**. Bu pilot APK genel dağıtıma uygun değildir.
-- Başlatma için hem MARS-X Network rızası hem Proxies.sx bilgilendirme kutusu gerekir; ardından gerçek trafik konusunda ikinci bir onay penceresi gösterilir. Android 13 ve sonrasında görünür foreground bildirim izni de zorunludur.
-- `Durdur ve rızayı geri çek`, SDK `stop()` ve Android `stopService()` çağrılarını yapar; genel rızanın veya Proxies.sx kutusunun kaldırılması da servisi durdurur. Anahtar şifreli olarak cihazda tutulur ancak rıza kaldırıldığında trafik otomatik yeniden başlamaz. **Kaydedilen SDK anahtarını unut** seçeneği önce paylaşımı durdurur, sonra şifreli anahtarı siler. SDK process-singleton olduğundan farklı anahtar kullanılmadan önce uygulama yeniden başlatılmalıdır. Cihazın offline olduğu farmer panelinden ayrıca doğrulanmalıdır.
-- Ekrandaki sağlayıcı cihaz kimliği SDK 1.3.2'nin kayıt sırasında gönderdiği aynı `psx_…` kimliğidir. Maya'ya yalnız bu cihaz kimliği gönderilir; farmer anahtarı gönderilmez.
-- Canlı pilot için uygulama sürümü `0.9.4-network-pilot` / versionCode `19` olarak ayırt edilir. Ödemeler ve kripto transferleri kapalı kalır.
+**Kullanıcı deneyimi:** MARS-X hesabına Google ile giriş yapar, bant genişliği paylaşımının risklerini okur, açık rıza verir ve **Ağ paylaşımını başlat** seçeneğini kullanır. SDK anahtarı girişi, eski uygulama ekranı ve eski Network WebView geçişi YOKTUR.
 
-## Önemli ayrım
+Yeni Supabase Edge Function: `marsx-peer-device-enroll` (POST). Kullanıcının `auth_session` oturumunu mevcut `marsx-pool-api/auth/me` üzerinden doğrular, `X-Install-Id` ile cihaz kimliğini ilişkilendirir. Yalnızca önceden MARS-X yöneticisi tarafından bu kullanıcıya ve bu cihaza atanan **ayrı ve iptal edilebilir SDK/cihaz anahtarını** verir. `PROXIES_SX_FARMER_API_KEY` olarak tutulan hesap genelindeki anahtarı asla döndürmez.
 
-Eski `GET /v1/peer/board` artık yönetici erişimine kapalıdır. Genel kart yalnızca belgelenmiş özet uç noktası eksiksiz ve geçerli sayılar döndürürse gösterilir. Çiftçi hesabı rakamları ayrı, kimlik doğrulamalı kartta yer alır.
+Her MARS-X kullanıcısının Google Auth kimliği `usr_...`, cihaz kurulumu `node-...` biçimindedir. Yetkili yönetici, bu eşlemeyi sadece Supabase → Edge Functions → Secrets bölümüne `MARSX_PROXIES_DEVICE_KEYS_JSON` adıyla kaydeder. **Gerçek anahtarları GitHub'a, APK'ya, sohbet mesajına veya örnek dosyaya yazma.**
 
-Bu dalda gerçek SDK yalnızca operatörün kendi cihazındaki sınırlı pilot için açılabilir. SDK 1.3.2 yerel yardımcı sunucuyu `127.0.0.1` adresine bağlayarak LAN erişimini kapatır; yine de farmer panelindeki online/offline durumu, yönlendirme testi ve gerçek durdurma davranışı Maya tarafından doğrulanmadan genel kullanıcı dağıtımı veya Play yayını yapılmaz.
+Yalnızca ŞEMA örneği (buradaki yer tutucular gerçek anahtar değildir):
 
-## Bir kez anahtar girişi / sonraki kullanımlar
+```json
+{
+  "node-00112233445566778899aabbccddeeff": {
+    "user_id": "usr_00112233445566778899aabbccddeeff",
+    "sdk_key": "REPLACE_WITH_UNIQUE_PROXIES_SX_SDK_DEVICE_KEY",
+    "enabled": true
+  }
+}
+```
 
-1. Sohbet içinde geçmişte paylaşılan SDK anahtarını **güvenli sayma**: Farmer panelindeki API Keys üzerinden iptal et ve yeni bir SDK/device anahtarı oluştur.
-2. APK'yı sadece kendi cihazında çalıştır. Network ve Proxies.sx rızalarını ver; yeni anahtarı ilk başlatmada **tek kez** maskeli alana gir. Onaydan sonra uygulama anahtarı yalnızca kendi telefonunun Android Keystore şifreli deposuna kaydeder.
-3. Sonraki açılışta giriş alanı gizlidir. Paylaşım **asla otomatik başlamaz**; başlatmak için yeni oturumda rızayı değerlendir ve başlatmayı onayla.
-4. Anahtarı değiştirmek/cihazı devretmek için **Kaydedilen SDK anahtarını unut** düğmesini kullan; uygulamayı yeniden başlatarak farklı anahtar gir. Kullanılmış anahtarın sağlayıcı panelinde iptali bu cihazda saklanan kaydı ayrıca geçersiz kılar.
-5. Anahtar Keystore tarafından korunmuş olsa da **cihaz ele geçirilmesine karşı mutlak koruma değildir**. Bu yöntem yalnızca sahip olunan pilot cihaz içindir; genel kullanıcı dağıtımında sunucudan cihaz-başına kapsamlı ve iptal edilebilir kimlik doğrulaması gerekir.
+- Yönetici Farmer panelinde her onaylı cihaz için ayrı SDK/device key oluşturur ve kullanıcı-cihaz eşlemesini Supabase Secret içinde tanımlar; aynı anahtarı iki cihaza atamaz.
+- Kullanıcı kendi MARS-X hesabına giriş yaptıktan ve açık rıza verdikten sonra Android yalnızca *kendi cihazına atanmış* anahtarı TLS üzerinden alıp SDK 1.3.2'yi başlatır. Kullanıcı API anahtarını **görmez, oluşturmaz ve giremez**.
+- Herhangi bir nedenle `MARSX_PROXIES_DEVICE_KEYS_JSON` eksikse, cihaz listede değilse, anahtar daha geniş yetkilere sahipse veya MARS-X oturumu geçersizse sistem **kapalı** kalmalıdır. Üretimde hesap genelindeki anahtarları veya hesap verilerine erişim yetkisi bulunan key'leri kullanıcılara dağıtma; sağlayıcı ile gerçek cihaz-başına sınırlı scope'u teyit et.
+- Kullanıcı durdurduğunda yerel SDK bağlantısı kapanır; geç gelen sunucu yanıtı onu yeniden açamaz. Yeniden başlatmak için yeni açık onay gerekir. Kazanç ve çevrimiçi durum yalnızca gerçekten sağlayıcıdan gelen yanıtlarla gösterilir.
+- `NetworkSignInActivity` yalnızca güncel MARS-X Network hesap girişidir. Manifestten eski `MainActivity` / `NetworkWebsiteActivity` girişleri kaldırılmıştır.
+- `scripts/test-peer-device-enrollment-live.py` fonksiyonun GET/anonim POST isteklerini reddettiğini kontrol eder. Bu test, gerçek anahtar atanmış ve canlı röleye bağlanmış bir telefonun testi **değildir**.
+
+**Önemli sağlayıcı bağımlılığı:** Proxies.sx'in belgeleri şu anda SDK'ya verilmek üzere cihaz bazında sınırlı API anahtarını programatik olarak üretme uç noktası sunmuyor. Bu yüzden Farmer panelinde anahtarın ilk oluşturulması ve Supabase yönetici eşlemesine alınması otomatik değil; **yalnızca son kullanıcı açısından anahtarsız otomatik kayıt** sağlanabilir. Toplu son kullanıcı dağıtımı öncesinde Proxies.sx'ten uygulama entegratörlerine yönelik dar kapsamlı, iptal edilebilir kimlik bilgisi akışı alınmalı ve kapsam doğrulanmalıdır.
+
+İlk pilotu sahibinin onayladığı 1–2 telefonda çalıştır. Farmer panelinde cihazın bağlandığını, otomatik testi geçtiğini ve durdurulduğunda çevrimdışı kaldığını doğrulamadan genel dağıtıma geçme.
