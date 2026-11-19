@@ -47,11 +47,8 @@ public final class NetworkHomeActivity extends Activity {
     private TextView proxyPrerequisites;
     private CheckBox proxyDisclosureAcknowledgement;
     private Button proxyStatusButton;
-    private EditText proxyPilotKey;
-    private Button proxyPilotForgetKey;
-    private TextView proxyPilotSavedKeyStatus;
-    private boolean keyChangeRestartRequired;
     private Button proxyPilotStart;
+    private int pendingEnrollmentGeneration;
     private TextView proxyPilotStatus;
     private ProxiesPilotController proxyPilot;
     private ProxiesPilotController.Listener proxyPilotListener;
@@ -215,48 +212,21 @@ public final class NetworkHomeActivity extends Activity {
         proxy.addView(proxyDisclosureAcknowledgement,new LinearLayout.LayoutParams(-1,-2));
         proxyPilotStatus=text(proxy,getString(R.string.psx_pilot_stopped),15,ORANGE,true);
         text(proxy,getString(R.string.psx_zero_earnings),13,MUTED,false);
-        proxyPilotKey=new EditText(this);
-        proxyPilotKey.setHint(getString(R.string.psx_pilot_key_hint));
-        proxyPilotKey.setTextColor(WHITE);
-        proxyPilotKey.setHintTextColor(MUTED);
-        proxyPilotKey.setSingleLine(true);
-        proxyPilotKey.setSaveEnabled(false);
-        proxyPilotKey.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
-        proxyPilotKey.setInputType(InputType.TYPE_CLASS_TEXT
-            | InputType.TYPE_TEXT_VARIATION_PASSWORD
-            | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-        proxy.addView(proxyPilotKey,new LinearLayout.LayoutParams(-1,-2));
-        proxyPilotSavedKeyStatus=text(proxy,"",12,MUTED,false);
-        proxyPilotForgetKey=button(proxy,getString(R.string.psx_key_forget));
-        proxyPilotForgetKey.setOnClickListener(v->new AlertDialog.Builder(this)
-            .setTitle(getString(R.string.psx_key_forget))
-            .setMessage(getString(R.string.psx_key_forget_confirm))
-            .setNegativeButton(getString(R.string.nui_14),null)
-            .setPositiveButton(getString(R.string.psx_key_forget),(dialog,which)->{
-                try {
-                    proxyPilot.forgetFarmerKey();
-                    proxyPilotKey.setText("");
-                    keyChangeRestartRequired=true;
-                    refreshSavedSdkKeyUi();
-                    // SDK init() is process-global. Do not reuse the old instance.
-                    proxyPilotStart.setEnabled(false);
-                    proxyPilotStatus.setText(getString(R.string.psx_key_restart_required));
-                } catch (RuntimeException ignored) {
-                    proxyPilotStatus.setText(getString(R.string.psx_pilot_error));
-                }
-            }).show());
-        refreshSavedSdkKeyUi();
-        proxyPilotStart=button(proxy,getString(R.string.psx_pilot_start));
+        // Users never enter or see a Proxies.sx SDK key.
+        // Credentials are assigned to each approved MARS-X device by the
+        // operator and obtained only after authenticated, explicit consent.
+        text(proxy,getString(R.string.psx_auto_setup_notice),12,MUTED,false);
+        proxyPilotStart=button(proxy,getString(R.string.psx_auto_start));
         proxyPilotStart.setOnClickListener(v->requestPilotStart());
         Button stopProxy=button(proxy,getString(R.string.psx_stop_revoke));
         stopProxy.setOnClickListener(v->{
+            pendingEnrollmentGeneration++; // Reject a late provisioning response.
             proxyPilot.stop();
             proxyStatusGeneration++;
             proxyStatusButton.setEnabled(true);
             prefs.edit().putBoolean("psx_read_notice_v1",false)
                 .putBoolean("consented",false).putBoolean("monitor_active",false)
                 .putBoolean("psx_sharing_active",false).apply();
-            if(proxyPilotKey!=null)proxyPilotKey.setText("");
             proxyDisclosureAcknowledgement.setChecked(false);
             stopMonitor();
             if(monitorButton!=null)monitorButton.setText(getString(R.string.nui_03));
@@ -282,7 +252,7 @@ public final class NetworkHomeActivity extends Activity {
         farmerLiveStatus=text(proxy,getString(R.string.psx_farmer_sign_in_required),14,WHITE,false);
         farmerLiveButton=button(proxy,getString(R.string.psx_farmer_sign_in));
         farmerLiveButton.setOnClickListener(v->{
-            if(currentAuthSession()==null) startActivity(new Intent(this,MainActivity.class));
+            if(currentAuthSession()==null) startActivity(new Intent(this,NetworkSignInActivity.class));
             else queryPrivateFarmerAccount(false);
         });
 
@@ -367,20 +337,7 @@ public final class NetworkHomeActivity extends Activity {
         text(page,getString(R.string.psx_pilot_warning),12,ORANGE,false);
     }
 
-    private void refreshSavedSdkKeyUi(){
-        boolean saved=proxyPilot.hasSavedFarmerKey();
-        proxyPilotKey.setVisibility(saved?View.GONE:View.VISIBLE);
-        proxyPilotForgetKey.setVisibility(saved?View.VISIBLE:View.GONE);
-        proxyPilotSavedKeyStatus.setText(getString(saved
-            ?R.string.psx_key_secure_saved:R.string.psx_key_first_time));
-    }
-
     private void requestPilotStart(){
-        if(keyChangeRestartRequired){
-            android.widget.Toast.makeText(this,getString(R.string.psx_key_restart_required),
-                android.widget.Toast.LENGTH_LONG).show();
-            return;
-        }
         if(!prefs.getBoolean("consented",false)
             || !prefs.getBoolean("psx_read_notice_v1",false)){
             android.widget.Toast.makeText(this,getString(R.string.psx_pilot_consent_required),
@@ -394,43 +351,62 @@ public final class NetworkHomeActivity extends Activity {
                 REQUEST_PROXY_NOTIFICATIONS);
             return;
         }
-        // An existing encrypted key is reused automatically. A new key must
-        // be entered exactly once on the operator's own pilot device.
-        String entered=proxyPilotKey.getText().toString().trim();
-        String key=entered.isEmpty()?proxyPilot.savedFarmerKey():entered;
-        if(!ProxiesPilotController.validFarmerKey(key)){
-            android.widget.Toast.makeText(this,getString(R.string.psx_pilot_key_invalid),
-                android.widget.Toast.LENGTH_LONG).show();
-            return;
+        if(currentAuthSession()==null) {
+            startActivity(new Intent(this,NetworkSignInActivity.class));
+            return; // Never auto-start sharing after sign-in.
         }
-        // Clear the visible key field before opening the confirmation dialog;
-        // the one-use value lives only in this short-lived callback.
-        proxyPilotKey.setText("");
         new AlertDialog.Builder(this)
             .setTitle(getString(R.string.psx_pilot_confirm_title))
             .setMessage(getString(R.string.psx_pilot_confirm_message))
             .setNegativeButton(getString(R.string.nui_14),null)
-            .setPositiveButton(getString(R.string.psx_pilot_start),(dialog,which)->startPilot(key))
+            .setPositiveButton(getString(R.string.psx_auto_start),(dialog,which)->startPilot())
             .show();
     }
 
-    private void startPilot(String key){
-        try{
-            String installId=getSharedPreferences("marsx_beta",MODE_PRIVATE)
-                .getString("worker_id","");
-            proxyPilotStart.setEnabled(false);
-            proxyPilot.start(key,installId);
-            // Remember only on the controlled pilot device, encrypted at rest.
-            // A subsequent launch reuses it but never auto-starts traffic.
-            proxyPilot.rememberFarmerKey(key);
-            refreshSavedSdkKeyUi();
-            // CONNECTING is distinct from CONNECTED and verified earnings.
-        }catch(RuntimeException error){
-            proxyPilot.stop();
-            prefs.edit().putBoolean("psx_sharing_active",false).apply();
-            proxyPilotStatus.setText(getString(R.string.psx_pilot_error));
-            proxyPilotStart.setEnabled(true);
+    private void startPilot(){
+        final int generation=++pendingEnrollmentGeneration;
+        final String session=currentAuthSession();
+        final String installId=getSharedPreferences("marsx_beta",MODE_PRIVATE)
+            .getString("worker_id","");
+        if(session==null || !installId.matches("node-[0-9a-fA-F]{32}")){
+            proxyPilotStatus.setText(getString(R.string.psx_auto_sign_in));
+            startActivity(new Intent(this,NetworkSignInActivity.class));
+            return;
         }
+        proxyPilotStart.setEnabled(false);
+        proxyPilotStatus.setText(getString(R.string.psx_auto_enrolling));
+        new Thread(()->{
+            String scopedKey=null;
+            try {
+                scopedKey=NetworkPeerEnrollmentClient.fetch(session,installId);
+            } catch(Exception ignored) {
+                // No provider key, token or response contents in logs.
+            }
+            final String verifiedDeviceKey=scopedKey;
+            runOnUiThread(()->{
+                if(isFinishing() || isDestroyed()
+                    || generation != pendingEnrollmentGeneration) return;
+                if(!prefs.getBoolean("consented",false)
+                    || !prefs.getBoolean("psx_read_notice_v1",false)){
+                    proxyPilotStatus.setText(getString(R.string.psx_pilot_stopped));
+                    proxyPilotStart.setEnabled(true);
+                    return;
+                }
+                if(verifiedDeviceKey==null){
+                    proxyPilotStatus.setText(getString(R.string.psx_auto_unavailable));
+                    proxyPilotStart.setEnabled(true);
+                    return;
+                }
+                try {
+                    proxyPilot.start(verifiedDeviceKey,installId);
+                    // 'Connecting' is not proof of relay traffic or earnings.
+                } catch(RuntimeException error){
+                    proxyPilot.stop();
+                    proxyPilotStatus.setText(getString(R.string.psx_pilot_error));
+                    proxyPilotStart.setEnabled(true);
+                }
+            });
+        },"marsx-peer-device-enrollment").start();
     }
 
     private void updatePilotStatus(String status,String deviceId){
@@ -451,7 +427,7 @@ public final class NetworkHomeActivity extends Activity {
         proxyPilotStatus.setText(value);
         boolean running="CONNECTED".equals(status)||"CONNECTING".equals(status);
         prefs.edit().putBoolean("psx_sharing_active",running).apply();
-        if(proxyPilotStart!=null)proxyPilotStart.setEnabled(!running && !keyChangeRestartRequired);
+        if(proxyPilotStart!=null)proxyPilotStart.setEnabled(!running);
     }
 
     @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] results){
@@ -637,6 +613,7 @@ public final class NetworkHomeActivity extends Activity {
         else if(active)monitorHandler.post(monitorTick);
     }
     @Override protected void onDestroy(){
+        pendingEnrollmentGeneration++;
         proxyPilot.detach(proxyPilotListener);
         farmerLiveHandler.removeCallbacks(farmerLiveRefresh);
         farmerLiveGeneration++;
