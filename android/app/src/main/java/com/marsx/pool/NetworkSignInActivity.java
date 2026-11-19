@@ -138,7 +138,7 @@ public final class NetworkSignInActivity extends Activity {
                 body.put("id_token",googleToken);
                 JSONObject result=postJson(api+"/auth/google/exchange",body);
                 String session=result.getString("session_token");
-                if(!session.matches("[A-Za-z0-9._~+/\\-]{24,512}"))
+                if(!session.matches("[A-Za-z0-9_-]{24,512}"))
                     throw new IllegalStateException("Bad session");
                 new SecureStore(this).put("auth_session",session);
                 runOnUiThread(()->{
