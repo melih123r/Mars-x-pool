@@ -28,6 +28,12 @@ jobs:
       - run: python3 scripts/check-release.py
       - name: Network Android UI safety contract
         run: python3 scripts/check-network-home-ui.py
+      - name: Live read-only proxy readiness check
+        run: python3 scripts/test-network-status-live.py
+      - name: Live Proxies.sx public network telemetry
+        run: python3 scripts/test-network-live-board.py
+      - name: MARS-X device enrollment denies unauthenticated requests
+        run: python3 scripts/test-peer-device-enrollment-live.py
 
   android:
     runs-on: ubuntu-latest
@@ -48,6 +54,15 @@ jobs:
           gradle-version: 8.11.1
       - name: Network locale and DEMO safety checks
         run: python3 scripts/check-network-home-ui.py
+      - name: Verify public Google sign-in build configuration
+        run: |
+          python3 - <<'PYGOOGLE'
+          import re
+          from pathlib import Path
+          build=Path('android/app/build.gradle').read_text()
+          assert re.search(r'getOrElse\("[0-9]+-[A-Za-z0-9_-]+\.apps\.googleusercontent\.com"\)',build)
+          print('PASS: public Google OAuth web client ID has a valid build fallback')
+          PYGOOGLE
       - name: Android unit tests
         run: gradle -p android :app:testDebugUnitTest --no-daemon
       - name: Android release lint

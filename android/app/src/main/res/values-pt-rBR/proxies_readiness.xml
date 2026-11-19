@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • consentimento e status"</string>
+    <string name="psx_risk_extra" formatted="false">"O tráfego de terceiros pode usar seu IP, dados e bateria. Pode afetar a reputação do IP; o isolamento da rede local não foi verificado. Não há garantia de ganhos."</string>
+    <string name="psx_acknowledgement" formatted="false">"Li os riscos. Marcar esta opção não inicia o compartilhamento."</string>
+    <string name="psx_off_status" formatted="false">"Compartilhamento Proxies.sx: DESLIGADO"</string>
+    <string name="psx_zero_earnings" formatted="false">"Tráfego compartilhado: 0 MB • Ganhos verificados: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Iniciar compartilhamento • indisponível"</string>
+    <string name="psx_stop_revoke" formatted="false">"Parar e revogar consentimento"</string>
+    <string name="psx_prerequisites" formatted="false">"Acordo, chave por dispositivo, isolamento local e aprovação de distribuição: não verificados."</string>
+    <string name="psx_check_backend" formatted="false">"Verificar status do servidor Supabase"</string>
+    <string name="psx_checking" formatted="false">"Verificando Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase acessível • Proxy DESLIGADO"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Servidor não verificado • Proxy DESLIGADO"</string>
+</resources>

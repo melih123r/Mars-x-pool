@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Cont privat de furnizor Proxies.sx • Nu sunt datele rețelei globale"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Conectați-vă la MARS-X pentru datele private autorizate"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Conectare cu Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Actualizează contul privat"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Datele contului privat nu sunt disponibile"</string>
+  <string name="psx_farmer_verified" formatted="false">"Verificate"</string>
+  <string name="psx_farmer_listed" formatted="false">"Listate"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Trafic real"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Câștiguri raportate de furnizor"</string>
+</resources>

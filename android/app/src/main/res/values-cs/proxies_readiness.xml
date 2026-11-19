@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • souhlas a stav"</string>
+    <string name="psx_risk_extra" formatted="false">"Provoz třetích stran může využít vaši IP, data i baterii. Pověst IP může utrpět; izolace místní sítě není ověřena. Výdělek není zaručen."</string>
+    <string name="psx_acknowledgement" formatted="false">"Rizika jsem četl(a). Zaškrtnutí nespuští sdílení."</string>
+    <string name="psx_off_status" formatted="false">"Sdílení Proxies.sx: VYPNUTO"</string>
+    <string name="psx_zero_earnings" formatted="false">"Sdílený provoz: 0 MB • Ověřený výdělek: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Spustit sdílení • nedostupné"</string>
+    <string name="psx_stop_revoke" formatted="false">"Zastavit a odvolat souhlas"</string>
+    <string name="psx_prerequisites" formatted="false">"Smlouva, klíč zařízení, izolace LAN a povolení distribuce: neověřeny."</string>
+    <string name="psx_check_backend" formatted="false">"Zkontrolovat server Supabase"</string>
+    <string name="psx_checking" formatted="false">"Kontrola Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase dostupný • Proxy VYPNUTO"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Server neověřen • Proxy VYPNUTO"</string>
+</resources>

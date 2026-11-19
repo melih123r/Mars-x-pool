@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"भागीदार समझौता"</string>
+    <string name="psx_check_credential" formatted="false">"प्रति-डिवाइस SDK क्रेडेंशियल"</string>
+    <string name="psx_check_isolation" formatted="false">"स्थानीय नेटवर्क अलगाव"</string>
+    <string name="psx_check_distribution" formatted="false">"वितरण/Play स्वीकृति"</string>
+    <string name="psx_check_verified" formatted="false">"सत्यापित"</string>
+    <string name="psx_check_unverified" formatted="false">"सत्यापित नहीं"</string>
+</resources>

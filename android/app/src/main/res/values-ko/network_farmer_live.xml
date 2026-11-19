@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Proxies.sx 비공개 공급자 계정 • 글로벌 네트워크 데이터 아님"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"승인된 비공개 계정 데이터를 보려면 MARS-X에 로그인하세요"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Google로 로그인"</string>
+  <string name="psx_farmer_refresh" formatted="false">"비공개 계정 새로고침"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"비공개 계정 데이터를 가져올 수 없음"</string>
+  <string name="psx_farmer_verified" formatted="false">"검증됨"</string>
+  <string name="psx_farmer_listed" formatted="false">"등록됨"</string>
+  <string name="psx_farmer_traffic" formatted="false">"실제 트래픽"</string>
+  <string name="psx_farmer_earnings" formatted="false">"공급자 보고 수익"</string>
+</resources>

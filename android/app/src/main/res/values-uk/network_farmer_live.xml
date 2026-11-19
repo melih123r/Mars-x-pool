@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Приватний обліковий запис постачальника Proxies.sx • Не дані глобальної мережі"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Увійдіть у MARS-X, щоб переглянути дозволені приватні дані"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Увійти через Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Оновити приватний обліковий запис"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Приватні дані недоступні"</string>
+  <string name="psx_farmer_verified" formatted="false">"Перевірено"</string>
+  <string name="psx_farmer_listed" formatted="false">"Опубліковано"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Реальний трафік"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Дохід за даними провайдера"</string>
+</resources>

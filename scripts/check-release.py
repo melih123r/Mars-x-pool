@@ -47,15 +47,6 @@ declared_permissions={p.get('{http://schemas.android.com/apk/res/android}name')
                       for p in ET.fromstring(manifest).findall('uses-permission')
                       if p.get('{http://schemas.android.com/tools}node')!='remove'}
 
-for forbidden in (
-    "android.permission.WAKE_LOCK",
-    "android.permission.FOREGROUND_SERVICE",
-    "android.permission.RECEIVE_BOOT_COMPLETED",
-    "android.permission.REQUEST_INSTALL_PACKAGES",
-):
-    if forbidden in declared_permissions:
-        raise SystemExit(f"Forbidden beta permission present: {forbidden}")
-
 if 'android.permission.INTERNET' not in manifest:
     raise SystemExit("INTERNET permission is required")
 if not re.search(r"targetSdk\s+36", gradle):
@@ -63,18 +54,41 @@ if not re.search(r"targetSdk\s+36", gradle):
 # Accept the legacy beta or the explicitly isolated Network test build.
 # Network versioning does not change the backend API's legacy 0.9.0 contract.
 legacy_version = 'versionName "0.9.0-beta"' in gradle and 'versionCode 13' in gradle
-network_version = 'versionName "0.9.4-network-demo"' in gradle and bool(re.search(r'versionCode\s+19\b', gradle))
+network_demo = 'versionName "0.9.4-network-demo"' in gradle and bool(re.search(r'versionCode\s+19\b', gradle))
+network_pilot = 'versionName "0.9.4-network-pilot"' in gradle and bool(re.search(r'versionCode\s+19\b', gradle))
+network_version = network_demo or network_pilot
 if not (legacy_version or network_version):
-    raise SystemExit("Unsupported Android version: expected legacy beta 13 or Network test 16")
+    raise SystemExit("Unsupported Android version: expected legacy beta 13 or Network v19")
 if network_version:
     if 'android:name=".NetworkHomeActivity"' not in manifest:
         raise SystemExit("Network test launcher activity is missing")
     if not re.search(r'<activity\s+android:name="\.NetworkHomeActivity"[^>]*>[\s\S]*?android.intent.action.MAIN[\s\S]*?android.intent.category.LAUNCHER', manifest):
         raise SystemExit("Network test must launch NetworkHomeActivity")
+    for legacy_activity in (".MainActivity", ".NetworkWebsiteActivity",
+                            ".NetworkSignInActivity", ".VrscPoolActivity",
+                            ".PremiumActivity"):
+        if f'android:name="{legacy_activity}"' in manifest:
+            raise SystemExit("Legacy/non-Network activity must not be packaged: " + legacy_activity)
+for forbidden in ("android.permission.RECEIVE_BOOT_COMPLETED",
+                  "android.permission.REQUEST_INSTALL_PACKAGES",
+                  "android.permission.READ_PHONE_STATE"):
+    if forbidden in declared_permissions:
+        raise SystemExit(f"Forbidden permission present: {forbidden}")
+if network_pilot:
+    for required in ("android.permission.WAKE_LOCK","android.permission.FOREGROUND_SERVICE",
+                     "android.permission.FOREGROUND_SERVICE_DATA_SYNC"):
+        if required not in declared_permissions:
+            raise SystemExit(f"Live pilot permission missing: {required}")
+else:
+    for forbidden in ("android.permission.WAKE_LOCK","android.permission.FOREGROUND_SERVICE"):
+        if forbidden in declared_permissions:
+            raise SystemExit(f"Forbidden beta permission present: {forbidden}")
 if '"version": "0.9.0"' not in package:
     raise SystemExit("Package version must match Beta 0.9.0")
-if 'APP_VERSION = "0.9.0-beta"' not in main_activity:
+if legacy_version and 'APP_VERSION = "0.9.0-beta"' not in main_activity:
     raise SystemExit("Android runtime version must match Beta 0.9.0")
+if network_version and 'APP_VERSION = BuildConfig.VERSION_NAME' not in main_activity:
+    raise SystemExit("Network runtime version must use BuildConfig.VERSION_NAME")
 for runtime in (
     ROOT / "server.js",
     ROOT / "cloudflare/src/worker.js",

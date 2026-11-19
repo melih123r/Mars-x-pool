@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Proxies.sx GENEL ağ • Senin çiftçi hesabın değil"</string>
+  <string name="psx_live_refresh" formatted="false">"Canlı ağ verisini getir"</string>
+  <string name="psx_live_loading" formatted="false">"Gerçek ağ verisi alınıyor…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Canlı veri alınamadı • Sayılar bilinmiyor"</string>
+  <string name="psx_live_initial" formatted="false">"Henüz sorgulanmadı"</string>
+  <string name="psx_live_total" formatted="false">"Toplam eş cihaz"</string>
+  <string name="psx_live_online" formatted="false">"Şu an çevrimiçi"</string>
+  <string name="psx_live_mobile" formatted="false">"Mobil"</string>
+  <string name="psx_live_residential" formatted="false">"Konut"</string>
+  <string name="psx_live_datacenter" formatted="false">"Veri merkezi"</string>
+  <string name="psx_live_updated" formatted="false">"Ölçüm (UTC)"</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"اتفاقية الشراكة"</string>
+    <string name="psx_check_credential" formatted="false">"بيانات SDK لكل جهاز"</string>
+    <string name="psx_check_isolation" formatted="false">"عزل الشبكة المحلية"</string>
+    <string name="psx_check_distribution" formatted="false">"الموافقة على التوزيع/Play"</string>
+    <string name="psx_check_verified" formatted="false">"تم التحقق"</string>
+    <string name="psx_check_unverified" formatted="false">"لم يتم التحقق"</string>
+</resources>

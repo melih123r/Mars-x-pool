@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"ЗАГАЛЬНА мережа Proxies.sx • Не ваш акаунт"</string>
+  <string name="psx_live_refresh" formatted="false">"Отримати дані мережі"</string>
+  <string name="psx_live_loading" formatted="false">"Отримання реальних даних…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Дані недоступні • Числа невідомі"</string>
+  <string name="psx_live_initial" formatted="false">"Ще не перевірено"</string>
+  <string name="psx_live_total" formatted="false">"Усього вузлів"</string>
+  <string name="psx_live_online" formatted="false">"Зараз онлайн"</string>
+  <string name="psx_live_mobile" formatted="false">"Мобільні"</string>
+  <string name="psx_live_residential" formatted="false">"Домашні"</string>
+  <string name="psx_live_datacenter" formatted="false">"Дата-центри"</string>
+  <string name="psx_live_updated" formatted="false">"Виміряно (UTC)"</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"ব্যক্তিগত Proxies.sx সরবরাহকারী অ্যাকাউন্ট • বৈশ্বিক নেটওয়ার্ক ডেটা নয়"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"অনুমোদিত ব্যক্তিগত ডেটা দেখতে MARS-X-এ সাইন ইন করুন"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Google দিয়ে সাইন ইন করুন"</string>
+  <string name="psx_farmer_refresh" formatted="false">"ব্যক্তিগত অ্যাকাউন্ট রিফ্রেশ করুন"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"ব্যক্তিগত অ্যাকাউন্টের ডেটা পাওয়া যায়নি"</string>
+  <string name="psx_farmer_verified" formatted="false">"যাচাইকৃত"</string>
+  <string name="psx_farmer_listed" formatted="false">"তালিকাভুক্ত"</string>
+  <string name="psx_farmer_traffic" formatted="false">"প্রকৃত ট্রাফিক"</string>
+  <string name="psx_farmer_earnings" formatted="false">"সরবরাহকারীর জানানো আয়"</string>
+</resources>

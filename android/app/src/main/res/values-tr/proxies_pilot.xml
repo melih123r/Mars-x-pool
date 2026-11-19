@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="network_pilot_disclaimer" formatted="false">"PİLOT • Ödemeler ve kripto transferleri kapalıdır. Gerçek proxy paylaşımı yalnızca açık rızadan sonra başlar."</string>
+    <string name="psx_pilot_warning" formatted="false">"PİLOT: Gerçek üçüncü taraf trafiği bu cihazın internet bağlantısını ve IP adresini kullanabilir. Yalnızca sahibi olduğunuz veya paylaşmaya yetkili olduğunuz cihaz ve bağlantıyı kullanın. İstediğiniz zaman durdurabilirsiniz."</string>
+    <string name="psx_pilot_stopped" formatted="false">"Paylaşım durduruldu"</string>
+    <string name="psx_pilot_connecting" formatted="false">"Proxies.sx ağına bağlanıyor…"</string>
+    <string name="psx_pilot_connected" formatted="false">"Proxies.sx bağlı • paylaşım etkin"</string>
+    <string name="psx_pilot_error" formatted="false">"Bağlantı başarısız • paylaşım doğrulanmadı"</string>
+    <string name="psx_pilot_key_hint" formatted="false">"Çiftçi SDK API anahtarı (psx_…)"</string>
+    <string name="psx_pilot_key_notice" formatted="false">"Yalnızca pilot: anahtar SDK 1.3.2 tarafından bellekte kullanılır, bu alandan silinir ve MARS-X içine derlenmez veya kaydedilmez."</string>
+    <string name="psx_pilot_start" formatted="false">"Canlı pilot paylaşımını başlat"</string>
+    <string name="psx_pilot_consent_required" formatted="false">"Başlatmadan önce hem Network rızasını hem de Proxies.sx açıklamasını kabul edin."</string>
+    <string name="psx_pilot_key_invalid" formatted="false">"Proxies.sx çiftçi hesabınızda oluşturduğunuz SDK API anahtarını girin."</string>
+    <string name="psx_pilot_confirm_title" formatted="false">"Gerçek proxy paylaşımı başlatılsın mı?"</string>
+    <string name="psx_pilot_confirm_message" formatted="false">"Bu işlem Proxies.sx ön plan servisini başlatır ve uygun müşteri trafiğini bu cihaz üzerinden yönlendirebilir. Trafik ve kazanç garanti değildir. Yalnızca kendi yetkili cihazınızda devam edin."</string>
+    <string name="psx_pilot_device_id" formatted="false">"Sağlayıcı cihaz kimliği"</string>
+    <string name="psx_pilot_notification_required" formatted="false">"Etkin paylaşımın görünür kalması için bildirim izni gereklidir."</string>
+</resources>

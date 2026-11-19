@@ -13,7 +13,7 @@ adb shell input keyevent KEYCODE_WAKEUP
 adb shell wm dismiss-keyguard
 adb shell input keyevent 82
 adb shell am force-stop com.marsx.pool
-adb shell am start -W -n com.marsx.pool/.MainActivity
+adb shell am start -W -n com.marsx.pool/.NetworkHomeActivity
 
 sleep 2
 adb exec-out screencap -p > "$output_dir/00-launch.png"

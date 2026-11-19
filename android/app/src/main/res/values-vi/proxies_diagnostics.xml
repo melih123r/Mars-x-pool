@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"Thỏa thuận đối tác"</string>
+    <string name="psx_check_credential" formatted="false">"Thông tin SDK theo thiết bị"</string>
+    <string name="psx_check_isolation" formatted="false">"Cô lập mạng nội bộ"</string>
+    <string name="psx_check_distribution" formatted="false">"Phê duyệt phân phối/Play"</string>
+    <string name="psx_check_verified" formatted="false">"Đã xác minh"</string>
+    <string name="psx_check_unverified" formatted="false">"Chưa xác minh"</string>
+</resources>

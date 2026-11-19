@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"PANDAIGDIGANG Proxies.sx network • Hindi iyong account"</string>
+  <string name="psx_live_refresh" formatted="false">"Kunin ang live network data"</string>
+  <string name="psx_live_loading" formatted="false">"Kinukuha ang totoong datos…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Walang datos • Hindi alam ang bilang"</string>
+  <string name="psx_live_initial" formatted="false">"Hindi pa nasuri"</string>
+  <string name="psx_live_total" formatted="false">"Kabuuang peer"</string>
+  <string name="psx_live_online" formatted="false">"Online ngayon"</string>
+  <string name="psx_live_mobile" formatted="false">"Mobile"</string>
+  <string name="psx_live_residential" formatted="false">"Residential"</string>
+  <string name="psx_live_datacenter" formatted="false">"Data center"</string>
+  <string name="psx_live_updated" formatted="false">"Sinukat (UTC)"</string>
+</resources>

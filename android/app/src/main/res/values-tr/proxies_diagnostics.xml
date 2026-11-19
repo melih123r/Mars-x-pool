@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"İş ortağı sözleşmesi"</string>
+    <string name="psx_check_credential" formatted="false">"Cihaza özel SDK kimliği"</string>
+    <string name="psx_check_isolation" formatted="false">"Yerel ağ izolasyonu"</string>
+    <string name="psx_check_distribution" formatted="false">"Dağıtım/Play onayı"</string>
+    <string name="psx_check_verified" formatted="false">"Doğrulandı"</string>
+    <string name="psx_check_unverified" formatted="false">"Doğrulanmadı"</string>
+</resources>

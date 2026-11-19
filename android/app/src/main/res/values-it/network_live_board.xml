@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Rete GLOBALE Proxies.sx • Non è il tuo account"</string>
+  <string name="psx_live_refresh" formatted="false">"Carica dati di rete in tempo reale"</string>
+  <string name="psx_live_loading" formatted="false">"Caricamento dati reali…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Dati non disponibili • Numeri sconosciuti"</string>
+  <string name="psx_live_initial" formatted="false">"Non ancora verificato"</string>
+  <string name="psx_live_total" formatted="false">"Peer totali"</string>
+  <string name="psx_live_online" formatted="false">"Online ora"</string>
+  <string name="psx_live_mobile" formatted="false">"Mobile"</string>
+  <string name="psx_live_residential" formatted="false">"Residenziale"</string>
+  <string name="psx_live_datacenter" formatted="false">"Data center"</string>
+  <string name="psx_live_updated" formatted="false">"Rilevato (UTC)"</string>
+</resources>

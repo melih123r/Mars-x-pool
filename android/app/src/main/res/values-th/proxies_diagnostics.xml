@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"ข้อตกลงพันธมิตร"</string>
+    <string name="psx_check_credential" formatted="false">"ข้อมูล SDK ต่ออุปกรณ์"</string>
+    <string name="psx_check_isolation" formatted="false">"การแยกเครือข่ายภายใน"</string>
+    <string name="psx_check_distribution" formatted="false">"การอนุมัติการเผยแพร่/Play"</string>
+    <string name="psx_check_verified" formatted="false">"ยืนยันแล้ว"</string>
+    <string name="psx_check_unverified" formatted="false">"ยังไม่ยืนยัน"</string>
+</resources>

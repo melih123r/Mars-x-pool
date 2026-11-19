@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"合作夥伴協議"</string>
+    <string name="psx_check_credential" formatted="false">"每台裝置的 SDK 憑證"</string>
+    <string name="psx_check_isolation" formatted="false">"本地網路隔離"</string>
+    <string name="psx_check_distribution" formatted="false">"發佈/Play 核准"</string>
+    <string name="psx_check_verified" formatted="false">"已驗證"</string>
+    <string name="psx_check_unverified" formatted="false">"未驗證"</string>
+</resources>

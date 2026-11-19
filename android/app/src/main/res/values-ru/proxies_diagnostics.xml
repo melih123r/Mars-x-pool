@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"Партнёрское соглашение"</string>
+    <string name="psx_check_credential" formatted="false">"Учётные данные SDK устройства"</string>
+    <string name="psx_check_isolation" formatted="false">"Изоляция локальной сети"</string>
+    <string name="psx_check_distribution" formatted="false">"Разрешение на выпуск/Play"</string>
+    <string name="psx_check_verified" formatted="false">"Проверено"</string>
+    <string name="psx_check_unverified" formatted="false">"Не проверено"</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Proxies.sx WERELDWIJD netwerk • Niet je account"</string>
+  <string name="psx_live_refresh" formatted="false">"Live netwerkgegevens ophalen"</string>
+  <string name="psx_live_loading" formatted="false">"Echte netwerkgegevens ophalen…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Gegevens niet beschikbaar • Aantallen onbekend"</string>
+  <string name="psx_live_initial" formatted="false">"Nog niet gecontroleerd"</string>
+  <string name="psx_live_total" formatted="false">"Totaal peers"</string>
+  <string name="psx_live_online" formatted="false">"Nu online"</string>
+  <string name="psx_live_mobile" formatted="false">"Mobiel"</string>
+  <string name="psx_live_residential" formatted="false">"Residentieel"</string>
+  <string name="psx_live_datacenter" formatted="false">"Datacenter"</string>
+  <string name="psx_live_updated" formatted="false">"Gemeten (UTC)"</string>
+</resources>

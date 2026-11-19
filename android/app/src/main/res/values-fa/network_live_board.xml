@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"شبکه جهانی Proxies.sx • نه حساب شما"</string>
+  <string name="psx_live_refresh" formatted="false">"دریافت داده زنده شبکه"</string>
+  <string name="psx_live_loading" formatted="false">"دریافت داده واقعی…"</string>
+  <string name="psx_live_unavailable" formatted="false">"داده در دسترس نیست • تعداد نامعلوم"</string>
+  <string name="psx_live_initial" formatted="false">"هنوز بررسی نشده"</string>
+  <string name="psx_live_total" formatted="false">"کل همتاها"</string>
+  <string name="psx_live_online" formatted="false">"اکنون آنلاین"</string>
+  <string name="psx_live_mobile" formatted="false">"موبایل"</string>
+  <string name="psx_live_residential" formatted="false">"خانگی"</string>
+  <string name="psx_live_datacenter" formatted="false">"مرکز داده"</string>
+  <string name="psx_live_updated" formatted="false">"زمان سنجش (UTC)"</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • consentement et état"</string>
+    <string name="psx_risk_extra" formatted="false">"Le trafic tiers peut utiliser votre IP, votre forfait et votre batterie. La réputation de l’IP peut être affectée et l’isolation du réseau local n’est pas vérifiée. Aucun revenu garanti."</string>
+    <string name="psx_acknowledgement" formatted="false">"J’ai lu les risques. Cocher ne lance aucun partage."</string>
+    <string name="psx_off_status" formatted="false">"Partage Proxies.sx : DÉSACTIVÉ"</string>
+    <string name="psx_zero_earnings" formatted="false">"Trafic partagé : 0 Mo • Gains vérifiés : 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Démarrer le partage • indisponible"</string>
+    <string name="psx_stop_revoke" formatted="false">"Arrêter et retirer mon consentement"</string>
+    <string name="psx_prerequisites" formatted="false">"Accord partenaire, clé par appareil, isolation locale et autorisation de diffusion : non vérifiés."</string>
+    <string name="psx_check_backend" formatted="false">"Vérifier le statut du serveur Supabase"</string>
+    <string name="psx_checking" formatted="false">"Vérification de Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase accessible • Partage proxy DÉSACTIVÉ"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Serveur non vérifié • Partage proxy DÉSACTIVÉ"</string>
+</resources>

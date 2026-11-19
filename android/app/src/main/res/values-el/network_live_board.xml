@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"ΠΑΓΚΟΣΜΙΟ δίκτυο Proxies.sx • Όχι ο λογαριασμός σας"</string>
+  <string name="psx_live_refresh" formatted="false">"Λήψη ζωντανών δεδομένων"</string>
+  <string name="psx_live_loading" formatted="false">"Λήψη πραγματικών δεδομένων…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Μη διαθέσιμα δεδομένα • Άγνωστοι αριθμοί"</string>
+  <string name="psx_live_initial" formatted="false">"Δεν ελέγχθηκε ακόμη"</string>
+  <string name="psx_live_total" formatted="false">"Σύνολο κόμβων"</string>
+  <string name="psx_live_online" formatted="false">"Τώρα online"</string>
+  <string name="psx_live_mobile" formatted="false">"Κινητά"</string>
+  <string name="psx_live_residential" formatted="false">"Οικιακά"</string>
+  <string name="psx_live_datacenter" formatted="false">"Κέντρο δεδομένων"</string>
+  <string name="psx_live_updated" formatted="false">"Μέτρηση (UTC)"</string>
+</resources>

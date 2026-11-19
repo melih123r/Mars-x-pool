@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Pribadong Proxies.sx provider account • Hindi pandaigdigang network data"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Mag-sign in sa MARS-X para makita ang awtorisadong pribadong data"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Mag-sign in gamit ang Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"I-refresh ang pribadong account"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Hindi makuha ang pribadong account data"</string>
+  <string name="psx_farmer_verified" formatted="false">"Na-verify"</string>
+  <string name="psx_farmer_listed" formatted="false">"Nakalista"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Tunay na trapiko"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Kita na iniulat ng provider"</string>
+</resources>

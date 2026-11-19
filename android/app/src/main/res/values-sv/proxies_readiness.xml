@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • samtycke och status"</string>
+    <string name="psx_risk_extra" formatted="false">"Tredjepartstrafik kan använda din IP, surf och batteri. IP-ryktet kan påverkas; isolering av lokalt nätverk är inte verifierad. Inga intäkter garanteras."</string>
+    <string name="psx_acknowledgement" formatted="false">"Jag har läst riskerna. Kryssrutan startar ingen delning."</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx-delning: AV"</string>
+    <string name="psx_zero_earnings" formatted="false">"Delad trafik: 0 MB • Verifierad intäkt: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Starta delning • inte tillgängligt"</string>
+    <string name="psx_stop_revoke" formatted="false">"Stoppa och återkalla samtycke"</string>
+    <string name="psx_prerequisites" formatted="false">"Partneravtal, enhetsnyckel, LAN-isolering och distribution: ej verifierade."</string>
+    <string name="psx_check_backend" formatted="false">"Kontrollera Supabase-server"</string>
+    <string name="psx_checking" formatted="false">"Kontrollerar Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase nås • Proxy AV"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Server ej verifierad • Proxy AV"</string>
+</resources>

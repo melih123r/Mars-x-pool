@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Proxies.sx वैश्विक नेटवर्क • आपका खाता नहीं"</string>
+  <string name="psx_live_refresh" formatted="false">"लाइव नेटवर्क डेटा देखें"</string>
+  <string name="psx_live_loading" formatted="false">"वास्तविक डेटा ला रहे हैं…"</string>
+  <string name="psx_live_unavailable" formatted="false">"डेटा उपलब्ध नहीं • संख्या अज्ञात"</string>
+  <string name="psx_live_initial" formatted="false">"अभी जाँच नहीं हुई"</string>
+  <string name="psx_live_total" formatted="false">"कुल पीयर"</string>
+  <string name="psx_live_online" formatted="false">"अभी ऑनलाइन"</string>
+  <string name="psx_live_mobile" formatted="false">"मोबाइल"</string>
+  <string name="psx_live_residential" formatted="false">"घरेलू"</string>
+  <string name="psx_live_datacenter" formatted="false">"डेटा सेंटर"</string>
+  <string name="psx_live_updated" formatted="false">"मापन (UTC)"</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • সম্মতি ও অবস্থা"</string>
+    <string name="psx_risk_extra" formatted="false">"তৃতীয় পক্ষের ট্রাফিক আপনার IP, ডেটা ও ব্যাটারি ব্যবহার করতে পারে। IP সুনাম ক্ষতিগ্রস্ত হতে পারে; স্থানীয় নেটওয়ার্ক বিচ্ছিন্নতা যাচাই হয়নি। আয়ের নিশ্চয়তা নেই।"</string>
+    <string name="psx_acknowledgement" formatted="false">"ঝুঁকি পড়েছি। টিক দিলে শেয়ারিং শুরু হয় না।"</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx শেয়ারিং: বন্ধ"</string>
+    <string name="psx_zero_earnings" formatted="false">"শেয়ার করা ট্রাফিক: 0 MB • যাচাইকৃত আয়: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"শেয়ারিং শুরু • উপলব্ধ নয়"</string>
+    <string name="psx_stop_revoke" formatted="false">"থামান ও সম্মতি প্রত্যাহার করুন"</string>
+    <string name="psx_prerequisites" formatted="false">"চুক্তি, ডিভাইস কী, LAN বিচ্ছিন্নতা ও বিতরণ অনুমোদন: যাচাই হয়নি।"</string>
+    <string name="psx_check_backend" formatted="false">"Supabase সার্ভার পরীক্ষা করুন"</string>
+    <string name="psx_checking" formatted="false">"Supabase যাচাই চলছে…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase পাওয়া গেছে • শেয়ারিং বন্ধ"</string>
+    <string name="psx_backend_unavailable" formatted="false">"সার্ভার যাচাই হয়নি • শেয়ারিং বন্ধ"</string>
+</resources>

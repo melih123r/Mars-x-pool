@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Cuenta privada de agricultor Proxies.sx • No son datos de la red global"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Inicia sesión en MARS-X para ver los datos privados autorizados"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Iniciar sesión con Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Actualizar cuenta privada"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Datos de la cuenta privada no disponibles"</string>
+  <string name="psx_farmer_verified" formatted="false">"Verificados"</string>
+  <string name="psx_farmer_listed" formatted="false">"Publicados"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Tráfico real"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Ganancias informadas por el proveedor"</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"ОБЩАЯ сеть Proxies.sx • Не ваш фермерский аккаунт"</string>
+  <string name="psx_live_refresh" formatted="false">"Загрузить данные сети"</string>
+  <string name="psx_live_loading" formatted="false">"Загрузка реальных данных…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Данные недоступны • Числа неизвестны"</string>
+  <string name="psx_live_initial" formatted="false">"Ещё не проверено"</string>
+  <string name="psx_live_total" formatted="false">"Всего узлов"</string>
+  <string name="psx_live_online" formatted="false">"Сейчас онлайн"</string>
+  <string name="psx_live_mobile" formatted="false">"Мобильные"</string>
+  <string name="psx_live_residential" formatted="false">"Домашние"</string>
+  <string name="psx_live_datacenter" formatted="false">"Дата-центры"</string>
+  <string name="psx_live_updated" formatted="false">"Измерено (UTC)"</string>
+</resources>

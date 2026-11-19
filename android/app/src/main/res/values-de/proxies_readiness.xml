@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • Einwilligung und Status"</string>
+    <string name="psx_risk_extra" formatted="false">"Fremder Datenverkehr könnte IP, Datenvolumen und Akku nutzen. Der IP-Ruf kann leiden; die Isolation des lokalen Netzes ist nicht geprüft. Keine Einnahmen garantiert."</string>
+    <string name="psx_acknowledgement" formatted="false">"Ich habe die Risiken gelesen. Das Häkchen startet nichts."</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx-Freigabe: AUS"</string>
+    <string name="psx_zero_earnings" formatted="false">"Geteilter Verkehr: 0 MB • Bestätigte Einnahmen: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Freigabe starten • nicht verfügbar"</string>
+    <string name="psx_stop_revoke" formatted="false">"Stoppen und Einwilligung widerrufen"</string>
+    <string name="psx_prerequisites" formatted="false">"Partnervertrag, Geräteschlüssel, LAN-Isolation und Vertriebsfreigabe: ungeprüft."</string>
+    <string name="psx_check_backend" formatted="false">"Supabase-Serverstatus prüfen"</string>
+    <string name="psx_checking" formatted="false">"Supabase wird geprüft…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase erreichbar • Proxy-Freigabe bleibt AUS"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Server nicht bestätigt • Proxy-Freigabe bleibt AUS"</string>
+</resources>

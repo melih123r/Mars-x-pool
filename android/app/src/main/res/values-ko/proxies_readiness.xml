@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • 동의 및 상태"</string>
+    <string name="psx_risk_extra" formatted="false">"제3자 트래픽이 IP, 데이터 요금제, 배터리를 사용할 수 있습니다. IP 평판이 영향을 받을 수 있으며 로컬 네트워크 격리는 확인되지 않았습니다. 수익은 보장되지 않습니다."</string>
+    <string name="psx_acknowledgement" formatted="false">"위험을 읽었습니다. 선택해도 공유는 시작되지 않습니다."</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx 공유: 꺼짐"</string>
+    <string name="psx_zero_earnings" formatted="false">"공유 트래픽: 0 MB • 확인된 수익: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"공유 시작 • 사용 불가"</string>
+    <string name="psx_stop_revoke" formatted="false">"중지 및 동의 철회"</string>
+    <string name="psx_prerequisites" formatted="false">"파트너 계약, 기기 키, LAN 격리, 배포 승인: 미확인."</string>
+    <string name="psx_check_backend" formatted="false">"Supabase 서버 상태 확인"</string>
+    <string name="psx_checking" formatted="false">"Supabase 확인 중…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase 연결 가능 • 공유 꺼짐"</string>
+    <string name="psx_backend_unavailable" formatted="false">"서버 미확인 • 공유 꺼짐"</string>
+</resources>

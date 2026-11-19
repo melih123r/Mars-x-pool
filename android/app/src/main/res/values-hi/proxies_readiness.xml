@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • सहमति और स्थिति"</string>
+    <string name="psx_risk_extra" formatted="false">"तीसरे पक्ष का ट्रैफिक आपके IP, डेटा और बैटरी का उपयोग कर सकता है। IP की प्रतिष्ठा प्रभावित हो सकती है; स्थानीय नेटवर्क अलगाव सत्यापित नहीं है। कमाई की गारंटी नहीं।"</string>
+    <string name="psx_acknowledgement" formatted="false">"मैंने जोखिम पढ़े हैं। टिक करने से शेयरिंग शुरू नहीं होती।"</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx शेयरिंग: बंद"</string>
+    <string name="psx_zero_earnings" formatted="false">"शेयर किया ट्रैफिक: 0 MB • सत्यापित कमाई: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"शेयरिंग शुरू करें • उपलब्ध नहीं"</string>
+    <string name="psx_stop_revoke" formatted="false">"रोकें और सहमति वापस लें"</string>
+    <string name="psx_prerequisites" formatted="false">"भागीदार समझौता, डिवाइस कुंजी, LAN अलगाव और वितरण मंजूरी: अप्रमाणित।"</string>
+    <string name="psx_check_backend" formatted="false">"Supabase सर्वर स्थिति देखें"</string>
+    <string name="psx_checking" formatted="false">"Supabase जाँच जारी…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase उपलब्ध • प्रॉक्सी शेयरिंग बंद"</string>
+    <string name="psx_backend_unavailable" formatted="false">"सर्वर सत्यापित नहीं • शेयरिंग बंद"</string>
+</resources>
