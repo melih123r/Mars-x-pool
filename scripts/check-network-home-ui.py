@@ -29,6 +29,10 @@ for forbidden in ("MobileAds.initialize(", "sendTransaction(", "withdrawUsdc("):
 assert 'versionCode 19' in build
 assert 'versionName "0.9.4-network-pilot"' in build
 assert 'android-peer-sdk:v1.3.2' in build
+# Public OAuth client ID must be built even without CI secret injection.
+# Without it new users cannot sign in after the legacy beta UI is removed.
+assert re.search(r'getOrElse\\("[0-9]+-[A-Za-z0-9_-]+\\.apps\\.googleusercontent\\.com"\\)', build)
+assert 'GOOGLE_WEB_CLIENT_ID' in build
 assert 'android:name=".NetworkHomeActivity"' in manifest
 for legacy in (".MainActivity", ".NetworkWebsiteActivity", ".VrscPoolActivity", ".PremiumActivity"):
     assert legacy not in manifest, legacy
