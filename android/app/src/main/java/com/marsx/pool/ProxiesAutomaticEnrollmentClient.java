@@ -52,8 +52,8 @@ final class ProxiesAutomaticEnrollmentClient {
         String id=value.getString("device_id");
         String token=value.getString("device_token");
         String relay=value.getString("relay_url");
-        if(!id.equals(expectedDeviceId)
-            || !id.matches("psx_[A-Za-z0-9_-]{8,64}")
+        if(!expectedDeviceId.equals(value.getString("client_request_id"))
+            || !id.matches("(?:psx_|agent_)[A-Za-z0-9_-]{8,64}")
             || !token.matches("[A-Za-z0-9._~+/\\-=]{24,4096}")
             || !validRelay(relay)) throw new JSONException("Unsafe enrollment values");
         return new Result(id,token,relay);
@@ -87,7 +87,7 @@ final class ProxiesAutomaticEnrollmentClient {
     private static void requireAuth(String session,String installId,String deviceId) throws IOException {
         if(session==null||!session.matches("[A-Za-z0-9._~+/\\-]{24,512}")
             ||installId==null||!installId.matches("[A-Za-z0-9_-]{3,64}")
-            ||deviceId==null||!deviceId.matches("psx_[A-Za-z0-9_-]{8,64}")) {
+            ||deviceId==null||!deviceId.matches("(?:psx_|agent_)[A-Za-z0-9_-]{8,64}")) {
             throw new IOException("Pilot authorization unavailable");
         }
     }
