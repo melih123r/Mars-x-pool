@@ -65,6 +65,8 @@ public final class NetworkHomeActivity extends Activity {
     private boolean authLoading;
     private boolean pendingPilotStart;
     private int pilotStatusAttempts;
+    // Invalidate in-flight provider status responses after stop/revoke or a new start.
+    private int pilotStatusGeneration;
     private int peerEnrollmentGeneration;
     private final Handler pilotStatusHandler=new Handler(Looper.getMainLooper());
     private final Handler farmerLiveHandler=new Handler(Looper.getMainLooper());
@@ -436,6 +438,7 @@ public final class NetworkHomeActivity extends Activity {
 
     private void pollPilotStatus(String deviceId){
         if(++pilotStatusAttempts>12)return;
+        final int statusGeneration=pilotStatusGeneration;
         pilotStatusHandler.postDelayed(()->new Thread(()->{
             boolean online=false;
             try{
@@ -444,7 +447,10 @@ public final class NetworkHomeActivity extends Activity {
             }catch(Exception ignored){ /* Remain CONNECTING; never invent online state. */ }
             final boolean confirmed=online;
             runOnUiThread(()->{
-                if(isFinishing()||isDestroyed())return;
+                if(isFinishing()||isDestroyed()
+                    ||statusGeneration!=pilotStatusGeneration
+                    ||!prefs.getBoolean("consented",false)
+                    ||!prefs.getBoolean("psx_read_notice_v1",false))return;
                 proxyPilot.providerOnline(confirmed);
                 if(confirmed){
                     queryPrivateFarmerAccount(false);
@@ -456,6 +462,7 @@ public final class NetworkHomeActivity extends Activity {
     }
 
     private void cancelPilotStatusChecks(){
+        pilotStatusGeneration++;
         pilotStatusAttempts=13;
         pilotStatusHandler.removeCallbacksAndMessages(null);
     }
