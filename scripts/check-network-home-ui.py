@@ -190,7 +190,7 @@ for folder in ["values", *translations.values(), "values-in"]:
     assert found==farmer_keys,(folder,sorted(farmer_keys-found),sorted(found-farmer_keys))
 assert "NetworkFarmerLiveClient.fetch(session,installId)" in source
 assert "farmerLiveHandler.postDelayed(farmerLiveRefresh,60000)" in source
-assert "startActivity(new Intent(this,MainActivity.class))" in source
+assert "startActivity(new Intent(this,NetworkSignInActivity.class))" in source
 farmer_client=Path("android/app/src/main/java/com/marsx/pool/NetworkFarmerLiveClient.java").read_text(encoding="utf-8")
 for marker in ("farmer_account_private", '"account_specific"', '"Authorization"',
                '"X-Install-Id"', "setInstanceFollowRedirects(false)"):
