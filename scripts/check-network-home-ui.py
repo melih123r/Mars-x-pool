@@ -62,7 +62,7 @@ for marker in (
     assert marker in client, marker
 assert "PROXIES_SX_FARMER_API_KEY" not in source + pilot + client
 for marker in (
-    "PROXIES_SX_FARMER_API_KEY", "/v1/peer/register", "/v1/peer/my-devices",
+    "PROXIES_SX_FARMER_API_KEY", "/v1/peer/agents/register", "/v1/peer/my-devices",
     "pilot_device_credential", "pilot_device_status", "farmer_api_key_included: false",
     "marsx-pool-api/auth/me",
 ):
