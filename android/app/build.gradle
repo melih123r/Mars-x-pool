@@ -96,6 +96,11 @@ android {
     }
 }
 
+def patchedProxiesSdkAar = file("libs/proxies-sdk-v132-patched-debug.aar")
+if (!patchedProxiesSdkAar.isFile()) {
+    throw new GradleException("Patched Proxies.sx SDK AAR missing: build disabled; never fall back to v1.3.2")
+}
+
 dependencies {
     // Pilot must use a locally reviewed, patched AAR. No fallback to unpatched JitPack.
     implementation files("libs/proxies-sdk-v132-patched-debug.aar")
