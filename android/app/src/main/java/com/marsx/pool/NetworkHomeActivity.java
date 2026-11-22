@@ -580,7 +580,7 @@ public final class NetworkHomeActivity extends Activity {
         pendingPilotStart=pendingPilotStart||continuePilot;
         if(!googleSignIn.isConfigured()){
             pendingPilotStart=false;
-            android.widget.Toast.makeText(this,getString(R.string.psx_auto_auth_failed),
+            android.widget.Toast.makeText(this,getString(R.string.psx_auto_auth_failed) + " (AUTH-CONFIG)",
                 android.widget.Toast.LENGTH_LONG).show();
             return;
         }
@@ -596,7 +596,7 @@ public final class NetworkHomeActivity extends Activity {
             catch(Exception ignored){ /* Authentication failure stays user-visible and generic. */ }
             final String requestedNonce=nonce;
             runOnUiThread(()->{
-                if(requestedNonce==null){finishNetworkAuth(false);return;}
+                if(requestedNonce==null){finishNetworkAuth("AUTH-NONCE");return;}
                 googleSignIn.signIn(requestedNonce,false,new GoogleSignInManager.Callback(){
                     @Override public void onToken(String idToken){
                         new Thread(()->{
@@ -610,17 +610,18 @@ public final class NetworkHomeActivity extends Activity {
                                     try{secureStore.put("auth_session",authenticatedSession);stored=true;}
                                     catch(Exception ignored){ /* Keystore failure is a failed sign-in. */ }
                                 }
-                                finishNetworkAuth(stored);
+                                finishNetworkAuth(stored ? null : (authenticatedSession == null ? "AUTH-EXCHANGE" : "AUTH-STORAGE"));
                             });
                         },"marsx-v19-auth-exchange").start();
                     }
-                    @Override public void onError(String message){finishNetworkAuth(false);}
+                    @Override public void onError(String message){finishNetworkAuth("AUTH-GOOGLE");}
                 });
             });
         },"marsx-v19-auth-nonce").start();
     }
 
-    private void finishNetworkAuth(boolean success){
+    private void finishNetworkAuth(String failureCode){
+        boolean success = failureCode == null;
         authLoading=false;
         if(farmerLiveButton!=null){
             farmerLiveButton.setEnabled(true);
@@ -629,7 +630,9 @@ public final class NetworkHomeActivity extends Activity {
         }
         if(!success){
             pendingPilotStart=false;
-            android.widget.Toast.makeText(this,getString(R.string.psx_auto_auth_failed),
+            String failureText = getString(R.string.psx_auto_auth_failed) + " (" + failureCode + ")";
+            if (farmerLiveStatus != null) farmerLiveStatus.setText(failureText);
+            android.widget.Toast.makeText(this,failureText,
                 android.widget.Toast.LENGTH_LONG).show();
             return;
         }
