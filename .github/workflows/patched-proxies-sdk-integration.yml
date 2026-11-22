@@ -1,0 +1,58 @@
+name: Patched Proxies SDK Android integration
+
+on:
+  pull_request:
+    paths:
+      - 'android/**'
+      - '.github/workflows/patched-proxies-sdk-integration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-patched-sdk-with-app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Clone vendor SDK v1.3.2
+        run: git clone --depth 1 --branch v1.3.2 https://github.com/bolivian-peru/android-peer-sdk.git /tmp/proxies-sdk
+      - name: Fetch reviewed SDK patch at immutable commit
+        run: |
+          curl --fail --location --silent --show-error \
+            https://raw.githubusercontent.com/melih123r/Mars-x-pool/57cc7369a1a829a979c0ef1528a9e7e0a81f4a3a/docs/network/proxies-sdk-v132-stop-race.patch \
+            --output /tmp/proxies-sdk-stop-race.patch
+          test -s /tmp/proxies-sdk-stop-race.patch
+      - name: Apply patch and build SDK
+        working-directory: /tmp/proxies-sdk
+        run: |
+          git apply --check /tmp/proxies-sdk-stop-race.patch
+          git apply /tmp/proxies-sdk-stop-race.patch
+          chmod +x gradlew
+          ./gradlew :sdk:assembleDebug --no-daemon
+      - name: Stage patched AAR in app
+        run: |
+          mkdir -p android/app/libs
+          cp /tmp/proxies-sdk/sdk/build/outputs/aar/sdk-debug.aar android/app/libs/proxies-sdk-v132-patched-debug.aar
+          sha256sum android/app/libs/proxies-sdk-v132-patched-debug.aar
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Compile Android pilot with patched SDK
+        working-directory: android
+        env:
+          PROXIES_SX_API_KEY: ''
+        run: gradle :app:assembleDebug --no-daemon
+      - name: Retain integration APK for inspection only
+        uses: actions/upload-artifact@v4
+        with:
+          name: marsx-patched-sdk-integration-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 3
