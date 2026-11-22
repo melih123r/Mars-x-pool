@@ -57,9 +57,14 @@ for forbidden in ("MobileAds.initialize(", "loadAd(", "AdRequest.Builder(", "sta
 partner = Path("android/app/src/main/java/com/marsx/pool/ProxiesSxPartner.java").read_text(encoding="utf-8")
 gradle = Path("android/app/build.gradle").read_text(encoding="utf-8")
 manifest = Path("android/app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
-for marker in ("android-peer-sdk:v1.3.2", "PROXIES_SX_API_KEY"):
-    if marker not in gradle:
-        raise SystemExit("Missing pinned partner integration: " + marker)
+patched = (
+    'libs/proxies-sdk-v132-patched-debug.aar' in gradle
+    and 'Patched Proxies.sx SDK AAR missing' in gradle
+    and 'com.github.bolivian-peru:android-peer-sdk:v1.3.2' not in gradle
+)
+legacy = 'com.github.bolivian-peru:android-peer-sdk:v1.3.2' in gradle
+if not (patched or legacy) or "PROXIES_SX_API_KEY" not in gradle:
+    raise SystemExit("Missing pinned and fail-closed partner integration")
 for marker in ("ProxiesPeerSDK.init", "sdk.start()", "sdk.stop()", "isConfigured"):
     if marker not in partner:
         raise SystemExit("Missing partner boundary: " + marker)
