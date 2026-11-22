@@ -1,13 +1,29 @@
 --- a/sdk/src/main/java/sx/proxies/peer/ProxiesPeerSDK.kt
 +++ b/sdk/src/main/java/sx/proxies/peer/ProxiesPeerSDK.kt
-@@ -12,0 +13 @@
+@@ -11,6 +11,7 @@
+ import com.google.gson.Gson
+ import com.google.gson.JsonObject
+ import sx.proxies.peer.service.PeerProxyService
+
 +import java.util.concurrent.atomic.AtomicLong
-@@ -154,0 +156,4 @@
+ import java.util.concurrent.TimeUnit
+ 
+ /**
+@@ -152,6 +152,9 @@
+     }
+ 
+     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
 +    private val startEpoch = AtomicLong(0)
 +    private val serviceTransitionLock = Any()
 +    @Volatile private var sharingRequested = false
-+
-@@ -193,59 +198,61 @@
+     private val client = OkHttpClient.Builder()
+         .connectTimeout(30, TimeUnit.SECONDS)
+         .readTimeout(30, TimeUnit.SECONDS)
+@@ -190,65 +190,66 @@
+      * Start the bandwidth sharing service.
+      * Registers the device if needed and connects to the relay.
+      */
 -    fun start() {
 -        Log.d(TAG, "Starting SDK")
 -        updateStatus(Status.CONNECTING)
@@ -127,4 +143,6 @@
 +            updateStatus(Status.STOPPED)
 +        }
 +    }
-+
+     /**
+      * Check if the service is currently running.
+      */
