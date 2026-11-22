@@ -63,6 +63,9 @@ final class ProxiesAutomaticEnrollmentClient {
                          String osVersion,String country) throws IOException,JSONException {
         requireAuth(session,installId,deviceId);
         JSONObject body=new JSONObject()
+            .put("action","register_after_explicit_consent")
+            .put("consent",true)
+            .put("proxies_notice",true)
             .put("device_id",deviceId)
             .put("model",safe(model,80))
             .put("os_version",safe(osVersion,80))
