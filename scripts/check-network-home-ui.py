@@ -54,6 +54,10 @@ for marker in (
 for marker in (
     "PeerProxyService.Companion.start", "PeerProxyService.Companion.stop",
     "Settings.Secure.ANDROID_ID", "providerOnline(boolean online)",
+    "MAX_UNREFRESHED_SESSION_MS=45L*60L*1000L",
+    "sessionHandler.postDelayed(expireUnrefreshedSession,MAX_UNREFRESHED_SESSION_MS)",
+    "sessionHandler.removeCallbacks(expireUnrefreshedSession)",
+    "if(consentedToRun)stop();",
 ):
     assert marker in pilot, marker
 for marker in (
