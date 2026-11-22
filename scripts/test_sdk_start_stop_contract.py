@@ -92,5 +92,34 @@ class StartStopContractTests(unittest.TestCase):
         self.assertIsNone(self.gate.begin_start())
 
 
+
+class UnsafeStartGate:
+    """Minimal reproduction of vendor's unguarded late service start."""
+
+    def __init__(self):
+        self.connected = False
+
+    def complete_start(self):
+        self.connected = True
+
+    def stop(self):
+        self.connected = False
+
+
+class ContractSensitivityTests(unittest.TestCase):
+    def test_unguarded_late_start_violates_last_stop_wins(self):
+        unsafe = UnsafeStartGate()
+        unsafe.stop()
+        unsafe.complete_start()
+        self.assertTrue(unsafe.connected, "The unsafe sequence must reproduce the violation")
+
+    def test_fenced_model_rejects_same_late_completion(self):
+        safe = StartGate()
+        safe.authorize(consent=True, lease=True)
+        token = safe.begin_start()
+        safe.stop()
+        self.assertFalse(safe.complete_start(token))
+        self.assertFalse(safe.connected)
+
 if __name__ == '__main__':
     unittest.main()
