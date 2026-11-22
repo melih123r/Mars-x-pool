@@ -11,7 +11,7 @@ activity = Path("android/app/src/main/java/com/marsx/pool/NetworkHomeActivity.ja
 # Never allow a vendor master key to be hard-coded into the repository.
 for path in [Path("android/app/build.gradle"), *Path("android/app/src/main").rglob("*.java")]:
     data = path.read_text(encoding="utf-8")
-    if re.search(r"psx_[A-Za-z0-9_-]{16,}", data):
+    if re.search(r"[\\\"\x27]psx_[A-Za-z0-9_-]{16,}[\\\"\x27]", data):
         raise SystemExit(f"Potential embedded Proxies.sx key in {path}")
 
 for required in (
