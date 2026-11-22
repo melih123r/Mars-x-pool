@@ -4,7 +4,6 @@
  import com.google.gson.Gson
  import com.google.gson.JsonObject
  import sx.proxies.peer.service.PeerProxyService
-
 +import java.util.concurrent.atomic.AtomicLong
  import java.util.concurrent.TimeUnit
  
@@ -13,7 +12,6 @@
      }
  
      private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
 +    private val startEpoch = AtomicLong(0)
 +    private val serviceTransitionLock = Any()
 +    @Volatile private var sharingRequested = false
