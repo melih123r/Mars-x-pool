@@ -99,6 +99,7 @@ sqlite_test = subprocess.run([sys.executable, "scripts/network_sqlite_integrity_
 if sqlite_test.returncode:
     raise SystemExit("SQLite integrity simulation failed: " + sqlite_test.stdout + sqlite_test.stderr)
 print(sqlite_test.stdout.strip())
+subprocess.run([sys.executable, "scripts/check-proxies-credential-boundary.py"], check=True)
 print("Network UI contract: PASS")
 subprocess.run([sys.executable, "scripts/check-demo-ads.py"], check=True)
 subprocess.run([sys.executable, "scripts/check-network-locale.py"], check=True)
