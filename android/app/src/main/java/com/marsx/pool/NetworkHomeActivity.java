@@ -436,7 +436,11 @@ public final class NetworkHomeActivity extends Activity {
     }
 
     private void pollPilotStatus(String deviceId){
-        if(++pilotStatusAttempts>12)return;
+        // Probe often during the initial connection, then every minute.
+        // A short burst of successful tests is NOT proof of all-day uptime;
+        // provider status must be rechecked after a JWT expires.
+        if(pilotStatusAttempts<12)pilotStatusAttempts++;
+        final long delay=pilotStatusAttempts<12?5000:60000;
         final int generation=pilotStatusGeneration;
         pilotStatusHandler.postDelayed(()->{
             if(generation!=pilotStatusGeneration)return;
@@ -448,20 +452,16 @@ public final class NetworkHomeActivity extends Activity {
                 }catch(Exception ignored){ /* Never invent online state. */ }
                 final boolean confirmed=online;
                 runOnUiThread(()->{
-                    // Late HTTPS responses must not re-activate a stopped or
-                    // different peer after consent withdrawal / new start.
+                    // A late result cannot revive a stopped or replaced session.
                     if(isFinishing()||isDestroyed()||generation!=pilotStatusGeneration
                         ||!prefs.getBoolean("consented",false)
                         ||!prefs.getBoolean("psx_read_notice_v1",false))return;
                     proxyPilot.providerOnline(confirmed);
-                    if(confirmed){
-                        queryPrivateFarmerAccount(false);
-                    }else if(pilotStatusAttempts<12){
-                        pollPilotStatus(deviceId);
-                    }
+                    if(confirmed)queryPrivateFarmerAccount(false);
+                    pollPilotStatus(deviceId);
                 });
             },"marsx-v19-provider-status").start();
-        },5000);
+        },delay);
     }
 
     private void cancelPilotStatusChecks(){
