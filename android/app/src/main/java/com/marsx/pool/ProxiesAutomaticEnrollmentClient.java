@@ -69,7 +69,9 @@ final class ProxiesAutomaticEnrollmentClient {
             .put("device_id",deviceId)
             .put("model",safe(model,80))
             .put("os_version",safe(osVersion,80))
-            .put("country",country!=null&&country.matches("[A-Z]{2}")?country:"FR");
+            // Country is optional; never fabricate France or another location.
+            .put("country",country!=null&&country.matches("[A-Z]{2}")
+                ?country:JSONObject.NULL);
         String response=request("POST",ENDPOINT,session,installId,body);
         return parse(response,deviceId);
     }
