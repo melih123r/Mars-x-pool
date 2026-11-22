@@ -1,25 +1,91 @@
 --- a/sdk/src/main/java/sx/proxies/peer/ProxiesPeerSDK.kt
 +++ b/sdk/src/main/java/sx/proxies/peer/ProxiesPeerSDK.kt
-@@
- import java.util.concurrent.TimeUnit
+@@ -12,0 +13 @@
 +import java.util.concurrent.atomic.AtomicLong
-@@
-     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-+    // A stop fences every outstanding async registration/refresh completion.
+@@ -154,0 +156,4 @@
 +    private val startEpoch = AtomicLong(0)
 +    private val serviceTransitionLock = Any()
 +    @Volatile private var sharingRequested = false
-@@
-     fun start() {
-         Log.d(TAG, "Starting SDK")
-+        val requestEpoch = startEpoch.incrementAndGet()
-+        sharingRequested = true
-         updateStatus(Status.CONNECTING)
-@@
++
+@@ -193,59 +198,61 @@
+-    fun start() {
+-        Log.d(TAG, "Starting SDK")
+-        updateStatus(Status.CONNECTING)
+-
+-        scope.launch {
+-            try {
+-                // Register or get token for device
+-                // A persisted refresh token means the device is known: refresh
+-                // instead of re-registering on every launch (1.3.2).
+-                if (deviceId != null && refreshTokenValue != null) {
+-                    refreshToken()
+-                } else {
+-                    registerDevice()
+-                }
+-
 -                // Start foreground service
-+                // Async register/refresh may finish after Stop.
-+                // Hold the same lock as Stop through the service-start call:
-+                // checking the epoch alone leaves a check-to-start race.
+-                val token = deviceToken
+-                if (token != null) {
+-                    // Relay precedence: explicit operator pin > geo-assigned
+-                    // relay from registration > built-in default. A pin also
+-                    // tells the connection to ignore runtime relay redirects.
+-                    val relay = config.relayUrl ?: assignedRelay ?: DEFAULT_RELAY_URL
+-                    val relayPinned = config.relayUrl != null
+-                    PeerProxyService.start(
+-                        context,
+-                        token,
+-                        relay,
+-                        relayPinned
+-                    )
+-                    // Note: Status will be CONNECTING until relay actually connects
+-                    // The service will update status via callbacks
+-                } else {
+-                    Log.e(TAG, "No device token available")
+-                    updateStatus(Status.ERROR)
+-                }
+-            } catch (e: Exception) {
+-                Log.e(TAG, "Failed to start", e)
+-                updateStatus(Status.ERROR)
+-            }
+-        }
+-
+-        // Start earnings auto-polling
+-        startEarningsPolling()
+-    }
+-
+-    /**
+-     * Stop the bandwidth sharing service.
+-     */
+-    fun stop() {
+-        Log.d(TAG, "Stopping SDK")
+-
+-        // Stop earnings auto-polling
+-        stopEarningsPolling()
+-
+-        // Stop foreground service
+-        PeerProxyService.stop(context)
+-        updateStatus(Status.STOPPED)
+-    }
+-
++    fun start() {
++        Log.d(TAG, "Starting SDK")
++        val requestEpoch: Long
++        synchronized(serviceTransitionLock) {
++            sharingRequested = true
++            requestEpoch = startEpoch.incrementAndGet()
++            updateStatus(Status.CONNECTING)
++        }
++
++        scope.launch {
++            try {
++                if (deviceId != null && refreshTokenValue != null) {
++                    refreshToken()
++                } else {
++                    registerDevice()
++                }
++
++                // Serialize the last-moment authorization check with stop().
++                // A delayed HTTP response must never restart a stopped relay.
 +                synchronized(serviceTransitionLock) {
 +                    if (!sharingRequested || startEpoch.get() != requestEpoch) {
 +                        Log.d(TAG, "Discarding stale SDK start completion")
@@ -35,17 +101,30 @@
 +                        updateStatus(Status.ERROR)
 +                    }
 +                }
-+                return@launch
-+                // Start foreground service
-@@
-     fun stop() {
-         Log.d(TAG, "Stopping SDK")
++            } catch (e: Exception) {
++                synchronized(serviceTransitionLock) {
++                    if (sharingRequested && startEpoch.get() == requestEpoch) {
++                        Log.e(TAG, "Failed to start", e)
++                        updateStatus(Status.ERROR)
++                    }
++                }
++            }
++        }
++
++        startEarningsPolling()
++    }
++
++    /**
++     * Stop the bandwidth sharing service.
++     */
++    fun stop() {
++        Log.d(TAG, "Stopping SDK")
++        stopEarningsPolling()
 +        synchronized(serviceTransitionLock) {
 +            sharingRequested = false
 +            startEpoch.incrementAndGet()
-+            // Stop while holding same lock as start so last stop wins.
 +            PeerProxyService.stop(context)
++            updateStatus(Status.STOPPED)
 +        }
-@@
--        PeerProxyService.stop(context)
-+        // Service already stopped in the locked transition above.
++    }
++
