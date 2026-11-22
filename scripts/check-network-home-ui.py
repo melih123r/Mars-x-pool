@@ -48,6 +48,7 @@ for marker in (
     "beginNetworkGoogleSignIn(false)", "NetworkAuthClient.requestNonce",
     "NetworkAuthClient.exchange", "ProxiesAutomaticEnrollmentClient.enroll",
     "ProxiesAutomaticEnrollmentClient.online", "cancelPilotStatusChecks()",
+    "pilotStatusGeneration++", "generation!=pilotStatusGeneration",
 ):
     assert marker in source, marker
 for marker in (
@@ -68,6 +69,12 @@ for marker in (
 ):
     assert marker in edge, marker
 assert "apiKey: auth.providerKey" in edge
+assert 'body?.consent !== true' in edge
+assert 'body?.proxies_notice !== true' in edge
+assert '"register_after_explicit_consent"' in edge
+assert '.put("action","register_after_explicit_consent")' in client
+assert '.put("consent",true)' in client
+assert '.put("proxies_notice",true)' in client
 for forbidden_response in ("farmer_api_key: providerKey", "api_key: providerKey"):
     assert forbidden_response not in edge
 
