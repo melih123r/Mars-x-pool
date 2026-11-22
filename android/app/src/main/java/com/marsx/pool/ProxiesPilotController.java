@@ -2,6 +2,8 @@ package com.marsx.pool;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 
 import sx.proxies.peer.ProxiesPeerSDK;
@@ -14,8 +16,17 @@ import sx.proxies.peer.service.PeerProxyService;
 final class ProxiesPilotController {
     interface Listener { void onStatus(ProxiesPeerSDK.Status status,String deviceId); }
 
+    // Agent JWT has ~1-hour lifetime. Until a vendor-approved refresh flow
+    // exists, never keep a direct relay service running indefinitely.
+    private static final long MAX_UNREFRESHED_SESSION_MS=45L*60L*1000L;
     private static ProxiesPilotController shared;
     private final Context context;
+    private final Handler sessionHandler=new Handler(Looper.getMainLooper());
+    private final Runnable expireUnrefreshedSession=()->{
+        synchronized(ProxiesPilotController.this){
+            if(consentedToRun)stop();
+        }
+    };
     private volatile Listener listener;
     private volatile boolean consentedToRun;
     private String activeDeviceId="";
@@ -47,8 +58,16 @@ final class ProxiesPilotController {
         }
         consentedToRun=true;
         activeDeviceId=credential.deviceId;
-        PeerProxyService.Companion.start(context,credential.deviceToken,credential.relayUrl,false);
-        notifyStatus(ProxiesPeerSDK.Status.CONNECTING);
+        sessionHandler.removeCallbacks(expireUnrefreshedSession);
+        try{
+            PeerProxyService.Companion.start(context,credential.deviceToken,credential.relayUrl,false);
+            // Stop before provider JWT expiry; do not claim auto-renewal.
+            sessionHandler.postDelayed(expireUnrefreshedSession,MAX_UNREFRESHED_SESSION_MS);
+            notifyStatus(ProxiesPeerSDK.Status.CONNECTING);
+        }catch(RuntimeException error){
+            stop();
+            throw error;
+        }
     }
 
     synchronized void providerOnline(boolean online){
@@ -58,6 +77,7 @@ final class ProxiesPilotController {
 
     synchronized void stop(){
         consentedToRun=false;
+        sessionHandler.removeCallbacks(expireUnrefreshedSession);
         try{PeerProxyService.Companion.stop(context);}catch(RuntimeException ignored){}
         context.stopService(new Intent(context,PeerProxyService.class));
         notifyStatus(ProxiesPeerSDK.Status.STOPPED);
