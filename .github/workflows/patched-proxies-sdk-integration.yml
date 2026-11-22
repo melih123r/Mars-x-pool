@@ -1,0 +1,44 @@
+name: Patched Proxies SDK Android integration
+
+on:
+  pull_request:
+    paths:
+      - 'android/**'
+      - '.github/workflows/patched-proxies-sdk-integration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-patched-sdk-with-app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Use preinstalled Android SDK and install required platform
+        run: |
+          echo "ANDROID_HOME=${ANDROID_HOME:-/usr/local/lib/android/sdk}" >> "$GITHUB_ENV"
+          yes | "${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+      - name: Verify pinned vendor tag and security patch, then build AAR
+        run: bash scripts/prepare-patched-proxies-sdk.sh
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Compile fail-closed Android pilot with patched SDK
+        working-directory: android
+        env:
+          PROXIES_SX_API_KEY: ''
+        run: gradle :app:assembleDebug --no-daemon
+      - name: Retain integration APK for inspection only
+        uses: actions/upload-artifact@v4
+        with:
+          name: marsx-patched-sdk-integration-debug
+          path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 3

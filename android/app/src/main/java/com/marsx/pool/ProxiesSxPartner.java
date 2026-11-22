@@ -1,11 +1,13 @@
 package com.marsx.pool;
 
 import android.content.Context;
+import android.content.Intent;
 
 import java.lang.ref.WeakReference;
 
 import kotlin.Unit;
 import sx.proxies.peer.ProxiesPeerSDK;
+import sx.proxies.peer.service.PeerProxyService;
 
 /**
  * Small Java boundary around the official Proxies.sx Android SDK.
@@ -21,6 +23,7 @@ public final class ProxiesSxPartner {
 
     private static ProxiesSxPartner instance;
 
+    private final Context context;
     private final ProxiesPeerSDK sdk;
     private WeakReference<Listener> listener = new WeakReference<>(null);
     private ProxiesPeerSDK.Status lastStatus = ProxiesPeerSDK.Status.STOPPED;
@@ -28,6 +31,7 @@ public final class ProxiesSxPartner {
         new ProxiesPeerSDK.EarningsInfo(0, 0, 0.0, 0.0);
 
     private ProxiesSxPartner(Context context, String apiKey, String installationId) {
+        this.context = context.getApplicationContext();
         ProxiesPeerSDK.Config config = new ProxiesPeerSDK.Config(
             "https://api.proxies.sx/v1",
             null,
@@ -84,7 +88,22 @@ public final class ProxiesSxPartner {
     }
 
     public void stop() {
-        sdk.stop();
+        // Android may disallow startService(ACTION_STOP) when backgrounded.
+        // Always stop the actual foreground service in addition to the SDK
+        // state transition. Patched SDK also fences late HTTP registrations.
+        try {
+            sdk.stop();
+        } catch (RuntimeException ignored) {
+            // Direct stopService below is the fail-closed fallback.
+        } finally {
+            try {
+                context.stopService(new Intent(context, PeerProxyService.class));
+            } finally {
+                lastStatus = ProxiesPeerSDK.Status.STOPPED;
+                Listener current = listener.get();
+                if (current != null) current.onPartnerStatus(lastStatus);
+            }
+        }
     }
 
     public boolean isRunning() {

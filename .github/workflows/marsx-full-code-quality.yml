@@ -72,6 +72,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
+      - name: Prepare reviewed patched Proxies SDK AAR
+        run: bash scripts/prepare-patched-proxies-sdk.sh
       - name: Validate Android project
         run: |
           test -f android/settings.gradle

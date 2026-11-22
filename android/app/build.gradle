@@ -29,9 +29,14 @@ def escapedMarsxVrscPoolAddress = marsxVrscPoolAddress
 def proxiesSxApiKey = providers.gradleProperty("PROXIES_SX_API_KEY")
         .orElse(providers.environmentVariable("PROXIES_SX_API_KEY"))
         .getOrElse("")
-def escapedProxiesSxApiKey = proxiesSxApiKey
-        .replace("\\", "\\\\")
-        .replace("\"", "\\\"")
+// No operator/farmer master credential may be embedded in ANY APK/AAB,
+// including a debug build. The SDK remains fail-closed until the provider
+// supports a revocable device-scoped bootstrap and vetted renewal lifecycle.
+if (proxiesSxApiKey) {
+    throw new GradleException("Refusing to package Proxies.sx account key in Android (debug or release)")
+}
+// Keep the legacy BuildConfig symbol for compile compatibility, always empty.
+def escapedProxiesSxApiKey = ""
 
 android {
     namespace "com.marsx.pool"
@@ -96,8 +101,16 @@ android {
     }
 }
 
+def patchedProxiesSdkAar = file("libs/proxies-sdk-v132-patched-debug.aar")
+if (!patchedProxiesSdkAar.isFile()) {
+    throw new GradleException("Patched Proxies.sx SDK AAR missing: build disabled; never fall back to v1.3.2")
+}
+
 dependencies {
-    implementation "com.github.bolivian-peru:android-peer-sdk:v1.3.2"
+    // Pilot must use a locally reviewed, patched AAR. No fallback to unpatched JitPack.
+    implementation files("libs/proxies-sdk-v132-patched-debug.aar")
+    // File-based AAR dependencies have no POM: include vendor runtime Gson explicitly.
+    implementation "com.google.code.gson:gson:2.11.0"
     implementation "com.google.android.gms:play-services-ads:25.5.0"
     implementation "com.google.android.ump:user-messaging-platform:4.0.0"
     testImplementation "junit:junit:4.13.2"
