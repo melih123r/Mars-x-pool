@@ -65,6 +65,7 @@ public final class NetworkHomeActivity extends Activity {
     private boolean authLoading;
     private boolean pendingPilotStart;
     private int pilotStatusAttempts;
+    private int pilotStatusGeneration;
     private int peerEnrollmentGeneration;
     private final Handler pilotStatusHandler=new Handler(Looper.getMainLooper());
     private final Handler farmerLiveHandler=new Handler(Looper.getMainLooper());
@@ -436,26 +437,35 @@ public final class NetworkHomeActivity extends Activity {
 
     private void pollPilotStatus(String deviceId){
         if(++pilotStatusAttempts>12)return;
-        pilotStatusHandler.postDelayed(()->new Thread(()->{
-            boolean online=false;
-            try{
-                online=ProxiesAutomaticEnrollmentClient.online(currentAuthSession(),
-                    accountPrefs.getString("worker_id",""),deviceId);
-            }catch(Exception ignored){ /* Remain CONNECTING; never invent online state. */ }
-            final boolean confirmed=online;
-            runOnUiThread(()->{
-                if(isFinishing()||isDestroyed())return;
-                proxyPilot.providerOnline(confirmed);
-                if(confirmed){
-                    queryPrivateFarmerAccount(false);
-                }else if(pilotStatusAttempts<12){
-                    pollPilotStatus(deviceId);
-                }
-            });
-        },"marsx-v19-provider-status").start(),5000);
+        final int generation=pilotStatusGeneration;
+        pilotStatusHandler.postDelayed(()->{
+            if(generation!=pilotStatusGeneration)return;
+            new Thread(()->{
+                boolean online=false;
+                try{
+                    online=ProxiesAutomaticEnrollmentClient.online(currentAuthSession(),
+                        accountPrefs.getString("worker_id",""),deviceId);
+                }catch(Exception ignored){ /* Never invent online state. */ }
+                final boolean confirmed=online;
+                runOnUiThread(()->{
+                    // Late HTTPS responses must not re-activate a stopped or
+                    // different peer after consent withdrawal / new start.
+                    if(isFinishing()||isDestroyed()||generation!=pilotStatusGeneration
+                        ||!prefs.getBoolean("consented",false)
+                        ||!prefs.getBoolean("psx_read_notice_v1",false))return;
+                    proxyPilot.providerOnline(confirmed);
+                    if(confirmed){
+                        queryPrivateFarmerAccount(false);
+                    }else if(pilotStatusAttempts<12){
+                        pollPilotStatus(deviceId);
+                    }
+                });
+            },"marsx-v19-provider-status").start();
+        },5000);
     }
 
     private void cancelPilotStatusChecks(){
+        pilotStatusGeneration++;
         pilotStatusAttempts=13;
         pilotStatusHandler.removeCallbacksAndMessages(null);
     }
