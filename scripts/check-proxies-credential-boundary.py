@@ -44,6 +44,13 @@ if "BuildConfig.PROXIES_SX_API_KEY" not in activity:
     raise SystemExit("SDK credential path changed: review required")
 if "isConfigured(BuildConfig.PROXIES_SX_API_KEY)" not in activity:
     raise SystemExit("Missing SDK-OFF default gate")
+for required in (
+    "context.stopService(new Intent(context, PeerProxyService.class))",
+    "sdk.stop();",
+    "lastStatus = ProxiesPeerSDK.Status.STOPPED;",
+):
+    if required not in partner:
+        raise SystemExit("Missing force-stop fallback: "+required)
 if "if (!isConfigured(apiKey))" not in partner:
     raise SystemExit("Missing invalid-credential rejection")
 subprocess.run([sys.executable, "scripts/test-proxies-credential-regex.py"], check=True)
