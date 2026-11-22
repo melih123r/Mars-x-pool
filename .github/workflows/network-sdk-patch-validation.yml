@@ -51,3 +51,10 @@ jobs:
         run: |
           test -s /tmp/proxies-sdk-v132/sdk/build/outputs/aar/sdk-debug.aar
           ls -lh /tmp/proxies-sdk-v132/sdk/build/outputs/aar/sdk-debug.aar
+      - name: Publish patched SDK AAR for isolated review
+        uses: actions/upload-artifact@v4
+        with:
+          name: proxies-sdk-v132-patched-debug-aar
+          path: /tmp/proxies-sdk-v132/sdk/build/outputs/aar/sdk-debug.aar
+          if-no-files-found: error
+          retention-days: 7
