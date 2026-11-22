@@ -73,7 +73,13 @@ if network_version:
     for required in ("android.permission.FOREGROUND_SERVICE", "android.permission.WAKE_LOCK"):
         if required not in declared_permissions:
             raise SystemExit(f"Partner foreground service permission missing: {required}")
-    if "android-peer-sdk:v1.3.2" not in gradle or "PROXIES_SX_API_KEY" not in gradle:
+    patched_sdk = (
+        'libs/proxies-sdk-v132-patched-debug.aar' in gradle
+        and 'Patched Proxies.sx SDK AAR missing' in gradle
+        and 'com.github.bolivian-peru:android-peer-sdk:v1.3.2' not in gradle
+    )
+    legacy_sdk = 'com.github.bolivian-peru:android-peer-sdk:v1.3.2' in gradle
+    if not (patched_sdk or legacy_sdk) or "PROXIES_SX_API_KEY" not in gradle:
         raise SystemExit("Pinned Proxies.sx SDK and fail-closed build key are required")
 if '"version": "0.9.0"' not in package:
     raise SystemExit("Package version must match Beta 0.9.0")
