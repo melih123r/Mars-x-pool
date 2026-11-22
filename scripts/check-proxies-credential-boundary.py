@@ -18,6 +18,7 @@ for required in (
     'getOrElse("")',
     'buildConfigField "String", "PROXIES_SX_API_KEY"',
     'Patched Proxies.sx SDK AAR missing',
+    'Proxies.sx credential in release build forbidden',
 ):
     if required not in gradle:
         raise SystemExit("Missing fail-closed SDK configuration: " + required)
