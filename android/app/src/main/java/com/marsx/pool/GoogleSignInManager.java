@@ -5,6 +5,7 @@ import android.os.CancellationSignal;
 
 import androidx.credentials.Credential;
 import androidx.credentials.CredentialManager;
+import androidx.credentials.CredentialOption;
 import androidx.credentials.CredentialManagerCallback;
 import androidx.credentials.CustomCredential;
 import androidx.credentials.GetCredentialRequest;
@@ -14,6 +15,8 @@ import androidx.credentials.exceptions.NoCredentialException;
 
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
+
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption;
 
 import java.util.concurrent.Executor;
 
@@ -41,12 +44,19 @@ final class GoogleSignInManager {
             callback.onError("not_configured");
             return;
         }
-        GetGoogleIdOption googleOption = new GetGoogleIdOption.Builder()
-                .setFilterByAuthorizedAccounts(silent)
-                .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
-                .setAutoSelectEnabled(silent)
-                .setNonce(nonce)
-                .build();
+        CredentialOption googleOption;
+        if (silent) {
+            googleOption = new GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(true)
+                    .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                    .setAutoSelectEnabled(true)
+                    .setNonce(nonce)
+                    .build();
+        } else {
+            googleOption = new GetSignInWithGoogleOption.Builder(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                    .setNonce(nonce)
+                    .build();
+        }
         GetCredentialRequest request = new GetCredentialRequest.Builder()
                 .addCredentialOption(googleOption)
                 .build();
