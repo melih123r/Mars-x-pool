@@ -1,0 +1,39 @@
+name: Network SDK patch validation
+
+on:
+  pull_request:
+    paths:
+      - 'docs/network/proxies-sdk-v132-stop-race.patch'
+      - '.github/workflows/network-sdk-patch-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-upstream-patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout exact vendor tag
+        run: |
+          git clone --depth 1 --branch v1.3.2 https://github.com/bolivian-peru/android-peer-sdk.git /tmp/proxies-sdk-v132
+      - name: Check patch against vendor source
+        run: |
+          cd /tmp/proxies-sdk-v132
+          git apply --check "$GITHUB_WORKSPACE/docs/network/proxies-sdk-v132-stop-race.patch"
+          git apply "$GITHUB_WORKSPACE/docs/network/proxies-sdk-v132-stop-race.patch"
+          git diff --check
+      - name: Ensure no unguarded service start remains in SDK start path
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source=Path('/tmp/proxies-sdk-v132/sdk/src/main/java/sx/proxies/peer/ProxiesPeerSDK.kt').read_text()
+          start=source.split('    fun start() {',1)[1].split('    fun stop() {',1)[0]
+          assert 'synchronized(serviceTransitionLock)' in start
+          assert 'startEpoch.get() != requestEpoch' in start
+          assert 'PeerProxyService.start(context, token, relay, relayPinned)' in start
+          assert start.index('startEpoch.get() != requestEpoch') < start.index('PeerProxyService.start(context, token, relay, relayPinned)')
+          print('Static guard placement: PASS (not a runtime race test)')
+          PY
