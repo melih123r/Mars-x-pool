@@ -96,6 +96,12 @@ Deno.serve(async (request: Request) => {
       const rawBody = await request.text();
       if (rawBody.length > 8192) return reply({ status: "error", error: "bad_request" }, 400);
       const body = JSON.parse(rawBody);
+      // Server must receive an explicit, current consent assertion before
+      // calling the vendor registration API. The Android UI also checks this.
+      if (body?.consent !== true || body?.proxies_notice !== true ||
+          body?.action !== "register_after_explicit_consent") {
+        return reply({ status: "error", error: "explicit_consent_required" }, 403);
+      }
       const deviceId = body?.device_id;
       const model = safeText(body?.model, 80);
       const osVersion = safeText(body?.os_version, 80);
