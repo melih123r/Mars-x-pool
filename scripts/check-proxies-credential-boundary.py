@@ -2,6 +2,8 @@
 """Fail-closed static checks for the Android Proxies.sx credential boundary."""
 from pathlib import Path
 import re
+import subprocess
+import sys
 
 gradle = Path("android/app/build.gradle").read_text(encoding="utf-8")
 partner = Path("android/app/src/main/java/com/marsx/pool/ProxiesSxPartner.java").read_text(encoding="utf-8")
@@ -28,4 +30,5 @@ if "isConfigured(BuildConfig.PROXIES_SX_API_KEY)" not in activity:
     raise SystemExit("Missing SDK-OFF default gate")
 if "if (!isConfigured(apiKey))" not in partner:
     raise SystemExit("Missing invalid-credential rejection")
+subprocess.run([sys.executable, "scripts/test-proxies-credential-regex.py"], check=True)
 print("Proxies.sx static credential boundary: PASS (not physical-device verification)")
