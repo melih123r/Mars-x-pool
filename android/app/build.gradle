@@ -29,6 +29,18 @@ def escapedMarsxVrscPoolAddress = marsxVrscPoolAddress
 def proxiesSxApiKey = providers.gradleProperty("PROXIES_SX_API_KEY")
         .orElse(providers.environmentVariable("PROXIES_SX_API_KEY"))
         .getOrElse("")
+// Never distribute a release APK/AAB containing the vendor's master SDK key.
+// Device-scoped runtime provisioning is not yet supported by this SDK integration.
+if (proxiesSxApiKey) {
+    def releaseRequested = gradle.startParameter.taskNames.any { task ->
+        def name = task.toLowerCase(java.util.Locale.ROOT)
+        name.contains("release") || name.contains("bundle") || name.contains("publish")
+    }
+    if (releaseRequested) {
+        throw new GradleException("Proxies.sx credential in release build forbidden: use server-issued device-scoped credentials; live release blocked")
+    }
+}
+
 def escapedProxiesSxApiKey = proxiesSxApiKey
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
