@@ -37,6 +37,11 @@ jobs:
           assert start.index('startEpoch.get() != requestEpoch') < start.index('PeerProxyService.start(context, token, relay, relayPinned)')
           print('Static guard placement: PASS (not a runtime race test)')
           PY
+      - name: Set up compatible Java 17 for Kotlin / Gradle 8.4
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
       - name: Compile patched SDK debug AAR (no live relay)
         working-directory: /tmp/proxies-sdk-v132
         run: |
