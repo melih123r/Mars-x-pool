@@ -79,8 +79,13 @@ try:
     tap(en['nui_46']);assert en['nui_47'] in textset(ui())
     report['checks']['consent grant and opt-out']='PASS'
 
-    # The Proxies.sx preview is on this very same v19 page.
+    # A normal user must never see a provider SDK-key field or old beta UI.
     proxy=strings('en')
+    tap(proxy['psx_auto_provisioning'],scroll=True)
+    visible=ui()
+    assert not any(n.get('class','').endswith('EditText') for n in visible.iter('node')), 'Unexpected SDK key input'
+    assert all('0.9.0-beta' not in item for item in textset(visible))
+    report['checks']['SDK-keyless Network v19 page, no legacy beta']='PASS'
     tap(proxy['psx_acknowledgement'],scroll=True)
     prefs_xml=adb('shell','run-as',PKG,'cat','shared_prefs/network_consent_v1.xml')
     assert 'name="psx_read_notice_v1" value="true"' in prefs_xml, prefs_xml
