@@ -1,0 +1,20 @@
+name: Network SDK stop/start reference contract
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/test_sdk_start_stop_contract.py'
+      - '.github/workflows/network-sdk-contract-tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-reference-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run fail-closed reference-model tests (NOT vendor SDK)
+        run: python3 -m unittest discover -s scripts -p 'test_sdk_start_stop_contract.py' -v
