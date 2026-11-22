@@ -37,3 +37,12 @@ jobs:
           assert start.index('startEpoch.get() != requestEpoch') < start.index('PeerProxyService.start(context, token, relay, relayPinned)')
           print('Static guard placement: PASS (not a runtime race test)')
           PY
+      - name: Compile patched SDK debug AAR (no live relay)
+        working-directory: /tmp/proxies-sdk-v132
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :sdk:assembleDebug --no-daemon --stacktrace
+      - name: Verify patched AAR output
+        run: |
+          test -s /tmp/proxies-sdk-v132/sdk/build/outputs/aar/sdk-debug.aar
+          ls -lh /tmp/proxies-sdk-v132/sdk/build/outputs/aar/sdk-debug.aar
