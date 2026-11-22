@@ -21,6 +21,7 @@ final class ProxiesPilotController {
     private static final long MAX_UNREFRESHED_SESSION_MS=45L*60L*1000L;
     private static ProxiesPilotController shared;
     private final Context context;
+    private volatile boolean consentedToRun;
     private final Handler sessionHandler=new Handler(Looper.getMainLooper());
     private final Runnable expireUnrefreshedSession=()->{
         synchronized(ProxiesPilotController.this){
@@ -28,7 +29,6 @@ final class ProxiesPilotController {
         }
     };
     private volatile Listener listener;
-    private volatile boolean consentedToRun;
     private String activeDeviceId="";
 
     private ProxiesPilotController(Context context,Listener listener){
