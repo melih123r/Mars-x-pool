@@ -107,7 +107,7 @@ Deno.serve(async (request: Request) => {
       const osVersion = safeText(body?.os_version, 80);
       const country = typeof body?.country === "string" && /^[A-Z]{2}$/.test(body.country)
         ? body.country : "";
-      if (!validDevice(deviceId) || !model || !osVersion || !country) {
+      if (!validDevice(deviceId) || !model || !osVersion) {
         return reply({ status: "error", error: "bad_request" }, 400);
       }
       const upstream = await fetch(REGISTER_URL, {
@@ -123,7 +123,7 @@ Deno.serve(async (request: Request) => {
           apiKey: auth.providerKey,
           model,
           osVersion,
-          country,
+          ...(country ? { country } : {}),
         }),
         redirect: "error",
         signal: AbortSignal.timeout(12000),
