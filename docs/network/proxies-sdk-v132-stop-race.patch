@@ -5,8 +5,9 @@
 +import java.util.concurrent.atomic.AtomicLong
 @@
      private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-+    // Every stop invalidates previously queued async register/refresh completions.
++    // A stop fences every outstanding async registration/refresh completion.
 +    private val startEpoch = AtomicLong(0)
++    private val serviceTransitionLock = Any()
 +    @Volatile private var sharingRequested = false
 @@
      fun start() {
@@ -16,14 +17,35 @@
          updateStatus(Status.CONNECTING)
 @@
 -                // Start foreground service
-+                // Registration/refresh may finish after Stop; never resurrect relay.
-+                if (!sharingRequested || startEpoch.get() != requestEpoch) {
-+                    Log.d(TAG, "Discarding stale SDK start completion")
-+                    return@launch
++                // Async register/refresh may finish after Stop.
++                // Hold the same lock as Stop through the service-start call:
++                // checking the epoch alone leaves a check-to-start race.
++                synchronized(serviceTransitionLock) {
++                    if (!sharingRequested || startEpoch.get() != requestEpoch) {
++                        Log.d(TAG, "Discarding stale SDK start completion")
++                        return@synchronized
++                    }
++                    val token = deviceToken
++                    if (token != null) {
++                        val relay = config.relayUrl ?: assignedRelay ?: DEFAULT_RELAY_URL
++                        val relayPinned = config.relayUrl != null
++                        PeerProxyService.start(context, token, relay, relayPinned)
++                    } else {
++                        Log.e(TAG, "No device token available")
++                        updateStatus(Status.ERROR)
++                    }
 +                }
++                return@launch
 +                // Start foreground service
 @@
      fun stop() {
          Log.d(TAG, "Stopping SDK")
-+        sharingRequested = false
-+        startEpoch.incrementAndGet()
++        synchronized(serviceTransitionLock) {
++            sharingRequested = false
++            startEpoch.incrementAndGet()
++            // Stop while holding same lock as start so last stop wins.
++            PeerProxyService.stop(context)
++        }
+@@
+-        PeerProxyService.stop(context)
++        // Service already stopped in the locked transition above.
