@@ -1,0 +1,29 @@
+--- a/sdk/src/main/java/sx/proxies/peer/ProxiesPeerSDK.kt
++++ b/sdk/src/main/java/sx/proxies/peer/ProxiesPeerSDK.kt
+@@
+ import java.util.concurrent.TimeUnit
++import java.util.concurrent.atomic.AtomicLong
+@@
+     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
++    // Every stop invalidates previously queued async register/refresh completions.
++    private val startEpoch = AtomicLong(0)
++    @Volatile private var sharingRequested = false
+@@
+     fun start() {
+         Log.d(TAG, "Starting SDK")
++        val requestEpoch = startEpoch.incrementAndGet()
++        sharingRequested = true
+         updateStatus(Status.CONNECTING)
+@@
+-                // Start foreground service
++                // Registration/refresh may finish after Stop; never resurrect relay.
++                if (!sharingRequested || startEpoch.get() != requestEpoch) {
++                    Log.d(TAG, "Discarding stale SDK start completion")
++                    return@launch
++                }
++                // Start foreground service
+@@
+     fun stop() {
+         Log.d(TAG, "Stopping SDK")
++        sharingRequested = false
++        startEpoch.incrementAndGet()
