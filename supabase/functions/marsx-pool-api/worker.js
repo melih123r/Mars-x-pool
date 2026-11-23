@@ -534,9 +534,10 @@ export class D1Store {
 
   async linkUserWorker(userId, workerId, at) {
     await this.db.prepare(`
-      INSERT INTO user_workers(user_id,worker_id,linked_at) VALUES (?, ?, ?)
+      INSERT INTO user_workers(user_id,worker_id,linked_at)
+      SELECT ?, worker_id, ? FROM workers WHERE worker_id=?
       ON CONFLICT(worker_id) DO UPDATE SET user_id=excluded.user_id,linked_at=excluded.linked_at
-    `).bind(userId, workerId, at).run();
+    `).bind(userId, at, workerId).run();
   }
 
   async referralProfile(userId) {
