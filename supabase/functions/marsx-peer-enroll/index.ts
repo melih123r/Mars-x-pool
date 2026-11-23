@@ -129,6 +129,7 @@ Deno.serve(async (request: Request) => {
         signal: AbortSignal.timeout(12000),
       });
       if (!upstream.ok) {
+        console.warn("peer_enrollment_provider_http", upstream.status);
         return reply({ status: "unavailable", error: upstream.status === 401 ||
           upstream.status === 403 ? "provider_authentication_failed" : "provider_unavailable" }, 502);
       }
@@ -164,7 +165,10 @@ Deno.serve(async (request: Request) => {
       redirect: "error",
       signal: AbortSignal.timeout(10000),
     });
-    if (!upstream.ok) return reply({ status: "unavailable", error: "provider_unavailable" }, 502);
+    if (!upstream.ok) {
+      console.warn("peer_status_provider_http", upstream.status);
+      return reply({ status: "unavailable", error: "provider_unavailable" }, 502);
+    }
     const responseText = await upstream.text();
     if (responseText.length > 1_000_000) throw new Error("response_too_large");
     const parsed = JSON.parse(responseText);
@@ -185,7 +189,12 @@ Deno.serve(async (request: Request) => {
       provider_status: providerStatus,
       sampled_at: new Date().toISOString(),
     }, 200);
-  } catch (_) {
+  } catch (error) {
+    const known = ["response_too_large", "unexpected_provider_response", "unexpected_device_list"];
+    const reason = error instanceof Error && known.includes(error.message) ? error.message
+      : error instanceof SyntaxError ? "invalid_json"
+      : error instanceof Error && error.name === "TimeoutError" ? "timeout" : "request_failed";
+    console.warn("peer_request_failed", request.method, reason);
     return reply({ status: "unavailable", error: "provider_unavailable" }, 502);
   }
 });
