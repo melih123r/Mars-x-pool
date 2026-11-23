@@ -394,11 +394,15 @@ public final class NetworkHomeActivity extends Activity {
         proxyPilotStatus.setText(getString(R.string.psx_auto_enrolling));
         new Thread(()->{
             ProxiesAutomaticEnrollmentClient.Result result=null;
+            int errorMessage = R.string.psx_pilot_error;
             try{
                 result=ProxiesAutomaticEnrollmentClient.enroll(session,installId,deviceId,
                     Build.MODEL,"Android "+Build.VERSION.RELEASE,
                     Locale.getDefault().getCountry().toUpperCase(Locale.ROOT));
+            }catch(ProxiesAutomaticEnrollmentClient.EnrollmentUnavailableException unavailable){
+                errorMessage = R.string.psx_android_enrollment_unavailable;
             }catch(Exception ignored){ /* Never log credentials or provider responses. */ }
+            final int enrollmentError = errorMessage;
             final ProxiesAutomaticEnrollmentClient.Result credential=result;
             runOnUiThread(()->{
                 if(isFinishing()||isDestroyed()||enrollmentId!=peerEnrollmentGeneration)return;
@@ -410,7 +414,7 @@ public final class NetworkHomeActivity extends Activity {
                 if(credential==null){
                     proxyPilot.stop();
                     prefs.edit().putBoolean("psx_sharing_active",false).apply();
-                    proxyPilotStatus.setText(getString(R.string.psx_pilot_error));
+                    proxyPilotStatus.setText(getString(enrollmentError));
                     proxyPilotStart.setEnabled(true);
                     return;
                 }

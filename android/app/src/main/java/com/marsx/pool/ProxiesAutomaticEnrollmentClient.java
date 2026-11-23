@@ -18,6 +18,8 @@ final class ProxiesAutomaticEnrollmentClient {
     static final String ENDPOINT =
         "https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-peer-enroll";
 
+    static final class EnrollmentUnavailableException extends IOException {}
+
     static final class Result {
         final String deviceId;
         final String deviceToken;
@@ -114,11 +116,24 @@ final class ProxiesAutomaticEnrollmentClient {
         try{
             if(encoded!=null)try(OutputStream output=connection.getOutputStream()){output.write(encoded);}
             int status=connection.getResponseCode();
+            if ("POST".equals(method) && status == 503 && connection.getErrorStream() != null) {
+                String error = readResponse(connection.getErrorStream());
+                try {
+                    if ("android_pilot_enrollment_unavailable".equals(new JSONObject(error).optString("error"))) {
+                        throw new EnrollmentUnavailableException();
+                    }
+                } catch (JSONException ignored) { /* Use the generic failure for other responses. */ }
+            }
             if(status!=200)throw new IOException(status==401||status==403
                 ?"Pilot authorization rejected":"Pilot enrollment unavailable");
+            return readResponse(connection.getInputStream());
+        }finally{connection.disconnect();}
+    }
+
+    private static String readResponse(java.io.InputStream input) throws IOException {
             StringBuilder response=new StringBuilder();
             try(BufferedReader reader=new BufferedReader(new InputStreamReader(
-                    connection.getInputStream(),StandardCharsets.UTF_8))){
+                    input,StandardCharsets.UTF_8))){
                 char[] buffer=new char[512]; int count;
                 while((count=reader.read(buffer))!=-1){
                     if(response.length()+count>32768)throw new IOException("Response too large");
@@ -126,7 +141,6 @@ final class ProxiesAutomaticEnrollmentClient {
                 }
             }
             return response.toString();
-        }finally{connection.disconnect();}
     }
 
     private static String safe(String value,int max){

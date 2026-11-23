@@ -183,4 +183,5 @@
     <string name="network_consent_button">Grant explicit consent</string>
     <string name="network_earnings_heading">2 • EARNINGS</string>
     <string name="network_history_heading">3 • WITHDRAWAL HISTORY</string>
+    <string name="psx_android_enrollment_unavailable">Proxies.sx Android pilot enrollment is unavailable. Sharing is off.</string>
 </resources>
