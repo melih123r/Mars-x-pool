@@ -2,7 +2,6 @@
  * Operator-only Proxies.sx device enrollment and status endpoint.
  * The farmer API key is consumed server-side and is never returned to Android.
  */
-const REGISTER_URL = "https://api.proxies.sx/v1/peer/agents/register";
 const DEVICES_URL = "https://api.proxies.sx/v1/peer/my-devices";
 const AUTH_URL =
   "https://gcqcxiqhuzfudlfosqlp.supabase.co/functions/v1/marsx-pool-api/auth/me";
@@ -27,24 +26,6 @@ function validInstall(value: string) {
 function validDevice(value: unknown): value is string {
   return typeof value === "string" && /^(?:psx_|agent_)[A-Za-z0-9_-]{8,64}$/.test(value);
 }
-function safeText(value: unknown, max: number) {
-  if (typeof value !== "string") return "";
-  const cleaned = value.replace(/[\u0000-\u001f\u007f]/g, "").trim();
-  return cleaned.length > 0 && cleaned.length <= max ? cleaned : "";
-}
-function validRelay(value: unknown): value is string {
-  if (typeof value !== "string") return false;
-  try {
-    const url = new URL(value);
-    return url.protocol === "wss:" &&
-      (url.hostname === "proxies.sx" || url.hostname.endsWith(".proxies.sx")) &&
-      (!url.port || url.port === "443") && !url.username && !url.password &&
-      !url.search && !url.hash;
-  } catch (_) {
-    return false;
-  }
-}
-
 async function authorize(request: Request) {
   const bearer = request.headers.get("authorization") ?? "";
   const installId = request.headers.get("x-install-id") ?? "";
@@ -102,58 +83,8 @@ Deno.serve(async (request: Request) => {
           body?.action !== "register_after_explicit_consent") {
         return reply({ status: "error", error: "explicit_consent_required" }, 403);
       }
-      const deviceId = body?.device_id;
-      const model = safeText(body?.model, 80);
-      const osVersion = safeText(body?.os_version, 80);
-      const country = typeof body?.country === "string" && /^[A-Z]{2}$/.test(body.country)
-        ? body.country : "";
-      if (!validDevice(deviceId) || !model || !osVersion) {
-        return reply({ status: "error", error: "bad_request" }, 400);
-      }
-      const upstream = await fetch(REGISTER_URL, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json; charset=utf-8",
-          accept: "application/json",
-        },
-        body: JSON.stringify({
-          // Stable per-phone identity for re-registration.
-          name: deviceId,
-          type: "android",
-          apiKey: auth.providerKey,
-          model,
-          osVersion,
-          ...(country ? { country } : {}),
-        }),
-        redirect: "error",
-        signal: AbortSignal.timeout(12000),
-      });
-      if (!upstream.ok) {
-        console.warn("peer_enrollment_provider_http", upstream.status);
-        return reply({ status: "unavailable", error: upstream.status === 401 ||
-          upstream.status === 403 ? "provider_authentication_failed" : "provider_unavailable" }, 502);
-      }
-      const responseText = await upstream.text();
-      if (responseText.length > 65536) throw new Error("response_too_large");
-      const parsed = JSON.parse(responseText);
-      const returnedId = parsed?.deviceId;
-      const token = parsed?.jwt;
-      const relay = parsed?.relay;
-      if (!validDevice(returnedId) || typeof token !== "string" ||
-        !/^[A-Za-z0-9._~+\/=-]{24,4096}$/.test(token) || !validRelay(relay)) {
-        throw new Error("unexpected_provider_response");
-      }
-      return reply({
-        schema_version: 1,
-        status: "enrolled",
-        source: "proxies.sx",
-        scope: "pilot_device_credential",
-        device_id: returnedId,
-        client_request_id: deviceId,
-        device_token: token,
-        relay_url: relay,
-        farmer_api_key_included: false,
-      }, 200);
+      // The Android SDK must enroll on the handset using a supported pilot credential.
+      return reply({ status: "unavailable", error: "android_pilot_enrollment_unavailable" }, 503);
     }
 
     const requestUrl = new URL(request.url);
