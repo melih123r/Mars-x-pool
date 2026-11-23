@@ -67,12 +67,13 @@ for marker in (
     assert marker in client, marker
 assert "PROXIES_SX_FARMER_API_KEY" not in source + pilot + client
 for marker in (
-    "PROXIES_SX_FARMER_API_KEY", "/v1/peer/agents/register", "/v1/peer/my-devices",
-    "pilot_device_credential", "pilot_device_status", "farmer_api_key_included: false",
+    "PROXIES_SX_FARMER_API_KEY", "/v1/peer/my-devices",
+    "android_pilot_enrollment_unavailable", "pilot_device_status",
     "marsx-pool-api/auth/me",
 ):
     assert marker in edge, marker
-assert "apiKey: auth.providerKey" in edge
+assert "/v1/peer/agents/register" not in edge
+assert "apiKey: auth.providerKey" not in edge
 assert 'body?.consent !== true' in edge
 assert 'body?.proxies_notice !== true' in edge
 assert '"register_after_explicit_consent"' in edge
