@@ -74,11 +74,11 @@ final class GoogleSignInManager {
                     }
 
                     @Override
-                    public void onError(GetCredentialException error) {
-                        if (error instanceof NoCredentialException) {
-                            callback.onError("silent_unavailable");
+                    public void onError(GetCredentialException e) {
+                        if (e instanceof NoCredentialException) {
+                            callback.onError("no_credentials");
                         } else {
-                            callback.onError(silent ? "silent_unavailable" : "cancelled");
+                            callback.onError(e.getMessage() != null ? e.getMessage() : "sign_in_failed");
                         }
                     }
                 }
