@@ -52,6 +52,7 @@ public final class NetworkHomeActivity extends Activity {
     private Button proxyStatusButton;
     private Button proxyPilotStart;
     private TextView proxyPilotStatus;
+    private TextView providerDeviceStatus;
     private ProxiesPilotController proxyPilot;
     private ProxiesPilotController.Listener proxyPilotListener;
     private TextView liveBoardStatus;
@@ -66,7 +67,6 @@ public final class NetworkHomeActivity extends Activity {
     private boolean pendingPilotStart;
     private int pilotStatusAttempts;
     private int pilotStatusGeneration;
-    private int peerEnrollmentGeneration;
     private final Handler pilotStatusHandler=new Handler(Looper.getMainLooper());
     private final Handler farmerLiveHandler=new Handler(Looper.getMainLooper());
     private final Runnable farmerLiveRefresh=()->queryPrivateFarmerAccount(true);
@@ -129,11 +129,7 @@ public final class NetworkHomeActivity extends Activity {
         proxyPilotListener=(status,deviceId)->runOnUiThread(()->
             updatePilotStatus(status.name(),deviceId));
         proxyPilot=ProxiesPilotController.attach(this,proxyPilotListener);
-        // A fresh activity must not trust a saved 'sharing_active' flag as
-        // evidence that the foreground SDK service is really connected.
-        // The single-operator pilot requires deliberate restart after reopening.
-        if(prefs.getBoolean("psx_sharing_active",false)
-            || !prefs.getBoolean("consented",false)
+        if (!prefs.getBoolean("consented",false)
             || !prefs.getBoolean("psx_read_notice_v1",false)) {
             prefs.edit().putBoolean("psx_sharing_active",false).apply();
             proxyPilot.stop();
@@ -156,7 +152,6 @@ public final class NetworkHomeActivity extends Activity {
         consentButton=button(network,getString(R.string.network_consent_button));
         consentButton.setOnClickListener(v->{
             if (prefs.getBoolean("consented",false)) {
-                peerEnrollmentGeneration++;
                 cancelPilotStatusChecks();
                 proxyPilot.stop();
                 prefs.edit().putBoolean("consented",false).putBoolean("monitor_active",false).apply();
@@ -222,7 +217,6 @@ public final class NetworkHomeActivity extends Activity {
         proxyDisclosureAcknowledgement.setChecked(prefs.getBoolean("psx_read_notice_v1",false));
         proxyDisclosureAcknowledgement.setOnCheckedChangeListener((button,checked)->{
             if(!checked){
-                peerEnrollmentGeneration++;
                 cancelPilotStatusChecks();
                 proxyPilot.stop();
             }
@@ -232,14 +226,18 @@ public final class NetworkHomeActivity extends Activity {
         });
         proxy.addView(proxyDisclosureAcknowledgement,new LinearLayout.LayoutParams(-1,-2));
         proxyPilotStatus=text(proxy,getString(R.string.psx_pilot_stopped),15,ORANGE,true);
+        if (BuildConfig.PRIVATE_PHONE) providerDeviceStatus=text(proxy,getString(R.string.operator_farmer_unknown),13,MUTED,false);
         if (!BuildConfig.PRIVATE_PHONE) text(proxy,getString(R.string.psx_zero_earnings),13,MUTED,false);
-        text(proxy,getString(R.string.psx_auto_provisioning),12,MUTED,false);
+        text(proxy,getString(BuildConfig.PRIVATE_PHONE ? R.string.operator_provisioning : R.string.psx_auto_provisioning),12,MUTED,false);
         proxyPilotStart=button(proxy,getString(R.string.psx_pilot_start));
         proxyPilotStart.setEnabled(BuildConfig.PRIVATE_PHONE);
+        if (BuildConfig.PRIVATE_PHONE) {
+            updatePilotStatus(proxyPilot.status().name(),proxyPilot.deviceId());
+            if (proxyPilot.active()) beginPilotStatusChecks(proxyPilot.deviceId());
+        }
         proxyPilotStart.setOnClickListener(v->requestPilotStart());
         Button stopProxy=button(proxy,getString(R.string.psx_stop_revoke));
         stopProxy.setOnClickListener(v->{
-            peerEnrollmentGeneration++;
             cancelPilotStatusChecks();
             proxyPilot.stop();
             proxyStatusGeneration++;
@@ -408,19 +406,20 @@ public final class NetworkHomeActivity extends Activity {
         pilotStatusHandler.postDelayed(()->{
             if(generation!=pilotStatusGeneration)return;
             new Thread(()->{
-                boolean online=false;
+                Boolean online=null;
                 try{
                     online=ProxiesAutomaticEnrollmentClient.online(currentAuthSession(),
                         accountPrefs.getString("worker_id",""),deviceId);
                 }catch(Exception ignored){ /* Never invent online state. */ }
-                final boolean confirmed=online;
+                final Boolean confirmed=online;
                 runOnUiThread(()->{
                     // A late result cannot revive a stopped or replaced session.
                     if(isFinishing()||isDestroyed()||generation!=pilotStatusGeneration
                         ||!prefs.getBoolean("consented",false)
                         ||!prefs.getBoolean("psx_read_notice_v1",false))return;
-                    // Relay status comes exclusively from the SDK. Farmer data is read separately.
-                    if(confirmed)queryPrivateFarmerAccount(false);
+                    providerDeviceStatus.setText(confirmed==null ? R.string.operator_farmer_unknown
+                        : confirmed ? R.string.operator_farmer_online : R.string.operator_farmer_offline);
+                    if(Boolean.TRUE.equals(confirmed))queryPrivateFarmerAccount(false);
                     pollPilotStatus(deviceId);
                 });
             },"marsx-v19-provider-status").start();
@@ -430,6 +429,7 @@ public final class NetworkHomeActivity extends Activity {
     private void cancelPilotStatusChecks(){
         pilotStatusGeneration++;
         pilotStatusAttempts=13;
+        if (providerDeviceStatus!=null) providerDeviceStatus.setText(R.string.operator_farmer_unknown);
         pilotStatusHandler.removeCallbacksAndMessages(null);
     }
 
@@ -705,7 +705,6 @@ public final class NetworkHomeActivity extends Activity {
         else if(active)monitorHandler.post(monitorTick);
     }
     @Override protected void onDestroy(){
-        peerEnrollmentGeneration++;
         cancelPilotStatusChecks();
         proxyPilot.detach(proxyPilotListener);
         farmerLiveHandler.removeCallbacks(farmerLiveRefresh);
@@ -736,7 +735,8 @@ public final class NetworkHomeActivity extends Activity {
 
     private void refreshConsent(){
         boolean consent=prefs.getBoolean("consented",false);
-        consentStatus.setText(consent
+        consentStatus.setText(BuildConfig.PRIVATE_PHONE && consent
+            ? getString(R.string.operator_consent) : consent
             ?getString(R.string.nui_44)
             :getString(R.string.nui_45));
         consentButton.setText(consent?getString(R.string.nui_46):getString(R.string.nui_47));

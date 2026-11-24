@@ -2,7 +2,6 @@
 """Install the operator credential over an already-authorized USB adb connection."""
 import argparse
 import ipaddress
-import os
 from pathlib import Path
 import re
 import subprocess
@@ -12,7 +11,7 @@ parser.add_argument("--serial", required=True)
 parser.add_argument("--key-file", required=True, type=Path)
 parser.add_argument("--test-ip", type=ipaddress.IPv4Address)
 args = parser.parse_args()
-if args.test_ip and (not args.test_ip.is_global or args.test_ip.is_multicast):
+if args.test_ip and (not args.test_ip.is_global or args.test_ip.is_multicast or args.test_ip.is_reserved):
     parser.error("Expected the public IPv4 address of the operator test destination")
 if args.key_file.stat().st_mode & 0o077:
     parser.error("Restrict the key file to its owner")

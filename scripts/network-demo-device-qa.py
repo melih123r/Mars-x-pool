@@ -1,4 +1,5 @@
 """Run on a disposable Android emulator; no live sharing, ads or payouts."""
+import os
 import json
 from pathlib import Path
 import re
@@ -63,7 +64,11 @@ report={'device':f'Android emulator API {API}','physical_device':False,'source_a
 try:
     assert API in (26,33)
     adb('shell','wm','size','1080x1920');adb('shell','wm','density','420')
-    adb('install','-r','android/app/build/outputs/apk/debug/app-debug.apk')
+    private_phone = os.environ.get('MARSX_QA_VARIANT') == 'privatePilot'
+    variant = 'privatePilot' if private_phone else 'debug'
+    adb('install','-r',f'android/app/build/outputs/apk/{variant}/app-{variant}.apk')
+    if private_phone and API >= 33:
+        adb('shell','pm','grant',PKG,'android.permission.POST_NOTIFICATIONS')
     report['checks'][f'Android API {API} install']='PASS'
     codes=[n.text for n in ET.parse(RES/'values/network_languages.xml').getroot().find("string-array[@name='network_language_codes']")]
     for code in codes:
@@ -88,6 +93,13 @@ try:
     report['checks']['SDK-keyless Network v19 page, no legacy beta']='PASS'
     prefs_xml=adb('shell','run-as',PKG,'cat','shared_prefs/network_consent_v1.xml')
     assert 'name="psx_read_notice_v1" value="true"' in prefs_xml, prefs_xml
+    if private_phone:
+        tap(en['nui_47'],scroll=True)
+        tap(en['nui_15'])
+        tap(proxy['psx_pilot_start'],scroll=True)
+        tap(proxy['psx_pilot_start'])
+        assert 'PeerProxyService' not in adb('shell','dumpsys','activity','services',PKG)
+        report['checks']['Unprovisioned confirmed Start leaves relay off']='PASS'
     tap(proxy['psx_stop_revoke'],scroll=True)
     prefs_xml=adb('shell','run-as',PKG,'cat','shared_prefs/network_consent_v1.xml')
     assert 'name="psx_read_notice_v1" value="false"' in prefs_xml, prefs_xml

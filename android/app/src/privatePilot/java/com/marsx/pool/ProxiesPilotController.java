@@ -33,6 +33,10 @@ final class ProxiesPilotController {
         String id = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         return id == null ? "" : "psx_" + id.substring(0, Math.min(16, id.length()));
     }
+    boolean active() { return running; }
+    ProxiesPeerSDK.Status status() {
+        return running && sdk != null ? sdk.getStatus() : ProxiesPeerSDK.Status.STOPPED;
+    }
     void start() throws IOException {
         if (running) return;
         if (sdk == null) {
@@ -50,6 +54,7 @@ final class ProxiesPilotController {
                 null, null, null, status -> {
                     main.post(() -> {
                         if (running && listener != null && sdk != null && status == sdk.getStatus()) {
+                            if (status == ProxiesPeerSDK.Status.ERROR) stop();
                             listener.onStatus(status, deviceId());
                         }
                     });
@@ -65,6 +70,8 @@ final class ProxiesPilotController {
         main.removeCallbacksAndMessages(null);
         try {
             if (sdk != null) sdk.stop();
+        } catch (IllegalStateException backgroundStop) {
+            // Android can reject ACTION_STOP when the activity is backgrounded.
         } finally {
             context.stopService(new Intent(context, PeerProxyService.class));
             if (listener != null) listener.onStatus(ProxiesPeerSDK.Status.STOPPED, deviceId());

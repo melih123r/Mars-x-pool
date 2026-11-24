@@ -1,0 +1,7 @@
+<resources>
+    <string name="operator_farmer_unknown">Farmer device status unknown</string>
+    <string name="operator_farmer_online">Farmer reports this device online</string>
+    <string name="operator_farmer_offline">Farmer reports this device offline</string>
+    <string name="operator_consent">Consent granted for the private phone test</string>
+    <string name="operator_provisioning">Device registration uses the private USB provisioning.</string>
+</resources>

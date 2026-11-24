@@ -1,0 +1,7 @@
+<resources>
+    <string name="operator_farmer_unknown">Farmer cihaz durumu bilinmiyor</string>
+    <string name="operator_farmer_online">Farmer bu cihazı çevrimiçi bildiriyor</string>
+    <string name="operator_farmer_offline">Farmer bu cihazı çevrimdışı bildiriyor</string>
+    <string name="operator_consent">Özel telefon testi için rıza verildi</string>
+    <string name="operator_provisioning">Cihaz kaydı için USB üzerinden sağlanan anahtar kullanılır.</string>
+</resources>
