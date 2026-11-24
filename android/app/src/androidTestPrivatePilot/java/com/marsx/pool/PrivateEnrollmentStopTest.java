@@ -38,7 +38,7 @@ public class PrivateEnrollmentStopTest {
                     refresh.countDown();
                     if (!finishRefresh.await(8, TimeUnit.SECONDS)) throw new java.io.IOException("refresh timeout");
                     json = "{\"token\":\"test-renewed\"}";
-                } else if (!path.contains("/earnings/")) {
+                } else if (!path.equals("/v1/peer/devices/test-device/earnings")) {
                     unexpected.set(true);
                 }
             } catch (InterruptedException interruption) {
