@@ -33,6 +33,7 @@ android {
     compileSdk 36
 
     defaultConfig {
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         applicationId "com.marsx.pool"
         buildConfigField "boolean", "PRIVATE_PHONE", "false"
         minSdk 26
@@ -51,6 +52,9 @@ android {
 
     // The in-app picker must work offline for every supported language after Play install.
     bundle { language { enableSplit = false } }
+
+    // Instrument only the private variant when explicitly requested by the device job.
+    testBuildType = providers.gradleProperty("marsxTestBuildType").getOrElse("debug")
 
     buildFeatures { buildConfig true }
 
@@ -115,6 +119,8 @@ dependencies {
     privatePilotImplementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation "com.google.android.gms:play-services-ads:25.5.0"
     implementation "com.google.android.ump:user-messaging-platform:4.0.0"
+    androidTestImplementation "androidx.test.ext:junit:1.2.1"
+    androidTestImplementation "androidx.test:runner:1.6.2"
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.json:json:20240303"
     implementation "io.qonversion.android.sdk:sdk:9.7.0"

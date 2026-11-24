@@ -48,4 +48,8 @@ jobs:
           arch: x86_64
           target: google_apis
           disable-animations: true
-          script: env MARSX_QA_VARIANT=privatePilot python3 scripts/network-demo-device-qa.py
+          script: |
+            env MARSX_QA_VARIANT=privatePilot python3 scripts/network-demo-device-qa.py
+            adb shell pm clear com.marsx.pool
+            gradle -p android -PmarsxTestBuildType=privatePilot :app:connectedPrivatePilotAndroidTest --no-daemon
+            python3 -c "import pathlib,xml.etree.ElementTree as E; assert any(t.get('name')=='delayedRegistrationAndRefreshCannotReviveStoppedService' for f in pathlib.Path('android/app/build/outputs/androidTest-results').rglob('*.xml') for t in E.parse(f).iter('testcase'))"
