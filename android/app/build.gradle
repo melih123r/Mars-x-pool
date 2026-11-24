@@ -34,6 +34,7 @@ android {
 
     defaultConfig {
         applicationId "com.marsx.pool"
+        buildConfigField "boolean", "PRIVATE_PHONE", "false"
         minSdk 26
         targetSdk 36
         versionCode 19
@@ -78,7 +79,17 @@ android {
             }
         }
     }
+    sourceSets {
+        debug.java.srcDir "src/publicNetwork/java"
+        release.java.srcDir "src/publicNetwork/java"
+    }
     buildTypes {
+        privatePilot {
+            initWith debug
+            versionNameSuffix "-private"
+            matchingFallbacks = ["debug"]
+            buildConfigField "boolean", "PRIVATE_PHONE", "true"
+        }
         release {
             if (hasUploadSigning) signingConfig signingConfigs.uploadRelease
             minifyEnabled true
@@ -91,7 +102,17 @@ android {
 dependencies {
     // Pinned open-source Proxies.sx Android peer transport. The farmer API key
     // is never compiled into this app; pilot enrollment is performed server-side.
-    implementation "com.github.bolivian-peru:android-peer-sdk:v1.3.2"
+    debugImplementation "com.github.bolivian-peru:android-peer-sdk:v1.3.2"
+    releaseImplementation "com.github.bolivian-peru:android-peer-sdk:v1.3.2"
+    privatePilotImplementation files("libs/proxies-sdk-v132-patched-debug.aar")
+    privatePilotImplementation("androidx.core:core-ktx:1.12.0")
+    privatePilotImplementation("androidx.appcompat:appcompat:1.6.1")
+    privatePilotImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    privatePilotImplementation("androidx.security:security-crypto:1.1.0-alpha06")
+    privatePilotImplementation("com.squareup.okhttp3:okhttp:4.12.0")
+    privatePilotImplementation("com.google.code.gson:gson:2.10.1")
+    privatePilotImplementation("org.nanohttpd:nanohttpd:2.3.1")
+    privatePilotImplementation("androidx.work:work-runtime-ktx:2.9.0")
     implementation "com.google.android.gms:play-services-ads:25.5.0"
     implementation "com.google.android.ump:user-messaging-platform:4.0.0"
     testImplementation "junit:junit:4.13.2"

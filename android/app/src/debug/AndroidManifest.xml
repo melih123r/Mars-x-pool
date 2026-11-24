@@ -1,0 +1,3 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <application><service android:name="sx.proxies.peer.service.PeerProxyService" tools:node="remove"/></application>
+</manifest>

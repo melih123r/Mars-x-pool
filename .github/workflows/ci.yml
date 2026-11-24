@@ -69,6 +69,7 @@ jobs:
         run: gradle -p android :app:lintRelease --no-daemon
       - name: Build debug APK
         run: gradle -p android :app:assembleDebug --no-daemon
+      - run: python3 scripts/check-android-artifact-secrets.py --self-test android/app/build/outputs/apk/debug/app-debug.apk
       - name: Publish debug APK immediately
         uses: actions/upload-artifact@v4
         with:
@@ -77,6 +78,7 @@ jobs:
           if-no-files-found: error
       - name: Build release AAB
         run: gradle -p android :app:bundleRelease --no-daemon
+      - run: python3 scripts/check-android-artifact-secrets.py android/app/build/outputs/bundle/release/app-release.aab
       - name: Verify all-language AAB packaging
         run: |
           curl --fail --location --retry 3 https://github.com/google/bundletool/releases/download/1.18.2/bundletool-all-1.18.2.jar -o "$RUNNER_TEMP/bundletool.jar"

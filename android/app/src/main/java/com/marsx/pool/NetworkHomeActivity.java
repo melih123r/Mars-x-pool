@@ -232,9 +232,10 @@ public final class NetworkHomeActivity extends Activity {
         });
         proxy.addView(proxyDisclosureAcknowledgement,new LinearLayout.LayoutParams(-1,-2));
         proxyPilotStatus=text(proxy,getString(R.string.psx_pilot_stopped),15,ORANGE,true);
-        text(proxy,getString(R.string.psx_zero_earnings),13,MUTED,false);
+        if (!BuildConfig.PRIVATE_PHONE) text(proxy,getString(R.string.psx_zero_earnings),13,MUTED,false);
         text(proxy,getString(R.string.psx_auto_provisioning),12,MUTED,false);
         proxyPilotStart=button(proxy,getString(R.string.psx_pilot_start));
+        proxyPilotStart.setEnabled(BuildConfig.PRIVATE_PHONE);
         proxyPilotStart.setOnClickListener(v->requestPilotStart());
         Button stopProxy=button(proxy,getString(R.string.psx_stop_revoke));
         stopProxy.setOnClickListener(v->{
@@ -357,6 +358,7 @@ public final class NetworkHomeActivity extends Activity {
     }
 
     private void requestPilotStart(){
+        if (!BuildConfig.PRIVATE_PHONE) return;
         if(!prefs.getBoolean("consented",false)
             || !prefs.getBoolean("psx_read_notice_v1",false)){
             android.widget.Toast.makeText(this,getString(R.string.psx_pilot_consent_required),
@@ -370,13 +372,6 @@ public final class NetworkHomeActivity extends Activity {
                 REQUEST_PROXY_NOTIFICATIONS);
             return;
         }
-        if(currentAuthSession()==null){
-            pendingPilotStart=true;
-            android.widget.Toast.makeText(this,getString(R.string.psx_auto_auth_required),
-                android.widget.Toast.LENGTH_LONG).show();
-            beginNetworkGoogleSignIn(true);
-            return;
-        }
         new AlertDialog.Builder(this)
             .setTitle(getString(R.string.psx_pilot_confirm_title))
             .setMessage(getString(R.string.psx_pilot_confirm_message))
@@ -386,51 +381,15 @@ public final class NetworkHomeActivity extends Activity {
     }
 
     private void startPilotAutomatic(){
-        final int enrollmentId=++peerEnrollmentGeneration;
-        final String session=currentAuthSession();
-        final String installId=accountPrefs.getString("worker_id","");
-        final String deviceId=proxyPilot.deviceId();
-        proxyPilotStart.setEnabled(false);
-        proxyPilotStatus.setText(getString(R.string.psx_auto_enrolling));
-        new Thread(()->{
-            ProxiesAutomaticEnrollmentClient.Result result=null;
-            int errorMessage = R.string.psx_pilot_error;
-            try{
-                result=ProxiesAutomaticEnrollmentClient.enroll(session,installId,deviceId,
-                    Build.MODEL,"Android "+Build.VERSION.RELEASE,
-                    Locale.getDefault().getCountry().toUpperCase(Locale.ROOT));
-            }catch(ProxiesAutomaticEnrollmentClient.EnrollmentUnavailableException unavailable){
-                errorMessage = R.string.psx_android_enrollment_unavailable;
-            }catch(Exception ignored){ /* Never log credentials or provider responses. */ }
-            final int enrollmentError = errorMessage;
-            final ProxiesAutomaticEnrollmentClient.Result credential=result;
-            runOnUiThread(()->{
-                if(isFinishing()||isDestroyed()||enrollmentId!=peerEnrollmentGeneration)return;
-                if(!prefs.getBoolean("consented",false)
-                    ||!prefs.getBoolean("psx_read_notice_v1",false)){
-                    proxyPilot.stop();
-                    return;
-                }
-                if(credential==null){
-                    proxyPilot.stop();
-                    prefs.edit().putBoolean("psx_sharing_active",false).apply();
-                    proxyPilotStatus.setText(getString(enrollmentError));
-                    proxyPilotStart.setEnabled(true);
-                    return;
-                }
-                try{
-                    proxyPilot.start(credential);
-                    prefs.edit().putString("psx_device_id",credential.deviceId).apply();
-                    proxyPilotStatus.setText(getString(R.string.psx_auto_provider_waiting)
-                        +"\n"+getString(R.string.psx_pilot_device_id)+": "+credential.deviceId);
-                    beginPilotStatusChecks(credential.deviceId);
-                }catch(RuntimeException error){
-                    proxyPilot.stop();
-                    proxyPilotStatus.setText(getString(R.string.psx_pilot_error));
-                    proxyPilotStart.setEnabled(true);
-                }
-            });
-        },"marsx-v19-device-enrollment").start();
+        if (!BuildConfig.PRIVATE_PHONE || !prefs.getBoolean("consented",false)
+                || !prefs.getBoolean("psx_read_notice_v1",false)) return;
+        try {
+            proxyPilot.start();
+            beginPilotStatusChecks(proxyPilot.deviceId());
+        } catch (Exception unavailable) {
+            proxyPilot.stop();
+            proxyPilotStatus.setText(getString(R.string.psx_android_enrollment_unavailable));
+        }
     }
 
     private void beginPilotStatusChecks(String deviceId){
@@ -460,7 +419,7 @@ public final class NetworkHomeActivity extends Activity {
                     if(isFinishing()||isDestroyed()||generation!=pilotStatusGeneration
                         ||!prefs.getBoolean("consented",false)
                         ||!prefs.getBoolean("psx_read_notice_v1",false))return;
-                    proxyPilot.providerOnline(confirmed);
+                    // Relay status comes exclusively from the SDK. Farmer data is read separately.
                     if(confirmed)queryPrivateFarmerAccount(false);
                     pollPilotStatus(deviceId);
                 });
@@ -492,7 +451,7 @@ public final class NetworkHomeActivity extends Activity {
         proxyPilotStatus.setText(value);
         boolean running="CONNECTED".equals(status)||"CONNECTING".equals(status);
         prefs.edit().putBoolean("psx_sharing_active",running).apply();
-        if(proxyPilotStart!=null)proxyPilotStart.setEnabled(!running);
+        if(proxyPilotStart!=null)proxyPilotStart.setEnabled(BuildConfig.PRIVATE_PHONE && !running);
     }
 
     @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] results){

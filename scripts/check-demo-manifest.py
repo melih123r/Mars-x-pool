@@ -28,6 +28,5 @@ for path in candidates:
     assert launchers==['com.marsx.pool.NetworkHomeActivity'], launchers
     services=root.findall('application/service')
     peer=[s for s in services if s.get(android+'name')=='sx.proxies.peer.service.PeerProxyService']
-    assert len(peer)==1 and peer[0].get(android+'exported')=='false'
-    assert peer[0].get(android+'foregroundServiceType')=='dataSync'
-print('Merged LIVE PILOT manifest safety: PASS')
+    assert not peer, 'Public release must exclude the relay service'
+print('Public Network release manifest safety: PASS')
