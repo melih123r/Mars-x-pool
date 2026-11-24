@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 
 root = Path(".")
 source = (root/"android/app/src/main/java/com/marsx/pool/NetworkHomeActivity.java").read_text()
-pilot = (root/"android/app/src/main/java/com/marsx/pool/ProxiesPilotController.java").read_text()
+pilot = (root/"android/app/src/publicNetwork/java/com/marsx/pool/ProxiesPilotController.java").read_text()
 client = (root/"android/app/src/main/java/com/marsx/pool/ProxiesAutomaticEnrollmentClient.java").read_text()
 manifest = (root/"android/app/src/main/AndroidManifest.xml").read_text()
 build = (root/"android/app/build.gradle").read_text()
@@ -28,7 +28,7 @@ for forbidden in ("MobileAds.initialize(", "sendTransaction(", "withdrawUsdc("):
 
 assert 'versionCode 19' in build
 assert 'versionName "0.9.4-network-pilot"' in build
-assert 'android-peer-sdk:v1.3.2' in build
+assert 'android-peer-sdk:' not in build and 'privatePilotImplementation files' in build
 # Public OAuth client ID must be built even without CI secret injection.
 # Without it new users cannot sign in after the legacy beta UI is removed.
 assert 'apps.googleusercontent.com' in build and '.getOrElse("' in build
@@ -46,20 +46,15 @@ for forbidden in (
 assert not re.search(r"psx_[0-9a-fA-F]{32}", source + pilot + client + build)
 for marker in (
     "beginNetworkGoogleSignIn(false)", "NetworkAuthClient.requestNonce",
-    "NetworkAuthClient.exchange", "ProxiesAutomaticEnrollmentClient.enroll",
+    "NetworkAuthClient.exchange", "BuildConfig.PRIVATE_PHONE",
     "ProxiesAutomaticEnrollmentClient.online", "cancelPilotStatusChecks()",
     "pilotStatusGeneration++", "generation!=pilotStatusGeneration",
 ):
     assert marker in source, marker
-for marker in (
-    "PeerProxyService.Companion.start", "PeerProxyService.Companion.stop",
-    "Settings.Secure.ANDROID_ID", "providerOnline(boolean online)",
-    "MAX_UNREFRESHED_SESSION_MS=45L*60L*1000L",
-    "sessionHandler.postDelayed(expireUnrefreshedSession,MAX_UNREFRESHED_SESSION_MS)",
-    "sessionHandler.removeCallbacks(expireUnrefreshedSession)",
-    "if(consentedToRun)stop();",
-):
-    assert marker in pilot, marker
+private = (root/"android/app/src/privatePilot/java/com/marsx/pool/ProxiesPilotController.java").read_text()
+assert "sdk.start()" in private and "sdk.stop()" in private and "context.stopService" in private
+assert "operator-key" not in pilot and "sdk.start()" not in pilot
+assert "privatePilotImplementation files" in build
 for marker in (
     "marsx-peer-enroll", "pilot_device_credential", "farmer_api_key_included",
     'setInstanceFollowRedirects(false)', '"Authorization"', '"X-Install-Id"',

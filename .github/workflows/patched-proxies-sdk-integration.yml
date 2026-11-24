@@ -1,0 +1,55 @@
+name: Patched Proxies SDK Android integration
+
+on:
+  pull_request:
+    paths:
+      - 'android/**'
+      - 'scripts/private-phone-network.patch'
+      - 'scripts/prepare-patched-proxies-sdk.sh'
+      - '.github/workflows/patched-proxies-sdk-integration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-patched-sdk-with-app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Use preinstalled Android SDK and install required platform
+        run: |
+          echo "ANDROID_HOME=${ANDROID_HOME:-/usr/local/lib/android/sdk}" >> "$GITHUB_ENV"
+          yes | "${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+      - name: Verify pinned vendor tag and security patch, then build AAR
+        run: bash scripts/prepare-patched-proxies-sdk.sh
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Compile and check the unprovisioned private variant
+        run: |
+          gradle -p android :app:assemblePrivatePilot :app:testPrivatePilotUnitTest :app:lintPrivatePilot --no-daemon
+          python3 scripts/check-android-artifact-secrets.py android/app/build/outputs/apk/privatePilot/app-privatePilot.apk
+      - name: Enable emulator acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Exercise the private variant without a Farmer credential
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: |
+            env MARSX_QA_VARIANT=privatePilot python3 scripts/network-demo-device-qa.py
+            adb shell pm clear com.marsx.pool
+            gradle -p android -PmarsxTestBuildType=privatePilot :app:connectedPrivatePilotAndroidTest --no-daemon
+            python3 -c "import pathlib,xml.etree.ElementTree as E; assert any(t.get('name')=='delayedRegistrationAndRefreshCannotReviveStoppedService' for f in pathlib.Path('android/app/build/outputs/androidTest-results').rglob('*.xml') for t in E.parse(f).iter('testcase'))"
