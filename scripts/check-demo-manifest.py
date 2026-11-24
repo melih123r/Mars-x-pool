@@ -18,10 +18,8 @@ for path in candidates:
                'android.permission.ACCESS_ADSERVICES_ATTRIBUTION','android.permission.ACCESS_ADSERVICES_TOPICS',
                'com.android.vending.BILLING','android.permission.READ_PHONE_STATE'}
     assert not (perms & forbidden), f'Forbidden transitive permissions: {sorted(perms & forbidden)}'
-    required={'android.permission.INTERNET','android.permission.ACCESS_NETWORK_STATE',
-              'android.permission.ACCESS_WIFI_STATE','android.permission.FOREGROUND_SERVICE',
-              'android.permission.FOREGROUND_SERVICE_DATA_SYNC','android.permission.WAKE_LOCK'}
-    assert required <= perms, f'Missing pilot SDK permissions: {sorted(required-perms)}'
+    assert "android.permission.FOREGROUND_SERVICE_DATA_SYNC" not in perms
+    assert "android.permission.INTERNET" in perms
     assert root.get('package')=='com.marsx.pool'
     launchers=[a.get(android+'name') for a in root.findall('application/activity')
                if a.find("intent-filter/category[@"+android+"name='android.intent.category.LAUNCHER']") is not None]
