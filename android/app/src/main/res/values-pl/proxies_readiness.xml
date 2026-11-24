@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • zgoda i stan"</string>
+    <string name="psx_risk_extra" formatted="false">"Ruch osób trzecich może używać Twojego IP, pakietu danych i baterii. Reputacja IP może ucierpieć; izolacja sieci lokalnej nie jest potwierdzona. Brak gwarancji zysków."</string>
+    <string name="psx_acknowledgement" formatted="false">"Znam ryzyko. Zaznaczenie nie uruchamia udostępniania."</string>
+    <string name="psx_off_status" formatted="false">"Udostępnianie Proxies.sx: WYŁ."</string>
+    <string name="psx_zero_earnings" formatted="false">"Ruch udostępniony: 0 MB • Potwierdzony zarobek: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Uruchom udostępnianie • niedostępne"</string>
+    <string name="psx_stop_revoke" formatted="false">"Zatrzymaj i wycofaj zgodę"</string>
+    <string name="psx_prerequisites" formatted="false">"Umowa, klucz urządzenia, izolacja LAN i zgoda na dystrybucję: niepotwierdzone."</string>
+    <string name="psx_check_backend" formatted="false">"Sprawdź serwer Supabase"</string>
+    <string name="psx_checking" formatted="false">"Sprawdzanie Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase dostępny • Proxy WYŁ."</string>
+    <string name="psx_backend_unavailable" formatted="false">"Serwer niepotwierdzony • Proxy WYŁ."</string>
+</resources>

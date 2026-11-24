@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • consenso e stato"</string>
+    <string name="psx_risk_extra" formatted="false">"Il traffico di terzi potrebbe usare IP, dati e batteria. Può danneggiare la reputazione IP; l’isolamento della rete locale non è verificato. Guadagni non garantiti."</string>
+    <string name="psx_acknowledgement" formatted="false">"Ho letto i rischi. La spunta non avvia la condivisione."</string>
+    <string name="psx_off_status" formatted="false">"Condivisione Proxies.sx: DISATTIVATA"</string>
+    <string name="psx_zero_earnings" formatted="false">"Traffico condiviso: 0 MB • Guadagni verificati: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Avvia condivisione • non disponibile"</string>
+    <string name="psx_stop_revoke" formatted="false">"Ferma e revoca il consenso"</string>
+    <string name="psx_prerequisites" formatted="false">"Accordo partner, chiave per dispositivo, isolamento locale e distribuzione: non verificati."</string>
+    <string name="psx_check_backend" formatted="false">"Verifica stato server Supabase"</string>
+    <string name="psx_checking" formatted="false">"Verifica Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase raggiungibile • Condivisione DISATTIVATA"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Server non verificato • Condivisione DISATTIVATA"</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • persetujuan dan status"</string>
+    <string name="psx_risk_extra" formatted="false">"Trafik pihak ketiga boleh menggunakan IP, data dan bateri anda. Reputasi IP mungkin terjejas; pengasingan rangkaian setempat belum disahkan. Tiada jaminan pendapatan."</string>
+    <string name="psx_acknowledgement" formatted="false">"Saya telah membaca risiko. Tandaan tidak memulakan perkongsian."</string>
+    <string name="psx_off_status" formatted="false">"Perkongsian Proxies.sx: MATI"</string>
+    <string name="psx_zero_earnings" formatted="false">"Trafik dikongsi: 0 MB • Pendapatan disahkan: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Mula berkongsi • tidak tersedia"</string>
+    <string name="psx_stop_revoke" formatted="false">"Henti dan tarik balik persetujuan"</string>
+    <string name="psx_prerequisites" formatted="false">"Perjanjian, kunci peranti, pengasingan LAN dan kelulusan edaran: belum disahkan."</string>
+    <string name="psx_check_backend" formatted="false">"Semak status pelayan Supabase"</string>
+    <string name="psx_checking" formatted="false">"Memeriksa Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase boleh dicapai • Proksi MATI"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Pelayan belum disahkan • Proksi MATI"</string>
+</resources>

@@ -534,9 +534,10 @@ export class D1Store {
 
   async linkUserWorker(userId, workerId, at) {
     await this.db.prepare(`
-      INSERT INTO user_workers(user_id,worker_id,linked_at) VALUES (?, ?, ?)
+      INSERT INTO user_workers(user_id,worker_id,linked_at)
+      SELECT ?, worker_id, ? FROM workers WHERE worker_id=?
       ON CONFLICT(worker_id) DO UPDATE SET user_id=excluded.user_id,linked_at=excluded.linked_at
-    `).bind(userId, workerId, at).run();
+    `).bind(userId, at, workerId).run();
   }
 
   async referralProfile(userId) {
@@ -1092,7 +1093,7 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
         const profile = await authReferralProfile(store, user.user_id);
         return json(200, {
           ok: true, session_token: sessionToken, expires_in: Math.floor(AUTH_SESSION_TTL_MS / 1000),
-          user: { display_name: user.display_name, email: user.email },
+          user: { user_id: user.user_id, display_name: user.display_name, email: user.email },
           referral: profile,
         });
       }
@@ -1103,7 +1104,7 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
         if (!user) return json(401, { error: "user_session_invalid" });
         return json(200, {
           ok: true,
-          user: { display_name: user.display_name, email: user.email },
+          user: { user_id: user.user_id, display_name: user.display_name, email: user.email },
           referral: await authReferralProfile(store, user.user_id),
           referral_policy: {
             platform_fee_percent: 2,

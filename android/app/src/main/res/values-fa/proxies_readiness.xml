@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • رضایت و وضعیت"</string>
+    <string name="psx_risk_extra" formatted="false">"ترافیک اشخاص ثالث ممکن است از IP، حجم اینترنت و باتری شما استفاده کند. اعتبار IP ممکن است آسیب ببیند؛ جداسازی شبکه محلی تأیید نشده است. درآمد تضمین نیست."</string>
+    <string name="psx_acknowledgement" formatted="false">"خطرات را خوانده‌ام. انتخاب این گزینه اشتراک را شروع نمی‌کند."</string>
+    <string name="psx_off_status" formatted="false">"اشتراک Proxies.sx: خاموش"</string>
+    <string name="psx_zero_earnings" formatted="false">"ترافیک مشترک: 0 مگابایت • درآمد تأییدشده: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"شروع اشتراک • در دسترس نیست"</string>
+    <string name="psx_stop_revoke" formatted="false">"توقف و لغو رضایت"</string>
+    <string name="psx_prerequisites" formatted="false">"قرارداد، کلید دستگاه، جداسازی LAN و مجوز توزیع: تأیید نشده."</string>
+    <string name="psx_check_backend" formatted="false">"بررسی وضعیت سرور Supabase"</string>
+    <string name="psx_checking" formatted="false">"در حال بررسی Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase در دسترس • اشتراک خاموش"</string>
+    <string name="psx_backend_unavailable" formatted="false">"سرور تأیید نشد • اشتراک خاموش"</string>
+</resources>

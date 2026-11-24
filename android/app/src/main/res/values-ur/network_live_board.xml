@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Proxies.sx عالمی نیٹ ورک • آپ کا اکاؤنٹ نہیں"</string>
+  <string name="psx_live_refresh" formatted="false">"لائیو نیٹ ورک ڈیٹا لیں"</string>
+  <string name="psx_live_loading" formatted="false">"اصل ڈیٹا حاصل کیا جا رہا ہے…"</string>
+  <string name="psx_live_unavailable" formatted="false">"ڈیٹا دستیاب نہیں • تعداد نامعلوم"</string>
+  <string name="psx_live_initial" formatted="false">"ابھی جانچ نہیں ہوئی"</string>
+  <string name="psx_live_total" formatted="false">"کل ڈیوائسز"</string>
+  <string name="psx_live_online" formatted="false">"ابھی آن لائن"</string>
+  <string name="psx_live_mobile" formatted="false">"موبائل"</string>
+  <string name="psx_live_residential" formatted="false">"رہائشی"</string>
+  <string name="psx_live_datacenter" formatted="false">"ڈیٹا سینٹر"</string>
+  <string name="psx_live_updated" formatted="false">"پیمائش (UTC)"</string>
+</resources>

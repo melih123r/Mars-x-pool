@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • رضامندی اور حالت"</string>
+    <string name="psx_risk_extra" formatted="false">"تیسرے فریق کا ٹریفک آپ کا IP، ڈیٹا اور بیٹری استعمال کر سکتا ہے۔ IP کی ساکھ متاثر ہو سکتی ہے؛ مقامی نیٹ ورک کی علیحدگی تصدیق شدہ نہیں۔ آمدنی کی ضمانت نہیں۔"</string>
+    <string name="psx_acknowledgement" formatted="false">"میں نے خطرات پڑھ لیے ہیں۔ نشان لگانے سے شیئرنگ شروع نہیں ہوتی۔"</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx شیئرنگ: بند"</string>
+    <string name="psx_zero_earnings" formatted="false">"مشترکہ ٹریفک: 0 MB • تصدیق شدہ آمدنی: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"شیئرنگ شروع کریں • دستیاب نہیں"</string>
+    <string name="psx_stop_revoke" formatted="false">"روکیں اور رضامندی واپس لیں"</string>
+    <string name="psx_prerequisites" formatted="false">"پارٹنر معاہدہ، ڈیوائس کلید، LAN علیحدگی اور تقسیم کی منظوری: غیر تصدیق شدہ۔"</string>
+    <string name="psx_check_backend" formatted="false">"Supabase سرور کی حالت دیکھیں"</string>
+    <string name="psx_checking" formatted="false">"Supabase چیک ہو رہا ہے…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase قابل رسائی • شیئرنگ بند"</string>
+    <string name="psx_backend_unavailable" formatted="false">"سرور کی تصدیق نہیں ہوئی • شیئرنگ بند"</string>
+</resources>

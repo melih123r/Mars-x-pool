@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"파트너 계약"</string>
+    <string name="psx_check_credential" formatted="false">"기기별 SDK 인증 정보"</string>
+    <string name="psx_check_isolation" formatted="false">"로컬 네트워크 격리"</string>
+    <string name="psx_check_distribution" formatted="false">"배포/Play 승인"</string>
+    <string name="psx_check_verified" formatted="false">"확인됨"</string>
+    <string name="psx_check_unverified" formatted="false">"미확인"</string>
+</resources>

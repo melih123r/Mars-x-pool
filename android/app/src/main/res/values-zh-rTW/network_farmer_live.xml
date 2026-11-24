@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Proxies.sx 私人供應商帳戶 • 非全域網路資料"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"登入 MARS-X 以查看已授權的私人帳戶資料"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"使用 Google 登入"</string>
+  <string name="psx_farmer_refresh" formatted="false">"重新整理私人帳戶"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"無法取得私人帳戶資料"</string>
+  <string name="psx_farmer_verified" formatted="false">"已驗證"</string>
+  <string name="psx_farmer_listed" formatted="false">"已上架"</string>
+  <string name="psx_farmer_traffic" formatted="false">"實際流量"</string>
+  <string name="psx_farmer_earnings" formatted="false">"供應商回報的收益"</string>
+</resources>

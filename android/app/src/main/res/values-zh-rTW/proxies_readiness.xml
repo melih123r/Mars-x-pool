@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • 同意與狀態"</string>
+    <string name="psx_risk_extra" formatted="false">"第三方流量可能使用您的 IP、數據方案與電池，並影響 IP 信譽。本地網路隔離尚未驗證。收益不保證。"</string>
+    <string name="psx_acknowledgement" formatted="false">"我已閱讀風險。勾選不會啟動分享。"</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx 分享：關閉"</string>
+    <string name="psx_zero_earnings" formatted="false">"分享流量：0 MB • 已核實收益：0"</string>
+    <string name="psx_start_disabled" formatted="false">"開始分享 • 無法使用"</string>
+    <string name="psx_stop_revoke" formatted="false">"停止並撤回同意"</string>
+    <string name="psx_prerequisites" formatted="false">"合作協議、裝置金鑰、區網隔離及發佈核准：尚未驗證。"</string>
+    <string name="psx_check_backend" formatted="false">"檢查 Supabase 伺服器狀態"</string>
+    <string name="psx_checking" formatted="false">"正在檢查 Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase 可連線 • 代理分享仍關閉"</string>
+    <string name="psx_backend_unavailable" formatted="false">"伺服器未驗證 • 代理分享仍關閉"</string>
+</resources>

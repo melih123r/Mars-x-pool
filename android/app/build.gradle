@@ -12,9 +12,11 @@ def marsxApiBaseUrl = providers.gradleProperty("MARSX_API_BASE_URL")
 def escapedMarsxApiBaseUrl = marsxApiBaseUrl
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
+// The OAuth WEB client ID is public (not a secret) and must be present in
+// debug APKs too, otherwise the modern Network-only login cannot work.
 def googleWebClientId = providers.gradleProperty("GOOGLE_WEB_CLIENT_ID")
         .orElse(providers.environmentVariable("GOOGLE_WEB_CLIENT_ID"))
-        .getOrElse("")
+        .getOrElse("391717958124-uvhj6atdg2am2vq41fhu1iq76to19qme.apps.googleusercontent.com")
 def escapedGoogleWebClientId = googleWebClientId
         .replace("\\", "\\\\")
         .replace("\"", "\\\"")
@@ -35,7 +37,7 @@ android {
         minSdk 26
         targetSdk 36
         versionCode 19
-        versionName "0.9.4-network-demo"
+        versionName "0.9.4-network-pilot"
         buildConfigField "String", "QONVERSION_PROJECT_KEY", "\"${escapedQonversionProjectKey}\""
         buildConfigField "String", "QONVERSION_PRODUCT_PRO", "\"pro_monthly\""
         buildConfigField "String", "QONVERSION_PRODUCT_FARM", "\"farm_monthly\""
@@ -87,6 +89,9 @@ android {
 }
 
 dependencies {
+    // Pinned open-source Proxies.sx Android peer transport. The farmer API key
+    // is never compiled into this app; pilot enrollment is performed server-side.
+    implementation "com.github.bolivian-peru:android-peer-sdk:v1.3.2"
     implementation "com.google.android.gms:play-services-ads:25.5.0"
     implementation "com.google.android.ump:user-messaging-platform:4.0.0"
     testImplementation "junit:junit:4.13.2"

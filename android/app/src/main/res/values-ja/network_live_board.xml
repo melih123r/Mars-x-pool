@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Proxies.sx 全体ネットワーク • あなたのアカウントではありません"</string>
+  <string name="psx_live_refresh" formatted="false">"ライブネットワーク情報を取得"</string>
+  <string name="psx_live_loading" formatted="false">"実際のデータを取得中…"</string>
+  <string name="psx_live_unavailable" formatted="false">"ライブ情報なし • 数値不明"</string>
+  <string name="psx_live_initial" formatted="false">"未確認"</string>
+  <string name="psx_live_total" formatted="false">"ピア合計"</string>
+  <string name="psx_live_online" formatted="false">"現在オンライン"</string>
+  <string name="psx_live_mobile" formatted="false">"モバイル"</string>
+  <string name="psx_live_residential" formatted="false">"住宅回線"</string>
+  <string name="psx_live_datacenter" formatted="false">"データセンター"</string>
+  <string name="psx_live_updated" formatted="false">"計測日時 (UTC)"</string>
+</resources>

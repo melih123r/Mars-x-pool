@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"निजी Proxies.sx प्रदाता खाता • वैश्विक नेटवर्क डेटा नहीं"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"अधिकृत निजी खाता डेटा देखने के लिए MARS-X में साइन इन करें"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Google से साइन इन करें"</string>
+  <string name="psx_farmer_refresh" formatted="false">"निजी खाता रीफ़्रेश करें"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"निजी खाता डेटा उपलब्ध नहीं"</string>
+  <string name="psx_farmer_verified" formatted="false">"सत्यापित"</string>
+  <string name="psx_farmer_listed" formatted="false">"सूचीबद्ध"</string>
+  <string name="psx_farmer_traffic" formatted="false">"वास्तविक ट्रैफ़िक"</string>
+  <string name="psx_farmer_earnings" formatted="false">"प्रदाता द्वारा रिपोर्ट की गई कमाई"</string>
+</resources>

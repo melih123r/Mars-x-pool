@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Privé Proxies.sx-leveranciersaccount • Geen wereldwijde netwerkgegevens"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Meld u aan bij MARS-X om geautoriseerde privégegevens te bekijken"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Aanmelden met Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Privéaccount vernieuwen"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Privéaccountgegevens niet beschikbaar"</string>
+  <string name="psx_farmer_verified" formatted="false">"Geverifieerd"</string>
+  <string name="psx_farmer_listed" formatted="false">"Vermeld"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Werkelijk verkeer"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Door provider gemelde opbrengsten"</string>
+</resources>

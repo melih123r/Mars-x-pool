@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Özel Proxies.sx çiftçi hesabı • Genel ağ verisi değil"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Yetkili özel hesap verisini görmek için MARS-X hesabına giriş yap"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Google ile giriş yap"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Özel hesabı yenile"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Özel hesap verisi alınamadı"</string>
+  <string name="psx_farmer_verified" formatted="false">"Doğrulanmış"</string>
+  <string name="psx_farmer_listed" formatted="false">"Listelenmiş"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Gerçek trafik"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Sağlayıcının bildirdiği kazanç"</string>
+</resources>

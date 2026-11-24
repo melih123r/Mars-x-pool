@@ -21,21 +21,23 @@ def ui():
 def textset(tree):
     return {n.get('text','') for n in tree.iter('node')}
 def tap(label,scroll=False):
-    attempts=9 if scroll else 8
-    for attempt in range(attempts):
-        for n in ui().iter('node'):
-            if n.get('text','').casefold()==label.casefold() or n.get('content-desc','').casefold()==label.casefold():
-                x1,y1,x2,y2=map(int,re.findall(r'\d+',n.get('bounds')))
-                if x2>x1 and y2>y1:
-                    adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2));time.sleep(.5);return
-        if scroll:
-            if attempt % 2 == 0:
-                adb('shell','input','swipe','540','450','540','1600','350')
+    # Scan forward to the page bottom, then backwards. Alternating scrolls
+    # on every attempt can oscillate around the middle of a long disclosure page.
+    for direction in ([1, -1] if scroll else [0]):
+        for attempt in range(18 if scroll else 8):
+            for n in ui().iter('node'):
+                if n.get('text','').casefold()==label.casefold() or n.get('content-desc','').casefold()==label.casefold():
+                    x1,y1,x2,y2=map(int,re.findall(r'\d+',n.get('bounds')))
+                    if x2>x1 and y2>y1:
+                        adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+                        time.sleep(.5)
+                        return
+            if scroll:
+                start,end=(1600,450) if direction==1 else (450,1600)
+                adb('shell','input','swipe','540',str(start),'540',str(end),'250')
             else:
-                adb('shell','input','swipe','540','1600','540','450','350')
-        else:
-            time.sleep(.25)
-    raise AssertionError('Control not found after waiting: '+label)
+                time.sleep(.25)
+    raise AssertionError('Control not found after full-page scan: '+label)
 def strings(code):
     folder='values-'+code.replace('-','-r')
     data={}
@@ -57,7 +59,7 @@ def set_locale(code):
 def shot(name):
     with (OUT/(name+'.png')).open('wb') as f:sp.run(['adb','exec-out','screencap','-p'],stdout=f,check=True)
 API=int(adb('shell','getprop','ro.build.version.sdk').strip())
-report={'device':f'Android emulator API {API}','physical_device':False,'source_app_version':18,'checks':{}}
+report={'device':f'Android emulator API {API}','physical_device':False,'source_app_version':19,'checks':{}}
 try:
     assert API in (26,33)
     adb('shell','wm','size','1080x1920');adb('shell','wm','density','420')
@@ -76,6 +78,28 @@ try:
     assert en['nui_46'] in textset(ui())
     tap(en['nui_46']);assert en['nui_47'] in textset(ui())
     report['checks']['consent grant and opt-out']='PASS'
+
+    # A normal user must never see a provider SDK-key field or old beta UI.
+    proxy=strings('en')
+    tap(proxy['psx_acknowledgement'],scroll=True)
+    visible=ui()
+    assert not any(n.get('class','').endswith('EditText') for n in visible.iter('node')), 'Unexpected SDK key input'
+    assert all('0.9.0-beta' not in item for item in textset(visible))
+    report['checks']['SDK-keyless Network v19 page, no legacy beta']='PASS'
+    prefs_xml=adb('shell','run-as',PKG,'cat','shared_prefs/network_consent_v1.xml')
+    assert 'name="psx_read_notice_v1" value="true"' in prefs_xml, prefs_xml
+    tap(proxy['psx_stop_revoke'],scroll=True)
+    prefs_xml=adb('shell','run-as',PKG,'cat','shared_prefs/network_consent_v1.xml')
+    assert 'name="psx_read_notice_v1" value="false"' in prefs_xml, prefs_xml
+    assert 'name="consented" value="false"' in prefs_xml, prefs_xml
+    report['checks']['same-page Proxies.sx disclosure and revoke']='PASS'
+    # The live public network button is on the same single scroll page.
+    tap(proxy['psx_live_refresh'],scroll=True)
+    assert proxy['psx_live_scope'] in textset(ui())
+    report['checks']['same-page GLOBAL live network refresh control']='PASS'
+    shot('en-global-live-network')
+    shot('en-proxy-off')
+
     shot('en-home')
     tap(en['nui_33'],scroll=True)
     assert any(n.get('text')=='English' and n.get('checked')=='true' for n in ui().iter('node'))

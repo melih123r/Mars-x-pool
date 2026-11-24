@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Privat Proxies.sx-leverantörskonto • Inte globala nätverksdata"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Logga in på MARS-X för behöriga privata kontodata"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Logga in med Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Uppdatera privat konto"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Privata kontodata är inte tillgängliga"</string>
+  <string name="psx_farmer_verified" formatted="false">"Verifierade"</string>
+  <string name="psx_farmer_listed" formatted="false">"Listade"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Verklig trafik"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Leverantörsrapporterade intäkter"</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Ιδιωτικός λογαριασμός παρόχου Proxies.sx • Όχι δεδομένα παγκόσμιου δικτύου"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Συνδεθείτε στο MARS-X για εξουσιοδοτημένα ιδιωτικά δεδομένα"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Σύνδεση με Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Ανανέωση ιδιωτικού λογαριασμού"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Τα ιδιωτικά δεδομένα δεν είναι διαθέσιμα"</string>
+  <string name="psx_farmer_verified" formatted="false">"Επαληθευμένες"</string>
+  <string name="psx_farmer_listed" formatted="false">"Καταχωρισμένες"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Πραγματική κίνηση"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Έσοδα που αναφέρει ο πάροχος"</string>
+</resources>

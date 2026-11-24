@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • persetujuan dan status"</string>
+    <string name="psx_risk_extra" formatted="false">"Trafik pihak ketiga dapat memakai IP, kuota, dan baterai Anda. Reputasi IP dapat terdampak; isolasi jaringan lokal belum diverifikasi. Penghasilan tidak dijamin."</string>
+    <string name="psx_acknowledgement" formatted="false">"Saya sudah membaca risikonya. Centang tidak memulai berbagi."</string>
+    <string name="psx_off_status" formatted="false">"Berbagi Proxies.sx: MATI"</string>
+    <string name="psx_zero_earnings" formatted="false">"Trafik dibagikan: 0 MB • Pendapatan terverifikasi: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Mulai berbagi • tidak tersedia"</string>
+    <string name="psx_stop_revoke" formatted="false">"Hentikan dan cabut persetujuan"</string>
+    <string name="psx_prerequisites" formatted="false">"Perjanjian, kunci per perangkat, isolasi LAN, dan izin distribusi: belum terverifikasi."</string>
+    <string name="psx_check_backend" formatted="false">"Periksa status server Supabase"</string>
+    <string name="psx_checking" formatted="false">"Memeriksa Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase terjangkau • Proxy tetap MATI"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Server belum terverifikasi • Proxy MATI"</string>
+</resources>

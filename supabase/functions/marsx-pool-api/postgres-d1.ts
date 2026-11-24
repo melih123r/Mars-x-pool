@@ -84,7 +84,7 @@ export class PostgresD1Database {
     this.client = postgres(connectionString, {
       max: 1,
       idle_timeout: 20,
-      connect_timeout: 10,
+      connect_timeout: 5,
       prepare: false,
     });
   }
@@ -107,10 +107,17 @@ export class PostgresD1Database {
 }
 
 export async function loadRuntimeConfig(database: PostgresD1Database) {
-  const rows = await database.client.unsafe(`
+  const readConfig = () => database.client.unsafe(`
     select name, decrypted_secret as value
     from vault.decrypted_secrets
     where name like 'marsx_pool_%'
   `);
+  let rows;
+  try {
+    rows = await readConfig();
+  } catch (error) {
+    if ((error as { code?: string })?.code !== "CONNECT_TIMEOUT") throw error;
+    rows = await readConfig();
+  }
   return Object.fromEntries(rows.map((row) => [String(row.name), String(row.value)]));
 }

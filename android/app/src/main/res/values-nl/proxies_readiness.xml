@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • toestemming en status"</string>
+    <string name="psx_risk_extra" formatted="false">"Verkeer van derden kan je IP, databundel en batterij gebruiken. Je IP-reputatie kan lijden; afscherming van het lokale netwerk is niet geverifieerd. Geen inkomsten gegarandeerd."</string>
+    <string name="psx_acknowledgement" formatted="false">"Ik heb de risico’s gelezen. Dit start geen delen."</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx delen: UIT"</string>
+    <string name="psx_zero_earnings" formatted="false">"Gedeeld verkeer: 0 MB • Geverifieerde inkomsten: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Delen starten • niet beschikbaar"</string>
+    <string name="psx_stop_revoke" formatted="false">"Stoppen en toestemming intrekken"</string>
+    <string name="psx_prerequisites" formatted="false">"Partnercontract, apparaatsleutel, LAN-afscherming en distributie: niet geverifieerd."</string>
+    <string name="psx_check_backend" formatted="false">"Controleer Supabase-server"</string>
+    <string name="psx_checking" formatted="false">"Supabase controleren…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase bereikbaar • Proxy delen blijft UIT"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Server niet geverifieerd • Proxy blijft UIT"</string>
+</resources>

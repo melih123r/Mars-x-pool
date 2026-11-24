@@ -1091,7 +1091,7 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
         const profile = await authReferralProfile(store, user.user_id);
         return json(200, {
           ok: true, session_token: sessionToken, expires_in: Math.floor(AUTH_SESSION_TTL_MS / 1000),
-          user: { display_name: user.display_name, email: user.email },
+          user: { user_id: user.user_id, display_name: user.display_name, email: user.email },
           referral: profile,
         });
       }
@@ -1102,7 +1102,7 @@ export function createApp({ store: injectedStore, now = () => Date.now(), fetchI
         if (!user) return json(401, { error: "user_session_invalid" });
         return json(200, {
           ok: true,
-          user: { display_name: user.display_name, email: user.email },
+          user: { user_id: user.user_id, display_name: user.display_name, email: user.email },
           referral: await authReferralProfile(store, user.user_id),
           referral_policy: {
             platform_fee_percent: 2,

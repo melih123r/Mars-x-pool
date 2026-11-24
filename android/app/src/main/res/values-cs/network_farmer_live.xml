@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"Soukromý účet poskytovatele Proxies.sx • Nejsou to data globální sítě"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"Přihlaste se k MARS-X pro autorizovaná soukromá data"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Přihlásit přes Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"Obnovit soukromý účet"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"Data soukromého účtu nejsou dostupná"</string>
+  <string name="psx_farmer_verified" formatted="false">"Ověřeno"</string>
+  <string name="psx_farmer_listed" formatted="false">"Zařazeno"</string>
+  <string name="psx_farmer_traffic" formatted="false">"Skutečný provoz"</string>
+  <string name="psx_farmer_earnings" formatted="false">"Výdělky hlášené poskytovatelem"</string>
+</resources>

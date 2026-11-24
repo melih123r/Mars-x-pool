@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"حساب خصوصی ارائه‌دهنده Proxies.sx • نه داده‌های شبکه جهانی"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"برای مشاهده داده‌های خصوصی مجاز وارد MARS-X شوید"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"ورود با Google"</string>
+  <string name="psx_farmer_refresh" formatted="false">"تازه‌سازی حساب خصوصی"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"داده‌های حساب خصوصی در دسترس نیست"</string>
+  <string name="psx_farmer_verified" formatted="false">"تأییدشده"</string>
+  <string name="psx_farmer_listed" formatted="false">"فهرست‌شده"</string>
+  <string name="psx_farmer_traffic" formatted="false">"ترافیک واقعی"</string>
+  <string name="psx_farmer_earnings" formatted="false">"درآمد گزارش‌شده توسط ارائه‌دهنده"</string>
+</resources>

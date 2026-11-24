@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • hozzájárulás és állapot"</string>
+    <string name="psx_risk_extra" formatted="false">"Harmadik fél forgalma használhatja az IP-címedet, adatkeretedet és akkumulátorodat. Az IP hírneve sérülhet; a helyi hálózati elszigetelés nem igazolt. Nincs garantált bevétel."</string>
+    <string name="psx_acknowledgement" formatted="false">"Elolvastam a kockázatokat. A jelölés nem indít megosztást."</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx megosztás: KI"</string>
+    <string name="psx_zero_earnings" formatted="false">"Megosztott forgalom: 0 MB • Igazolt bevétel: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Megosztás indítása • nem elérhető"</string>
+    <string name="psx_stop_revoke" formatted="false">"Leállítás és hozzájárulás visszavonása"</string>
+    <string name="psx_prerequisites" formatted="false">"Szerződés, eszközkulcs, LAN-védelem és terjesztés: nincs igazolva."</string>
+    <string name="psx_check_backend" formatted="false">"Supabase-kiszolgáló ellenőrzése"</string>
+    <string name="psx_checking" formatted="false">"Supabase ellenőrzése…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase elérhető • Proxy KI"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Kiszolgáló nem ellenőrzött • Proxy KI"</string>
+</resources>

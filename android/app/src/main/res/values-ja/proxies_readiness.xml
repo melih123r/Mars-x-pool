@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • 同意と状態"</string>
+    <string name="psx_risk_extra" formatted="false">"第三者の通信があなたのIP、データ通信量、バッテリーを使う可能性があります。IP評価が低下する恐れがあり、LAN分離は未確認です。収益は保証されません。"</string>
+    <string name="psx_acknowledgement" formatted="false">"リスクを確認しました。チェックしても共有は始まりません。"</string>
+    <string name="psx_off_status" formatted="false">"Proxies.sx共有：オフ"</string>
+    <string name="psx_zero_earnings" formatted="false">"共有通信：0 MB • 確認済み収益：0"</string>
+    <string name="psx_start_disabled" formatted="false">"共有開始 • 利用不可"</string>
+    <string name="psx_stop_revoke" formatted="false">"停止して同意を撤回"</string>
+    <string name="psx_prerequisites" formatted="false">"提携契約、端末鍵、LAN分離、配布承認：未確認。"</string>
+    <string name="psx_check_backend" formatted="false">"Supabaseサーバー状態を確認"</string>
+    <string name="psx_checking" formatted="false">"Supabaseを確認中…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase接続可 • 共有はオフ"</string>
+    <string name="psx_backend_unavailable" formatted="false">"サーバー未確認 • 共有はオフ"</string>
+</resources>

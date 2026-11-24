@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_page_title" formatted="false">"Proxies.sx • consimțământ și stare"</string>
+    <string name="psx_risk_extra" formatted="false">"Traficul terților poate folosi IP-ul, datele și bateria. Reputația IP poate fi afectată; izolarea rețelei locale nu este verificată. Venituri negarantate."</string>
+    <string name="psx_acknowledgement" formatted="false">"Am citit riscurile. Bifarea nu pornește partajarea."</string>
+    <string name="psx_off_status" formatted="false">"Partajare Proxies.sx: OPRITĂ"</string>
+    <string name="psx_zero_earnings" formatted="false">"Trafic partajat: 0 MB • Câștiguri verificate: 0"</string>
+    <string name="psx_start_disabled" formatted="false">"Pornește partajarea • indisponibil"</string>
+    <string name="psx_stop_revoke" formatted="false">"Oprește și retrage consimțământul"</string>
+    <string name="psx_prerequisites" formatted="false">"Acord, cheie per dispozitiv, izolare LAN și distribuție: neverificate."</string>
+    <string name="psx_check_backend" formatted="false">"Verifică serverul Supabase"</string>
+    <string name="psx_checking" formatted="false">"Se verifică Supabase…"</string>
+    <string name="psx_backend_available" formatted="false">"Supabase accesibil • Proxy OPRIT"</string>
+    <string name="psx_backend_unavailable" formatted="false">"Server neverificat • Proxy OPRIT"</string>
+</resources>

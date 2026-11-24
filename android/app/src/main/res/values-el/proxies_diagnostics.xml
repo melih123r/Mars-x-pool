@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"Συμφωνία συνεργάτη"</string>
+    <string name="psx_check_credential" formatted="false">"Διαπιστευτήρια SDK ανά συσκευή"</string>
+    <string name="psx_check_isolation" formatted="false">"Απομόνωση τοπικού δικτύου"</string>
+    <string name="psx_check_distribution" formatted="false">"Έγκριση διανομής/Play"</string>
+    <string name="psx_check_verified" formatted="false">"Επαληθεύτηκε"</string>
+    <string name="psx_check_unverified" formatted="false">"Μη επαληθευμένο"</string>
+</resources>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_live_scope" formatted="false">"Proxies.sx TELJES hálózat • Nem a saját fiókod"</string>
+  <string name="psx_live_refresh" formatted="false">"Élő hálózati adatok lekérése"</string>
+  <string name="psx_live_loading" formatted="false">"Valós adatok lekérése…"</string>
+  <string name="psx_live_unavailable" formatted="false">"Adatok nem érhetők el • Ismeretlen értékek"</string>
+  <string name="psx_live_initial" formatted="false">"Még nem ellenőrzött"</string>
+  <string name="psx_live_total" formatted="false">"Összes peer"</string>
+  <string name="psx_live_online" formatted="false">"Most online"</string>
+  <string name="psx_live_mobile" formatted="false">"Mobil"</string>
+  <string name="psx_live_residential" formatted="false">"Lakossági"</string>
+  <string name="psx_live_datacenter" formatted="false">"Adatközpont"</string>
+  <string name="psx_live_updated" formatted="false">"Mérés (UTC)"</string>
+</resources>

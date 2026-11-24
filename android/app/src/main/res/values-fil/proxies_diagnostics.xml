@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="psx_check_partner" formatted="false">"Kasunduan ng partner"</string>
+    <string name="psx_check_credential" formatted="false">"Kredensyal SDK bawat device"</string>
+    <string name="psx_check_isolation" formatted="false">"Paghihiwalay ng lokal na network"</string>
+    <string name="psx_check_distribution" formatted="false">"Pahintulot sa pamamahagi/Play"</string>
+    <string name="psx_check_verified" formatted="false">"Beripikado"</string>
+    <string name="psx_check_unverified" formatted="false">"Hindi pa beripikado"</string>
+</resources>

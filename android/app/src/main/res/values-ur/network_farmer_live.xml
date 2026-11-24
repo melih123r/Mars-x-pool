@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="psx_farmer_scope" formatted="false">"نجی Proxies.sx فراہم کنندہ اکاؤنٹ • عالمی نیٹ ورک ڈیٹا نہیں"</string>
+  <string name="psx_farmer_sign_in_required" formatted="false">"مجاز نجی ڈیٹا دیکھنے کے لیے MARS-X میں سائن ان کریں"</string>
+  <string name="psx_farmer_sign_in" formatted="false">"Google کے ساتھ سائن ان کریں"</string>
+  <string name="psx_farmer_refresh" formatted="false">"نجی اکاؤنٹ تازہ کریں"</string>
+  <string name="psx_farmer_unavailable" formatted="false">"نجی اکاؤنٹ کا ڈیٹا دستیاب نہیں"</string>
+  <string name="psx_farmer_verified" formatted="false">"تصدیق شدہ"</string>
+  <string name="psx_farmer_listed" formatted="false">"فہرست شدہ"</string>
+  <string name="psx_farmer_traffic" formatted="false">"حقیقی ٹریفک"</string>
+  <string name="psx_farmer_earnings" formatted="false">"فراہم کنندہ کی رپورٹ کردہ آمدنی"</string>
+</resources>
