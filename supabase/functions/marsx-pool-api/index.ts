@@ -1,5 +1,6 @@
 import { createApp, D1Store } from "./worker.js";
 import { loadRuntimeConfig, PostgresD1Database } from "./postgres-d1.ts";
+import { createRuntimeConfigLoader } from "./runtime-config-loader.js";
 
 const database = new PostgresD1Database(Deno.env.get("SUPABASE_DB_URL") ?? "");
 const store = new D1Store(database);
@@ -17,13 +18,9 @@ const SECRET_NAMES: Record<string, string> = {
   marsx_pool_auth_subject_pepper: "AUTH_SUBJECT_PEPPER",
 };
 
-let cachedEnvironment: Record<string, string> | null = null;
-let environmentExpiresAt = 0;
-
-async function runtimeEnvironment() {
-  const now = Date.now();
-  if (cachedEnvironment && now < environmentExpiresAt) return cachedEnvironment;
-
+// The Vault read is safe to retry once on an actual transient DB CONNECT_TIMEOUT.
+// No retries apply to nonce/session writes or any other API side effect.
+const runtimeEnvironment = createRuntimeConfigLoader(async () => {
   const secrets = await loadRuntimeConfig(database);
   const environment: Record<string, string> = {
     LICENSE_TOKEN_TTL_SECONDS: "2592000",
@@ -35,10 +32,8 @@ async function runtimeEnvironment() {
   for (const [vaultName, environmentName] of Object.entries(SECRET_NAMES)) {
     if (secrets[vaultName]) environment[environmentName] = secrets[vaultName];
   }
-  cachedEnvironment = environment;
-  environmentExpiresAt = now + 60_000;
   return environment;
-}
+});
 
 function routeRequest(request: Request) {
   const url = new URL(request.url);
@@ -54,7 +49,11 @@ Deno.serve(async (request: Request) => {
   try {
     return await application.fetch(routeRequest(request), await runtimeEnvironment());
   } catch (error) {
-    console.error("MARS-X Supabase function failed", error);
+    // Postgres errors can include connection metadata; do not write secrets/PII to logs.
+    const code = error && typeof error === "object" && "code" in error
+      && typeof error.code === "string" ? error.code : "";
+    console.error("MARS-X Supabase function failed",
+      code === "CONNECT_TIMEOUT" ? "db_connect_timeout" : "service_unavailable");
     return Response.json(
       { ok: false, service: "marsx-pool-worker-api", version: "0.8.4", error: "service_unavailable" },
       { status: 503, headers: { "Cache-Control": "no-store" } },
